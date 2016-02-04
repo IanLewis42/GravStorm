@@ -1,0 +1,17 @@
+SITIMUS
+
+Kulmikas kaupunkikenttä, erikoisuutena
+korjaus-, tankkaus- ja ammuspaikat 
+jotka ovat merkitty asian mukaisin  merkein.        
+Nopeuskisarata on merkitty rataan harmain nuolin.
+
+Nopeuskisan vaikeustaso: 7  
+         
+SITIMUS
+
+An angular city level, specialties 
+repair-, refuel- and ammo spots that 
+have been marked with appropriate signs. 
+The speedrace track is marked with grey arrows.
+
+Difficulty of the speedrace: 7

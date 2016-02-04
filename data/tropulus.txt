@@ -1,0 +1,18 @@
+map_type      0
+display_map   tropulus.png
+collision_map tropulus_col.png
+description   tropulus_desc.txt
+
+ship_first    1
+
+gravity 0.05
+drag    2
+
+;   type y    xmin xmax
+pad 0    712  110  170  
+pad 1    169  720  780 
+
+max_players 2
+
+;    x   x   y   y
+race 448 448 520 780

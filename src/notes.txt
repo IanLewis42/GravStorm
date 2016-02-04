@@ -1,0 +1,439 @@
+ //Random development notes. Nothing in this file should be taken as an indication of anything other than
+ //  something I was thinking at some point during development.
+ 
+//TODO
+ //Level 1
+ //*ship rotation, movement
+ //*scrolling background
+ //*bullets - bug with explosion?
+ //*collision detection
+ //  *ship-to-ship - first pass - BB
+ //  *bullet-to-ship - ditto
+ //  *bullet-to-wall
+ //  *ship-to-wall - seems OK.....
+ 
+ //Level 2
+ //*split screen
+ //*first level design and -import
+ //*status display=>variable mass, ammo etc. - need to calc mass, ammo2, end on lives=0
+ //*landing pads
+ //*level metadata - start pos, landing pad pos & properties (refuelling etc), water, updrafts.....
+ 
+ //Level 3 - finish TR
+ //?sound
+ // more sounds (wind, engine, menu sound)
+ //*more levels - need to sort out making collision map - all TR levels done
+ //*all weapon types
+ //*front end menu 
+ //  DO this in 3 columns, left col has map names (as now). when you select a map, the next col pops up,
+ //  listing players - white if selectable, grey if not (cos too big - read from map text file) *colour* if selected
+ //  (could wind profile saving in here maybe...)
+ //  Selected player shows key/joystick config in right col. COuld also pick/enter name....
+ //  need to read number of USB joysticks. Start p1,p2 keyboard, scroll down through GPIO joystick (commad line option?)
+ //  then USBs. Start with p3,p4 N/A as sensible default.
+ //*ship config menu
+ //  Key handling is more complicated with this - I think the answer is to store more info in ship struct - 
+ //  perhaps ship[i].left_pressed, ship[i].left_released (also for right,fire1,fire2 - rename up/down??)
+ //  so _pressed is set TRUE by ScanInputs(). Can then be cleared by reading code for one-shot effect,
+ //  or cleared by ScanInputs() when released, at which time _released is set.
+ //  Hmmm.... sounds like I don't really need _released. 
+ //  more detail: Code in main loop processes Allegro event and sets value in pressed_keys[] in even was DOWN,
+ //				  clears value in pressed_keys[] in event was UP.
+ //               ScanInputs() then maps this across to Ship[] structs.
+ //				  ScanInputs also reads GPIO Joystick and puts this info in. Note that SI() clears pressed_keys for fire2.
+ //                 and also has a state machine to acheive the same effect for GPIO Joystick.
+ //				  UpdateShips() takes the values from ship[] struct, and does stuff accordingly.
+ //				  The keys need one-short or continuous depending on menu states, so the 'clever' bit should
+ //               be in UpdateShips().
+ //               So... how about we keep the main loop code, and add joystick (GPIO & USB?) stuff, 
+ //				  so that ship.left etc get set once on press, clear on release, but can be cleared by later code.
+ //				  main loop code should be in terms of devices (keys, joystick)
+ //				  ScanInputs should carry on doing the mapping.
+ //	Messy. better: 
+ //	2 key event log arrays, replacing pressed_keys, key_down_log[] & key_up_log[].
+ //	Ship struct extended, so we have key_x_down and key_x_held
+ //	ScanInputs() sets Ship.key_x_down and Ship.key_x_held when key_down_log[] is set, and then clears key_down_log[]
+ //	ScanInputs() clears Ship.key_x_held when key_up_log[] is set, and then clears key_up_log[].
+ //	Other code (e.g menu handling) clears Ship.key_x_down on read.
+ //	USB joystick should be similar, as it's event based.
+ //	Need to generate on/off events for GPIO joystick.
+ //	
+ //*race
+ //  Specify start/finish line as pair of x,y co-ords line must be horizontal or vertical, i.e either x1=x2, or y1=y2.
+ //  Read this in, and create 2 areas, before and after line, by extending 'same' coord,
+ //  e.g. horizontal line, 100,100 200,100 so areas are 100,90;200,90 plus line coords, and 100,110;200,110 plus line co-ords.
+ //  Check (like with special areas) if we are in 'before' area. If we are flag it. If we were in it last time, then check 
+ //  for 'after area'. toggle timing on transition. Do timing as float, with increment as 1/30, add this each frame. Ooooh. or 
+ //  could use al_get_time. Ah, no, I'd like it to update every frame, so might as well just add on...
+ //  DIsplay two times in status bar? running and last lap? - need small font.... 7 seg???
+ 
+ //Level 4 - new stuff
+ //*Draw (render) tiles - also collision tiles
+ //*make map drawing tool - based on original gameloop, load map from ascii file, key to reload
+ // improved this a bit - have mouse drag and drop, save, show grid.
+ //*code for tilemap drawing and collision
+ //  *ship-wall collision,
+ //  *bullet-wall collision
+ //*Sentry guns - define position, orientation(NESW), fire rate in map file
+ // populate (array of) struct with this, new functions for CheckBSentry collisions & update sentry (firing & exploding!)
+ // done volcanoes, parameters:
+    x,y direction (of fire, 0-39) type (volcano, but currently unused) period, probability, random.
+    waits for period (in 1/30th s frames) then has 'probability' of firing, 'random' applied to vector.
+//  for sentry, targeted would be good. one more parameter. No targeted is type. done :-)
+//  also add range for targetted sentries.
+//also, sentries can be destroyed, so need to be drawn like ships. 
+//so specify a sprite sheet along with map tiles etc, and an offset into this for each sentry
+//this lets you have different orientations, or even diffecnt styles of sentry....
+ 
+ //Warp gateways (Z)!
+ //Sentry/volcano:
+ //  Quiet time/active time/frames between firing when active/number of bullets per fire
+ //  random flag to tweak last 2 params. Volcano flag for colour!
+ //Extras
+ //*usb joystick!
+ //radar? big radar for 3 player?
+ //network? - radar for network, if I ever do it....
+ 
+ //Level ideas:
+ //*Zoë's 2 player volcano/warp gate level
+ //*4-player X shape
+ //*black hole with rocks (2 player?) - includes wrapping as 'warp gate'
+ //*1 player rescue mission (rescuing?? - pickup areas, show in status bar?) no pads??
+ //  Or pickup on pads - animated rescuee?
+ //pacman-like 4-player?
+ //*hexagons.... beehive? alien beehive!
+ //  need 9 tiles in square + Sentry(L/R/T) + eggshells on floor (x2), + goo on ceiling (x2) + Pads w/flag + house?
+ //  eggshells - sphere, scale, subtract smaller, half with plane, jagged edge with boxes
+ //  goo - blob. pink? long goo may need second tile
+ //  pad: /--------\ with flag.
+ //  Aside: tiles 64 wide (split into two 32 bit words in collision map , display x1, need new collision maps for ships)
+ //         or 32 wide, single word, display x2, use same collision map. 
+ //	    allow both?
+ //	    DONE: Render/display as 64, use 32 collision map.
+ //*[vertically sliding map list in menu??]
+ //Thrust missions - need forcefields
+ // forcefields drawn as sprites (so they can vanish...)
+ // use 64x64 sprite, (add to sentry bitmap)
+ // define as centres, so for a long one, multiple entries:
+ // forcefield x y sentry image
+ // sentry is the one which if destroyed it removes the forcefield.
+ // nice to animate forcefield, but we need to collide with it as well, so maybe just colour cycle it.
+ // Do forcefield collision in sentry routine.
+ // Ah. do we do ship-sentry collisions? No.....
+ // Could dynamically modify map (if it's tile map, obviously) - sprites better, I think.
+ // add door-opening sentry images (red sphere, change to green when 'destroyed'?)
+ // Could have 'bouncing force fields, by ++ gravity. Really only works for horizontal fields though.....
+ //  unless we add in a term to xv/pos calc for 'x force', and have ff code poke it.
+ // So, yes, add x, y force term to ship calc. Normally zero, poked by 'area' code.
+ // forcefield x1,y1,x2,y2, strength, sentry, image1, image2
+ // use code similar to raceline to derive 2 areas with opposite accn.
+ // image is full size? or 64x64 and we duplicate. line is multiple of 64 (or you'll get overlap at end)
+ // when 'sentry' hit, sentry goes green (sentry code), stop displaying FF image (switch - or just off?)
+ // areas go to '0' accn.
+ 
+ // *try double size running man - 1.5 better
+ // *animated jewels?
+ // *FREE FONT MEMORY???
+ // *Better forcefield drawing, i.e. use draw_bitmap_region to just draw part of sprite image
+      FF will look better drawn before map...
+ // *Shrink cross map
+ // *bigger jewels! 
+ // *Shelf in hex cavern + SENTRIES
+ // *cross map scrolling 
+ // *angled sentries
+    *Add to thrust 1,2
+ // *cross map collisions on /| tiles 
+ 
+ // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
+ // Thrust levels 3,4,5,6
+ 
+ // mapmaker mouse/drag stuff
+ // mapmaker lean on drawing.c (and init.c?)
+ // *Game name....
+ // readme (map making)
+ // *menu slow response. Sounds? or file opening? Neither - should only redraw when event queue empty!
+ 
+ // Windows port....
+ //  Variable resolution? 
+     Resizable window?
+     Networking?
+ // Android port?
+ 
+ // Sentry damage shield:
+    TR has rapid fire bullets, (max 100) with low damage (3)
+       also heavy weapons (max 8) with higher damage (50-80)
+       weapons recharge on pads.
+       Ship shield starts at 100
+       
+    Thrust ship has unlimited single shot gun, where 1 hit destroys anything (ship or sentry).
+    Close-ish is: *Just use heavy weapons (init ammo to 0/max(8))
+                  *Sentry shield = 50 (or less....)
+                  Sentry shot damage = 100
+                  *Need fewer sentries on 'hex' map. Or a less lethal type....
+                  or keep damage at say 50
+                  
+ //Issues
+ // reduce sound latency
+ //*smarter parser for map files....
+ 
+ //Small jobs
+ //*ammo 2 firing, handle collision
+ //*gpio joystick
+ //*bullets bug.
+ //*momentum from bullets to ship on impact (and firing??)
+ //*render ships, make sprite sheets, make masks.
+ //*end game on lives = 0;
+ //*fuel decrement and checking
+ //*png support
+ //*sprite sheet rotation
+ //*variable map size - needed for stop scrolling in corners. also, map size in pixels, not tiles for old TR maps.
+ //*2-level defaults. also for fuel, ammo amounts.
+ //*put damage & mass into bullet structure
+ //*highlight on status bars
+ //*status/menu backgrounds
+ //*fixed point maths? - no, RPi has fp (if compiled everywhere...) - but rationalise floats.
+ //* Note that Rasbpian is always hard-float (i.e. uses ARM fp hw)
+ //*more normal and heavy weapon types - normal is patterns, rather than types. reduce types to 5?
+ //*refuelling - bottom nibble is home base, next nibble is bit-mapped facilities
+ //* if(Ship[i].pad == i || (Ship[i].pad & PAD_FUEL) ) //do refuelling 
+ //*Ship drawn first/last - parameter in map file/ struct (untested...)
+ //*bullet/wall supersampling
+ //*all printing to log. 
+ //*more ship types 
+ // haven't done collision masks 
+ //*mass calc - gravity in wrong place - acceleration, not force!
+ //*keymapping (in text file for now - tricky with eg cursor or ctrl keys....)
+ //*gravity (& drag?) for bullets
+ //*memory issue ; make sure stuff gets freed; free map on game over exit, not on re-init?
+ //*key mapping.
+ //*menu highlighting of non-selected columns.
+ //*resources to diff directory.
+ //*need to sort joystick in ship config menu
+ //*random - put level description text in another .txt file (suitably line-wrapped) - reference it from mapfile.
+ //*  display after front end menu done.
+ //*put max players and race lines into other maps
+ //*add bottom-right landing pad to sitimus map / collision map / text file.
+ //*max speed for heatseekers? could do via drag?
+ // SO Ship max v is 25, I think, as Drag = 2, d*25 = 50 = THRUST.
+ // HS max v depends on range (as thrust equivalent is 1/r^2)
+ // So to get HS v = 25 @ (say) 100 pixels,
+ //HS_ACCN = 50 * 100^2 (for r^2) = 500000 (with same drag as ship)
+ //HS_ACCN = 50 * 100 (for (r)  = 5000 (ditto for drag).
+ // give it a go....
+ //however, ship accn is limited by mass, so net thrust is 50 from 0 velocity,
+ //but accn is only ~0.5 (average ship mass = 100)
+ //so divide hs by 100? (to get similar performace) or less, 'cos it's lighter
+ //but numbers above still give max speed = 25.
+ //If you have less drag (say drag/10) then drag = 0.2, 25*d = 5 (cf 50)
+ //So HS_ACCN scales with drag. Might as well leave it as ship, it's all in floats anyway.....
+ //NB was 70, no drag, 1/r (seemed OK ish....)
+ //Still not happy. Too easy to 'break away' as if HS > 100 pixels away, ship thrust is more.
+ // So, can we set a maximum on thrust? So still varies with 1/r^2, but gets to ship equivalent at (say) 400 pixels,
+ // but never gets more? 
+ // Yes! Done this seems good.
+ //*blackholes: Maths v.similar to heatseekers
+ //*test GPIO on/off
+ //*new source files: objects.c (ship, bullet functions)
+                     inputs.c (kb, joystick functions, inc ScanInputs() )
+ //*screenshots
+ //*remove debug -d switch?
+ 
+ 
+ //To test/fix: 
+ // *menu background
+ // *refuelling for all levels.
+ // *bullet wall oversampling. fixed, i.e. doesn't crash, check if it works. done, but do we need backwards and forwards?
+ // *ship first drawing
+ // *hsay is backwards? not quite sure if it all is - test heatseekers vertical??? seems OK. Don't entirely understand...
+ // *normal firing types - need flexible reload counter. done. test
+ // *test spreader
+ // *increase colour depth on all maps except sitimus - and check transparency.
+ // sound latency.... try allegro.cfg... didn't work - try .asoundrc. Didn't work so far....
+ // could try:create voice, create mixer, create sample instance, attach sample instance to mixer, attach mixer to voice.
+ // then play sample instance....
+ // should only need one voice and one mixer for everything.
+ // tried it;no difference......
+ // Try rtaudio, and for opening wav files, see http://yannesposito.com/Scratch/en/blog/2010-10-14-Fun-with-wav/
+ // better: Pre process to fixed sample rate/depth in Audacity, and export as raw pcm.
+ // different font for menus.
+ // *pad numbering: currently read into pad array index as we go through text file. This gives home base.
+ //  also, home base is given in bottom nibble. This is bad......
+ //  Taking home base from index ensures you have 1 of each, but means that the bottom nibble is
+ //  effectively ignored.... Using bottom nibble means that you could end up with multiple home bases
+ //  (maybe intentional - though you can only reappear at one of them....) or no home bases for some ships...
+ //  Like using bottom nibble better. Need yet another entry in Ship struct for home pad...
+ //*New heatseeker maths
+ 
+ //Heatseekers
+ // gravity-like force, so magnitude is proportional to 1/r^2
+ // SO get vector from bullet to (each) ship, x^2 + y^2 = r^2, acceleration = K/r^2
+ // need to apply this in the correct direction, so multiply a by x & y,
+ // except that yo need to normalise the vector first, so a*x/r, a*y/r.
+ // save a division by K*x/(r^3), K*y/(r^3).
+ // However, square root may be expensive, so could try CORDIC
+ // this gives you r & theta, sinlut[theta], coslut[theta] gives normalised vectar
+ // but we do need to divide theta(degrees) by 9 to get LUT index....
+ // also need to square and divide by r^2
+ //SO: Square, square add sqrt mul div, mul div - sqrt 2 divs
+ //OR: CORDIC div LUT LUT square mul div div - CORDIC 3 divs
+ //check after getting r / r^2 - skip the rest if it's big, as effect limited.
+ //Hmmm.. cordic might be able to do other things....like get sin/cos, though that's starting with the angle....
+ //Hurrr.... looks like RPi (ARM11/ARMv6 w/FP (VFPv2) has h/w FP divide and FP sqrt, both taking 14 cycles.
+ //  so I might as well use them.....
+ // I've just explicitly turned on FP in build script....
+ //check here; http://www.eliteraspberries.com/blog/2013/08/cflags-for-numerical-computing-on-the-raspberry-pi.html
+ // Hmmm.. could maybe scrap -pthreads and -lrt
+ /*
+ 
+ Collision detection
+ --------------------
+ Will ultimately need pixel-perfect CD, but that's expensive, so limit it.
+ Bounding boxes for ship-to-ship seem good, then do PP if BB says yes.
+ Or distance? Could do x^2+y^2<80^2 - this is 2 subtractions, 2 multiplies, add and compare
+ or do x/y separately would be abs(x1-x2)<80 (sub, abs, compare) same for y. better I think.
+ This seems roughly equivalent to BB, but I'm not absolutley sure. 
+ If both conditions pass, then go to PP. Take 2 masks, overlap them. Note that I'll need masks 
+ for each rotation, which implies sprite sheet rotation, rather than al_ rotation.
+ Also note that you just mask the ship, not the flame. 
+ 
+ NO! The collision masks and ship display are completely separate - There's no reason you couldn't keep 
+ using al_ rotation for display, and use still collision masks. Angles would have to agree, obvs...
+ That said, I think I'll try to do sprite sheet rotation. POV rendering everything looks promising, and 
+ Napoleons sprite sheet editor seems to do what I want. (NO! GlueIt much better!)
+ 
+ Bullet-to-ship: do distance compare as above, but can just check for point against mask, 
+ as bullets are small. Not absolutely sure how to relate the two though.... Maybe just 40,40 offset from 
+ centres? 
+  
+ Which leaves ship to wall. Ah yes, also bullet to wall. 
+ Bullet to wall could be done with BB, but there's a lot of BBs... ah, but not so many tiles.
+ Check for which tile bullet's in, lookup tile, then compare position-in-tile (bitmask, as tile size is poewer of 2)
+ with tile pixel. Again, only do 1 pixel 'cos bullet is small. Compare alpha values?
+ 
+ 
+ Ship To Wall
+ -----------
+ Back to ship-to-wall. Could do something similar, but will be more complicated cos ship can 
+ be in more than 1 tile. I s'pose compare ship mask to tile mask, as above, for each tile ship is in.
+ Simplify by not checking if tile is empty. Also don't check if tile is full - just declare collision.
+ So it's only partly filled tiles that are hard - minimise them! Rubbish! you're always going to collide when 
+ the ship and the tile are partly overlapping, so it's a question of whether any non-empty pixels from the ship overlap
+ non-empty ones in the tile. If the tile is full, then that might be slightly easier, but not much.
+ And genuinely full tiles means dead straight up/down/left/right and therefore quite boring maps.....
+ 
+ Looks like TR maps may not be tiled, so need to load whole bitmap (OK at original TR resolution...)
+ and display part of it. (with draw_bitmap_region (possibly scaled)
+ 
+ So if you can get collision map(/tiles) into 1bpp, and then pack 8 pixels into a byte (/32 into an int...)
+ and do the same with the sprite collision maps (just the alpha value - of the ship, remember, not the flame)
+ Then you can compare 8/16/32 pixels in one go. smart :-) Ah, alignment issues mean it's not that simple.
+ 
+ I'm tentatively happy with displaying TR map x2. Ship size will be something like 50x50. Display / movement is fine (need
+ to tweak gravity / thrust / drag). So to do collision, we need to either halve ship coords / mask or double
+ collision map/coords. halving ship is bad unless ship size is power of 2, so go for doubling map.
+ 
+ So, we have an array of ints with each bit representing a pixel in the ship. (3x16 = 48, so that might be a good size...)
+Say array is 3*48 x U16 (note one array for each rotation - or one big one for all rotations. Not sure which is better/easier).
+We have another array of ints which is the same for the collision map. This will be bigger - 640*640 map gives an array of
+40*640 x U16
+
+Ignorning doubling/halving for the minute, say ship centre is at 100,100. Ship TopLeft is at 76,76. So I need to AND the first 
+word in the ship array with the bits from row 76 of the array, starting with b12 in word 4. 
+I can get to row 76 easily, and word 4 comes from 76>>4. b12 is 76&FF. 
+So, take word from ship array, promote to 32 bit, LS by 16, then RS by 12 (combine, obvs). Split into 2 U16s, and compare
+these with w4 and w5 from the map array.
+I then need word 2 from the ship array. This needs to be checked against w5/w6 with the same shifting (I think), then word 3 /6&7
+Repeat for next 47 rows.
+
+If the map was stored as 32 bits, then I could halve the word index (so lword 2)do the shift and directly compare, I think.
+Ah, well yes, but only half the time. There will still be times when the 16bit word overlaps a 32bit boundary. So don't bother.
+
+Now consider double scaling. If ship centre is at 100,100, this corresponds to 50,50 on the tr map. TL will be 76,76 = 38,38 on tr map.
+If we store the collision map as 640 rows, but 1280 columns, with each bit/pixel duplicated, we double the size of the array, to 80*640
+but can do the compare as above. We need to use row 38, but all other calcs are the same. Also, we only do this for 24 rows. 
+I can't see an easy way to avoid doing this on every pass. Effort involved is:
+
+For each ship, on every frame:
+ Calc TL (2Xsub from centre pos)
+ RS to get halved row.
+ RS to get word in row
+ mask to get bit in word
+ x24
+ 	x3
+ 		Read word
+ 		Shift, split	;store map as 32 => no split, 1x AND? No, well, yes, but only half the time.
+ 		2xAND			;so on average you'll save mips, but the extra complication prob isn't worth it.
+ 		compare to zero
+ end
+ 
+ Hopefully doable....
+ 
+ Alternative approach: for double scaling, you need a ship mask which is 24x24, not 48x48.
+ You can store ship mask in 32bit words (24 long ints)
+ If you also store map mask in 32s, then you need 1 or 2 compares per row.
+ Ship mask will be left-aligned. 
+ So say ship is at 100,100 (centre) - this is 50,50 for collisions. SO we need to move the centre to 50. This is 18 pixels in to 
+ so we need to compare map 18 to ship 0. this means shift right by 18, then AND ship with map. we then need to take next map word, 
+ and AND with ship LS so that bottom 18 bits are compared, - this is LS by (32-18=) 14.
+ 
+ 
+ If we were further in, say 500, that's 250, 
+ which is 7*32=224 + 26, so take map word 7(6) and compare to ship right shift by 26, then word 8 to ship LS by 8.
+ 
+ For a small first shift, say the ship is at 66->33, we take map word 2(1) and compare to ship rs by 1. We would then,
+ as above, compare next map word to ship ls by 31. as this is >23, there's no point, so don't bother.
+ 
+ Repeat this for 24 rows, but shifts are the same for each row :-).
+ 
+
+ 
+ Ship to ship:
+ -------------
+ First do bounding box, iff that collides, then:
+ 
+  ShipSize - mod(y1-y2) = number of rows to check = nr
+  start with top row in lower y. Start with nr up from bottow row in upper y.
+  ShipSize - mod(x1-x2) = number of cols to check = nc
+  
+   
+  if 16 >= nc 
+  	take bigger x, lookup 1st word in ship mask, LS by nc%16 (simpler)
+  	AND with 3rd word in smaller x
+  
+    
+  if 32 >= nc >= 16
+  	take bigger x, lookup 1st word in ship mask, promote to 32bit. LS by nc%16
+  	  take 2nd and 3rd word from smaller x, combine into 32 bit (just grab from array via cast?? - alignment??)
+  	  AND  32 bit things together 
+  	
+  	take bigger x, lookup 2nd word in ship mask, LS by nc%16 (simpler)
+  	  AND with 3rd word in smaller x    
+  
+  
+  if 48 >= nc >= 32
+  	take bigger x, lookup 1st word in ship mask, LS by nc%16
+  	  take 1st and 2nd word from smaller x, combine into 32 bit (just grab from array via cast?? - alignment??)
+  	  AND  32 bit things together 
+   	  	
+  	take bigger x, lookup 2nd word in ship mask, LS by nc%16
+  	  take 2nd and 3rd word from smaller x, combine into 32 bit (just grab from array via cast?? - alignment??)
+  	  AND  32 bit things together     
+  	
+  	take bigger x, lookup 3rd word in ship mask, LS by nc%16(simpler)
+  	  AND with 3rd word in smaller x
+  	  
+should be able to wind this into a for loop (reverse order of steps?) 	  
+
+ 
+ */
+ 
+ /*
+ Joystick options:
+ ----------------
+ connect old quickshot 15 pin to second port of GPIO (15D on PCB, or 9D on cable?)
+ AH, no, 15 pin i/f is analogue. Maybe hack the stick?
+ Speedlink competition pro (Ithink) USB - ~œ20
+ Atari 2600 clone USB, ~œ9
+ cheap usb gamepad (<œ5)
+ */
+ 

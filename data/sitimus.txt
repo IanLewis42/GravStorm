@@ -1,0 +1,28 @@
+map_type      0
+;display_map   sitimus.png
+display_map   sitimus4p.png
+collision_map sitimus4p_col.png
+description   sitimus_desc.txt
+
+ship_first    0
+
+gravity 0.05
+;gravity 0
+drag 2
+
+; pads
+;   type y    xmin xmax
+pad 0    1228 240  350  
+pad 1    400  1060 1170     
+;pad 2    412  240  410  ;parking
+pad 2    396  260 370
+pad 3    1226 1110 1220 ;new, bottom right
+pad 24   412  670  815  ;ammo1
+pad 45   827  240  410  ;ammo2
+pad 16   827  670  815  ;fuel
+
+max_players 4
+
+;    x  x   y   y
+race 50 200 400 400
+

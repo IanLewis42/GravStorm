@@ -1,0 +1,18 @@
+map_type      0
+display_map   keurakea.png
+collision_map keurakea_col.png
+description   keurakea_desc.txt
+
+ship_first    0
+
+gravity 0.05
+drag    2
+
+;   type y    xmin xmax
+pad 0    581  260  360  
+pad 1    933  1107  1207 
+
+;    xmin xmax ymin ymax g    drag
+area 0    150  270  650 -0.05 2
+
+max_players 2

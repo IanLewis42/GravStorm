@@ -1,0 +1,16 @@
+TROPULUS   
+                         
+Pieni pyöreä helppo   
+kenttä, jossa ajetaan  
+kilpaa myötäpäivään   
+keskustan ympäri.    
+                         
+Nopeuskisan vaikeustaso: 4     
+
+TROPULUS
+
+A small round easy level, 
+where racing occurs 
+clockwise around the center.
+
+Difficulty of the speedrace: 4

@@ -1,0 +1,21 @@
+:One Player
+mission 1
+mission 2
+mission 3
+final mission
+:Multi Player
+cruciatus
+neutron star
+explono
+:TurboRaketti
+sitimus
+ekolos
+likvidius
+metarola
+tropulus
+:TR Beta
+sinneau
+mutolos
+keurakea
+isemania
+ekolos beta
