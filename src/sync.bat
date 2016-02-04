@@ -1,5 +1,5 @@
-xcopy C:\IPL\Game\*.* R:\game /d /y /s
+xcopy C:\IPL\gravstorm\*.* R:\gravstorm /d /y /s
 
-xcopy R:\game\*.* C:\IPL\Game /d /y /s
+xcopy R:\gravstorm\*.* C:\IPL\gravstorm /d /y /s
 
 pause
