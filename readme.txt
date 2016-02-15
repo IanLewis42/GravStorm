@@ -18,7 +18,7 @@ REQUIREMENTS
 ------------
 o Raspberry Pi
   I built/ran it under Raspbian. I assume you'll need Raspbian too. 
-  ~6MB free disk/SD card space
+  ~10MB free disk/SD card space
   TV / Monitor plugged into the Pi. It only runs full-screen (not in a window) and VNC doesn't display anything.
   I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your
   display isn't big enough. Feedback welcome :-)
