@@ -17,13 +17,13 @@ If you're curious as to what it looks like, there should be some screenshots in 
 REQUIREMENTS
 ------------
 o Raspberry Pi
+  I built/ran it under Raspbian. I assume you'll need Raspbian too. 
   ~6MB free disk/SD card space
   TV / Monitor plugged into the Pi. It only runs full-screen (not in a window) and VNC doesn't display anything.
   I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your
   display isn't big enough. Feedback welcome :-)
   There are probably some software / library dependencies. Let me know if you figure out what they are :-)
-  Oh yes, I built/ran it under Raspbian. I assume you'll need Raspbian too. 
-  
+    
 o Windows
   Coming soon....
   
@@ -38,16 +38,16 @@ INSTALLATION
 Unzip the contents of this into the home directory on your Pi (probably /home/pi). You should end up with the following 
 directory structure:
 
-~/game
-~/game/data
-~/game/src
+~/gravstorm
+~/gravstorm/data
+~/gravstorm/src
 
 STARTING THE GAME
 ------------------
 Change into the game directory, and run the executable 'game' (I told you it needs a name...)
 
-cd game
-./game
+cd gravstorm
+./gravstorm
 
 MENU
 -----
@@ -115,7 +115,7 @@ So if you have a USB joystick, try both USB Joy 1 and USB Joy 2 in the menu.
 There is also support for an old-fashioned microswitch joystick connected to the Pi's
 GPIO header. To enable this, use the command line:
 
-sudo ./game -g
+sudo ./gravstorm -g
 
 sudo is required for access to the GPIO hardware. If you want to know which pins do what, 
 have a look in the source, or ask me.
@@ -127,6 +127,7 @@ I've spent a while trying to fix it. If anyone knows all about ALSA, please get 
 
 MAKING MAPS
 -----------
+Only read this bit if you want to make your own maps / levels.
 The game has been designed to make creating your own levels as easy as possible. It's still quite complicated though :-)
 
 I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusion this causes :-)
@@ -136,34 +137,41 @@ I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusio
   the entry in maps.txt is my_level, you must have a file called data/my_level.txt
   
 - This .txt file contains all the information about the level. Each parameter should be typed on its own line. 
+  Pretty much anything can be used as a single-line comment, but I tend to use a semicolon ;
+  The easiest thing to do is take a look at some af the existing  files, but for reference, I'll describe 
+  all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly.
   
-
 o map_type <0|1>
   0 - Single image file for map (default)
   1 - Tiled map
   
 o display_map <filename> only png format supported. REQUIRED
-  Image to display, or images of all the tiles, arranged in a single horizontal line
+  Image to display, or images of all the tiles, arranged in a single horizontal line. If tiles, each tile must be 64x64 
+  pixels, so the whole image must be (n*64) x 64 pixels. Tiles are displayed 'normal' size;  single image maps are
+  displayed double size. 
   
 o collision_map <filename> only png format supported. REQUIRED
-  Similar to display_map, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255)
+  Similar to display_map, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). 
+  If tiles, this should be HALF-SIZE, so each tile must be 32x32 pixels, and the whole image must be (n*32) x 32 pixels.
   
 o ascii_map <filename> 
-  Shows the arrangement of tiles to make the map. ASCII format, 0-9 for first 10 tiles, A-Z for next 26. ' ' (space) doubles as 0.
-  Only applies if map_type = 1
+  Shows the arrangement of tiles to make the map. ASCII format, 0-9 for first 10 tiles, A-Z for next 26. ' ' (space) 
+  doubles as 0. Only applies if map_type = 1
   
 o sentry_display <filename> only png format supported.
-  Images of all the sentries and forcefields, arranged in a single horizontal line
+  Images of all the sentries and forcefields, arranged in a single horizontal line. Each image must be 64x64 pixels, 
+  so the whole image must be (n*64) x 64 pixels
 
 o sentry_collision <filename> only png format supported.
-  Similar to sentry_display, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255)
+  Similar to sentry_display, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). This should be HALF-SIZE, 
+  so each tile must be 32x32 pixels, and the whole image must be (n*32) x 32 pixels.
   
 o description <filename> 
   Text displayed after selecting map
   
 o ship_first <0|1>
   0 - Map gets drawn first, then ship (also sentries, forcefields etc.) on top (default)
-  1 - ship (also sentries, forcefields etc.) get drawn first, then Map on top
+  1 - ship (also sentries, forcefields etc.) get drawn first, then map on top
   
 o wrap <0|1>
   0 - Ship stops at edge of map (if there's no wall)  (default)
@@ -189,7 +197,9 @@ o drag
   Air resistance. Default = 2
 
 o pad <type> <y> <min x> <max x> <miners> <jewels>  REQUIRED (at least one)
-  <type> is a hexadecimal number.
+  This describes a landing pad. Note that this does NOT draw graphics for the pad. These must be part of the display_map 
+  file. Maximum 12 pads allowed.
+  <type> is a 16-bit hexadecimal number.
     Lowest nibble (digit) is the ship that this pad is 'home' for (0-3). Each ship always appears on its home pad, 
       and will get shield, fuel and both types of ammo recharged when on it. If this digit is > 3 then this pad will
       be a general pad, not home for any ship.
@@ -199,49 +209,90 @@ o pad <type> <y> <min x> <max x> <miners> <jewels>  REQUIRED (at least one)
     AMMO2  0x0040
     SHIELD 0x0080
     e.g. if pad type is 10 then it is home for ship 0, and will recharge fuel for any ship that lands on it
-         if pad type is 9F then it's not home for any ship (F = 15, which is > 3) but will recharge fuel and shield for any ship (8+1 = 9)
+         if pad type is 9F then it's not home for any ship (F = 15, which is > 3) but will recharge fuel and shield for any 
+         ship (8+1 = 9)
   <y> is the y-coordinate of the pad. 0 is the top of the map, and it becomes more positive as you go down.
     The easiest way to find the y-coordinate is to start the game with the debug switch -d, try to land on the pad, 
       and note the y-cordintae displayed in the status bar when you crash on the pad.
+  <min x> and <max x> are the x coordinates of the left and right hnad edges of the pad. If this is the home pad for 
+    a ship, it will appear half way in between these.
+  <miners> and <jewels> are the number of miners stranded on this pad for the ship to rescue / number of jewels to be
+    collected (both only applicable on 'mission' levels)
     
+o blackhole <x> <y> <g>
+  This describes a gravity source somewhere on the map. Ships will be pulled towards it from any direction. The force is 
+  stronger the closer you get. Again, this does NOT draw anything. Maximum 4 blackholes allowed.
+  <x> <y> position of the blackhole
+  <g> gravity. Typically 5
+
+o sentry <x> <y> <direction> <type>(0/1/2) <period> <probability> <random> <range> <alive_sprite> <dead_sprite>
+  Describes a sentry; a stationary object wich fires bullets. This DOES draw the sentry, using a sprite taken from the 
+  sentry_display file defined earlier. Maximum 30 sentries allowed.
+  
+  <x> <y> position of the sentry. 
+  
+  <direction> direction of fire. 0-39 (9 degree increments). 0 is straight up, 10 is right, 20 is straight down etc. 
+    Doesn't apply to 'targeted' sentries.
+  
+  <type>(0/1/2)> 0 is 'normal' damage = 50
+                 1 is 'targeted' (i.e. aims at nearest ship) damage = 50
+                 2 is 'volcano' (lava coloured bullets) damage = 10
+  
+  <period> <probability> every <period> frames, the sentry has <probability> of firing.
+    e.g. if period is 30 and probability is 50, then the sentry has a 50% chance of firing every second.
+  
+  <random> amount of randomness applied to each shot. Typically 0-20
+  
+  <range> distance at which targeted sentries will start firing.
+  
+  <alive_sprite> <dead_sprite> index into sentry_display file to define image to be drawn for when the sentry is active /
+    destroyed. 0 for first 64x64 image, 1 for next image etc.
+
+o forcefield <min_x> <max_x> <min_y> <max_y> <strength> <sentry> <alive_sprite> <dead_sprite>
+  <min_x> <max_x> <min_y> <max_y> define endpoints of forcefield. Forcefield must be either horizontal or vertical,
+    i.e. EITHER min_x = max_x (vertical) OR min_y = max_y (horizontal). Maximum 5 forcefields allowed.
     
-&Map.pad[i].type,&Map.pad[i].y,&Map.pad[i].min_x,&Map.pad[i].max_x,&Map.pad[i].miners,&Map.pad[i].jewels);
-Pad %d: type:%02x y:%d x:%d x:%d miners:%d jewels:%d\n",i,Map.pad[i].type,Map.pad[i].y,Map.pad[i].min_x,Map.pad[i].max_x,Map.pad[i].miners,Map.pad[i].jewels);
+  <strength> force of repulsion. Typically 1000
+  
+  <sentry> If this sentry is destroyed, the forcefield is deactivated. Sentries are numbered in the order they are defined 
+    in this file.
+  
+  <alive_sprite> <dead_sprite> index into sentry_display file to define image to be drawn for when the forcefield is active /
+    deactivated. 0 for first 64x64 image, 1 for next image etc.
 
-Ship[Map.pad[i].type & 0x000f].home_pad = i;    //bottom nibble of type gives ship which this is home pad for.
+o area <min_x> <max_x> <min_y> <max_y> <gravity> <drag>
+  defines a rectangular area where gravity and/or drag are different from the rest of the map. Maximum 4 areas allowed.
+  
+  <min_x> <max_x> <min_y> <max_y> define opposite corners of the rectangle
+  
+  <gravity> <drag> as per normal definitions for the level.
 
-area
-&Map.area[j].min_x,&Map.area[j].max_x,&Map.area[j].min_y,&Map.area[j].max_y,&Map.area[j].gravity,&Map.area[j].drag);
-area %d: x:%d x:%d y:%d y:%d g:%f drag:%f\n",j,Map.area[j].min_x, Map.area[j].max_x, Map.area[j].min_y, Map.area[j].max_y, Map.area[j].gravity, Map.area[j].drag);
+o race <min_x> <max_x> <min_y> <max_y>
+  defines the start/finish line of the race.
+  
+  <min_x> <max_x> <min_y> <max_y> define endpoints of line. Line must be either horizontal or vertical,
+    i.e. EITHER min_x = max_x (vertical) OR min_y = max_y (horizontal).
 
-blackhole
-&Map.blackhole[l].x,&Map.blackhole[l].y,&Map.blackhole[l].g);
-blackhole %d: x:%d y:%d g:%f\n",l,Map.blackhole[l].x,Map.blackhole[l].y,Map.blackhole[l].g);
+There is a separate mapmaker program. This is unimaginatively called 'mapamker'. It reads the same .txt file, which should
+be passed on the command line, e.g. 
 
-//      x y type(0/1/2) gun volcano firing period probability random/targeted
-sentry
-&Map.sentry[m].x, &Map.sentry[m].y, &Map.sentry[m].direction, &Map.sentry[m].type, &Map.sentry[m].period, &Map.sentry[m].probability, &Map.sentry[m].random, &Map.sentry[m].range, &Map.sentry[m].alive_sprite, &Map.sentry[m].dead_sprite);
-Sentry %i: x:%i, y:%i, Direction:%i, Type:%i, Period:%i, Prob:%i, Random:%i, Range:%i, Sprite%d, Sprite%d\n",m, Map.sentry[m].x,  Map.sentry[m].y,  Map.sentry[m].direction,  Map.sentry[m].type,  Map.sentry[m].period,  Map.sentry[m].probability,  Map.sentry[m].random,  Map.sentry[m].range, Map.sentry[m].alive_sprite, Map.sentry[m].dead_sprite);
-Map.sentry[m].range = Map.sentry[m].range * Map.sentry[m].range;	//square to save square rooting later.
+mapmaker "mission 1.txt"
+  
+Quotes are required if there's a space in the filename. This program is rather undeveloped, and really just acts as a 
+viewer. Keyboard controls are:
 
-race
-&Map.raceline_minx,&Map.raceline_maxx,&Map.raceline_miny,&Map.raceline_maxy);
-else fprintf(logfile,"X or Y values must match in race start/finish line (i.e. line must be horizontal or vertical)\n");
-fprintf(logfile,"Race:   x:%d x:%d y:%d y:%d\n",Map.raceline_minx,Map.raceline_maxx,Map.raceline_miny,Map.raceline_maxy);
-fprintf(logfile,"Before: x:%d x:%d y:%d y:%d\n",Map.before_minx,Map.before_maxx,Map.before_miny,Map.before_maxy);
-fprintf(logfile,"After:  x:%d x:%d y:%d y:%d\n",Map.after_minx,Map.after_maxx,Map.after_miny,Map.after_maxy);
+Cursor keys:       scroll left, right, up, down.
+PageUp / PageDown: zoom in and out
+Q/A:               scroll tile preview on left
+Return:            reload .txt file
+G:                 toggle grid off/white/grey/black
 
-forcefield
-&Map.forcefield[n].min_x,&Map.forcefield[n].max_x,&Map.forcefield[n].min_y,&Map.forcefield[n].max_y,&Map.forcefield[n].strength,&Map.forcefield[n].sentry,&Map.forcefield[n].alive_sprite,&Map.forcefield[n].dead_sprite);
-else fprintf(logfile,"X or Y values must match in forcefield (i.e. line must be horizontal or vertical)\n");
-
-fprintf(logfile,"ForceField: x:%d x:%d x:%d y:%d y:%d y:%d\n",Map.forcefield[n].min_x,Map.forcefield[n].half_x,Map.forcefield[n].max_x,Map.forcefield[n].min_y,Map.forcefield[n].half_y,Map.forcefield[n].max_y);
-fprintf(logfile,"ForceField: strength:%0.0f sentry:%d\n",Map.forcefield[n].strength,Map.forcefield[n].sentry);
-
+There was some half-hearted support for dragging and dropping tiles, but it seems to be broken at the moment. It might get 
+fixed in the future. 
 
 LEGAL STUFF
 -----------
-Ian's Thrust Game  Copyright (C) 2015-2016  Ian Lewis
+GravStorm Copyright (C) 2015-2016  Ian Lewis
 This program and it's source code are released under the GPL.
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
@@ -250,5 +301,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 18/01/16
-iansthrustgame@gmail.com
+IPL 15/02/16
+gravstorm9@gmail.com

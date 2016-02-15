@@ -5,7 +5,7 @@ ascii_map     m1_map.txt
 description   m1_desc.txt
 mission	      1
 
-	time_limit 60
+time_limit 60
 
 sentry_display   sentries.png
 sentry_collision sentries_col.png
@@ -28,7 +28,7 @@ pad 2    633  1939 2092   0     5
 sentry 995  798  30 2    15     50    2      2000  5     0
 sentry 2272 605  30 2    15     50    2      1000  6     0
 
-max_players 1
+;max_players 1
 
 
 
