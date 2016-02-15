@@ -176,7 +176,7 @@ int main (int argc, char *argv[]){
     fprintf(logfile,"Creating display\n");
     display = al_create_display(SCREENX, SCREENY);
 
-    al_set_window_title(display, "Headrush");
+    al_set_window_title(display, NAME);
 
 	//change directory to data, where all resources live (images, fonts, sounds and text files)
 	al_append_path_component(path, "data");
@@ -190,7 +190,7 @@ int main (int argc, char *argv[]){
     if ((race_font  = al_load_font("7seg.ttf", 20, 0))            == NULL)  fprintf(logfile,"7seg.ttf load fail");
 	//if ((title_font = al_load_font("41155_WESTM.ttf", 200, 0))    == NULL)  fprintf(logfile,"41155_WESTM.ttf load fail");
 	//if ((title_font = al_load_font("Zebulon.otf", 130, 0))    == NULL)  fprintf(logfile,"Zebulon.otf load fail");
-	if ((title_font = al_load_font("Rapier Zero.otf", 130, 0))    == NULL)  fprintf(logfile,"Rapier Zero.otf load fail");
+	if ((title_font = al_load_font("Rapier Zero.otf", 160, 0))    == NULL)  fprintf(logfile,"Rapier Zero.otf load fail");
 	fprintf(logfile,"Loaded 6 fonts\n");
 	fflush(logfile);
 
