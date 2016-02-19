@@ -28,14 +28,18 @@ o Windows
   Coming soon....
   
 o Android  
-  Possible (If you've ever made anything for Android, please get in touch)
+  Possible (If you've ever made anything for Android, and want to help, please get in touch)
 
 o iOS
   No chance. Unless you want to do it :-)
 
 INSTALLATION
 ------------
-Unzip the contents of this into the home directory on your Pi (probably /home/pi). You should end up with the following 
+Go to https://github.com/IanLewis42/GravStorm 
+Click the button labelled 'Download Zip'
+
+Save the zip file, and unzip the contents of this into the directory of your choice. 
+On Raspberry Pi, your home directory is a good choice (probably /home/pi). You should end up with the following 
 directory structure:
 
 ~/gravstorm
@@ -44,7 +48,7 @@ directory structure:
 
 STARTING THE GAME
 ------------------
-Change into the game directory, and run the executable 'game' (I told you it needs a name...)
+Change into the game directory, and run the executable 'gravstorm'
 
 cd gravstorm
 ./gravstorm
@@ -127,7 +131,8 @@ I've spent a while trying to fix it. If anyone knows all about ALSA, please get 
 
 MAKING MAPS
 -----------
-Only read this bit if you want to make your own maps / levels.
+*** Only read this bit if you want to make your own maps / levels.***
+
 The game has been designed to make creating your own levels as easy as possible. It's still quite complicated though :-)
 
 I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusion this causes :-)
@@ -301,5 +306,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 15/02/16
+IPL 19/02/16
 gravstorm9@gmail.com
