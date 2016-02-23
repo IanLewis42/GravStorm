@@ -150,6 +150,7 @@ int main (int argc, char *argv[]){
 
 	//open logfile in executable directory
 	logfile = fopen("logfile.txt","w");
+    fprintf(logfile,"%s %s\n",NAME,VERSION);
     fprintf(logfile,"Init Allegro\n");
 
     //init other bits of allegro

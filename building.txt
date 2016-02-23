@@ -8,7 +8,7 @@ http://joshua14.homelinux.org/blog/?p=1726
 
 Having done this, change to the source directory and run the build script:
 
-cd ~/game/src
+cd ~/gravstorm/src
 ./build.sh
 
 Static vs Shared
@@ -29,5 +29,5 @@ Good Luck!
 
 Ian
 
-IPL 9/2/15
-iansthrustgame@gmail.com
+IPL 22/2/16
+gravstorm9@gmail.com

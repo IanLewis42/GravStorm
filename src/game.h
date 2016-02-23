@@ -17,6 +17,7 @@
 */
 
 #define NAME "GravStorm"
+#define VERSION "V0.1"
 
 #define TRUE 1
 #define FALSE 0

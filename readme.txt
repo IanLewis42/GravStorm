@@ -17,12 +17,13 @@ If you're curious as to what it looks like, there should be some screenshots in 
 REQUIREMENTS
 ------------
 o Raspberry Pi
-  I built/ran it under Raspbian. I assume you'll need Raspbian too. 
+  I built/ran it under Raspbian. If you just want to run it, you'll need Raspbian too. I've tested it under both Wheezy 
+  and Jessie versions of Raspbian and it seems OK. If you want to build it yourself, feel free to try under any OS you want ;-)
   ~10MB free disk/SD card space
   TV / Monitor plugged into the Pi. It only runs full-screen (not in a window) and VNC doesn't display anything.
   I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your
   display isn't big enough. Feedback welcome :-)
-  There are probably some software / library dependencies. Let me know if you figure out what they are :-)
+  There don't seem to be any dependencies that aren't in the standard Raspbian Jessie image (as of 23/02/16).
     
 o Windows
   Coming soon....
@@ -46,12 +47,25 @@ directory structure:
 ~/gravstorm/data
 ~/gravstorm/src
 
+(Github seems to make the directory name 'gravstorm-master'. You can leave it, or change it. I'm going to refer to it
+ as 'gravstorm').
+
+You may then need to change the file permissions to make the game executable. Start up a terminal (e.g. lxterminal)
+  - change into the gravstorm directory:
+    cd gravstorm
+  - set file permissions:
+    chmod +x gravstorm
+
 STARTING THE GAME
 ------------------
-Change into the game directory, and run the executable 'gravstorm'
+Change into the game directory (if you're not there already), and run the executable 'gravstorm'
 
 cd gravstorm
 ./gravstorm
+
+NOTE: My Pi boots straight into the GUI, and I normally run it via LXTerminal. It still seems to work if I exit the GUI
+  and go back to commandline and run it from there, so I assume it will run without starting the GUI at all. If your Pi
+  is configured that way, please try it and let me know!
 
 MENU
 -----
@@ -85,8 +99,7 @@ o Single player 'Mission' levels
   bottom of the cave system. Land on the 'blue' pads to rescue them. Land on the 'red' pads to collect jewels for 
   bonus points. Beware that your ship will be heavier with extra passengers and cargo! Fly off away from the surface
   to complete the level.
-
-
+  
 STATUS PANEL
 ------------
 The bar on the left hand side of the screen has a status panel for each ship. 
@@ -107,6 +120,12 @@ SHIP CONFIG
 If you press Down/Fire2 when on your landing pad, a config menu will appear.
 This lets you choose how much fuel you carry, and how much and what types of ammunition.
 More fuel and ammo make your ship heavier, and therefore less manouverable.
+
+EXITING
+-------
+If the game is completed (i.e. one player loses all lives, or mission complete) press 'thust' to return to the menu.
+If you want to exit the level before completion, press 'escape' to go back to the menu.
+Press 'escape' to exit from the menu back to the command prompt.
 
 JOYSTICKS
 ---------
@@ -306,5 +325,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 19/02/16
+IPL 23/02/16
 gravstorm9@gmail.com
