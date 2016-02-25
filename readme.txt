@@ -63,10 +63,14 @@ Change into the game directory (if you're not there already), and run the execut
 cd gravstorm
 ./gravstorm
 
-NOTE: My Pi boots straight into the GUI, and I normally run it via LXTerminal. It still seems to work if I exit the GUI
-  and go back to commandline and run it from there, so I assume it will run without starting the GUI at all. If your Pi
-  is configured that way, please try it and let me know!
-
+NOTE: My Pi boots straight into the GUI, and I normally run Gravstorm via LXTerminal. It also works if you run
+      it direct from the command line, without the desktop GUI running. If try to run it from the desktop/gui
+      and get an error message (perhaps similar to the one shown below) then try it without the GUI.
+      ***
+      XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":0.0"
+      after 17 requests (17 known processed) with 0 events remaining.
+      ***
+      
 MENU
 -----
 It's supposed to be intuitive / self explanatory, but just in case....
