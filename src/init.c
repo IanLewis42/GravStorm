@@ -178,14 +178,6 @@ int init_map(int group, int map)
 		{
 			sscanf(line+11," %d",&Map.max_players);
 			fprintf(logfile,"Max players:%d\n",Map.max_players);
-			//for (k=Map.max_players ; k<MAX_SHIPS ; k++)
-			for (k=0 ; k<MAX_SHIPS ; k++)
-			{
-				if (k >= Map.max_players)
-					Ship[k].controller = NA;
-				else
-					Ship[k].controller = Ship[k].selected_controller;
-			}
 		}
 
 		else if (strncmp(line,"gravity",7) == 0)
@@ -330,6 +322,15 @@ int init_map(int group, int map)
 	Map.num_blackholes = l;
 	Map.num_sentries = m;
 	Map.num_forcefields = n;
+
+	//for (k=Map.max_players ; k<MAX_SHIPS ; k++)
+	for (k=0 ; k<MAX_SHIPS ; k++)
+	{
+		if (k >= Map.max_players)
+			Ship[k].controller = NA;
+		else
+			Ship[k].controller = Ship[k].selected_controller;
+	}
 
 	if (Map.display_file_name[0] == 0)
 		fprintf(logfile,"ERROR: No display file specified\n");

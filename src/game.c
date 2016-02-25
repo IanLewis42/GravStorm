@@ -1118,6 +1118,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	}
 
 	fprintf(logfile,"Final Selected map %d\n",Menu.map);
+	fprintf(logfile,"Number of players %d\n",num_ships);
 
 	for (i=0 ; i<30 ; )
 	{
