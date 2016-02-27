@@ -149,14 +149,22 @@
  
  // mapmaker mouse/drag stuff
  // mapmaker lean on drawing.c (and init.c?)
+ // mapmaker static linked build.
  // *Game name....
- // readme (map making)
+ // *readme (map making)
  // *menu slow response. Sounds? or file opening? Neither - should only redraw when event queue empty!
  
  // Windows port....
  //  Variable resolution? 
      Resizable window?
      Networking?
+     *icons
+     window closing
+     window sizing
+     shuffle text to match background (status and menu)
+ 
+ //behaviour when landed - menu doesn't appear on down / sitimus 4p ; quickfire doesn't work....
+ 
  // Android port?
  
  // Sentry damage shield:

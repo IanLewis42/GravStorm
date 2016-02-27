@@ -25,14 +25,15 @@
 #include "allegro5/allegro_font.h"
 #include "allegro5/allegro_audio.h"
 
-#include <wiringPi.h>
-
 #include "game.h"
 #include "init.h"
 #include "objects.h"
 #include "inputs.h"
 #include "drawing.h"
 
+#if RPI
+#include <wiringPi.h>
+#endif
 FILE* map_file;	//text file containing map-specific data
 const char txt[5] = ".txt\0";
 
@@ -555,6 +556,7 @@ void init_keys(bool* pressed_keys)
 
 void init_joystick(void)
 {
+#if RPI
 	fprintf(logfile,"Init GPIO joystick\n");
 
 	wiringPiSetupPhys();	//set up wiring pi lib. Using phsical piun numbers (ie the numbers on th eheader)
@@ -568,6 +570,7 @@ void init_joystick(void)
 	pullUpDnControl(18,PUD_UP);
 	pinMode (16, INPUT) ;
 	pullUpDnControl(16,PUD_UP);
+#endif // TARGET
 }
 
 void general_init()

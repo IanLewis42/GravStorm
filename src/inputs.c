@@ -58,7 +58,7 @@ void ReadGPIOJoystick()
 	static int joystick_up_state = RELEASED;
 	static int joystick_down_state = RELEASED;
 	static int joystick_button_state = RELEASED;
-
+#if RPI
 	fprintf(logfile,"Read GPIO joystick\n");
 
 	//state machine to set/clear variables only once per stick push.
@@ -151,6 +151,7 @@ void ReadGPIOJoystick()
 	}
 
 	//GPIOJoystick.button = !digitalRead(GPIO_BUT1);
+#endif
 }
 
 void CheckUSBJoyStick(ALLEGRO_EVENT event)

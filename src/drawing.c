@@ -58,6 +58,7 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 {
 	ALLEGRO_TRANSFORM transform;
 	int i,j,y=-10;
+	int w,h,xoffset,yoffset;
 	float scale;
 	char keys[]  = "Keys";
 	char gpio[]  = "GPIO Joy";
@@ -68,9 +69,24 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 	static int temp = 0,temp2=0;
 
 	ALLEGRO_COLOR colour;
+
+	w = al_get_display_width(display);
+    h = al_get_display_height(display);
+
+	//al_set_clipping_rectangle(0, 0, SCREENX, SCREENY);
+	al_set_clipping_rectangle(0, 0, w, h);
+
+	yoffset = (h-SCREENY)/2;
+	if (yoffset < 0) yoffset = 0;
+
+	xoffset = (w-SCREENX)/2;
+    if (xoffset < 0) xoffset = 0;
+
+    Menu.offset += xoffset;
+
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 
-	al_draw_bitmap(menu_bg_bmp,0,0,0);
+	al_draw_bitmap(menu_bg_bmp,xoffset,yoffset,0);
 
 	/*
 	temp++;
@@ -100,6 +116,7 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 
 	y+= 25;
 
+    y+= yoffset;
 
 	//Display maps; display all group names, and maps in current group
 	for (i=0 ; i<Menu.num_groups ; i++)
@@ -140,6 +157,8 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 	//al_draw_textf(menu_font, colour ,Menu.offset+480, 20,  ALLEGRO_ALIGN_LEFT, "PLAYERS");
 
 	y=80;
+
+	y+= yoffset;
 
 	for (i=0 ; i<4 ; i++)			//List players
 	{
@@ -929,67 +948,77 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
 void draw_status_bar(num_ships)
 {
 	int i,j;
+	int w,h,yoffset;
 	int bs;	//size of coloured block;
 
-	al_set_clipping_rectangle(0, 0, SCREENX, SCREENY);
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+
+	//al_set_clipping_rectangle(0, 0, SCREENX, SCREENY);
+	al_set_clipping_rectangle(0, 0, w, h);
+
+	yoffset = (h-STATUS_BAR_HEIGHT)/2;
 
 	//Status info
-	al_draw_bitmap(status_bg,0,0,0);
+	al_draw_bitmap(status_bg,0,yoffset,0);
 
 	if (Map.mission)
 		bs = 160;
 	else
 		bs = 120;
 
+	yoffset += 5;
+
 	for (i=0 ; i<num_ships ; i++)
 	{
 		//al_draw_filled_rectangle(0,i*100,120,i*100+90,Ship[i].colour);	//120*90 - make a nice bitmap background.
-		al_draw_filled_rectangle(15,5+i*bs,135,5+i*bs+(bs-10),Ship[i].colour);
+		al_draw_filled_rectangle(15,yoffset+i*bs,135,yoffset+i*bs+(bs-10),Ship[i].colour);
 		//al_draw_bitmap(Ship[i].status_bg,0,i*100,0);
 
-		al_draw_filled_rectangle(15,5+i*bs+10,15+Ship[i].shield,5+i*bs+20,al_map_rgb(0, 128, 0));
-		al_draw_filled_rectangle(15,5+i*bs+12,15+Ship[i].shield-2,5+i*bs+14,al_map_rgba(255, 255, 255, 64));
+		al_draw_filled_rectangle(15,yoffset+i*bs+10,15+Ship[i].shield,yoffset+i*bs+20,al_map_rgb(0, 128, 0));
+		al_draw_filled_rectangle(15,yoffset+i*bs+12,15+Ship[i].shield-2,yoffset+i*bs+14,al_map_rgba(255, 255, 255, 64));
 
-		al_draw_filled_rectangle(15,5+i*bs+30,15+Ship[i].ammo1,5+i*bs+40,al_map_rgb(128, 0, 0));
-		al_draw_filled_rectangle(15,5+i*bs+32,15+Ship[i].ammo1-2,5+i*bs+34,al_map_rgba(255, 255, 255, 64));
+		al_draw_filled_rectangle(15,yoffset+i*bs+30,15+Ship[i].ammo1,yoffset+i*bs+40,al_map_rgb(128, 0, 0));
+		al_draw_filled_rectangle(15,yoffset+i*bs+32,15+Ship[i].ammo1-2,yoffset+i*bs+34,al_map_rgba(255, 255, 255, 64));
 
 		for (j=0 ; j<Ship[i].ammo2 ; j++)
 		{
-			al_draw_filled_rectangle(15+j*12+1,5+i*bs+50,15+j*12+11,5+i*bs+60,al_map_rgb(0, 128, 128));
-			al_draw_filled_rectangle(15+j*12+1,5+i*bs+52,15+j*12+11,5+i*bs+54,al_map_rgba(255, 255, 255, 64));
+			al_draw_filled_rectangle(15+j*12+1,yoffset+i*bs+50,15+j*12+11,yoffset+i*bs+60,al_map_rgb(0, 128, 128));
+			al_draw_filled_rectangle(15+j*12+1,yoffset+i*bs+52,15+j*12+11,yoffset+i*bs+54,al_map_rgba(255, 255, 255, 64));
 		}
 
 
-		al_draw_filled_rectangle(15,5+i*bs+70,15+(Ship[i].fuel>>4),5+i*bs+80,al_map_rgb(128, 128, 0));
-		al_draw_filled_rectangle(15,5+i*bs+72,15+(Ship[i].fuel>>4)-2,5+i*bs+74,al_map_rgba(255, 255, 255, 64));
+		al_draw_filled_rectangle(15,yoffset+i*bs+70,15+(Ship[i].fuel>>4),yoffset+i*bs+80,al_map_rgb(128, 128, 0));
+		al_draw_filled_rectangle(15,yoffset+i*bs+72,15+(Ship[i].fuel>>4)-2,yoffset+i*bs+74,al_map_rgba(255, 255, 255, 64));
 
 		for (j=0 ; j<Ship[i].lives ; j++)
 			//al_draw_filled_circle(110, i*100+j*12+10, 5, al_map_rgb(255, 255, 255));
-			al_draw_filled_triangle(15+106, 5+i*bs+j*12+15, 15+114, 5+i*bs+j*12+15,  15+110, 5+i*bs+j*12+5, al_map_rgb(255, 255, 255));
+			al_draw_filled_triangle(15+106, yoffset+i*bs+j*12+15, 15+114, yoffset+i*bs+j*12+15,  15+110, yoffset+i*bs+j*12+5, al_map_rgb(255, 255, 255));
 
 		if (Map.mission)
 		{
 			for (j=0 ; j<Ship[i].miners ; j++)
-				al_draw_bitmap_region(pickups,16,0,16,16,15+j*12+1,5+i*bs+90,0);
+				al_draw_bitmap_region(pickups,16,0,16,16,15+j*12+1,yoffset+i*bs+90,0);
 			for (j=0 ; j<Ship[i].jewels ; j++)
-				al_draw_bitmap_region(pickups,0,0,16,16,15+j*12+1,5+i*bs+110,0);
+				al_draw_bitmap_region(pickups,0,0,16,16,15+j*12+1,yoffset+i*bs+110,0);
 		}
 
 		//miners
 		//jewels
 
 		if (Ship[i].racing)
-			al_draw_textf(race_font, al_map_rgb(255, 255, 255),15, 5+i*bs+(bs-35), ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].current_lap_time);
+			al_draw_textf(race_font, al_map_rgb(255, 255, 255),15, yoffset+i*bs+(bs-35), ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].current_lap_time);
 		if (Ship[i].lap_complete)
-			al_draw_textf(race_font, al_map_rgb(255, 255, 0),70, 5+i*bs+(bs-35), ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].last_lap_time);
+			al_draw_textf(race_font, al_map_rgb(255, 255, 0),70, yoffset+i*bs+(bs-35), ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].last_lap_time);
 
 	}
 
 	//dividers
 	if (num_ships > 1)
-		al_draw_filled_rectangle(STATUS_BAR_WIDTH,SCREENY/2-5,SCREENX,SCREENY/2+5,al_map_rgb(128, 128, 128));
+		//al_draw_filled_rectangle(STATUS_BAR_WIDTH,SCREENY/2-5,SCREENX,SCREENY/2+5,al_map_rgb(128, 128, 128));
+		al_draw_filled_rectangle(STATUS_BAR_WIDTH,h/2-5,w,h/2+5,al_map_rgb(128, 128, 128));
 	if (num_ships > 2)
-		al_draw_filled_rectangle(((SCREENX-STATUS_BAR_WIDTH)/2)+STATUS_BAR_WIDTH-5,0,(SCREENX-STATUS_BAR_WIDTH)/2+STATUS_BAR_WIDTH+5,SCREENY,al_map_rgb(128, 128, 128));
+		al_draw_filled_rectangle(((w-STATUS_BAR_WIDTH)/2)+STATUS_BAR_WIDTH-5,0,(w-STATUS_BAR_WIDTH)/2+STATUS_BAR_WIDTH+5,h,al_map_rgb(128, 128, 128));
 
 
 	return;

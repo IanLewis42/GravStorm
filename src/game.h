@@ -16,6 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+//Target
+#define  RPI 0
+#define  WINDOWS 1
+
 #define NAME "GravStorm"
 #define VERSION "V0.1"
 
@@ -36,6 +40,7 @@
 #define SCREENY 720//1080 //768
 
 #define STATUS_BAR_WIDTH 150
+#define STATUS_BAR_HEIGHT 720
 
 #define MAX_MAP_WIDTH 100
 #define MAX_MAP_HEIGHT 100
@@ -232,5 +237,11 @@ extern MenuType Menu;
 extern int tile_width, tile_height;
 
 extern FILE* logfile;
+
+extern ALLEGRO_SAMPLE *clunk;
+extern ALLEGRO_SAMPLE *wind;
+
+extern bool pressed_keys[ALLEGRO_KEY_MAX];
+extern int gpio_active;
 
 int  ShipMass(int ship_num);
