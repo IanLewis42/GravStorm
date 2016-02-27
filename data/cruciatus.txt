@@ -2,7 +2,7 @@ map_type      1
 display_map   ground.png
 collision_map ground_col.png
 ascii_map     cross_map.txt
-description   cruciatus_desc.txt
+description   cr_desc.txt
 mission	      0
 
 ;sentry_display   sentries.png
