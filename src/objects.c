@@ -382,18 +382,18 @@ void UpdateLandedShip(int i)
 	if (Ship[i].fire1_reload != 0)	//decrement reload counter
 	Ship[i].fire1_reload--;
 
+	if (Map.race)
+	{
+		if (Ship[i].racing)
+			Ship[i].current_lap_time += FrameTime;
+	}
+
 	//thrust makes us live again
 	if (Ship[i].thrust_held)
 	{
 		Ship[i].menu = FALSE;
 		Ship[i].landed = FALSE;
 		Ship[i].thrust = THRUST;
-	}
-
-	if (Map.race)
-	{
-		if (Ship[i].racing)
-			Ship[i].current_lap_time += FrameTime;
 	}
 
 	else if (Ship[i].menu)
