@@ -66,7 +66,7 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 	char usb1[]  = "USB Joy 2";
 	char na[]    = "N/A";
 	char* control_string;
-	static int temp = 0,temp2=0;
+	//static int temp = 0,temp2=0;
 
 	ALLEGRO_COLOR colour;
 
@@ -101,13 +101,13 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 	scale = 0.4;
 	al_identity_transform(&transform);			/* Initialize transformation. */
 	al_scale_transform(&transform, scale, scale);	/* Rotate and scale around the center first. */
-	al_translate_transform(&transform,SCREENX/2,y);
+	al_translate_transform(&transform,SCREENX/2,y+yoffset);
 	al_use_transform(&transform);
 	al_draw_textf(title_font, al_map_rgba(0, 0, 0,128),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
 
 	al_identity_transform(&transform);
 	al_scale_transform(&transform, scale, scale);	/* Rotate and scale around the center first. */
-	al_translate_transform(&transform,SCREENX/2-7,y+7);
+	al_translate_transform(&transform,SCREENX/2-7,y+yoffset+7);
 	al_use_transform(&transform);
 	al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
 
@@ -125,7 +125,7 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 		if (i == Menu.group)
         {
 			colour = al_map_rgba(0, 255, 0, 20);
-			al_draw_textf(menu_font, colour ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", &MapNames[i].Group);
+			al_draw_textf(menu_font, colour ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
 
             for (j=0 ; j<MapNames[Menu.group].Count ; j++)
             {
@@ -139,13 +139,13 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
         		 else
 					colour = al_map_rgba(255, 255, 255, 20);
 
-        		al_draw_textf(menu_font, colour ,Menu.offset+30, y+=Menu.expand,  ALLEGRO_ALIGN_LEFT, "%s", &MapNames[i].Map[j]);
+        		al_draw_textf(menu_font, colour ,Menu.offset+30, y+=Menu.expand,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
 			}
         }
         else
 		{
 			colour = al_map_rgba(0, 48, 0, 20);
-			al_draw_textf(menu_font, colour ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", &MapNames[i].Group);
+			al_draw_textf(menu_font, colour ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
 		}
 	}
 
@@ -183,13 +183,13 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 	{
 		if (Ship[i].controller == KEYS)
 			control_string = keys;
-		if (Ship[i].controller == GPIO_JOYSTICK)
+		else if (Ship[i].controller == GPIO_JOYSTICK)
 			control_string = gpio;
-		if (Ship[i].controller == USB_JOYSTICK0)
+		else if (Ship[i].controller == USB_JOYSTICK0)
 			control_string = usb0;
-		if (Ship[i].controller == USB_JOYSTICK1)
+		else if (Ship[i].controller == USB_JOYSTICK1)
 			control_string = usb1;
-		if (Ship[i].controller == NA)
+		else//if (Ship[i].controller == NA)
 			control_string = na;
 
 		//if (i >= Map.max_players)
@@ -250,7 +250,7 @@ void display_map_text(int done, int timer)
     FILE * description_file;
     char line[200];
     int i=20;
-    ALLEGRO_USTR *ustr;
+    ALLEGRO_USTR *ustr = NULL;
 
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
@@ -258,7 +258,7 @@ void display_map_text(int done, int timer)
 
 	al_draw_filled_rectangle(0,0,SCREENX,SCREENY,al_map_rgba(0,0,0,timer*6));	//black filter to darken?
 
-	if (description_file = fopen(Map.description_file_name,"r"))
+	if ((description_file = fopen(Map.description_file_name,"r")))
 	{
 		while (fgets(line, 200, description_file) != NULL)
 		{
@@ -269,12 +269,12 @@ void display_map_text(int done, int timer)
 			i+=35;
 		}
 
-		al_ustr_free(ustr);
+		if (ustr) al_ustr_free(ustr);
 		fclose(description_file); //close file
 	}
 	else
 	{
-		al_draw_textf(small_font, al_map_rgb(timer*8, timer*8, timer*8),0, i,  ALLEGRO_ALIGN_LEFT, "%s",&MapNames[Menu.group].Map[Menu.map]);
+		al_draw_textf(small_font, al_map_rgb(timer*8, timer*8, timer*8),0, i,  ALLEGRO_ALIGN_LEFT, "%s",(char*)&MapNames[Menu.group].Map[Menu.map]);
 		i+=35;
 		al_draw_textf(small_font, al_map_rgb(timer*8, timer*8, timer*8),0, i,  ALLEGRO_ALIGN_LEFT, "Couldn't open description file: %s",Map.description_file_name);
 	}
@@ -386,16 +386,16 @@ void draw_split_screen(ViewportType viewport, int ship_num)
 {
 //void tile_map_draw(void) {
     int x, y;
-    int min_x, min_y;
-    ALLEGRO_TRANSFORM transform;
+    //int min_x, min_y;
+    //ALLEGRO_TRANSFORM transform;
     int w, h;
-    int i,j;
+    //int i,j;
 
 	int scrollx, scrolly;	//These are the centre of the 'viewport' - normally the ship position, except when you get near an edge.
 
-	ALLEGRO_COLOR bullet_colour;
+	//ALLEGRO_COLOR bullet_colour;
 	//int component;
-	unsigned char r, g, b;
+	//unsigned char r, g, b;
 
 	//replace with split screen window size.
     w = al_get_display_width(display);
@@ -445,7 +445,12 @@ void draw_split_screen(ViewportType viewport, int ship_num)
     		y=h/2;
     		w=(w-STATUS_BAR_WIDTH)/2;
     		h=h/2;
-
+    		break;
+        default:
+    		x=STATUS_BAR_WIDTH;
+    		y=0;
+    		w=w-STATUS_BAR_WIDTH ;
+    		h=h;
     		break;
 	}
 	al_set_clipping_rectangle(x, y, w, h);
@@ -592,10 +597,10 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 	al_hold_bitmap_drawing(1);
 
 	//draw bullets first
-	int current_bullet, previous_bullet;
+	int current_bullet;//, previous_bullet;
 
 	current_bullet = first_bullet;
-	previous_bullet = END_OF_LIST;
+	//previous_bullet = END_OF_LIST;
 
 	while(current_bullet != END_OF_LIST)
 	{
@@ -611,7 +616,7 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 			case BLT_MINE:
 				al_unmap_rgb(Bullet[current_bullet].colour, &r,&g,&b);
 
-				if (Bullet[current_bullet].ttl&0x1f < 0x10)
+				if ((Bullet[current_bullet].ttl & 0x1f) < 0x10)
 					r -= 16;
 				else
 					r += 16;
@@ -945,7 +950,7 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
 }
 #endif
 
-void draw_status_bar(num_ships)
+void draw_status_bar(int num_ships)
 {
 	int i,j;
 	int w,h,yoffset;

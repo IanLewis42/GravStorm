@@ -29,6 +29,7 @@
 
 #include "game.h"
 #include "objects.h"
+#include "init.h"
 
 //Trig LUTs
 float sinlut[NUM_ANGLES];
@@ -574,8 +575,9 @@ void UpdateLandedShip(int i)
 //void CreateExplosion(ship_num)
 void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv)//float outward_v);
 {
-	int i,j,k;
-	int type = 0;	//different type?
+	//int i;
+	int j,k;
+	//int type = 0;	//different type?
 
 	for (k=1 ; k<num_rings+1 ; k++)	//1-2 for 2 rings of particles; fast and slow
 	{
@@ -667,8 +669,9 @@ void FireNormal(int i)
 ****************************************************/
 void FireSpecial(int ship_num)
 {
-	int i,j,k;
-	int type = 0;	//different type?
+	//int i;
+	int j,k;
+	//int type = 0;	//different type?
 
 	switch (Ship[ship_num].ammo2_type)
 	{
@@ -798,7 +801,7 @@ void UpdateSentries(void)
 //work out bullet parameters from ship parameters
 void NewShipBullet (int ship_num, int type, int flags)// signed int position, int random)
 {
-	int i;
+	//int i;
 	int position = 0, angle, speed, random = 0;
 
 	//Set start location for bullet

@@ -39,7 +39,7 @@
 int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
 	ALLEGRO_TRANSFORM transform;
-	int count = 0;
+	//int count = 0;
 	//float scale;
 	ALLEGRO_MIXER *mixer;
 	ALLEGRO_SAMPLE_INSTANCE *wind_inst;
@@ -233,7 +233,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
             //al_play_sample_instance(clunk_inst);
 
 			//Escape to exit trumps everything
-			if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) Exit();
+ 			if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) Exit();
 
 			//Otherwise, check if we're defining keys, so we can allow any keys (other than escape) here
 			//NB only way out of column 3 is to get to the end of this process (i.e. define all 5 keys
@@ -272,11 +272,11 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
             else
             {
                 key_down_log[event.keyboard.keycode]=true;
-			}
+	 		}
 		}
 
 		//See if it's a USB joystick event. If it is, log it.
-		else CheckUSBJoyStick(event);
+ 		else CheckUSBJoyStick(event);
 
 		//turn any pending keypresses / Joystick events into Ship controls
         ScanInputs(MAX_SHIPS);
@@ -288,7 +288,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 			{
 				AnyShip.left_down = true;
 				Ship[i].left_down = false;
-				key_down_log[ALLEGRO_KEY_LEFT] = false;
+	 			key_down_log[ALLEGRO_KEY_LEFT] = false;
 
 			}
 			if (Ship[i].right_down || key_down_log[ALLEGRO_KEY_RIGHT])

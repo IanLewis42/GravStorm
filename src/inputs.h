@@ -55,3 +55,8 @@ typedef struct
 extern ALLEGRO_JOYSTICK *USBJOY[2];
 extern bool key_down_log[ALLEGRO_KEY_MAX];
 extern bool key_up_log[ALLEGRO_KEY_MAX];
+
+void ScanInputs(int num_ships);
+void ReadGPIOJoystick();
+void CheckUSBJoyStick(ALLEGRO_EVENT event);
+

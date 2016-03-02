@@ -103,7 +103,7 @@ void make_sentry_col_mask()
 	sentry_mask = al_load_bitmap(Map.sentry_collision_file_name);
 	if (sentry_mask == NULL)
 	{
-		fprintf(logfile,"No sentry mask\n",mask_width,mask_height);
+		fprintf(logfile,"No sentry mask\n");
 
 		for (i=0 ; i< 1*MAX_SENTRIES*32 ; i++)
 			sentry_col_mask[i] = 0;
@@ -259,7 +259,7 @@ void make_map_col_mask(void)
 #else
 void make_map_col_mask(void)
 {
-	int i,j,k;
+	int i,j=0,k;
 	int row_start, row_end, col_start, col_end;
 	//int words_per_row;
 
@@ -278,8 +278,8 @@ void make_map_col_mask(void)
 		words_per_row +=2;
 
 	fprintf(logfile,"map:%d,%d wpr:%d (including padding)\n",mask_width,mask_height,words_per_row);
-	if (mask_width & 0x001f != 0)
-		fprintf(logfile,"ERROR:map width must be a multiple of 32!\n",mask_width,mask_height,words_per_row);
+	if ((mask_width & 0x001f) != 0)
+		fprintf(logfile,"ERROR:map width must be a multiple of 32!\n");
 
 	if (Map.type == 0)
 	{
@@ -288,7 +288,7 @@ void make_map_col_mask(void)
 			for(j=0 ; j<words_per_row ; j++)
 			{
 				map_col_mask[i*words_per_row+j] = 0;	//top padding
-				fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
+				fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 			}
 			fprintf(map_file,"\n");
 		}
@@ -310,7 +310,7 @@ void make_map_col_mask(void)
 		if (Map.type == 0)
 		{
 			map_col_mask[i*words_per_row+0] = 0;	//left hand padding column
-			fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
+			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		for(j=col_start ; j<col_end ; j++)
@@ -325,13 +325,13 @@ void make_map_col_mask(void)
 				}
 			}
 			//if (i<320)
-			fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
+			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		if (Map.type == 0)
 		{
 			map_col_mask[i*words_per_row+j] = 0;	//right hand padding column
-			fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
+			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		//if (i<320)
@@ -351,7 +351,7 @@ void make_map_col_mask(void)
 			for(j=0 ; j<words_per_row ; j++)
 			{
 				map_col_mask[i*words_per_row+j] = 0;	//top padding
-				fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
+				fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 			}
 			fprintf(map_file,"\n");
 		}
@@ -530,7 +530,7 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 
 #define NUM_SENTRY_SPRITES 5
 
-void CheckBSentryCollisions(int num_ships)	//Bullet-to-sentry collisions
+void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 {
 	int i,j,k;
 	int sentry_word, bullet_word, y_offset, shift;
@@ -610,7 +610,7 @@ int start_row,current_row,rows;
 
 void CheckSWCollisions(int num_ships)
 {
-	int i,j,k;
+	int i,j;//,k;
 	//int shift;
 	//int map_word;
 	//int tile_x, tile_y, tile_idx, tile;

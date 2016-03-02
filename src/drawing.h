@@ -24,6 +24,8 @@ void tile_map_draw(void);
 void draw_status_bar(int num_ships);
 void display_menu(void);//int num_maps, int selected);
 void display_map_text(int done, int timer);
+void make_bullet_bitmap(void);
+void draw_split_screen(ViewportType viewport, int ship_num);
 
 
 

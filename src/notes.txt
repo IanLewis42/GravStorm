@@ -162,6 +162,26 @@
      window closing
      window sizing
      shuffle text to match background (status and menu)
+     
+//windows static buid:
+  many distributions of mingw
+  official binaries + deps + mingw-w64 https://sourceforge.net/projects/mingw-w64/
+  add /bin to path
+  point c:B at mingw
+  point to compilers: gcc, g++
+  libs:
+  in addition: 
+    libpng16.a
+    [libzlib.a]
+    libjpeg.a
+    
+    libshlwapi.a
+    
+  other
+   -static
+   -lpthread
+ 
+ 
  
  //behaviour when landed - menu doesn't appear on down / sitimus 4p ; quickfire doesn't work....
  

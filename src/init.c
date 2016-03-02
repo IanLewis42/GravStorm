@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -113,38 +114,38 @@ int init_map(int group, int map)
 
 		else if (strncmp(line,"display_map",11) == 0)
 		{
-			sscanf(line+11," %s",&Map.display_file_name);
+			sscanf(line+11," %s",(char *)&Map.display_file_name);
 			fprintf(logfile,"Display Map:%s\n",Map.display_file_name);
 		}
 
 		else if (strncmp(line,"collision_map",13) == 0)
 		{
-			sscanf(line+13," %s",&Map.collision_file_name);
+			sscanf(line+13," %s",(char *)&Map.collision_file_name);
 			fprintf(logfile,"Collision Map:%s\n",Map.collision_file_name);
 		}
 
 		else if (strncmp(line,"ascii_map",9) == 0)
 		{
-			sscanf(line+9," %s",&Map.ascii_map_file_name);
+			sscanf(line+9," %s",(char *)&Map.ascii_map_file_name);
 			fprintf(logfile,"ASCII map file:%s\n",Map.ascii_map_file_name);
 			load_map_file();
 		}
 
 		else if (strncmp(line,"sentry_display",14) == 0)
 		{
-			sscanf(line+14," %s",&Map.sentry_file_name);
+			sscanf(line+14," %s",(char *)&Map.sentry_file_name);
 			fprintf(logfile,"Sentry Image file:%s\n",Map.sentry_file_name);
 		}
 
 		else if (strncmp(line,"sentry_collision",16) == 0)
 		{
-			sscanf(line+16," %s",&Map.sentry_collision_file_name);
+			sscanf(line+16," %s",(char *)&Map.sentry_collision_file_name);
 			fprintf(logfile,"Sentry Collision file:%s\n",Map.sentry_collision_file_name);
 		}
 
 		else if (strncmp(line,"description",11) == 0)
 		{
-			sscanf(line+11," %s",&Map.description_file_name);
+			sscanf(line+11," %s",(char *)&Map.description_file_name);
 			fprintf(logfile,"Description file:%s\n",Map.description_file_name);
 		}
 

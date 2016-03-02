@@ -188,7 +188,7 @@ typedef struct
 } BulletType;
 
 extern ShipType Ship[MAX_SHIPS];
-extern num_ships;
+extern int num_ships;
 extern BulletType Bullet[MAX_BULLETS];
 extern int first_bullet;
 extern int mapx, mapy;

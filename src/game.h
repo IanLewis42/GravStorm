@@ -245,3 +245,6 @@ extern bool pressed_keys[ALLEGRO_KEY_MAX];
 extern int gpio_active;
 
 int  ShipMass(int ship_num);
+void FreeMenuBitmaps(void);
+int read_maps(void);
+void Exit(void);

@@ -122,10 +122,8 @@ FILE* logfile;
 int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  GameOver(void);
-int  FreeGameBitmaps(void);
-void FreeMenuBitmaps(void);
+void  FreeGameBitmaps(void);
 void FreeFonts(void);
-void Exit(void);
 void draw_debug(void);
 
 int main (int argc, char *argv[]){
@@ -134,8 +132,9 @@ int main (int argc, char *argv[]){
     ALLEGRO_EVENT_QUEUE *queue;
     ALLEGRO_EVENT event;
     bool redraw = true;
-	int i,j,k,temp;
-	int num_maps,selected_map,exit;
+	int i;//,j,k,temp;
+	//int num_maps,selected_map;
+	int exit;
 
 	//parse command line arguments
 	for (i=1 ; i<argc ; i++)
@@ -226,22 +225,29 @@ int main (int argc, char *argv[]){
     */
 
 	al_reserve_samples(6);
+	fprintf(logfile,"Reserved Audio Samples\n");
+	fflush(logfile);
 	if ((shoota = al_load_sample  ("shootA.wav"))   == NULL)  fprintf(logfile,"shootA.wav load fail");
 	if ((shootb = al_load_sample  ("shootB.wav"))   == NULL)  fprintf(logfile,"shootB.wav load fail");
 	if ((particle = al_load_sample("particle.wav")) == NULL)  fprintf(logfile,"particle.wav load fail");
 	if ((dead = al_load_sample    ("dead.wav"))     == NULL)  fprintf(logfile,"dead.wav load fail");
 	if ((clunk = al_load_sample   ("clunk.wav"))    == NULL)  fprintf(logfile,"clunk.wav load fail");
 	if ((wind = al_load_sample    ("wind.wav"))     == NULL)  fprintf(logfile,"wind.wav load fail");
+	fprintf(logfile,"Loaded Audio Samples\n");
+
+	fflush(logfile);
 
 	fprintf(logfile,"Creating Events\n");
 	timer = al_create_timer(1.0 / 30);
 	queue = al_create_event_queue();
+	fflush(logfile);
 
 	//Allegro Joystick routines
 	//move to inputs/init??
 	if (al_install_joystick())	//USB joystick, hopefully
 		fprintf(logfile,"Init allegro joystick\n");
 	fprintf(logfile,"%d Joysticks on system\n",al_get_num_joysticks());
+	fflush(logfile);
 
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	//al_register_event_source(queue, al_get_mouse_event_source());
@@ -349,7 +355,7 @@ int main (int argc, char *argv[]){
 				if (Ship[i].thrust_down || key_down_log[ALLEGRO_KEY_ENTER])
             	{
 					Ship[i].thrust_down = false;
-					key_down_log[ALLEGRO_KEY_ENTER] == false;
+					key_down_log[ALLEGRO_KEY_ENTER] = false;
 					break;			//out of the for loop
 				}
 			}
@@ -467,7 +473,7 @@ int main (int argc, char *argv[]){
 				switch(num_ships)
 				{
 				case 1:
-						draw_split_screen(FULL,0);
+  						draw_split_screen(FULL,0);
 						break;
 				case 2:
 						draw_split_screen(TOP,1);
@@ -703,11 +709,10 @@ int read_maps(void)
 	return group+1;
 }
 
-
 void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
 {
-    fprintf(logfile,"tr_map = %d\n",tr_map);
-    fflush(logfile);
+    //fprintf(logfile,"tr_map = %d\n",tr_map);
+    //fflush(logfile);
 
     tr_map = al_load_bitmap(Map.display_file_name);
 	if (Map.type == 0)
@@ -728,7 +733,7 @@ void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
     fflush(logfile);
 }
 
-int FreeGameBitmaps(void)
+void FreeGameBitmaps(void)
 {
     int i=0,j=0;;
 
@@ -870,13 +875,10 @@ extern int start_row,current_row,rows;
 
 void draw_debug(void)
 {
-	int i;
-
 	int level;
 
 	if (Map.mission) level = num_ships*150;
 	else             level = num_ships*120;
-
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[0].xpos);
@@ -925,6 +927,7 @@ void draw_debug(void)
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "xg: %.1f", xg);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "yg: %.1f",yg);
 
+	//int i;
 	//for (i=0 ; i<al_get_num_joysticks() ; i++)
 	//{
 	//	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy%d L %d",i,USBJoystick[i].left_down);

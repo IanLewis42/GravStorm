@@ -18,11 +18,13 @@
 
 void make_ship_col_mask(void);
 void make_map_col_mask(void);
+void make_sentry_col_mask(void);
 
 void CheckSSCollisions(int num_ships);
 void CheckBSCollisions(int num_ships);
 void CheckSWCollisions(int num_ships);
 void CheckBWCollisions(void);
+void CheckBSentryCollisions(void);
 
 int EquivalentColour(ALLEGRO_COLOR col1, ALLEGRO_COLOR col2);
 

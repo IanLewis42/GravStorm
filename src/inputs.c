@@ -53,12 +53,13 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event);
 ****************************************************/
 void ReadGPIOJoystick()
 {
+#if RPI
 	static int joystick_left_state = RELEASED;
 	static int joystick_right_state = RELEASED;
 	static int joystick_up_state = RELEASED;
 	static int joystick_down_state = RELEASED;
 	static int joystick_button_state = RELEASED;
-#if RPI
+
 	fprintf(logfile,"Read GPIO joystick\n");
 
 	//state machine to set/clear variables only once per stick push.
@@ -255,7 +256,7 @@ void ScanInputs(int num_ships)
 {
 
 	int i, joy_idx;
-	static int joystick_down_state = RELEASED;
+	//static int joystick_down_state = RELEASED;
 
 	for (i=0 ; i<num_ships ; i++)
 	{
