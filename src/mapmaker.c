@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,19 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-/* Simple Allegro 5 tilemap example from allegro.cc:
- *
- * http://www.allegro.cc/forums/thread/606482
- *
- * Also see here for more info:
- *
- * http://wiki.allegro.cc/index.php?title=Allegro_5_Tutorial
- *
-
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -37,30 +24,27 @@
 #include "allegro5/allegro_image.h"
 #include "allegro5/allegro_primitives.h"
 #include "allegro5/allegro_font.h"
+#include "allegro5/allegro_audio.h"
+#include "allegro5/allegro_acodec.h"
 
 #include "game.h"
-/* Our window. */
+
 ALLEGRO_DISPLAY *display;
-/* Our tiles atlas. */
 ALLEGRO_BITMAP *tiles;
 ALLEGRO_BITMAP *ships;
 ALLEGRO_BITMAP *mouse_bmp;
 ALLEGRO_BITMAP *sentries;
-/* Our tilemap. */
+
 #define MAX_MAP_WIDTH 100
 #define MAX_MAP_HEIGHT 100
 int tile_map[MAX_MAP_WIDTH * MAX_MAP_HEIGHT];
-/* Keep track of pressed mouse button. */
+
 int mouse;
-/* Camera parameters. */
-float zoom = 1.0, rotate;
+float zoom = 1.0;
 float scroll_x, scroll_y;
-/* Our icon and font. */
 ALLEGRO_BITMAP *icon;
 ALLEGRO_FONT *font;
-/* Simple FPS counter. */
-int fps, fps_accum;
-double fps_time;
+ALLEGRO_MOUSE_STATE state;
 
 MapType Map;
 int map_height=0, map_width=0;
@@ -84,10 +68,6 @@ void save_map_file (void);
 int init_map(char *map_file_name);
 void Exit(void);
 
-//need to specify: ascii map file, tiles bitmap, tile width/height
-//map width height can be derived from ascii file.
-//tile width fixed at 64? tile hight read from bitmap?
-//so maybe just 2 files.....
 int main (int argc, char *argv[]){
     ALLEGRO_TIMER *timer;
     ALLEGRO_EVENT_QUEUE *queue;
@@ -98,11 +78,9 @@ int main (int argc, char *argv[]){
 
     if (argc != 2)
     {
-		fprintf(stderr,"Map preview utility for Ian's thrust game\nSyntax: ./mapmaker map_info_file_name\nPRE-ALPHA VERSION; UNDER HEAVY DEVELOPMENT!!!!!\n\n");
+		fprintf(stderr,"Map preview utility for Gravstorm\nSyntax: ./mapmaker map_info_file_name\nPRE-ALPHA VERSION; UNDER HEAVY DEVELOPMENT!!!!!\n\n");
 		return 0;
 	}
-
-    //srand(time(NULL));
 
     /* Init Allegro 5 + addons. */
     al_init();
@@ -125,10 +103,6 @@ int main (int argc, char *argv[]){
     display = al_create_display(1280, 720);
     al_set_window_title(display, "Mapmaker");
 
-    //al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
-
-    //tile_map_create();
-
     for(i=0 ; i<(MAX_MAP_WIDTH*MAX_MAP_HEIGHT) ; i++)
     	tile_map[i] = 0;
 
@@ -145,8 +119,9 @@ int main (int argc, char *argv[]){
 	scroll_x = ((map_width * tile_width)-150) / 2;
     scroll_y = map_height * tile_height / 2;
 
-    mouse_x = 0;
-    mouse_y = 0;
+    al_get_mouse_state(&state);
+    mouse_x = state.x;
+    mouse_y = state.y;
 
     timer = al_create_timer(1.0 / 60);
     queue = al_create_event_queue();
@@ -169,8 +144,10 @@ int main (int argc, char *argv[]){
             if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
                 break;
             if (event.keyboard.keycode == ALLEGRO_KEY_ENTER)
+            {
                 init_map(argv[1]);
                 load_map_file();
+            }
             if (event.keyboard.keycode == ALLEGRO_KEY_S)
                 save_map_file();
             if (event.keyboard.keycode == ALLEGRO_KEY_HOME)
@@ -243,16 +220,7 @@ int main (int argc, char *argv[]){
 					dragging = true;
 					dragged_tile = tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH];	//pick up tile
 				}
-
-            	/*
-            	else if (mouse_tile_x >= 0 && mouse_tile_x < map_width &&	//check we're in the map
-            			 mouse_tile_y >= 0 && mouse_tile_y < map_height)
-            	{																			//if so,
-            		dragged_tile = tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH];	//pick up tile
-            		tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH] = 0;				//and remove it from the map
-				}
-				*/
-			}
+            }
 			else if (mouse == 2)	//right click
 			{
 				if (dragging) 			//if we're dragging, stop it
@@ -269,50 +237,13 @@ int main (int argc, char *argv[]){
         }
         if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
         {
-            /*
-            if (mouse == 1) //if we were dragging a tile
-            {
-            	if (mouse_x < 150)	//in  sidebar
-            	{
-					 if (mouse_y < 110)	//in top-left, so we're trying to delete, so do nothing
-					 {}
-					 //else
-					 //{
-					//	dragged_tile = mouse_y/37 - tile_offset; //pick up a tile
-					 //}
-				}
-
-            	else if (mouse_tile_x >= 0 && mouse_tile_x < MAX_MAP_WIDTH &&	//check if we're in the entire array
-            			 mouse_tile_y >= 0 && mouse_tile_y < MAX_MAP_HEIGHT)
-				{																			//if so,
-					tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH] = dragged_tile;	//place tile
-					if (mouse_tile_x >= map_width) map_width = mouse_tile_x+1;					//extend map if required
-					if (mouse_tile_y >= map_height) map_height = mouse_tile_y+1;
-				}
-			}
-			*/
             mouse = 0;
         }
 
         if (event.type == ALLEGRO_EVENT_MOUSE_AXES) //mouse has moved
         {
-            // Left button scrolls.
-            //if (mouse == 1) {
-                mouse_x += event.mouse.dx;// / zoom;
-                mouse_y += event.mouse.dy;// / zoom;
-                //scroll_x -= x;// * cos(rotate) + y * sin(rotate);
-                //scroll_y -= y;// * cos(rotate) - x * sin(rotate);
-            //}
-            /*
-            // Right button zooms/rotates.
-            if (mouse == 2) {
-                //rotate += event.mouse.dx * 0.01;
-                zoom += event.mouse.dy * 0.01 * zoom;
-            }
-            zoom += event.mouse.dz * 0.1 * zoom;
-            if (zoom < 0.1) zoom = 0.1;
-            if (zoom > 10) zoom = 10;
-            */
+            mouse_x += event.mouse.dx;// / zoom;
+            mouse_y += event.mouse.dy;// / zoom;
 
             if (mouse == 1)	//left button held
             {
@@ -357,69 +288,6 @@ int main (int argc, char *argv[]){
 	}
 }
 
-#if 0
-/* Places a single tile into the tile atlas.
- * Normally you would load the tiles from a file.
- */
-void tile_draw(int i, float x, float y, float w, float h) {
-    ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR yellow = al_map_rgb(255, 255, 0);
-    ALLEGRO_COLOR red = al_map_rgb(255, 0, 0);
-    switch (i) {
-        case 0:
-            al_draw_filled_rectangle(x, y, x + w, y + h, black);
-            break;
-        case 1:
-            al_draw_filled_rectangle(x, y, x + w, y + h, red);
-            al_draw_filled_circle(x + w * 0.5, y + h * 0.5, w * 0.475,
-                yellow);
-            break;
-        case 2:
-            al_draw_filled_rectangle(x, y, x + w, y + h, yellow);
-            al_draw_filled_triangle(x + w * 0.5, y + h * 0.125,
-                x + w * 0.125, y + h * 0.875,
-                x + w * 0.875, y + h * 0.875, red);
-            break;
-        case 3:
-            al_draw_filled_rectangle(x, y, x + w, y + h, black);
-            if (icon)
-                al_draw_scaled_bitmap(icon, 0, 0, 48, 48,
-                    x, y, w, h, 0);
-            break;
-    }
-}
-
-/* Creates the tiles and a random 100x100 map. */
-void tile_map_create(void) {
-    int i;
-    int x, y;
-    /* Create the tile atlas. */
-    tiles = al_create_bitmap(1024, 1024);
-    al_set_target_bitmap(tiles);
-    al_clear_to_color(al_map_rgba(0, 0, 0, 0));
-    for (i = 0; i < 4; i++) {
-        /* We draw the tiles a bit bigger (66x66 instead of 64x64)
-         * to account for the linear filtering. Normally just leaving
-         * the border transparent for sprites or repeating the border
-         * for tiling tiles should work well.
-         */
-        tile_draw(i, i * 66, 0, 66, 66);
-    }
-    al_set_target_backbuffer(display);
-
-    /* Create the random map. */
-    for (y = 0; y < 100; y++) {
-        for (x = 0; x < 100; x++) {
-            tile_map[x + y * 100] = rand() % 4;
-        }
-    }
-
-    /* Center of map. */
-    scroll_x = 100 * 64 / 2;
-    scroll_y = 100 * 64 / 2;
-}
-#endif
-
 /* Draws the complete map. */
 void map_draw(void) {
     int x=0, y=0;
@@ -434,8 +302,7 @@ void map_draw(void) {
     al_identity_transform(&transform);
     /* Move to scroll position. */
     al_translate_transform(&transform, -scroll_x, -scroll_y);
-    /* Rotate and scale around the center first. */
-    //al_rotate_transform(&transform, rotate);
+    /* Scale around the center first. */
     al_scale_transform(&transform, zoom, zoom);
     /* Move scroll position to screen center. */
     al_translate_transform(&transform, w * 0.5, h * 0.5);
@@ -531,7 +398,6 @@ void map_draw(void) {
 		}
 	}
 
-
     al_translate_transform(&transform, scroll_x*zoom, scroll_y*zoom);	//remove scroll so ship is always in the centre
     al_use_transform(&transform);
     al_draw_bitmap_region(ships,0,0,SHIP_SIZE_X, SHIP_SIZE_Y,0,0, 0);
@@ -588,7 +454,10 @@ void sidebar_draw(void)
 	if (dragging)
     	//al_draw_bitmap_region(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width, mouse_y-0.5*tile_height,0);
 		al_draw_scaled_bitmap(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width, mouse_y-0.5*tile_height, tile_width*zoom, tile_height*zoom, 0);
+
+	#if RPI
 	al_draw_bitmap_region(mouse_bmp, 0, 0, 25, 25, mouse_x, mouse_y,0);	//mouse cursor
+	#endif
 }
 //parse:
 //align label first column, parameters sep by spaces, suits scanf I think.
@@ -612,12 +481,7 @@ int init_map(char *map_file_name)
 	FILE* map_file;
 
 	int i=0, j=0,k=0,l=0,m=0,n=0;	//counters for pads, special areas, blackholes, sentries etc.
-	//char map_file_name[MAP_NAME_LENGTH];
 	char line[100];
-
-	//strncpy(map_file_name, (map_names + map*MAP_NAME_LENGTH), MAP_NAME_LENGTH);
-
-	//strcat(map_file_name, txt);
 
 	map_file = fopen(map_file_name,"r");
 
