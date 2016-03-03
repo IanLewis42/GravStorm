@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-/* Ian's Turbo Raketti clone */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -208,7 +206,7 @@ int main (int argc, char *argv[]){
 	fprintf(logfile,"Loaded 6 fonts\n");
 	fflush(logfile);
 
-	//al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
+	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 	//fprintf(logfile,"Creating Tilemap\n");
 	//tile_map_create();
 	//make_bullet_bitmap();

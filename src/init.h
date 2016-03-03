@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

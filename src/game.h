@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,12 +27,6 @@
 #define FALSE 0
 
 #define PI 3.141592654
-//instead define angle steps, say 16 or 32. if multiple of 4, then will get 90degrees
-//if power of 2 can wrap with bitmask....
-//#define ANGLE_INC (15/2)
-//#define ANGLE_INC_RAD ((ANGLE_INC*(2*PI))/360)
-//#define NUM_ANGLES 360/ANGLE_INC
-
 
 #define MAX_SHIPS 4		//max number of players
 

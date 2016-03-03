@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,16 +18,11 @@
 
 void LoadMap(void);
 void FreeMap(void);
-void tile_draw(int i, float x, float y, float w, float h);
-void tile_map_create(void);
-void tile_map_draw(void);
 void draw_status_bar(int num_ships);
 void display_menu(void);//int num_maps, int selected);
 void display_map_text(int done, int timer);
 void make_bullet_bitmap(void);
 void draw_split_screen(ViewportType viewport, int ship_num);
-
-
 
 extern ALLEGRO_BITMAP *tiles;
 extern ALLEGRO_BITMAP *bullets_bmp;

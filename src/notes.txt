@@ -156,12 +156,13 @@
  
  // Windows port....
  //  Variable resolution? 
-     Resizable window?
+     *Resizable window?
      Networking?
      *icons
-     window closing
-     window sizing
-     shuffle text to match background (status and menu)
+     *window closing
+     *window sizing
+     *shuffle text to match background (status and menu)
+      also title and text screen?
      
 //windows static buid:
   many distributions of mingw
@@ -180,10 +181,17 @@
   other
    -static
    -lpthread
+   
+   //clean up code (REMOVE DEAD)
+   //gRAVSTORM  in top of files
+   //win static build of MM
+   //RPI static build of MM
+   //MM lean on drawing/init more??
+   //levels
  
  
  
- //behaviour when landed - menu doesn't appear on down / sitimus 4p ; quickfire doesn't work....
+ //*behaviour when landed - menu doesn't appear on down / sitimus 4p ; quickfire doesn't work....
  
  // Android port?
  

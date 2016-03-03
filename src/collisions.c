@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,9 +63,9 @@ void make_ship_col_mask()
 	{
 		//fprintf(logfile,"%d ",i);
 
-		for(j=0 ; j<40/*(mask_width/24)*/ ; j++)
+		for(j=0 ; j<NUM_ANGLES ; j++)
 		{
-			ship_col_mask[i*40+j] = 0;	//NUM_ANGLES
+			ship_col_mask[i*NUM_ANGLES+j] = 0;	//NUM_ANGLES
 
 			for(k=0 ; k<24 ; k++)
 			{
@@ -120,10 +120,9 @@ void make_sentry_col_mask()
 	{
 		//fprintf(logfile,"%d ",i);
 
-		//for(j=0 ; j<40/*(mask_width/24)*/ ; j++)
 		for(j=0 ; j<(mask_width/32) ; j++)
 		{
-			sentry_col_mask[i*(mask_width/32)+j] = 0;	//NUM_ANGLES
+			sentry_col_mask[i*(mask_width/32)+j] = 0;
 
 			for(k=0 ; k<32 ; k++)
 			{
@@ -135,14 +134,6 @@ void make_sentry_col_mask()
 				//else fprintf(logfile,"0,");
 			}
 			//fprintf(logfile,"%08X ",ship_col_mask[i*24+j]);
-
-			//if(j==1)	//duplicate middle column
-			//{
-			//	j++;
-			//	ship_col_mask[i*j] = ship_col_mask[i*(j-1)];
-			//	fprintf(logfile,"%08X ",ship_col_mask[i*(j-1)]);
-			//}
-
 		}
 		//fprintf(logfile,"\n");
 
@@ -154,109 +145,6 @@ void make_sentry_col_mask()
 
 int words_per_row;
 
-#if 0
-void make_map_col_mask(void)
-{
-	int i,j,k;
-	//int words_per_row;
-
-	al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
-	//map_mask = al_load_bitmap("sitimus_col.png");
-	map_mask = al_load_bitmap(Map.collision_file_name);
-
-	mask_width = al_get_bitmap_width(map_mask);
-	mask_height = al_get_bitmap_height(map_mask);
-
-	map_file = fopen("mapfile.txt","w");
-
-	words_per_row = (mask_width/32);//+2;// +2 for padding.
-
-	fprintf(logfile,"map:%d,%d wpr:%d (including padding)\n",mask_width,mask_height,words_per_row);
-	if (mask_width & 0x001f != 0)
-		fprintf(logfile,"ERROR:map width must be a multiple of 32!\n",mask_width,mask_height,words_per_row);
-
-/*
-	for (i=0 ; i<12 ; i++)
-	{
-		for(j=0 ; j<words_per_row ; j++)
-		{
-			map_col_mask[i*words_per_row+j] = 0;	//top padding
-			fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
-		}
-		fprintf(map_file,"\n");
-	}
-
-	for (i=12 ; i<mask_height+12 ; i++)
-*/
-	for (i=0 ; i<mask_height ; i++)
-	{
-		//map_col_mask[i*words_per_row+0] = 0;	//left hand padding column
-		//fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
-
-		//for(j=1 ; j<words_per_row-1 ; j++)
-		for(j=0 ; j<words_per_row ; j++)
-		{
-			map_col_mask[i*words_per_row+j] = 0;
-
-			for(k=0 ; k<32 ; k++)
-			{
-				if(!EquivalentColour(al_get_pixel(map_mask,((j/*-1*/)*32)+k,i/*-12*/), al_map_rgb(255,0,255)))
-				{
-					map_col_mask[i*words_per_row+j] |= (0x80000000 >> k);	//20
-				}
-			}
-			//if (i<320)
-			fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
-		}
-
-		//map_col_mask[i*words_per_row+j] = 0;	//right hand padding column
-		//fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
-
-		//if (i<320)
-		fprintf(map_file,"\n");
-		//for (k=0 ; k<65535 ; k++)
-		//{
-		//	asm("nop");
-		//}
-		//fprintf(logfile,"%d\n",i);
-
-	}
-/*
-	for (i=mask_height+12 ; i<mask_height+24 ; i++)
-	{
-		for(j=0 ; j<words_per_row ; j++)
-		{
-			map_col_mask[i*words_per_row+j] = 0;	//top padding
-			fprintf(map_file,"%08X ",map_col_mask[i*words_per_row+j]);
-		}
-		fprintf(map_file,"\n");
-	}
-*/
-
-	al_destroy_bitmap(map_mask);
-	fclose(map_file);
-	//fprintf(logfile,"File done\n");
-
-	//return 0;
-	//
-	//for (i=0 ; i<mask_height ; i++)
-	//{
-	//	for (j=0 ; j<(mask_width>>5) ; j++)
-	//	{
-	//		fprintf(map_file,"%08X ",map_col_mask[i*20+j]);
-	//	}
-	//	fprintf(map_file,"\n");
-	//	fprintf(logfile,"%d\n",i);
-	//}
-	//fclose(map_file);
-	//fprintf(logfile,"File done\n");
-
-	//return 0;
-
-
-	al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
-}
-#else
 void make_map_col_mask(void)
 {
 	int i,j=0,k;
@@ -264,7 +152,6 @@ void make_map_col_mask(void)
 	//int words_per_row;
 
 	al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
-	//map_mask = al_load_bitmap("sitimus_col.png");
 	map_mask = al_load_bitmap(Map.collision_file_name);
 
 	mask_width = al_get_bitmap_width(map_mask);
@@ -381,15 +268,14 @@ void make_map_col_mask(void)
 
 	al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
 }
-#endif
 
 
-int y_overlap,y_offset,i_row,j_row,shift,shipi_word,shipj_word;
+//int y_overlap,y_offset,i_row,j_row,shift,shipi_word,shipj_word; //global for debug
 
 void CheckSSCollisions(int num_ships)	//Ship-to-ship collisions
 {
 	int i,j,k;
-	//int y_overlap,y_offset,i_row,j_row,shift,shipi_word,shipj_word;
+	int y_overlap,y_offset,i_row,j_row,shift,shipi_word,shipj_word;
 
 	for (i=0 ; i<num_ships ; i++)
 	{
@@ -512,9 +398,6 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 							{
 								al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 								Bullet[j].ttl=0;	//decrement, picked up next time.
-								//Ship[i].shield-=Damage[Bullet[j].type];
-								//Ship[i].xv += 0.04*Bullet[j].xv;	//momentum from bullet to ship
-								//Ship[i].yv += 0.04*Bullet[j].yv;
 								Ship[i].shield -= Bullet[j].damage;				//decrement shield
 								Ship[i].xv     += Bullet[j].mass*Bullet[j].xv;	//momentum from bullet to ship
 								Ship[i].yv     += Bullet[j].mass*Bullet[j].yv;
@@ -597,7 +480,7 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 	}
 }
 
-
+//global vars for debug
 int map_idx_x, map_idx_y;
 int map_idx, map_word1, map_word2;
 int shift1, shift2;
@@ -641,26 +524,6 @@ void CheckSWCollisions(int num_ships)
 
 					if((ship_col_mask[j*NUM_ANGLES + Ship[i].angle] >> shift1) & map_word1)
 					{
-						//check for landing
-						/*
-						if ((Ship[i].angle) < 5 || (Ship[i].angle) > NUM_ANGLES-5)
-						{
-							for(k=0 ; k<Map.num_pads ; k++)
-							{
-								if(Ship[i].ypos < Map.pad[k].y + 4 && Ship[i].ypos > Map.pad[k].y - 4 )
-									if(Ship[i].xpos > Map.pad[k].min_x)
-										if(Ship[i].xpos < Map.pad[k].max_x)
-										{
-											Ship[i].landed = 1;
-											Ship[i].pad = k;
-											Ship[i].angle = 0;			//position correctly
-											Ship[i].ypos = Map.pad[k].y-2;
-											Ship[i].xv = 0;
-											Ship[i].yv = 0;
-										}
-							}
-						}
-						*/
 						CheckForLanding(i);			//check for landing
 						if (!Ship[i].landed)
 						{
@@ -684,26 +547,6 @@ void CheckSWCollisions(int num_ships)
 
 						if((ship_col_mask[j*NUM_ANGLES + Ship[i].angle] << shift2) & map_word2)
 						{
-							//check for landing
-							/*
-							if ((Ship[i].angle) < 5 || (Ship[i].angle) > NUM_ANGLES-5)
-							{
-								for(k=0 ; k<Map.num_pads ; k++)
-								{
-									if(Ship[i].ypos < Map.pad[k].y + 2 && Ship[i].ypos > Map.pad[k].y - 2 )
-										if(Ship[i].xpos > Map.pad[k].min_x)
-											if(Ship[i].xpos < Map.pad[k].max_x)
-											{
-												Ship[i].landed = 1;
-												Ship[i].pad = k;
-												Ship[i].angle = 0;			//position correctly
-												Ship[i].ypos = Map.pad[k].y-2;
-												Ship[i].xv = 0;
-												Ship[i].yv = 0;
-											}
-								}
-							}
-							*/
 							CheckForLanding(i);			//check for landing
 							if (!Ship[i].landed)
 							{
@@ -871,57 +714,7 @@ void CheckSWCollisions(int num_ships)
 						}
 					}
 				}
-
-
-
-				/*
-						shift2 = 32-shift1;
-						shift2 = 30-shift1;	//seems better. don't know why!
-
-						ship_word2 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
-
-						ship_word2_shift = ship_word2 << shift2;
-
-						//if (!(shift2 > 23))
-						{
-							map_word2 = map_col_mask[map_idx+1];
-
-							if((ship_col_mask[j*NUM_ANGLES + Ship[i].angle] << shift2) & map_word2)
-							{
-								//check for landing
-								if ((Ship[i].angle) < 5 || (Ship[i].angle) > NUM_ANGLES-5)
-								{
-									for(k=0 ; k<Map.num_pads ; k++)
-									{
-										if(Ship[i].ypos < Map.pad[k].y + 2 && Ship[i].ypos > Map.pad[k].y - 2 )
-											if(Ship[i].xpos > Map.pad[k].min_x)
-												if(Ship[i].xpos < Map.pad[k].max_x)
-												{
-													Ship[i].landed = 1;
-													Ship[i].pad = k;
-													Ship[i].angle = 0;			//position correctly
-													Ship[i].ypos = Map.pad[k].y-2;
-													Ship[i].xv = 0;
-													Ship[i].yv = 0;
-												}
-									}
-								}
-								if (!Ship[i].landed)
-								{
-									Ship[i].shield = 0;
-									//collision = 1;
-									break;
-								}
-							}
-							//else collision = 0;
-						}
-
-
-						map_idx += words_per_row;//mapx>>6;//This assumes that display map and collision map are the same size
-						collision=0;
-					}
-			*/
-			}		//end of (if reincarnate timer)
+            }		//end of (if reincarnate timer)
 		}			//end of for (ships)
 	}
 }
@@ -936,7 +729,9 @@ void CheckForLanding(int i)
 		for(k=0 ; k<Map.num_pads ; k++)
 		{
 			if(Ship[i].ypos < Map.pad[k].y + 4 && Ship[i].ypos > Map.pad[k].y - 4 )
+            {
 				if(Ship[i].xpos > Map.pad[k].min_x)
+                {
 					if(Ship[i].xpos < Map.pad[k].max_x)
 					{
 						Ship[i].landed = 1;
@@ -956,6 +751,8 @@ void CheckForLanding(int i)
 							}
 						}
 					}
+                }
+            }
 		}
 	}
 	return;
@@ -1003,7 +800,7 @@ int bullet_word, map_word;
 
 void CheckBWCollisions(void)
 {
-	int i,j=0;
+	int i,j=0,shift;
 
 	if (Map.type == 0)
 	{

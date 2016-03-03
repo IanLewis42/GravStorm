@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,11 +32,9 @@
 #include "objects.h"
 
 ALLEGRO_JOYSTICK *USBJOY[2];
-//GPIOJoystickType GPIOJoystick;
 
 JoystickType GPIOJoystick;
 JoystickType USBJoystick[2];
-
 
 bool key_down_log[ALLEGRO_KEY_MAX];
 bool key_up_log[ALLEGRO_KEY_MAX];
@@ -157,8 +155,6 @@ void ReadGPIOJoystick()
 
 void CheckUSBJoyStick(ALLEGRO_EVENT event)
 {
-	//return;
-
 	int JoyIdx = 0;
 
 	if (event.type == ALLEGRO_EVENT_JOYSTICK_AXIS)

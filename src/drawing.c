@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,16 +29,6 @@
 #include "objects.h"
 #include "inputs.h"
 
-
- /* Our tiles atlas. */
- ALLEGRO_BITMAP *tiles; //not used currently
- //ALLEGRO_BITMAP *bullets_bmp;
- //ALLEGRO_BITMAP *tr_map;
- //ALLEGRO_BITMAP *tr_col_map;//Collision map. Might not need this to be an allegro bitmap, just a made-up binary format.
- //ALLEGRO_BITMAP *tr_map_section;
-
-
-/* Our tilemap. */
 #define MAX_MAP_WIDTH 100
 #define MAX_MAP_HEIGHT 100
 int tile_map[MAX_MAP_WIDTH * MAX_MAP_HEIGHT];
@@ -73,7 +63,6 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 	w = al_get_display_width(display);
     h = al_get_display_height(display);
 
-	//al_set_clipping_rectangle(0, 0, SCREENX, SCREENY);
 	al_set_clipping_rectangle(0, 0, w, h);
 
 	yoffset = (h-SCREENY)/2;
@@ -87,16 +76,6 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 
 	al_draw_bitmap(menu_bg_bmp,xoffset,yoffset,0);
-
-	/*
-	temp++;
-	if (temp == 30)
-	{
-		temp = 0;
-		temp2++;
-	}
-	al_draw_textf(title_font, al_map_rgba(0, 0, 0,128),10, 10,  ALLEGRO_ALIGN_LEFT, "%i", temp2);
-	*/
 
 	scale = 0.4;
 	al_identity_transform(&transform);			/* Initialize transformation. */
@@ -149,15 +128,7 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 		}
 	}
 
-	//al_draw_textf(menu_font, colour ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%d %d", Menu.group, Menu.map);
-
-	//al_draw_textf(menu_font, colour ,20, 20+i*70,  ALLEGRO_ALIGN_LEFT, "%d", Menu.col);
-
-	//colour = al_map_rgb(255, 255, 255);
-	//al_draw_textf(menu_font, colour ,Menu.offset+480, 20,  ALLEGRO_ALIGN_LEFT, "PLAYERS");
-
 	y=80;
-
 	y+= yoffset;
 
 	for (i=0 ; i<4 ; i++)			//List players
@@ -287,90 +258,6 @@ void display_map_text(int done, int timer)
     return;
 }
 
-/* Places a single tile into the tile atlas.
- * Normally you would load the tiles from a file.
- */
-void tile_draw(int i, float x, float y, float w, float h) {
-    ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR yellow = al_map_rgb(255, 255, 0);
-    ALLEGRO_COLOR red = al_map_rgb(255, 0, 0);
-    switch (i) {
-        case 0:
-            al_draw_filled_rectangle(x, y, x + w, y + h, black);
-            break;
-        case 1:
-            al_draw_filled_rectangle(x, y, x + w, y + h, red);
-            al_draw_filled_circle(x + w * 0.5, y + h * 0.5, w * 0.475,yellow);
-            break;
-        case 2:
-            al_draw_filled_rectangle(x, y, x + w, y + h, yellow);
-            al_draw_filled_triangle(x + w * 0.5, y + h * 0.125,
-                x + w * 0.125, y + h * 0.875,
-                x + w * 0.875, y + h * 0.875, red);
-            break;
-        case 3:
-            al_draw_filled_rectangle(x, y, x + w, y + h, black);
-            //if (icon)
-            //    al_draw_scaled_bitmap(icon, 0, 0, 48, 48,
-            //        x, y, w, h, 0);
-            break;
-    }
-}
-
-/* Creates the tiles and a random 100x100 map. */
-void tile_map_create(void) {
-    int i;
-    int x, y;
-
-    /* Create the tile atlas. */
-    //This is a bitmap with all the tile types in. Would normally be created elsewhere and loaded in.
-    fprintf(logfile,"Creating tiles bitmap\n");
-    tiles = al_create_bitmap(1024, 1024);			//create a bitmap
-    al_set_target_bitmap(tiles);					//set it as the default target for all al_draw_ operations
-    al_clear_to_color(al_map_rgba(0, 0, 0, 0));		//paint it balck.
-
-    for (i = 0; i < 4; i++)						// We draw the tiles a bit bigger (66x66 instead of 64x64)
-    {											// to account for the linear filtering. Normally just leaving
-        tile_draw(i, i * 66, 0, 66, 66);		// the border transparent for sprites or repeating the border
-    }											// for tiling tiles should work well.
-    //fprintf(logfile,"Creating bullets bitmap\n");
-    //bullets_bmp = al_create_bitmap(10, 10);			//create a bitmap
-	//al_set_target_bitmap(bullets_bmp);					//set it as the default target for all al_draw_ operations
-    //al_draw_filled_circle(2, 2, 2, al_map_rgb(255, 255, 255));
-
-
-    al_set_target_backbuffer(display);			//Put default target back
-
-    /* Create the random map. */
-    //for (y = 0; y < 100; y++) {
-    //    for (x = 0; x < 100; x++) {
-    //        tile_map[x + y * 100] = rand() % 4;
-    //    }
-    //}
-
-    //tiles at borders
-    //load from file for real map....
-    for (x=0 ; x<100 ; x++)
-    {
-    	tile_map[x + 0  * 100] = 1;
-    	tile_map[x + 99 * 100] = 1;
-	}
-    for (y=0 ; y<100 ; y++)
-    {
-    	tile_map[0  + y * 100] = 1;
-    	tile_map[99 + y * 100] = 1;
-	}
-
-
- 	//mapx = tile size * x tiles
- 	//mapy...
-
-    /* Center of map. */
-    //scroll_x = 100 * 32 / 2;
-    //scroll_y = 100 * 32 / 2;
-}
-
-
 void make_bullet_bitmap(void)
 {
     fprintf(logfile,"Creating bullets bitmap\n");
@@ -384,18 +271,9 @@ void make_bullet_bitmap(void)
 int component;
 void draw_split_screen(ViewportType viewport, int ship_num)
 {
-//void tile_map_draw(void) {
     int x, y;
-    //int min_x, min_y;
-    //ALLEGRO_TRANSFORM transform;
     int w, h;
-    //int i,j;
-
 	int scrollx, scrolly;	//These are the centre of the 'viewport' - normally the ship position, except when you get near an edge.
-
-	//ALLEGRO_COLOR bullet_colour;
-	//int component;
-	//unsigned char r, g, b;
 
 	//replace with split screen window size.
     w = al_get_display_width(display);
@@ -509,16 +387,10 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 		al_identity_transform(&transform);
 		/* Move to scroll position. */
 		al_translate_transform(&transform, -scrollx, -scrolly);
-		/* Rotate and scale around the center first. */
-		//al_rotate_transform(&transform, rotate);
-		//al_scale_transform(&transform, zoom, zoom);
 		/* Move scroll position to screen center. */
 		al_translate_transform(&transform, w * 0.5, h * 0.5);
 		/* All subsequent drawing is transformed. */
 		al_use_transform(&transform);
-
-
-		//x had status bar width info; or window positioning, we reused it as a loop count. sort it out!!!!
 
 		min_x = (scrollx - 0.5*w)/(tile_width);	//optimise by using shifts, rather than divides....
 		min_y = (scrolly - 0.5*h)/(tile_height);
@@ -535,10 +407,7 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 				float u = i * tile_width;
 				float v = 0;
 										   //sx  sy sw          sh           dx                    dy                  dw  dh
-				//al_draw_scaled_bitmap(tiles, u,  v, 64, 64, x * 32, y * 32, 32, 32, 0);
-				//al_draw_bitmap_region(tr_map, u, v, tile_width, tile_height, win_x + x*tile_width, win_y + y*tile_height,0);
 				al_draw_scaled_bitmap(tr_map, u, v, tile_width, tile_height, win_x + x*tile_width, win_y + y*tile_height, tile_width, tile_height,0);
-				//al_draw_scaled_bitmap(tiles, u, v, tile_width, tile_height, x*tile_width, y*tile_height, tile_width+2, tile_height+2,0);
 			}
 		}
 		al_hold_bitmap_drawing(0);
@@ -551,11 +420,11 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 
 			for (i=0 ; i<map_width ; i++)
 			{
-				al_draw_filled_rectangle(i*tile_width+win_x,0,i*tile_width+win_x+1,map_height*tile_height,grid_colour);
+				al_draw_filled_rectangle(i*tile_width+win_x,0+win_y,i*tile_width+win_x+1,map_height*tile_height+win_y,grid_colour);
 			}
 			for (i=0 ; i<map_height ; i++)
 			{
-				al_draw_filled_rectangle(0,i*tile_height+win_y,map_width*tile_width,i*tile_height+win_y+1,grid_colour);
+				al_draw_filled_rectangle(0+win_x,i*tile_height+win_y,map_width*tile_width+win_x,i*tile_height+win_y+1,grid_colour);
 			}
 
 		}
@@ -702,7 +571,6 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 					}
 					//                    bmp    srcx                      srcy size      dstx    dsty
 					al_draw_bitmap_region(miner,(Ship[i].miner_count%8)*24,0,   24,  24,  miner_x,Map.pad[Ship[i].pad].y-13,0);
-					//free miner bmp
 				}
 				//draw rolling jewel
 				if (Map.pad[Ship[i].pad].jewels)
@@ -717,7 +585,6 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 					}
 					//                    bmp    srcx                      srcy size      dstx    dsty
 					al_draw_bitmap_region(jewel,(Ship[i].jewel_count%16)*24,0,   24,  24,  jewel_x,Map.pad[Ship[i].pad].y-17,0);
-					//free  bmp
 				}
 
 			}
@@ -765,190 +632,6 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
 
 		return;
 }
-
-
-#if 0
-	//stop scrolling when you get near to the edge.
-	//scrollx is ship xpos, except saturated at half screen width
-	if (mapx < (SCREENX-STATUS_BAR_WIDTH))	//for small maps....
-		scrollx = 0.5*w;
-	else if (Ship[ship_num].xpos < 0.5*w) 						//if the ship is <0.5 viewport width from edge, stop following it.
-		scrollx = 0.5*w;
-	else if (Ship[ship_num].xpos > mapx-0.5*w) //likewise from far edge
-		scrollx = mapx-0.5*w;
-	else
-		scrollx = Ship[ship_num].xpos;
-
-	if (Ship[ship_num].ypos < 0.5*h) 						//...and for y
-		scrolly = 0.5*h;
-	else if (Ship[ship_num].ypos > mapy-0.5*h)
-		scrolly = mapy-0.5*h;
-	else
-		scrolly = Ship[ship_num].ypos;
-
-    /* Initialize transformation. */
-    al_identity_transform(&transform);
-
-    /* Move to scroll position. */
-    //I'm thinking of this like a camera - so we move the camera to where the ship is.
-    //Actually, as the numbers are -ve, it seems more like the camera/viewport is fixed, and we're moving the world.
-    //so we move everything (ship, bullets, tiles) to 0,0
-    al_translate_transform(&transform, -scrollx, -scrolly);
-
-    /* Move scroll position to screen center. */
-    //Now we move it to centre of viewport/window thing
-    //al_translate_transform(&transform, w * 0.5 + STATUS_BAR_WIDTH, h * 0.5);
-    al_translate_transform(&transform, x + w * 0.5 , y + h * 0.5);
-
-    /* All subsequent drawing is transformed. */
-    //al_use_transform(&transform);
-
- #if 0
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    al_hold_bitmap_drawing(1);
-
-	//only draw the bit of the map on the screen/viewport
-	//Draw an extra row/column, but make sure we don't draw outside the buffer.
-	min_y = (scrolly-h*0.5)/TILE_SIZE_Y;	//so if the viewport edge (cente - half height(or width) is more than 1 tile from the 'zero' edge,
-	if (min_y > 0)							//  draw an extra row(/col) of tiles. As you approach the edge, the last tile will be drawn
-		min_y--;							//  before you get there, and scroll in, then stop :-) The >0 is required to stop us drawing outside the backbuffer.
-	min_x = (scrollx-w*0.5)/TILE_SIZE_X;
-	if (min_x > 0)							//This check may not be needed for X, as we have the statusbar on the left.....
-		min_x--;
-	/*
-	for (y = min_y; y < ((scrolly+h*0.5)/TILE_SIZE_Y)+1; y++)
-	{
-        for (x = min_x; x < ((scrollx+w*0.5)/TILE_SIZE_X)+1; x++)
-        {
-            int i = tile_map[x + y * MAP_Y];
-            float u = 1 + i * 66;
-            float v = 1;
-            al_draw_scaled_bitmap(tiles, u, v, 64, 64,x * 64, y * 64, 64, 64, 0); //src x,y,w,h dst x,y,w,h,flags
-			//al_draw_bitmap(tiles, );
-			//try with non-scaled......
-			//al_draw_bitmap(tiles, u, v, 64, 64,x * 64, y * 64, 0); //src x,y,w,h dst x,y,flags
-        }
-    }
-    */
-#endif
-//draw map at (scrollx-w*0.5)/2, scrollx is saturated xpos. map scaled by 2
-//ship gets drawn at xpos, but transformed to -scrollx, +0.5*w. this uses pre-saturated scrollx....
-//so, even assuming the translation is inverted wrt offsets in draw functions, the translations are similar, but not the same
-//best thing to do might be:
-
-//if (ship first) drw ship; draw map
-//else draw map; draw ship
-// draw ship does transform, draws ship, bullets.
-//draw map checks tiled, creates new var for saturated scroll
-//uses identity transform, draws map/tiles using offsets, not transform.
-
-    if (!Map.ship_first)	//draw thw map first
-    {
-    	//actually now drawing the whole map, and letting the clipping rectangle sort it out.
-    	al_draw_scaled_bitmap(tr_map, (scrollx-w*0.5)/2,(scrolly-h*0.5)/2, w/2, h/2, x, y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
-#if 0
-//from mapmaker. this had use_transform called first.....
-		if (Map.type == 0)//draw tr style map
-			//al_draw_scaled_bitmap(tiles, (scroll_x-w*0.5)/2,(scroll_y-h*0.5)/2, w/2, h/2, x, y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
-			al_draw_scaled_bitmap(tr_map, 0,0, al_get_bitmap_width(tiles), al_get_bitmap_width(tiles), x, y, al_get_bitmap_width(tiles)*2, al_get_bitmap_width(tiles)*2, 0); //src x,y,w,h dst x,y,w,h,flags
-		else
-		{			//draw tiled map
-			al_hold_bitmap_drawing(1);
-			for (y = 0; y < map_height; y++)
-			{
-				for (x = 0; x < map_width; x++)
-				{
-					int i = tile_map[x + y * MAX_MAP_WIDTH];
-					float u = i * tile_width;
-					float v = 0;
-											   //sx  sy sw  sh  dx      dy      dw  dh
-					//al_draw_scaled_bitmap(tiles, u,  v, 64, 64, x * 32, y * 32, 32, 32, 0);
-					al_draw_bitmap_region(tr_map, u, v, tile_width, tile_height, x*tile_width, y*tile_height,0);
-					//al_draw_scaled_bitmap(tiles, u, v, tile_width, tile_height, x*tile_width, y*tile_height, tile_width+2, tile_height+2,0);
-				}
-			}
-			al_hold_bitmap_drawing(0);
-		}
-#endif
-	}
-
-
-
-    al_use_transform(&transform);
-	//Use draw_bitmap_region with offset for sprite sheet
-	for(i=0 ; i<num_ships ; i++)
-	{
-		if (Ship[i].reincarnate_timer)
-		{}
-		else
-		{
-			al_draw_bitmap_region(ships,Ship[i].angle*SHIP_SIZE_X,(2*i + (Ship[i].thrust?1:0) )*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Ship[i].xpos-SHIP_SIZE_X/2,Ship[i].ypos-SHIP_SIZE_Y/2, 0);
-			//if (Ship[i].thrust)
-			//	al_draw_rotated_bitmap(Ship[i].ship_flame_bmp,SHIP_SIZE_X/2,SHIP_SIZE_Y/2,Ship[i].xpos,Ship[i].ypos,ANGLE_INC_RAD*Ship[i].angle,0); //Use draw_bitmap_region with offset for sprite sheet
-			//else
-			//	al_draw_rotated_bitmap(Ship[i].ship_bmp,SHIP_SIZE_X/2,SHIP_SIZE_Y/2,Ship[i].xpos,Ship[i].ypos,ANGLE_INC_RAD*Ship[i].angle,0); //Use draw_bitmap_region with offset for sprite sheet
-		}
-	}
-
-	al_hold_bitmap_drawing(1);
-
-	//draw bullets
-	int current_bullet, previous_bullet;
-
-	current_bullet = first_bullet;
-	previous_bullet = END_OF_LIST;
-
-	while(current_bullet != END_OF_LIST)
-	{
-		//assuming type 0
-		//al_draw_bitmap(bullets_bmp,Bullet[current_bullet].xpos, Bullet[current_bullet].ypos,0);
-
-		//only for colour-changing bullets
-		switch(Bullet[current_bullet].type)
-		{
-			case BLT_LAVA:
-				//bullet_colour = al_map_rgb(255,128,0);
-				//bullet_colour = al_map_rgb(255,(Bullet[current_bullet].ttl>>1)0xFF,0);
-				//bullet_colour = al_map_rgb(255,rand()%255,0);
-				//bullet[i].colour = modify....
-			break;
-			case BLT_HEATSEEKER:
-				if (Bullet[current_bullet].ttl&0x4)
-					Bullet[current_bullet].colour = al_map_rgb(0,255,0);
-				else
-					Bullet[current_bullet].colour = al_map_rgb(0,0,0);
-			break;
-			case BLT_MINE:
-				al_unmap_rgb(Bullet[current_bullet].colour, &r,&g,&b);
-
-				if (Bullet[current_bullet].ttl&0x1f < 0x10)
-					r -= 16;
-				else
-					r += 16;
-				Bullet[current_bullet].colour = al_map_rgb(r,r,0);
-			break;
-			default:
-				//bullet_colour = al_map_rgb(255,255,255);
-			break;
-		}
-
-		al_draw_tinted_bitmap(bullets_bmp,Bullet[current_bullet].colour,Bullet[current_bullet].xpos, Bullet[current_bullet].ypos,0);
-		current_bullet = Bullet[current_bullet].next_bullet;
-	}
-
-    al_hold_bitmap_drawing(0);
-
-    al_identity_transform(&transform);
-    al_use_transform(&transform);
-    //ok, if black was transparent.....
-    //works as long as you set palette to 24 bit....
-    //undesirable for sitimus, as you go behind the road markings,
-    //nice for other levesl, so maybe a map parameter to switch.
-
-    if(Map.ship_first)	//draw map last
-    	al_draw_scaled_bitmap(tr_map, (scrollx-w*0.5)/2,(scrolly-h*0.5)/2, w/2, h/2, x, y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
-}
-#endif
 
 void draw_status_bar(int num_ships)
 {
@@ -1007,9 +690,6 @@ void draw_status_bar(int num_ships)
 			for (j=0 ; j<Ship[i].jewels ; j++)
 				al_draw_bitmap_region(pickups,0,0,16,16,15+j*12+1,yoffset+i*bs+110,0);
 		}
-
-		//miners
-		//jewels
 
 		if (Ship[i].racing)
 			al_draw_textf(race_font, al_map_rgb(255, 255, 255),15, yoffset+i*bs+(bs-35), ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].current_lap_time);

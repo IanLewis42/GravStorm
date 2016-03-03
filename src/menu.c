@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,8 +39,6 @@
 int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
 	ALLEGRO_TRANSFORM transform;
-	//int count = 0;
-	//float scale;
 	ALLEGRO_MIXER *mixer;
 	ALLEGRO_SAMPLE_INSTANCE *wind_inst;
 	ALLEGRO_VOICE *voice;
@@ -180,13 +178,6 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	menu_bg_bmp = al_load_bitmap("menu_bg.png");
 
 	fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
-
-	//REDUNDANT
-	//if (map_names[MAP_NAME_LENGTH * Menu.map] == ':')
-	//{
-	//	Menu.map++;
-	//	fprintf(logfile,"Selected map %d\n",Menu.map);
-	//}
 
 	if (init_map(Menu.group, Menu.map))		//opens 'map name.txt' and copies into MapTypeStruct.
 	{								//everything else (load map, make col map, init ships etc. reads from MapType struct
@@ -368,20 +359,6 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 						fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 						init_map(Menu.group, Menu.map);
-
-
-						/*
-						if (Menu.map < Menu.num_maps-1)
-						{
-							Menu.map++;
-
-							if (map_names[MAP_NAME_LENGTH * Menu.map] == ':')
-								Menu.map++;
-
-							fprintf(logfile,"\nSelected map %d\n",Menu.map);
-							init_map(Menu.map);
-						}
-						*/
 					}
 					//else if (event.keyboard.keycode == ALLEGRO_KEY_UP)
 					else if(AnyShip.fire1_down)
@@ -399,20 +376,6 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 						fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 						init_map(Menu.group, Menu.map);
-
-
-						/*
-						if (Menu.map > 0)
-						{
-							Menu.map--;
-
-							if (map_names[MAP_NAME_LENGTH * Menu.map] == ':')
-								Menu.map--;
-
-							init_map(Menu.map);
-							fprintf(logfile,"Selected map %d\n",Menu.map);
-						}
-						*/
 					}
 					for (i=0 ; i<MAX_SHIPS ; i++)	//work out number of players (1st N/A signals the end)
 					{
@@ -455,10 +418,6 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 						if (Ship[Menu.player].controller > NA)
 							Ship[Menu.player].controller = NA;
-
-						//if (Ship[Menu.player].controller < 0)
-						//	Ship[Menu.player].controller = 0;
-
 
 					}
 					//else if (event.keyboard.keycode == ALLEGRO_KEY_UP)

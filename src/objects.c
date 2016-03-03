@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,7 +59,6 @@ ALLEGRO_SAMPLE *particle;
 ALLEGRO_SAMPLE *dead;
 
 void UpdateLandedShip(int ship_num);	//int
-//void CreateExplosion(int ship_num);		//int
 void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv);//float outward_v);
 void NewShipBullet (int ship_num, int type, int flags); //int
 void NewBullet (int x,int y,int xv,int yv,int angle,float speed, int type,int random);
@@ -70,15 +69,15 @@ void FireSpecial(int i);	//int
 /****************************************************
 ** int UpdateShips(int num_ships)
 ** Calculate Ship positions based on controls
-** Check for ship inside specail areas & race start/finish zones.
+** Check for ship inside special areas & race start/finish zones.
 ** Also handle firing, updating fuel, ammo, lives etc.
 ** if lives go down to 0, return game_over countdown.
 ****************************************************/
-float x,y,r,r_squared,xg,yg;	//blackhole vars
+//float x,y,r,r_squared,xg,yg;	//blackhole vars    - global for debug
 int UpdateShips(int num_ships)
 {
 	int i,j;
-	//float x,y,r,r_squared,xg,yg;	//blackhole vars
+	float x,y,r,r_squared,xg,yg;	//blackhole vars
 
 	for (i=0 ; i<num_ships ; i++)
 	{
@@ -102,21 +101,14 @@ int UpdateShips(int num_ships)
 		}
 		else if (Ship[i].shield <= 0)
 		{
-			//CreateExplosion(i);
 			CreateExplosion(Ship[i].xpos, Ship[i].ypos, 2, 8, Ship[i].xv, Ship[i].yv);//float outward_v);
 			al_play_sample(dead, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 			Ship[i].reincarnate_timer = 100;
 			Ship[i].lives--;
 			fprintf(logfile,"Ship %d destroyed\n",i);
-			//if (Ship[i].lives == 0)
-			//	return(100);	//game over
 		}
 		else if(Ship[i].landed)
 		{
-			//if (Map.mission)
-			//	if(Ship[i].pad == Map.num_pads-1)
-			//		return(100);	//game over
-
 			UpdateLandedShip(i);		//separate functiom, as it was getting unweildy
 		}
 		else
@@ -547,23 +539,6 @@ void UpdateLandedShip(int i)
 				Ship[i].ammo2++;
 	}
 
-	if (Map.mission)
-	{
-		if ((Ship[i].recharge_timer & 0x001f) == 0)	//inc every 32 frame ~1s
-		{
-			//if (Map.pad[Ship[i].pad].miners)
-			//{
-			//	Ship[i].miners++;
-			//	Map.pad[Ship[i].pad].miners--;
-			//}
-			//if (Map.pad[Ship[i].pad].jewels)
-			//{
-			//	Ship[i].jewels++;
-			//	Map.pad[Ship[i].pad].jewels--;
-			//}
-		}
-	}
-
 	return;
 }
 
@@ -575,45 +550,13 @@ void UpdateLandedShip(int i)
 //void CreateExplosion(ship_num)
 void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv)//float outward_v);
 {
-	//int i;
 	int j,k;
-	//int type = 0;	//different type?
 
 	for (k=1 ; k<num_rings+1 ; k++)	//1-2 for 2 rings of particles; fast and slow
 	{
 		for (j=0 ; j<num_particles ; j++)
 		{
-
 			NewBullet(xpos, ypos, xv, yv, j*5, 0.5 * k * BULLET_SPEED, BLT_NORMAL, 0);
-			//NewBullet(Ship[ship_num].xpos, Ship[ship_num].ypos, Ship[ship_num].xv, Ship[ship_num].yv, j*5, 0.5 * k * BULLET_SPEED, BLT_NORMAL, 0);
-			/*
-			for (i=0 ; 	Bullet[i].ttl != 0 ; i++)	//scan till you find a free one.
-			{
-				if (i == MAX_BULLETS)
-				{
-					fprintf(logfile,"Max Bullets exceeded (explosion)\n");
-					return;
-				}
-			}
-
-			if (first_bullet == END_OF_LIST)
-				first_bullet = i;
-			else
-				Bullet[last_bullet].next_bullet = i;	//point previous end of list to new end of list
-
-			//init new bullet
-			Bullet[i].type = type;
-			Bullet[i].ttl = TTL[type];
-			Bullet[i].mass = Mass[type];
-			Bullet[i].damage = Damage[type];
-			Bullet[i].xpos = Ship[ship_num].xpos;// + (40 * sinlut[j*5]);
-			Bullet[i].ypos = Ship[ship_num].ypos;// - (40 * coslut[j*5]);
-			Bullet[i].xv = Ship[ship_num].xv + (0.5 * k * BULLET_SPEED * sinlut[j*5]);
-			Bullet[i].yv = Ship[ship_num].yv + (0.5 * k * BULLET_SPEED * coslut[j*5]);
-			Bullet[i].next_bullet = END_OF_LIST;
-
-			last_bullet = i;			//remember this is the end of the list
-			*/
 		}
 	}
 }
@@ -669,9 +612,7 @@ void FireNormal(int i)
 ****************************************************/
 void FireSpecial(int ship_num)
 {
-	//int i;
 	int j,k;
-	//int type = 0;	//different type?
 
 	switch (Ship[ship_num].ammo2_type)
 	{
@@ -695,27 +636,6 @@ void FireSpecial(int ship_num)
 					NewBullet(Ship[ship_num].xpos + (SHIP_SIZE_X/2 * sinlut[Ship[ship_num].angle]), Ship[ship_num].ypos - (SHIP_SIZE_Y/2 * coslut[Ship[ship_num].angle]),
 					          Ship[ship_num].xv + (BULLET_SPEED * sinlut[Ship[ship_num].angle]), Ship[ship_num].yv + (BULLET_SPEED * coslut[Ship[ship_num].angle]),
 					          j*5, 0.02 * k * BULLET_SPEED, BLT_NORMAL, 0);
-					/*
-					for (i=0 ; 	Bullet[i].ttl != 0 ; i++);	//scan till you find a free one.
-
-					if (first_bullet == END_OF_LIST)
-						first_bullet = i;
-					else
-						Bullet[last_bullet].next_bullet = i;	//point previous end of list to new end of list
-
-					//init new bullet
-					Bullet[i].type = type;
-					Bullet[i].ttl = TTL[type];
-					Bullet[i].mass = Mass[type];
-					Bullet[i].damage = Damage[type];
-					Bullet[i].xpos = Ship[ship_num].xpos + (SHIP_SIZE_X/2 * sinlut[Ship[ship_num].angle]);
-					Bullet[i].ypos = Ship[ship_num].ypos - (SHIP_SIZE_Y/2 * coslut[Ship[ship_num].angle]);
-					Bullet[i].xv = Ship[ship_num].xv + (BULLET_SPEED * sinlut[Ship[ship_num].angle]) + (0.02 * k * BULLET_SPEED * sinlut[j*5]);
-					Bullet[i].yv = Ship[ship_num].yv + (BULLET_SPEED * coslut[Ship[ship_num].angle]) + (0.02 * k * BULLET_SPEED * coslut[j*5]);
-					Bullet[i].next_bullet = END_OF_LIST;
-
-					last_bullet = i;			//remember this is the end of the list
-				*/
 				}
 			}
 
@@ -725,13 +645,13 @@ void FireSpecial(int ship_num)
 	}
 }
 
-//
-float x_dis, y_dis, distance, direction;
+
+//float x_dis, y_dis, distance, direction;  //global for debug
 
 void UpdateSentries(void)
 {
 	int i,j;
-	//float x_dis, y_dis, distance, direction;
+	float x_dis, y_dis, distance, direction;
 
 	for (i=0 ; i<Map.num_sentries ; i++)
 	{

@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,18 +46,10 @@ void load_map_file(void);
 int init_map(int group, int map)
 {
 	int i=0, j=0,k=0,l=0,m=0,n=0;	//counters for pads, special areas, blackholes, sentries, forcefields etc.
-	//float ff_strength;
+
 	char map_file_name[MAP_NAME_LENGTH];
 	char str[100];
 	char *line;
-	//char* name;
-
-	//name = (char*)&MapNames[group].Map[map];
-
-	//for (i=0 ; i<MAP_NAME_LENGTH ; i++)
-
-
-	//strncpy(map_file_name, (map_names + map*MAP_NAME_LENGTH), MAP_NAME_LENGTH);
 	strncpy(map_file_name, (char*)&MapNames[group].Map[map], MAP_NAME_LENGTH);
 
 	strcat(map_file_name, txt);
@@ -247,9 +239,7 @@ int init_map(int group, int map)
 
 		else if (strncmp(line,"race",4) == 0)
 		{
-			//fprintf(logfile,"RACE\n");
 			sscanf(line+4," %d %d %d %d",&Map.raceline_minx,&Map.raceline_maxx,&Map.raceline_miny,&Map.raceline_maxy);
-			//fprintf(logfile,"Race start/finish line: min x:%d max x:%d min y:%d max y:%d\n",Map.raceline_minx,Map.raceline_maxx,Map.raceline_miny,Map.raceline_maxy);
 			Map.race = true;
 			if (Map.raceline_minx == Map.raceline_maxx)
 			{
@@ -297,8 +287,6 @@ int init_map(int group, int map)
 				Map.forcefield[n].max_x = Map.forcefield[n].half_x + 20;
 
 				Map.forcefield[n].half_y = Map.forcefield[n].min_y;	//don't need half_y, so set = min_y and use as test for line direction.
-
-				//Map.forcefield[n].x_force = strength = ff_strength;
 			}
 			else if (Map.forcefield[n].min_y == Map.forcefield[n].max_y)	//horizontal line
 			{
@@ -307,8 +295,6 @@ int init_map(int group, int map)
 				Map.forcefield[n].max_y = Map.forcefield[n].half_y + 20;
 
 				Map.forcefield[n].half_x = Map.forcefield[n].min_x;
-
-				//Map.forcefield[n].y_force = strength = ff_strength;
 			}
 
 			else fprintf(logfile,"X or Y values must match in forcefield (i.e. line must be horizontal or vertical)\n");
@@ -394,7 +380,6 @@ void load_map_file(void)
 				if(i >= map_width) map_width = i; //width is last valid char
 			}
 			i++;
-
 		}
 		j++;
 		if (found) 	map_height = j;	//height is number of lines read
@@ -482,7 +467,6 @@ void init_ships(int num_ships)
 	}
 }
 
-
 void reinit_ship(int i)
 {
 	Ship[i].thrust = FALSE;
@@ -510,9 +494,6 @@ void reinit_ship(int i)
 	Ship[i].xv = 0;
 	Ship[i].yv = 0;
 
-	//Ship[i].xpos = (Map.pad[i].min_x + Map.pad[i].max_x)>>1;
-	//Ship[i].ypos = Map.pad[i].y-2;
-
 	Ship[i].xpos = (Map.pad[Ship[i].home_pad].min_x + Map.pad[Ship[i].home_pad].max_x)>>1;
 	Ship[i].ypos = Map.pad[Ship[i].home_pad].y-2;
 
@@ -525,7 +506,6 @@ void reinit_ship(int i)
 	Ship[i].reincarnate_timer = 0;
 	Ship[i].recharge_timer = 0;
 	Ship[i].landed = TRUE;
-	//Ship[i].pad = i;
 	Ship[i].pad = Ship[i].home_pad;
 	Ship[i].menu = FALSE;
 

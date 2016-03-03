@@ -1,6 +1,6 @@
 /*
-	Ian's Thrust Game
-    Copyright (C) 2015 Ian Lewis
+	GravStorm
+    Copyright (C) 2015-2016 Ian Lewis
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #define USB_JOYSTICK1 3
 #define NA 4
 
+//GPIO Pins for joystick
 #define GPIO_LEFT  22/*18*/
 #define GPIO_RIGHT 24/*26*/
 #define GPIO_UP    18/*22*/
