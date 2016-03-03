@@ -311,6 +311,8 @@ void map_draw(void) {
 
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
+    if (Map.ship_first) draw_sprites();
+
     if (Map.type == 0)//draw tr style map
     	//al_draw_scaled_bitmap(tiles, (scroll_x-w*0.5)/2,(scroll_y-h*0.5)/2, w/2, h/2, x, y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
 		al_draw_scaled_bitmap(tiles, 0,0, al_get_bitmap_width(tiles), al_get_bitmap_width(tiles), x, y, al_get_bitmap_width(tiles)*2, al_get_bitmap_width(tiles)*2, 0); //src x,y,w,h dst x,y,w,h,flags
@@ -350,14 +352,25 @@ void map_draw(void) {
 		}
 	}
 
-	//then sentries
-	for(i=0 ; i<Map.num_sentries ; i++)
-	{
-		//if (Map.sentry[i].alive)
-		{
-			al_draw_bitmap_region(sentries,Map.sentry[i].alive_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
-		}
-	}
+    if (!Map.ship_first) draw_sprites();
+
+    al_translate_transform(&transform, scroll_x*zoom, scroll_y*zoom);	//remove scroll so ship is always in the centre
+    al_use_transform(&transform);
+    al_draw_bitmap_region(ships,0,0,SHIP_SIZE_X, SHIP_SIZE_Y,0,0, 0);
+
+    //al_translate_transform(&transform, w * -0.5 *zoom, h * -0.5*zoom);	//remove centring so dragged tile is always in the centre
+    //al_use_transform(&transform);											//DOESN'T WORK!
+	//if (mouse == 1)
+	//   	al_draw_bitmap_region(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width, mouse_y-0.5*tile_height,0);
+
+
+    al_identity_transform(&transform);
+    al_use_transform(&transform);
+}
+
+void draw_sprites(void)
+{
+	int x,y,i;
 
 	//forcefields
 	for(i=0 ; i<Map.num_forcefields ; i++)
@@ -398,18 +411,15 @@ void map_draw(void) {
 		}
 	}
 
-    al_translate_transform(&transform, scroll_x*zoom, scroll_y*zoom);	//remove scroll so ship is always in the centre
-    al_use_transform(&transform);
-    al_draw_bitmap_region(ships,0,0,SHIP_SIZE_X, SHIP_SIZE_Y,0,0, 0);
+	//then sentries
+	for(i=0 ; i<Map.num_sentries ; i++)
+	{
+		//if (Map.sentry[i].alive)
+		{
+			al_draw_bitmap_region(sentries,Map.sentry[i].alive_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
+		}
+	}
 
-    //al_translate_transform(&transform, w * -0.5 *zoom, h * -0.5*zoom);	//remove centring so dragged tile is always in the centre
-    //al_use_transform(&transform);											//DOESN'T WORK!
-	//if (mouse == 1)
-	//   	al_draw_bitmap_region(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width, mouse_y-0.5*tile_height,0);
-
-
-    al_identity_transform(&transform);
-    al_use_transform(&transform);
 }
 
 //draws all the non-translated and scaled stuff, sidebar, mouse pointer, notifications etc....
