@@ -26,7 +26,8 @@ o Raspberry Pi
   There don't seem to be any dependencies that aren't in the standard Raspbian Jessie image (as of 23/02/16).
     
 o Windows
-  Coming soon....
+  Should run on any modern version of windows, but only tested on Windows7 32-bit ('cos that's what I have :-)
+  If you run it on any other version, please let me know how you get on.
   
 o Android  
   Possible (If you've ever made anything for Android, and want to help, please get in touch)
@@ -38,39 +39,52 @@ INSTALLATION
 ------------
 Go to https://github.com/IanLewis42/GravStorm 
 Click the button labelled 'Download Zip'
+.
 
 Save the zip file, and unzip the contents of this into the directory of your choice. 
-On Raspberry Pi, your home directory is a good choice (probably /home/pi). You should end up with the following 
-directory structure:
 
-~/gravstorm
-~/gravstorm/data
-~/gravstorm/src
+o Raspberry Pi
+  On Raspberry Pi, your home directory is a good choice (probably /home/pi). You should end up with the following 
+  directory structure:
 
-(Github seems to make the directory name 'gravstorm-master'. You can leave it, or change it. I'm going to refer to it
- as 'gravstorm').
+  ~/gravstorm
+  ~/gravstorm/data
+  ~/gravstorm/src
 
-You may then need to change the file permissions to make the game executable. Start up a terminal (e.g. lxterminal)
-  - change into the gravstorm directory:
-    cd gravstorm
-  - set file permissions:
-    chmod +x gravstorm
+  (Github seems to make the directory name 'gravstorm-master'. You can leave it, or change it. I'm going to refer to it
+   as 'gravstorm').
+
+  You may then need to change the file permissions to make the game executable. Start up a terminal (e.g. lxterminal)
+    - change into the gravstorm directory:
+      cd gravstorm
+    - set file permissions:
+      chmod +x gravstorm
+      
+    Note that 'gravstorm.exe' is the windows executable, and if you're not running windows, you can delete it.
+
+o Windows
+  Unzip wherever you like. You should get a folder named 'gravstorm' (or gravstorm-master if Guthub changes it) and 
+  inside that, folders called 'data' and 'src'. 
 
 STARTING THE GAME
 ------------------
-Change into the game directory (if you're not there already), and run the executable 'gravstorm'
+o Raspberry Pi
+  Change into the game directory (if you're not there already), and run the executable 'gravstorm'
 
-cd gravstorm
-./gravstorm
+  cd gravstorm
+  ./gravstorm
 
-NOTE: My Pi boots straight into the GUI, and I normally run Gravstorm via LXTerminal. It also works if you run
-      it direct from the command line, without the desktop GUI running. If try to run it from the desktop/gui
-      and get an error message (perhaps similar to the one shown below) then try it without the GUI.
-      ***
-      XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":0.0"
-      after 17 requests (17 known processed) with 0 events remaining.
-      ***
-      
+  NOTE: My Pi boots straight into the GUI, and I normally run Gravstorm via LXTerminal. It also works if you run
+        it direct from the command line, without the desktop GUI running. If try to run it from the desktop/gui
+        and get an error message (perhaps similar to the one shown below) then try it without the GUI.
+        ***
+        XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":0.0"
+        after 17 requests (17 known processed) with 0 events remaining.
+        ***
+o Windows
+  In the gravstorm folder, there is a file called 'gravstorm.exe'.
+  Double click this to run it. Feel free to make a shortcut, pin to the start menu or whatever.
+  
 MENU
 -----
 It's supposed to be intuitive / self explanatory, but just in case....
@@ -168,6 +182,7 @@ I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusio
   Pretty much anything can be used as a single-line comment, but I tend to use a semicolon ;
   The easiest thing to do is take a look at some af the existing  files, but for reference, I'll describe 
   all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly.
+  These should be edited in a text editor (e.g. nano or leafpad on Raspberry Pi, notepad on windows.)
   
 o map_type <0|1>
   0 - Single image file for map (default)
@@ -301,27 +316,43 @@ o race <min_x> <max_x> <min_y> <max_y>
   <min_x> <max_x> <min_y> <max_y> define endpoints of line. Line must be either horizontal or vertical,
     i.e. EITHER min_x = max_x (vertical) OR min_y = max_y (horizontal).
 
-There is a separate mapmaker program. This is unimaginatively called 'mapamker'. It reads the same .txt file, which should
+There is a separate mapmaker program. This is unimaginatively called 'mapmaker'. It reads the same .txt file, which should
 be passed on the command line, e.g. 
 
 mapmaker "mission 1.txt"
   
-Quotes are required if there's a space in the filename. This program is rather undeveloped, and really just acts as a 
-viewer. Keyboard controls are:
+Quotes are required if there's a space in the filename. If you run it without an filename, it will immediately exit, so
+double clicking from Windows explorer won't work. Open a command window by clicking on the start button and typing
+cmd <return>, then navigate to the 'gravstorm' directory, and type the command line as above. 
 
-Cursor keys:       scroll left, right, up, down.
-PageUp / PageDown: zoom in and out
-Q/A:               scroll tile preview on left
-Return:            reload .txt file
-G:                 toggle grid off/white/grey/black
+Note that the Windows executable is called 'mapmaker.exe' ; the Raspberry Pi executabe is just 'mapmaker'. You can 
+delete whichever one you don't need.
 
-There was some half-hearted support for dragging and dropping tiles, but it seems to be broken at the moment. It might get 
-fixed in the future. 
+Keyboard controls are:
+
+- Cursor keys:       scroll left, right, up, down.
+- PageUp / PageDown: zoom in and out
+- Home:              return to centre of map, zoom level 1.0
+- Q/A:               scroll tile preview on left
+- Return:            reload .txt file
+- S:		     save modified ASCII map file. N.B. Overwrites without warning!
+- G:                 toggle grid off/white/grey/black
+- Escape:            exit (without warning!)
+
+The mouse can be used to edit tiled maps as follows:
+- Left click and release to 'pick up' a tile (either from the map, or the preview area on the left)
+- Once a tile is picked up, left click and release to place a new copy of it in the map, or left click 
+  and drag to 'paint' a series of tiles. 
+- Right click and release to 'drop' the tile. 
+- To erase, just paint over with 'empty space' (tile zero) N.B. It can be hard to tell whether you have
+  an empty tile picked up, or no tile. 
+  
+Alternatively, you can edit the ascii map file in a text editor, and reload it using <return>.
 
 LEGAL STUFF
 -----------
 GravStorm Copyright (C) 2015-2016  Ian Lewis
-This program and it's source code are released under the GPL.
+This program and its source code are released under the GPL.
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions. See gpl.txt for details.
@@ -329,5 +360,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 23/02/16
+IPL 08/03/16
 gravstorm9@gmail.com
