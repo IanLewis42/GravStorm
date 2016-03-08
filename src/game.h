@@ -17,11 +17,11 @@
 */
 
 //Target
-#define  RPI 0
-#define  WINDOWS 1
+#define  RPI 1
+#define  WINDOWS 0
 
 #define NAME "GravStorm"
-#define VERSION "V0.1"
+#define VERSION "V0.2"
 
 #define TRUE 1
 #define FALSE 0

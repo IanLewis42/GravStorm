@@ -1,7 +1,9 @@
-GravStorm V0.1
+GravStorm V0.2
 Init Allegro
 Creating display
 Loaded 6 fonts
+Reserved Audio Samples
+Loaded Audio Samples
 Creating Events
 Init allegro joystick
 2 Joysticks on system
@@ -56,280 +58,21 @@ Sentry 0: x:995, y:798, Direction:30, Type:2, Period:15, Prob:50, Random:2, Rang
 Sentry 1: x:2272, y:605, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:1000, Sprite6, Sprite0
 Max players:1
 --End of mapfile mission 1.txt--
-
-Selected map 0,1
-Map type:1
-Display Map:hex_green.png
-Collision Map:hextiles_col.png
-ASCII map file:m2_map.txt
-ASCII Map: H:42 W:59
-Description file:m2_desc.txt
-Mission:1
-Time Limit:120
-Sentry Image file:sentries.png
-Sentry Collision file:sentries_col.png
-Ship first:1
-Gravity:0.050000
-Drag:2.000000
-Wrap:0
-Lives:1
-Pad 0: type:00 y:505 x:2962 x:3116 miners:0 jewels:0
-Pad 1: type:01 y:2554 x:1555 x:1708 miners:5 jewels:0
-Pad 2: type:02 y:699 x:787 x:940 miners:0 jewels:5
-Sentry 0: x:1252, y:2147, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite8, Sprite0
-Sentry 1: x:2271, y:2020, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite7, Sprite0
-Sentry 2: x:1122, y:735, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite1, Sprite0
-Max players:1
---End of mapfile mission 2.txt--
-
-Selected map 0,2
-Map type:1
-Display Map:hex_blue.png
-Collision Map:hextiles_col.png
-ASCII map file:m3_map.txt
-ASCII Map: H:56 W:71
-Description file:m3_desc.txt
-Mission:1
-Time Limit:200
-Sentry Image file:sentries.png
-Sentry Collision file:sentries_col.png
-Ship first:1
-Gravity:0.050000
-Drag:2.000000
-Wrap:0
-Lives:3
-Pad 0: type:00 y:890 x:3733 x:3884 miners:0 jewels:0
-Pad 1: type:01 y:699 x:2077 x:2220 miners:0 jewels:5
-Pad 2: type:f2 y:1466 x:3476 x:3628 miners:0 jewels:0
-Pad 3: type:03 y:3387 x:789 x:940 miners:5 jewels:0
-Sentry 0: x:1890, y:735, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:1000, Sprite1, Sprite0
-Sentry 1: x:2658, y:1314, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite8, Sprite0
-Sentry 2: x:3874, y:1344, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite4, Sprite0
-Sentry 3: x:1696, y:1984, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite8, Sprite0
-Sentry 4: x:1696, y:2880, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite6, Sprite0
-Sentry 5: x:544, y:3136, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite2, Sprite0
-Max players:1
---End of mapfile mission 3.txt--
-
-Selected map 0,3
-Map type:1
-Display Map:hex_blue.png
-Collision Map:hextiles_col.png
-ASCII map file:map.txt
-ASCII Map: H:35 W:57
-Description file:fm_desc.txt
-Mission:1
-Time Limit:150
-Sentry Image file:sentries.png
-Sentry Collision file:sentries_col.png
-Ship first:1
-Gravity:0.050000
-Drag:2.000000
-Wrap:0
-Pad 0: type:00 y:186 x:979 x:1131 miners:0 jewels:0
-Pad 1: type:01 y:2107 x:1236 x:1387 miners:5 jewels:0
-Pad 2: type:02 y:1018 x:1107 x:1260 miners:0 jewels:5
-Pad 3: type:03 y:1211 x:2260 x:2413 miners:5 jewels:0
-Sentry 0: x:544, y:416, Direction:30, Type:2, Period:30, Prob:50, Random:10, Range:200, Sprite4, Sprite0
-Sentry 1: x:160, y:864, Direction:10, Type:2, Period:30, Prob:50, Random:10, Range:200, Sprite2, Sprite0
-Sentry 2: x:544, y:1312, Direction:10, Type:2, Period:30, Prob:50, Random:10, Range:200, Sprite4, Sprite0
-Sentry 3: x:160, y:1824, Direction:10, Type:2, Period:30, Prob:50, Random:10, Range:200, Sprite2, Sprite0
-Sentry 4: x:1376, y:1216, Direction:10, Type:2, Period:30, Prob:100, Random:0, Range:100, Sprite2, Sprite0
-Sentry 5: x:1504, y:1152, Direction:10, Type:2, Period:30, Prob:100, Random:0, Range:100, Sprite4, Sprite0
-Sentry 6: x:992, y:1664, Direction:10, Type:2, Period:30, Prob:50, Random:20, Range:400, Sprite2, Sprite0
-Sentry 7: x:1312, y:1312, Direction:10, Type:2, Period:30, Prob:50, Random:20, Range:400, Sprite9, Sprite10
-Sentry 8: x:1440, y:1890, Direction:10, Type:2, Period:30, Prob:50, Random:5, Range:400, Sprite3, Sprite0
-Sentry 9: x:1888, y:1792, Direction:10, Type:2, Period:30, Prob:50, Random:20, Range:400, Sprite9, Sprite10
-Sentry 10: x:2656, y:1472, Direction:10, Type:2, Period:30, Prob:50, Random:20, Range:400, Sprite4, Sprite0
-Sentry 11: x:2592, y:2144, Direction:10, Type:2, Period:30, Prob:50, Random:20, Range:400, Sprite1, Sprite0
-Sentry 12: x:2144, y:1088, Direction:10, Type:2, Period:30, Prob:50, Random:20, Range:400, Sprite2, Sprite0
-Sentry 13: x:2208, y:672, Direction:10, Type:2, Period:30, Prob:50, Random:20, Range:400, Sprite3, Sprite0
-ForceField: x:1359 x:1359 x:1521 y:1086 y:1106 y:1126
-ForceField: strength:1000 sentry:7
-ForceField: x:1984 x:2004 x:2024 y:1893 y:1893 y:2139
-ForceField: strength:1000 sentry:9
-Max players:1
---End of mapfile final mission.txt--
-
-Selected map 1,0
-Map type:1
-Display Map:ground.png
-Collision Map:ground_col.png
-ASCII map file:cross_map.txt
-ASCII Map: H:36 W:38
-Description file:cruciatus_desc.txt
-Mission:0
-Ship first:0
-Gravity:0.050000
-Drag:2.000000
-Wrap:0
-Pad 0: type:00 y:1963 x:487 x:618 miners:0 jewels:0
-Pad 1: type:01 y:296 x:2075 x:2215 miners:0 jewels:0
-Pad 2: type:02 y:296 x:215 x:360 miners:0 jewels:0
-Pad 3: type:02 y:2026 x:2075 x:2215 miners:0 jewels:0
-Pad 4: type:34 y:361 x:1110 x:1258 miners:0 jewels:0
-Pad 5: type:35 y:1002 x:982 x:1130 miners:0 jewels:0
-Pad 6: type:f6 y:1321 x:1876 x:2026 miners:0 jewels:0
-Pad 7: type:f7 y:2219 x:1305 x:1385 miners:0 jewels:0
-Max players:4
-area 0: x:2105 x:2245 y:836 y:1726 g:-0.050000 drag:2.000000
---End of mapfile cruciatus.txt--
-
-Selected map 1,1
-Map type:0
-Display Map:black_hole_800.png
-Collision Map:black_hole_col_800.png
-Description file:ns_desc.txt
-Ship first:0
-Gravity:0.050000
-Drag:2.000000
-Wrap:1
-Radial Gravity On
-blackhole 0: x:800 y:500 g:5.000000
-Pad 0: type:00 y:91 x:640 x:720 miners:0 jewels:0
-Pad 1: type:01 y:91 x:830 x:920 miners:0 jewels:0
-Max players:2
---End of mapfile neutron star.txt--
-
-Selected map 1,2
-Map type:0
-Display Map:explono.png
-Collision Map:explono_col.png
-Description file:explono_desc.txt
-Ship first:1
-Sentry Image file:sentries.png
-Gravity:0.050000
-Drag:2.000000
-Pad 0: type:00 y:925 x:330 x:410 miners:0 jewels:0
-Pad 1: type:01 y:603 x:1200 x:1300 miners:0 jewels:0
-Sentry 0: x:168, y:725, Direction:0, Type:1, Period:3, Prob:50, Random:10, Range:200, Sprite0, Sprite0
-Sentry 1: x:870, y:225, Direction:0, Type:1, Period:3, Prob:50, Random:10, Range:424, Sprite0, Sprite0
-Sentry 2: x:1352, y:869, Direction:0, Type:1, Period:3, Prob:50, Random:10, Range:424, Sprite0, Sprite0
-Max players:2
-Possible error: No sentry collision file specified. Sentries will be indestructible.
---End of mapfile explono.txt--
-
-Selected map 2,0
-Map type:0
-Display Map:sitimus4p.png
-Collision Map:sitimus4p_col.png
-Description file:sitimus_desc.txt
-Ship first:0
-Gravity:0.050000
-Drag:2.000000
-Pad 0: type:00 y:1228 x:240 x:350 miners:0 jewels:0
-Pad 1: type:01 y:400 x:1060 x:1170 miners:0 jewels:0
-Pad 2: type:02 y:396 x:260 x:370 miners:0 jewels:0
-Pad 3: type:03 y:1226 x:1110 x:1220 miners:0 jewels:0
-Pad 4: type:24 y:412 x:670 x:815 miners:0 jewels:0
-Pad 5: type:45 y:827 x:240 x:410 miners:0 jewels:0
-Pad 6: type:16 y:827 x:670 x:815 miners:0 jewels:0
-Max players:4
-Race:   x:50 x:200 y:400 y:400
-Before: x:50 x:200 y:380 y:400
-After:  x:50 x:200 y:400 y:420
---End of mapfile sitimus.txt--
 Final Selected map 0
-Number of players 4
+Number of players 1
 Loading map
-tr_map = 0
-tr_map size 1280 x 1280
+tr_map size 2880 x 1088
 Making collision masks
 ship mask:960,24 
-No sentry mask
-map:640,640 wpr:22 (including padding)
+sentry mask:416,32 
+map:992,32 wpr:31 (including padding)
 Loading game bitmaps
 Creating bullets bitmap
 Init Ships
 Init Bullets
 Init done
-Freed 1 menu bitmaps
-Ship 0 destroyed
-Ship 0 reincarnated
-Game Over
-Freeing game bitmaps
-Freed 9/10 game bitmaps
-Init Keyboard
-4 Map groups
-Group: One Player
-Map: mission 1
-Map: mission 2
-Map: mission 3
-Map: final mission
-Group: Multi Player
-Map: cruciatus
-Map: neutron star
-Map: explono
-Group: TurboRaketti
-Map: sitimus
-Map: ekolos
-Map: likvidius
-Map: metarola
-Map: tropulus
-Group: TR Beta
-Map: sinneau
-Map: mutolos
-Map: keurakea
-Map: isemania
-Map: ekolos beta
-
-Selected map 2,0
-Map type:0
-Display Map:sitimus4p.png
-Collision Map:sitimus4p_col.png
-Description file:sitimus_desc.txt
-Ship first:0
-Gravity:0.050000
-Drag:2.000000
-Pad 0: type:00 y:1228 x:240 x:350 miners:0 jewels:0
-Pad 1: type:01 y:400 x:1060 x:1170 miners:0 jewels:0
-Pad 2: type:02 y:396 x:260 x:370 miners:0 jewels:0
-Pad 3: type:03 y:1226 x:1110 x:1220 miners:0 jewels:0
-Pad 4: type:24 y:412 x:670 x:815 miners:0 jewels:0
-Pad 5: type:45 y:827 x:240 x:410 miners:0 jewels:0
-Pad 6: type:16 y:827 x:670 x:815 miners:0 jewels:0
-Max players:4
-Race:   x:50 x:200 y:400 y:400
-Before: x:50 x:200 y:380 y:400
-After:  x:50 x:200 y:400 y:420
---End of mapfile sitimus.txt--
-
-Selected map 2,1
-Map type:0
-Display Map:ekolos.png
-Collision Map:ekolos_col.png
-Description file:ekolos_desc.txt
-Ship first:1
-Gravity:0.050000
-Drag:2.000000
-Pad 0: type:00 y:408 x:530 x:620 miners:0 jewels:0
-Pad 1: type:01 y:884 x:640 x:730 miners:0 jewels:0
-area 0: x:0 x:150 y:270 y:650 g:-0.050000 drag:2.000000
-Max players:2
---End of mapfile ekolos.txt--
-
-Selected map 2,0
-Map type:0
-Display Map:sitimus4p.png
-Collision Map:sitimus4p_col.png
-Description file:sitimus_desc.txt
-Ship first:0
-Gravity:0.050000
-Drag:2.000000
-Pad 0: type:00 y:1228 x:240 x:350 miners:0 jewels:0
-Pad 1: type:01 y:400 x:1060 x:1170 miners:0 jewels:0
-Pad 2: type:02 y:396 x:260 x:370 miners:0 jewels:0
-Pad 3: type:03 y:1226 x:1110 x:1220 miners:0 jewels:0
-Pad 4: type:24 y:412 x:670 x:815 miners:0 jewels:0
-Pad 5: type:45 y:827 x:240 x:410 miners:0 jewels:0
-Pad 6: type:16 y:827 x:670 x:815 miners:0 jewels:0
-Max players:4
-Race:   x:50 x:200 y:400 y:400
-Before: x:50 x:200 y:380 y:400
-After:  x:50 x:200 y:400 y:420
---End of mapfile sitimus.txt--
 Exiting
 Freeing game bitmaps
-Freed 0/10 game bitmaps
+Freed 10/10 game bitmaps
 Freed 1 menu bitmaps
 Freed 6 fonts
