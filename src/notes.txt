@@ -145,11 +145,11 @@
  // *cross map collisions on /| tiles 
  
  // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
- // Thrust levels 3,4,5,6
+ // Thrust levels 4,5,6
  
- // mapmaker mouse/drag stuff
+ // *mapmaker mouse/drag stuff
  // mapmaker lean on drawing.c (and init.c?)
- // mapmaker static linked build.
+ // *mapmaker static linked build.
  // *Game name....
  // *readme (map making)
  // *menu slow response. Sounds? or file opening? Neither - should only redraw when event queue empty!
@@ -182,14 +182,14 @@
    -static
    -lpthread
    
-   //clean up code (REMOVE DEAD)
-   //gRAVSTORM  in top of files
-   //win static build of MM
-   //RPI static build of MM
+   //*clean up code (REMOVE DEAD)
+   //*gRAVSTORM  in top of files
+   //*win static build of MM
+   //*RPI static build of MM
    //MM lean on drawing/init more??
    //levels
- 
- 
+   //fix to tile dispaly - optimize more with shifts.
+   
  
  //*behaviour when landed - menu doesn't appear on down / sitimus 4p ; quickfire doesn't work....
  

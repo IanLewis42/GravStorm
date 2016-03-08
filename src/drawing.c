@@ -383,20 +383,16 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 
 	if (Map.type)	//1 for tiled
 	{
-		/* Initialize transformation. */
-		al_identity_transform(&transform);
-		/* Move to scroll position. */
-		al_translate_transform(&transform, -scrollx, -scrolly);
-		/* Move scroll position to screen center. */
-		al_translate_transform(&transform, w * 0.5, h * 0.5);
-		/* All subsequent drawing is transformed. */
-		al_use_transform(&transform);
+		al_identity_transform(&transform);  		            /* Initialize transformation. */
+		al_translate_transform(&transform, -scrollx, -scrolly); /* Move to scroll position. */
+		al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
+		al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
 
-		min_x = (scrollx - 0.5*w)/(tile_width);	//optimise by using shifts, rather than divides....
-		min_y = (scrolly - 0.5*h)/(tile_height);
+		min_x = (scrollx - (w>>1) ) >> TILE_SHIFTS;// /(tile_width);	//optimise by using shifts, rather than divides....
+		min_y = (scrolly - (h>>1) ) >> TILE_SHIFTS;// /(tile_height);
 
-		max_x = ((scrollx + 0.5*w)/(tile_width)) +1;
-		max_y = ((scrolly + 0.5*h)/(tile_height)) +1;
+		max_x = ((scrollx + (w>>1) ) >> TILE_SHIFTS )+1;// /(tile_width)) +1;
+		max_y = ((scrolly + (h>>1) ) >> TILE_SHIFTS )+1;// /(tile_height)) +1;
 
 		al_hold_bitmap_drawing(1);
 		for (y = min_y; y < max_y; y++)
@@ -404,10 +400,9 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 			for (x = min_x; x < max_x; x++)
 			{
 				int i = tile_map[x + y * MAX_MAP_WIDTH];
-				float u = i * tile_width;
-				float v = 0;
-										   //sx  sy sw          sh           dx                    dy                  dw  dh
-				al_draw_scaled_bitmap(tr_map, u, v, tile_width, tile_height, win_x + x*tile_width, win_y + y*tile_height, tile_width, tile_height,0);
+				int u = i << 6;
+                                            //sx sy sw         sh         dx                        dy
+				al_draw_bitmap_region(tr_map, u, 0, TILE_WIDTH, TILE_HEIGHT, win_x + (x<<TILE_SHIFTS), win_y + (y<<TILE_SHIFTS), 0);
 			}
 		}
 		al_hold_bitmap_drawing(0);
@@ -420,11 +415,11 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 
 			for (i=0 ; i<map_width ; i++)
 			{
-				al_draw_filled_rectangle(i*tile_width+win_x,0+win_y,i*tile_width+win_x+1,map_height*tile_height+win_y,grid_colour);
+				al_draw_filled_rectangle(i*TILE_WIDTH+win_x,0+win_y,i*TILE_WIDTH+win_x+1,map_height*TILE_HEIGHT+win_y,grid_colour);
 			}
 			for (i=0 ; i<map_height ; i++)
 			{
-				al_draw_filled_rectangle(0+win_x,i*tile_height+win_y,map_width*tile_width+win_x,i*tile_height+win_y+1,grid_colour);
+				al_draw_filled_rectangle(0+win_x,i*TILE_HEIGHT+win_y,map_width*TILE_WIDTH+win_x,i*TILE_HEIGHT+win_y+1,grid_colour);
 			}
 
 		}

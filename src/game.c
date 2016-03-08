@@ -101,7 +101,7 @@ MapGroupType MapNames[MAX_GROUPS];
 
 int game_over = 0;
 int mapx, mapy;
-int tile_width = 64, tile_height = 64;
+//int tile_width = 64, tile_height = 64;
 
 int gpio_active = false;
 int debug_on = false;
@@ -720,8 +720,8 @@ void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
 	}
 	else
 	{
-		mapx = map_width * tile_width;
-		mapy = map_height * tile_height;
+		mapx = map_width * TILE_WIDTH;
+		mapy = map_height * TILE_HEIGHT;
 	}
 
 	if (Map.num_sentries)
@@ -870,7 +870,6 @@ extern float x_dis, y_dis, distance, direction;
 extern int tile_x, tile_y, tile_idx, tile, tl_tile;
 extern int start_row,current_row,rows;
 
-
 void draw_debug(void)
 {
 	int level;
@@ -881,6 +880,7 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[0].xpos);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[0].ypos);
+
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Mapx: %d", mapx);
 
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "M: %d", Ship[0].miners);

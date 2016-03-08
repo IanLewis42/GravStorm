@@ -44,8 +44,10 @@ extern int map_height, map_width;
 #define MAP_X 100	//tiles
 #define MAP_Y 100
 
-#define TILE_SIZE_X	64
-#define TILE_SIZE_Y 64
+#define TILE_SIZE	64
+#define TILE_SHIFTS 6      //2^6 = 64
+#define TILE_WIDTH  TILE_SIZE
+#define TILE_HEIGHT TILE_SIZE
 
 #define SHIP_SIZE_X 48
 #define SHIP_SIZE_Y 48
@@ -228,7 +230,7 @@ extern MapGroupType MapNames[MAX_GROUPS];
 extern MapType Map;
 extern MenuType Menu;
 
-extern int tile_width, tile_height;
+//extern int tile_width, tile_height;
 
 extern FILE* logfile;
 
