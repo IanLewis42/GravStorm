@@ -188,7 +188,8 @@
    //*RPI static build of MM
    //MM lean on drawing/init more??
    //levels
-   //fix to tile dispaly - optimize more with shifts.
+   //*fix to tile display - optimize more with shifts.
+   //more sounds...
    
  
  //*behaviour when landed - menu doesn't appear on down / sitimus 4p ; quickfire doesn't work....
