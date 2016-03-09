@@ -114,6 +114,8 @@ char screenshot_basename[5] = {'S','c','r','_',0};
 char screenshot_ext[5] = {'.','p','n','g',0};
 char screenshot_name[20];
 
+int debug_key = 0;
+
 FILE* logfile;
 
 //Local prototypes
@@ -384,6 +386,8 @@ int main (int argc, char *argv[]){
 
 			if (event.type == ALLEGRO_EVENT_KEY_DOWN)
 			{
+				debug_key = event.keyboard.keycode;
+
 				//DEBUG THINGS
 				if (debug_on)
 				{
@@ -402,7 +406,8 @@ int main (int argc, char *argv[]){
 
 				if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) break;//Exit();
 
-				else if  (event.keyboard.keycode == ALLEGRO_KEY_PRINTSCREEN)
+				else if  (event.keyboard.keycode == ALLEGRO_KEY_PRINTSCREEN ||
+                          event.keyboard.keycode == ALLEGRO_KEY_F12)
 				{
 					take_screenshot = true;
 					fprintf(logfile,"Screenshot %d\n",screenshot_count);
@@ -880,6 +885,8 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[0].xpos);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[0].ypos);
+
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Key: %d",debug_key);
 
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Mapx: %d", mapx);
 
