@@ -494,15 +494,6 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 		current_bullet = Bullet[current_bullet].next_bullet;
 	}
 
-	//then sentries
-	for(i=0 ; i<Map.num_sentries ; i++)
-	{
-		if (Map.sentry[i].alive)
-			al_draw_bitmap_region(sentries,Map.sentry[i].alive_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
-		else
-			al_draw_bitmap_region(sentries,Map.sentry[i].dead_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
-	}
-
 	//forcefields
 	for(i=0 ; i<Map.num_forcefields ; i++)
 	{
@@ -541,6 +532,15 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 				}
 			}
 		}
+	}
+
+	//then sentries
+	for(i=0 ; i<Map.num_sentries ; i++)
+	{
+		if (Map.sentry[i].alive)
+			al_draw_bitmap_region(sentries,Map.sentry[i].alive_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
+		else
+			al_draw_bitmap_region(sentries,Map.sentry[i].dead_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
 	}
 
 	//finally ships, miners and jewels
