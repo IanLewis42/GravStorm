@@ -1,29 +1,39 @@
 Building
 ---------
-If you want to build the code, you'll need to install the Allegro libraries first.
-I used version 5.1.8, which I believe is the first version with support for Raspberry Pi.
 
-To install it, I followed this tutorial:
-http://joshua14.homelinux.org/blog/?p=1726
+o Raspberry Pi  
+  If you want to build the code, you'll need to install the Allegro libraries first.
+  I used version 5.1.8, which I believe is the first version with support for Raspberry Pi.
 
-Having done this, change to the source directory and run the build script:
+  To install it, I followed this tutorial:
+  http://joshua14.homelinux.org/blog/?p=1726
 
-cd ~/gravstorm/src
-./build.sh
+  There's a pair of #defines at the top of game.h to set the target. Make sure tese are:
+  #define  RPI 1
+  #define  WINDOWS 0
+  
+  Having done this, change to the source directory and run the build script:
 
-Static vs Shared
-----------------
+  cd ~/gravstorm/src
+  ./build.sh
 
-The build script will build either an executable which expects shared-object versions of the allegro libraries,
-or one which requires, and includes, static versions. The distributed executable (and default config of the 
-build script) is statically-linked to allegro, in the hope that this means that end-users don't need to 
-install allegro at all. 
+  Static vs Shared
+  The build script will build either an executable which expects shared-object versions of the allegro libraries,
+  or one which requires, and includes, static versions. The distributed executable (and default config of the 
+  build script) is statically-linked to allegro, in the hope that this means that end-users don't need to 
+  install allegro at all. 
 
-If you're building the code, you need to edit the build script to choose static or shared object linking, and
-make sure that you built the Allegro5 libraries correspondingly. 
+  If you're building the code, you need to edit the build script to choose static or shared object linking, and
+  make sure that you built the Allegro5 libraries correspondingly. 
 
-The above tutorial produces shared-object libraries. To build static versions, I think I referred to this:
-https://ventilatorxor.wordpress.com/2011/08/07/linux-allegro5-static-linking-for-beginners/
+  The above tutorial produces shared-object libraries. To build static versions, I think I referred to this:
+  https://ventilatorxor.wordpress.com/2011/08/07/linux-allegro5-static-linking-for-beginners/
+
+o Windows
+
+
+
+
 
 Good Luck!
 

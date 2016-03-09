@@ -1,0 +1,716 @@
+# depslib dependency file v1.0
+1446667744 source:c:\ipl\gravstorm\main.c
+	<stdio.h>
+	<stdlib.h>
+
+1457041837 source:c:\ipl\gravstorm\src\collisions.c
+	<stdio.h>
+	"allegro5/allegro.h"
+	"allegro5/allegro_image.h"
+	"allegro5/allegro_primitives.h"
+	"allegro5/allegro_font.h"
+	"allegro5/allegro_ttf.h"
+	"allegro5/allegro_audio.h"
+	"allegro5/allegro_acodec.h"
+	"collisions.h"
+	"game.h"
+	"objects.h"
+
+1441918212 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\allegro.h
+	"allegro5/base.h"
+	"allegro5/altime.h"
+	"allegro5/bitmap.h"
+	"allegro5/bitmap_draw.h"
+	"allegro5/bitmap_io.h"
+	"allegro5/bitmap_lock.h"
+	"allegro5/blender.h"
+	"allegro5/clipboard.h"
+	"allegro5/color.h"
+	"allegro5/config.h"
+	"allegro5/cpu.h"
+	"allegro5/debug.h"
+	"allegro5/display.h"
+	"allegro5/drawing.h"
+	"allegro5/error.h"
+	"allegro5/events.h"
+	"allegro5/file.h"
+	"allegro5/fixed.h"
+	"allegro5/fmaths.h"
+	"allegro5/fshook.h"
+	"allegro5/fullscreen_mode.h"
+	"allegro5/haptic.h"
+	"allegro5/joystick.h"
+	"allegro5/keyboard.h"
+	"allegro5/memory.h"
+	"allegro5/monitor.h"
+	"allegro5/mouse.h"
+	"allegro5/mouse_cursor.h"
+	"allegro5/path.h"
+	"allegro5/render_state.h"
+	"allegro5/shader.h"
+	"allegro5/system.h"
+	"allegro5/threads.h"
+	"allegro5/timer.h"
+	"allegro5/tls.h"
+	"allegro5/touch_input.h"
+	"allegro5/transformations.h"
+	"allegro5/utf8.h"
+	"allegro5/alcompat.h"
+
+1453596062 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\base.h
+	<errno.h>
+	<limits.h>
+	<limits.h>
+	<stdarg.h>
+	<stddef.h>
+	<stdlib.h>
+	<time.h>
+	<string.h>
+	<sys/types.h>
+	<fortify/fortify.h>
+	<dmalloc.h>
+	"allegro5/internal/alconfig.h"
+
+1405877029 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\internal\alconfig.h
+	"allegro5/platform/alplatf.h"
+	"allegro5/platform/alwatcom.h"
+	"allegro5/platform/almngw32.h"
+	"allegro5/platform/albcc32.h"
+	"allegro5/platform/almsvc.h"
+	"allegro5/platform/aliphonecfg.h"
+	"allegro5/platform/alosxcfg.h"
+	"allegro5/platform/alandroidcfg.h"
+	"allegro5/platform/alraspberrypicfg.h"
+	"allegro5/platform/alucfg.h"
+	"allegro5/platform/allegro_sdl_config.h"
+	"allegro5/platform/astdint.h"
+	"allegro5/platform/astdbool.h"
+
+1453954841 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\alplatf.h
+
+1365814994 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\alwatcom.h
+	<io.h>
+	<i86.h>
+	<conio.h>
+	<fcntl.h>
+	<direct.h>
+	<malloc.h>
+
+1365815668 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\almngw32.h
+	<io.h>
+	<fcntl.h>
+	<direct.h>
+	<malloc.h>
+	"allegro5/platform/alplatf.h"
+
+1365815668 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\albcc32.h
+	<io.h>
+	<fcntl.h>
+	<direct.h>
+	<malloc.h>
+
+1365815668 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\almsvc.h
+	<io.h>
+	<fcntl.h>
+	<direct.h>
+	<malloc.h>
+	"allegro5/platform/alplatf.h"
+
+1354191040 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\aliphonecfg.h
+	<fcntl.h>
+	<unistd.h>
+
+1365815668 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\alosxcfg.h
+	"allegro5/platform/alplatf.h"
+
+1324189852 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\alandroidcfg.h
+
+1354191040 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\alraspberrypicfg.h
+	<fcntl.h>
+	<unistd.h>
+	<sys/types.h>
+
+1365814994 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\alucfg.h
+	<fcntl.h>
+	<unistd.h>
+	"alunix.h"
+	"allegro5/platform/alplatf.h"
+
+1266925320 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\alunix.h
+
+1405877029 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\allegro_sdl_config.h
+	<fcntl.h>
+	<unistd.h>
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\astdint.h
+	<inttypes.h>
+	<stdint.h>
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\platform\astdbool.h
+	<stdbool.h>
+
+1285073381 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\altime.h
+	"allegro5/base.h"
+
+1437143311 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\bitmap.h
+	"allegro5/color.h"
+
+1440807192 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\color.h
+	"allegro5/base.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\bitmap_draw.h
+	"allegro5/bitmap.h"
+
+1443026217 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\bitmap_io.h
+	"allegro5/bitmap.h"
+	"allegro5/file.h"
+
+1419211222 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\file.h
+	"allegro5/base.h"
+	"allegro5/path.h"
+	"allegro5/utf8.h"
+
+1337489393 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\path.h
+	"allegro5/base.h"
+
+1337165689 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\utf8.h
+	"allegro5/base.h"
+
+1418623615 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\bitmap_lock.h
+	"allegro5/bitmap.h"
+
+1435289814 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\blender.h
+
+1441570820 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\clipboard.h
+	"allegro5/base.h"
+	"allegro5/display.h"
+	"allegro5/utf8.h"
+
+1450573311 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\display.h
+	"allegro5/bitmap.h"
+	"allegro5/color.h"
+	"allegro5/events.h"
+
+1443700444 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\events.h
+	"allegro5/altime.h"
+
+1351456157 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\config.h
+	"allegro5/file.h"
+
+1441918212 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\cpu.h
+	"allegro5/base.h"
+
+1351638189 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\debug.h
+	<assert.h>
+	"allegro5/base.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\drawing.h
+	"allegro5/color.h"
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\error.h
+	"allegro5/base.h"
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\fixed.h
+	"allegro5/base.h"
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\fmaths.h
+	"allegro5/base.h"
+	"allegro5/fixed.h"
+	"allegro5/inline/fmaths.inl"
+
+1365812642 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\inline\fmaths.inl
+	"allegro5/error.h"
+
+1406014637 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\fshook.h
+	"allegro5/base.h"
+	"allegro5/file.h"
+	"allegro5/path.h"
+	<sys/types.h>
+
+1354536559 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\fullscreen_mode.h
+
+1433186211 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\haptic.h
+	"allegro5/base.h"
+	"allegro5/display.h"
+	"allegro5/events.h"
+	"allegro5/joystick.h"
+	"allegro5/keyboard.h"
+	"allegro5/mouse.h"
+	"allegro5/touch_input.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\joystick.h
+	"allegro5/base.h"
+	"allegro5/events.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\keyboard.h
+	"allegro5/base.h"
+	"allegro5/events.h"
+	"allegro5/keycodes.h"
+
+1374889001 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\keycodes.h
+
+1423030331 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\mouse.h
+	"allegro5/base.h"
+	"allegro5/events.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\touch_input.h
+	"allegro5/base.h"
+	"allegro5/events.h"
+
+1286709932 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\memory.h
+
+1354537335 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\monitor.h
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\mouse_cursor.h
+	"allegro5/base.h"
+
+1337481027 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\render_state.h
+
+1363127582 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\shader.h
+	"allegro5/base.h"
+	"allegro5/transformations.h"
+
+1427940464 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\transformations.h
+	"allegro5/display.h"
+
+1333144478 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\system.h
+	"allegro5/config.h"
+	"allegro5/path.h"
+
+1289087210 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\threads.h
+	"allegro5/altime.h"
+
+1441679042 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\timer.h
+	"allegro5/base.h"
+
+1440992595 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\tls.h
+	"allegro5/base.h"
+
+1368863806 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\alcompat.h
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\allegro_image.h
+
+1393645666 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\allegro_primitives.h
+	<allegro5/allegro.h>
+
+1442282078 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\allegro_font.h
+	"allegro5/allegro.h"
+
+1329948386 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\allegro_ttf.h
+	"allegro5/allegro.h"
+	"allegro5/allegro_font.h"
+
+1447883510 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\allegro_audio.h
+	"allegro5/allegro.h"
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113distro\include\\allegro5\allegro_acodec.h
+	"allegro5/allegro.h"
+	"allegro5/allegro_audio.h"
+
+1457035469 c:\ipl\gravstorm\src\collisions.h
+
+1457476319 c:\ipl\gravstorm\src\game.h
+
+1457038797 c:\ipl\gravstorm\src\objects.h
+
+1457468407 source:c:\ipl\gravstorm\src\drawing.c
+	<stdio.h>
+	"allegro5/allegro.h"
+	"allegro5/allegro_image.h"
+	"allegro5/allegro_primitives.h"
+	"allegro5/allegro_font.h"
+	"allegro5/allegro_audio.h"
+	"game.h"
+	"drawing.h"
+	"objects.h"
+	"inputs.h"
+
+1457043352 c:\ipl\gravstorm\src\drawing.h
+
+1457041943 c:\ipl\gravstorm\src\inputs.h
+
+1457517719 source:c:\ipl\gravstorm\src\game.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"allegro5/allegro.h"
+	"allegro5/allegro_image.h"
+	"allegro5/allegro_primitives.h"
+	"allegro5/allegro_font.h"
+	"allegro5/allegro_ttf.h"
+	"allegro5/allegro_audio.h"
+	"allegro5/allegro_acodec.h"
+	"game.h"
+	"drawing.h"
+	"init.h"
+	"collisions.h"
+	"objects.h"
+	"inputs.h"
+	<wiringPi.h>
+
+1457035469 c:\ipl\gravstorm\src\init.h
+
+1457038620 source:c:\ipl\gravstorm\src\init.c
+	<string.h>
+	<stdio.h>
+	<ctype.h>
+	"allegro5/allegro.h"
+	"allegro5/allegro_image.h"
+	"allegro5/allegro_primitives.h"
+	"allegro5/allegro_font.h"
+	"allegro5/allegro_audio.h"
+	"game.h"
+	"init.h"
+	"objects.h"
+	"inputs.h"
+	"drawing.h"
+	<wiringPi.h>
+
+1457043171 source:c:\ipl\gravstorm\src\inputs.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"allegro5/allegro.h"
+	"allegro5/allegro_image.h"
+	"allegro5/allegro_primitives.h"
+	"allegro5/allegro_font.h"
+	"allegro5/allegro_audio.h"
+	"allegro5/allegro_acodec.h"
+	"game.h"
+	"inputs.h"
+	"objects.h"
+
+1457039450 source:c:\ipl\gravstorm\src\objects.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"allegro5/allegro.h"
+	"allegro5/allegro_image.h"
+	"allegro5/allegro_primitives.h"
+	"allegro5/allegro_font.h"
+	"allegro5/allegro_audio.h"
+	"allegro5/allegro_acodec.h"
+	"game.h"
+	"objects.h"
+	"init.h"
+
+1457043243 source:c:\ipl\gravstorm\src\menu.c
+	<stdio.h>
+	<stdlib.h>
+	"allegro5/allegro.h"
+	"allegro5/allegro_image.h"
+	"allegro5/allegro_primitives.h"
+	"allegro5/allegro_font.h"
+	"allegro5/allegro_ttf.h"
+	"allegro5/allegro_audio.h"
+	"allegro5/allegro_acodec.h"
+	"game.h"
+	"drawing.h"
+	"init.h"
+	"collisions.h"
+	"objects.h"
+	"inputs.h"
+
+1441918212 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\allegro.h
+	"allegro5/base.h"
+	"allegro5/altime.h"
+	"allegro5/bitmap.h"
+	"allegro5/bitmap_draw.h"
+	"allegro5/bitmap_io.h"
+	"allegro5/bitmap_lock.h"
+	"allegro5/blender.h"
+	"allegro5/clipboard.h"
+	"allegro5/color.h"
+	"allegro5/config.h"
+	"allegro5/cpu.h"
+	"allegro5/debug.h"
+	"allegro5/display.h"
+	"allegro5/drawing.h"
+	"allegro5/error.h"
+	"allegro5/events.h"
+	"allegro5/file.h"
+	"allegro5/fixed.h"
+	"allegro5/fmaths.h"
+	"allegro5/fshook.h"
+	"allegro5/fullscreen_mode.h"
+	"allegro5/haptic.h"
+	"allegro5/joystick.h"
+	"allegro5/keyboard.h"
+	"allegro5/memory.h"
+	"allegro5/monitor.h"
+	"allegro5/mouse.h"
+	"allegro5/mouse_cursor.h"
+	"allegro5/path.h"
+	"allegro5/render_state.h"
+	"allegro5/shader.h"
+	"allegro5/system.h"
+	"allegro5/threads.h"
+	"allegro5/timer.h"
+	"allegro5/tls.h"
+	"allegro5/touch_input.h"
+	"allegro5/transformations.h"
+	"allegro5/utf8.h"
+	"allegro5/alcompat.h"
+
+1453596062 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\base.h
+	<errno.h>
+	<limits.h>
+	<limits.h>
+	<stdarg.h>
+	<stddef.h>
+	<stdlib.h>
+	<time.h>
+	<string.h>
+	<sys/types.h>
+	<fortify/fortify.h>
+	<dmalloc.h>
+	"allegro5/internal/alconfig.h"
+
+1405877029 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\internal\alconfig.h
+	"allegro5/platform/alplatf.h"
+	"allegro5/platform/alwatcom.h"
+	"allegro5/platform/almngw32.h"
+	"allegro5/platform/albcc32.h"
+	"allegro5/platform/almsvc.h"
+	"allegro5/platform/aliphonecfg.h"
+	"allegro5/platform/alosxcfg.h"
+	"allegro5/platform/alandroidcfg.h"
+	"allegro5/platform/alraspberrypicfg.h"
+	"allegro5/platform/alucfg.h"
+	"allegro5/platform/allegro_sdl_config.h"
+	"allegro5/platform/astdint.h"
+	"allegro5/platform/astdbool.h"
+
+1453679353 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\alplatf.h
+
+1365814994 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\alwatcom.h
+	<io.h>
+	<i86.h>
+	<conio.h>
+	<fcntl.h>
+	<direct.h>
+	<malloc.h>
+
+1365815668 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\almngw32.h
+	<io.h>
+	<fcntl.h>
+	<direct.h>
+	<malloc.h>
+	"allegro5/platform/alplatf.h"
+
+1365815668 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\albcc32.h
+	<io.h>
+	<fcntl.h>
+	<direct.h>
+	<malloc.h>
+
+1365815668 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\almsvc.h
+	<io.h>
+	<fcntl.h>
+	<direct.h>
+	<malloc.h>
+	"allegro5/platform/alplatf.h"
+
+1354191040 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\aliphonecfg.h
+	<fcntl.h>
+	<unistd.h>
+
+1365815668 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\alosxcfg.h
+	"allegro5/platform/alplatf.h"
+
+1324189852 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\alandroidcfg.h
+
+1354191040 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\alraspberrypicfg.h
+	<fcntl.h>
+	<unistd.h>
+	<sys/types.h>
+
+1365814994 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\alucfg.h
+	<fcntl.h>
+	<unistd.h>
+	"alunix.h"
+	"allegro5/platform/alplatf.h"
+
+1266925320 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\alunix.h
+
+1405877029 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\allegro_sdl_config.h
+	<fcntl.h>
+	<unistd.h>
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\astdint.h
+	<inttypes.h>
+	<stdint.h>
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\platform\astdbool.h
+	<stdbool.h>
+
+1285073381 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\altime.h
+	"allegro5/base.h"
+
+1437143311 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\bitmap.h
+	"allegro5/color.h"
+
+1440807192 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\color.h
+	"allegro5/base.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\bitmap_draw.h
+	"allegro5/bitmap.h"
+
+1443026217 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\bitmap_io.h
+	"allegro5/bitmap.h"
+	"allegro5/file.h"
+
+1419211222 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\file.h
+	"allegro5/base.h"
+	"allegro5/path.h"
+	"allegro5/utf8.h"
+
+1337489393 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\path.h
+	"allegro5/base.h"
+
+1337165689 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\utf8.h
+	"allegro5/base.h"
+
+1418623615 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\bitmap_lock.h
+	"allegro5/bitmap.h"
+
+1435289814 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\blender.h
+
+1441570820 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\clipboard.h
+	"allegro5/base.h"
+	"allegro5/display.h"
+	"allegro5/utf8.h"
+
+1450573311 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\display.h
+	"allegro5/bitmap.h"
+	"allegro5/color.h"
+	"allegro5/events.h"
+
+1443700444 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\events.h
+	"allegro5/altime.h"
+
+1351456157 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\config.h
+	"allegro5/file.h"
+
+1441918212 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\cpu.h
+	"allegro5/base.h"
+
+1351638189 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\debug.h
+	<assert.h>
+	"allegro5/base.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\drawing.h
+	"allegro5/color.h"
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\error.h
+	"allegro5/base.h"
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\fixed.h
+	"allegro5/base.h"
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\fmaths.h
+	"allegro5/base.h"
+	"allegro5/fixed.h"
+	"allegro5/inline/fmaths.inl"
+
+1365812642 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\inline\fmaths.inl
+	"allegro5/error.h"
+
+1406014637 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\fshook.h
+	"allegro5/base.h"
+	"allegro5/file.h"
+	"allegro5/path.h"
+	<sys/types.h>
+
+1354536559 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\fullscreen_mode.h
+
+1433186211 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\haptic.h
+	"allegro5/base.h"
+	"allegro5/display.h"
+	"allegro5/events.h"
+	"allegro5/joystick.h"
+	"allegro5/keyboard.h"
+	"allegro5/mouse.h"
+	"allegro5/touch_input.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\joystick.h
+	"allegro5/base.h"
+	"allegro5/events.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\keyboard.h
+	"allegro5/base.h"
+	"allegro5/events.h"
+	"allegro5/keycodes.h"
+
+1374889001 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\keycodes.h
+
+1423030331 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\mouse.h
+	"allegro5/base.h"
+	"allegro5/events.h"
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\touch_input.h
+	"allegro5/base.h"
+	"allegro5/events.h"
+
+1286709932 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\memory.h
+
+1354537335 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\monitor.h
+
+1354620434 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\mouse_cursor.h
+	"allegro5/base.h"
+
+1337481027 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\render_state.h
+
+1363127582 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\shader.h
+	"allegro5/base.h"
+	"allegro5/transformations.h"
+
+1427940464 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\transformations.h
+	"allegro5/display.h"
+
+1333144478 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\system.h
+	"allegro5/config.h"
+	"allegro5/path.h"
+
+1289087210 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\threads.h
+	"allegro5/altime.h"
+
+1441679042 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\timer.h
+	"allegro5/base.h"
+
+1440992595 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\tls.h
+	"allegro5/base.h"
+
+1368863806 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\alcompat.h
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\allegro_image.h
+
+1393645666 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\allegro_primitives.h
+	<allegro5/allegro.h>
+
+1442282078 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\allegro_font.h
+	"allegro5/allegro.h"
+
+1329948386 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\allegro_ttf.h
+	"allegro5/allegro.h"
+	"allegro5/allegro_font.h"
+
+1447883510 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\allegro_audio.h
+	"allegro5/allegro.h"
+
+1281008445 c:\ipl\turboraketti\allegrodlls\a5113_new\include\allegro5\allegro_acodec.h
+	"allegro5/allegro.h"
+	"allegro5/allegro_audio.h"
+
+1457046378 source:c:\ipl\gravstorm\src\mapmaker.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"allegro5/allegro.h"
+	"allegro5/allegro_image.h"
+	"allegro5/allegro_primitives.h"
+	"allegro5/allegro_font.h"
+	"allegro5/allegro_audio.h"
+	"allegro5/allegro_acodec.h"
+	"game.h"
+

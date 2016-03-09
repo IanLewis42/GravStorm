@@ -71,8 +71,60 @@ Creating bullets bitmap
 Init Ships
 Init Bullets
 Init done
-Exiting
+Freed 1 menu bitmaps
+Ship 0 destroyed
+Game Over
 Freeing game bitmaps
 Freed 10/10 game bitmaps
+Init Keyboard
+4 Map groups
+Group: One Player
+Map: mission 1
+Map: mission 2
+Map: mission 3
+Map: final mission
+Group: Multi Player
+Map: cruciatus
+Map: neutron star
+Map: explono
+Group: TurboRaketti
+Map: sitimus
+Map: ekolos
+Map: likvidius
+Map: metarola
+Map: tropulus
+Group: TR Beta
+Map: sinneau
+Map: mutolos
+Map: keurakea
+Map: isemania
+Map: ekolos beta
+
+Selected map 0,0
+Map type:1
+Display Map:hex_orange.png
+Collision Map:hextiles_col.png
+ASCII map file:m1_map.txt
+ASCII Map: H:17 W:45
+Description file:m1_desc.txt
+Mission:1
+Time Limit:60
+Sentry Image file:sentries.png
+Sentry Collision file:sentries_col.png
+Ship first:1
+Gravity:0.050000
+Drag:2.000000
+Wrap:0
+Lives:1
+Pad 0: type:00 y:697 x:658 x:814 miners:0 jewels:0
+Pad 1: type:01 y:826 x:1298 x:1455 miners:5 jewels:0
+Pad 2: type:02 y:633 x:1939 x:2092 miners:0 jewels:5
+Sentry 0: x:995, y:798, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite5, Sprite0
+Sentry 1: x:2272, y:605, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:1000, Sprite6, Sprite0
+Max players:1
+--End of mapfile mission 1.txt--
+Exiting
+Freeing game bitmaps
+Freed 0/10 game bitmaps
 Freed 1 menu bitmaps
 Freed 6 fonts
