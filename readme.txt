@@ -153,7 +153,7 @@ I don't know how well it will work with an analogue stick.
 My wireless keyboard / trackpad (Perixx Periboard-716) seems to be detected as a USB joystick,
 but doesn't then work as one! This makes it difficult to detect how many 'real' joysticks are plugged in.
 So if you have a USB joystick, try both USB Joy 1 and USB Joy 2 in the menu.
-There is also support for an old-fashioned microswitch joystick connected to the Pi's
+There is also support in the Raspberry Pi version for an old-fashioned microswitch joystick connected to the Pi's
 GPIO header. To enable this, use the command line:
 
 sudo ./gravstorm -g
@@ -163,7 +163,7 @@ have a look in the source, or ask me.
 
 KNOWN ISSUES
 ------------
-There's a significant lag between events that cause sounds and the sounds themselves.
+On Raspberry Pi, there's a significant lag between events that cause sounds and the sounds themselves.
 I've spent a while trying to fix it. If anyone knows all about ALSA, please get in touch!
 
 MAKING MAPS
