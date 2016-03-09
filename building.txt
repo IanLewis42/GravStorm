@@ -8,7 +8,7 @@ o Raspberry Pi
   To install it, I followed this tutorial:
   http://joshua14.homelinux.org/blog/?p=1726
 
-  There's a pair of #defines at the top of game.h to set the target. Make sure tese are:
+  There's a pair of #defines at the top of game.h to set the target. Make sure these are:
   #define  RPI 1
   #define  WINDOWS 0
   
@@ -30,14 +30,21 @@ o Raspberry Pi
   https://ventilatorxor.wordpress.com/2011/08/07/linux-allegro5-static-linking-for-beginners/
 
 o Windows
-
-
-
+  I use Code:Blocks and MinGW to build under windows. The project file is included (gravstorm.cbp)
+  There's a tutorial for setting up allegro for codeblocks here:
+  https://wiki.allegro.cc/index.php?title=Windows,_Code::Blocks_and_Allegro_5
+  and a forum thread which includes all the things that weren't in the tutorial here :-)
+  https://www.allegro.cc/forums/thread/616089
+  I might update the tutorial if I get around to it....
+  
+  There's a pair of #defines at the top of game.h to set the target. Make sure these are:
+  #define  RPI 0
+  #define  WINDOWS 1
 
 
 Good Luck!
 
 Ian
 
-IPL 22/2/16
+IPL 09/03/16
 gravstorm9@gmail.com
