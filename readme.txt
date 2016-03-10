@@ -14,7 +14,8 @@ If you're curious as to what it looks like, there should be some screenshots in 
 REQUIREMENTS
 ------------
 o Raspberry Pi
-  I built/ran it under Raspbian. If you just want to run it, you'll need Raspbian too. I've tested it under both Wheezy and Jessie versions of Raspbian and it seems OK. If you want to build it yourself, feel free to try under any OS you want ;-) ~10MB free disk/SD card space.
+  I built/ran it under Raspbian. If you just want to run it, you'll need Raspbian too. I've tested it under both Wheezy and Jessie versions of Raspbian and it seems OK. If you want to build it yourself, feel free to try under any OS you want ;-)
+  ~10MB free disk/SD card space.
   TV / Monitor plugged into the Pi. It only runs full-screen (not in a window) and VNC doesn't display anything. I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your display isn't big enough. Feedback welcome :-)
   There don't seem to be any dependencies that aren't in the standard Raspbian Jessie image (as of 23/02/16).
     
@@ -51,10 +52,10 @@ o Raspberry Pi
     - set file permissions:
       chmod +x gravstorm
       
-    Note that 'gravstorm.exe' is the windows executable, and if you're not running windows, you can delete it.
-
 o Windows
-  Unzip wherever you like. You should get a folder named 'gravstorm' (or gravstorm-master if Guthub changes it) and inside that, folders called 'data' and 'src'. 
+  Unzip wherever you like. You should get a folder named 'gravstorm' (or gravstorm-master if GitHub changes it) and inside that, folders called 'data' and 'src'. 
+  
+  Note that the Windows executable is called 'gravstorm.exe' ; the Raspberry Pi executabe is just 'gravstorm'. You can delete whichever one you don't need.  
 
 STARTING THE GAME
 ------------------
@@ -73,8 +74,6 @@ o Raspberry Pi
 o Windows
   In the gravstorm folder, there is a file called 'gravstorm.exe'.
   Double click this to run it. Feel free to make a shortcut, pin to the start menu or whatever.
-  
-  Note that the Windows executable is called 'gravstorm.exe' ; the Raspberry Pi executabe is just 'gravstorm'. You can delete whichever one you don't need.
   
 MENU
 -----
@@ -135,15 +134,13 @@ JOYSTICKS
 ---------
 Joysticks (only 2 at the moment - could be extended) can be connected via USB. I've tested with a Speedlink Competition Pro USB, but I don't see why any joystick won't work. I don't know how well it will work with an analogue stick.
 
-My wireless keyboard / trackpad (Perixx Periboard-716) seems to be detected as a USB joystick, but doesn't then work as one! This makes it difficult to detect how many 'real' joysticks are plugged in.So if you have a USB joystick, try both USB Joy 1 and USB Joy 2 in the menu.
+My wireless keyboard / trackpad (Perixx Periboard-716) seems to be detected as a USB joystick, but doesn't then work as one! This makes it difficult to detect how many 'real' joysticks are plugged in. So if you have a USB joystick, try both USB Joy 1 and USB Joy 2 in the menu.
 
-There is also support in the Raspberry Pi version for an old-fashioned microswitch joystick connected to the Pi's
-GPIO header. To enable this, use the command line:
+There is also support in the Raspberry Pi version for an old-fashioned microswitch joystick connected to the Pi's GPIO header. To enable this, use the command line:
 
 sudo ./gravstorm -g
 
-sudo is required for access to the GPIO hardware. If you want to know which pins do what, 
-have a look in the source, or ask me.
+sudo is required for access to the GPIO hardware. If you want to know which pins do what, have a look in the source, or ask me.
 
 TROUBLESHOOTING
 ----------------
@@ -229,7 +226,7 @@ o pad <type> <y> <min x> <max x> <miners> <jewels>  REQUIRED (at least one)
     e.g. if pad type is 10 then it is home for ship 0, and will recharge fuel for any ship that lands on it
          if pad type is 9F then it's not home for any ship (F = 15, which is > 3) but will recharge fuel and shield for any ship (8+1 = 9)
   <y> is the y-coordinate of the pad. 0 is the top of the map, and it becomes more positive as you go down. The easiest way to find the y-coordinate is to start the game with the debug switch -d, try to land on the pad, and note the y-cordintae displayed in the status bar when you crash on the pad.
-  <min x> and <max x> are the x coordinates of the left and right hnad edges of the pad. If this is the home pad for a ship, it will appear half way in between these.
+  <min x> and <max x> are the x coordinates of the left and right hand edges of the pad. If this is the home pad for a ship, it will appear half way in between these.
   <miners> and <jewels> are the number of miners stranded on this pad for the ship to rescue / number of jewels to be collected (both only applicable on 'mission' levels)
     
 o blackhole <x> <y> <g>
@@ -283,7 +280,7 @@ There is a separate mapmaker program. This is unimaginatively called 'mapmaker'.
 
 mapmaker "mission 1.txt"
   
-Quotes are required if there's a space in the filename. If you run it without an filename, it will immediately exit, so double clicking from Windows explorer won't work. In WIndows, open a command window by clicking on the start button and typing cmd <return>, then navigate to the 'gravstorm' directory, and type the command line as above. 
+Quotes are required if there's a space in the filename. If you run it without an filename, it will immediately exit, so double clicking from Windows explorer won't work. In Windows, open a command window by clicking on the start button and typing cmd <return>, then navigate to the 'gravstorm' directory, and type the command line as above. 
 
 Note that the Windows executable is called 'mapmaker.exe' ; the Raspberry Pi executabe is just 'mapmaker'. You can delete whichever one you don't need.
 
@@ -319,5 +316,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 08/03/16
+IPL 10/03/16
 gravstorm9@gmail.com
