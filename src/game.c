@@ -119,10 +119,10 @@ int debug_key = 0;
 FILE* logfile;
 
 //Local prototypes
-int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
+int  DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  GameOver(void);
-void  FreeGameBitmaps(void);
+void FreeGameBitmaps(void);
 void FreeFonts(void);
 void draw_debug(void);
 
@@ -165,6 +165,8 @@ int main (int argc, char *argv[]){
     al_install_audio();
 	al_init_acodec_addon();
 
+	fprintf(logfile,"Init Allegro done\n");
+
     srand(time(NULL));
 
 	//move to objects / init??
@@ -194,7 +196,7 @@ int main (int argc, char *argv[]){
 
     if ((icon = al_load_bitmap("gs_icon.png")) == NULL)  fprintf(logfile,"gs_icon.png load fail\n");
 
-    al_set_display_icon(display, icon);
+    if (icon) al_set_display_icon(display, icon);
 
     //font = al_load_font("arial.ttf", 20, 0);	//debug font
     if ((font       = al_load_font("miriam.ttf", 20, 0))          == NULL)  fprintf(logfile,"miriam.ttf load fail\n"); //debug font
