@@ -15,4 +15,4 @@ pad 1    898  2690 2790
 max_players 2
 
 ;    x   x   y   y
-race 448 448 520 780
+;race 448 448 520 780
