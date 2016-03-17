@@ -12,7 +12,4 @@ drag    2
 pad 0    581  260  360  
 pad 1    933  1107  1207 
 
-;    xmin xmax ymin ymax g    drag
-area 0    150  270  650 -0.05 2
-
 max_players 2
