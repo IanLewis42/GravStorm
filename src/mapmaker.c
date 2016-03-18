@@ -1,17 +1,14 @@
 /*
 	GravStorm
     Copyright (C) 2015-2016 Ian Lewis
-
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -33,6 +30,7 @@ ALLEGRO_DISPLAY *display;
 ALLEGRO_BITMAP *tiles;
 ALLEGRO_BITMAP *ships;
 ALLEGRO_BITMAP *mouse_bmp;
+ALLEGRO_BITMAP *mouse2_bmp;
 ALLEGRO_BITMAP *sentries;
 
 #define MAX_MAP_WIDTH 100
@@ -45,6 +43,9 @@ float scroll_x, scroll_y;
 ALLEGRO_BITMAP *icon;
 ALLEGRO_FONT *font;
 ALLEGRO_MOUSE_STATE state;
+ALLEGRO_MOUSE_CURSOR *cursor;
+ALLEGRO_MOUSE_CURSOR *cursor2;
+
 
 MapType Map;
 int map_height=0, map_width=0;
@@ -111,7 +112,8 @@ int main (int argc, char *argv[]){
 	if ((font = al_load_font("miriam.ttf", 30, 0)) == NULL)  fprintf(stderr,"miriam.ttf load fail"); //debug font
 	if ((tiles = al_load_bitmap(Map.display_file_name)) == NULL)  fprintf(stderr,"%s load fail",Map.display_file_name);
     if ((ships = al_load_bitmap("ships.png")) == NULL)  fprintf(stderr,"ships.png load fail");
-    if ((mouse_bmp = al_load_bitmap("mouse.png")) == NULL)  fprintf(stderr,"mouse.png load fail");
+    if ((mouse_bmp = al_load_bitmap("mouse1.png")) == NULL)  fprintf(stderr,"mouse1.png load fail");
+	if ((mouse2_bmp = al_load_bitmap("mouse2.png")) == NULL)  fprintf(stderr,"mouse2.png load fail");
 	if ((sentries = al_load_bitmap(Map.sentry_file_name)) == NULL)  fprintf(stderr,"%s",Map.sentry_file_name);
 	load_map_file();
 
@@ -122,6 +124,11 @@ int main (int argc, char *argv[]){
     al_get_mouse_state(&state);
     mouse_x = state.x;
     mouse_y = state.y;
+
+    cursor = al_create_mouse_cursor(mouse_bmp, 0, 0);
+    cursor2 = al_create_mouse_cursor(mouse2_bmp, 0, 0);
+    al_set_mouse_cursor(display, cursor);
+    //al_show_mouse_cursor(display);
 
     timer = al_create_timer(1.0 / 60);
     queue = al_create_event_queue();
@@ -206,6 +213,7 @@ int main (int argc, char *argv[]){
             	if (mouse_x < 150)	//in sidebar so pick up 'new' tile
             	{
 					dragging = true;
+					al_set_mouse_cursor(display, cursor2);
 					dragged_tile = mouse_y/(tile_height+5) - tile_offset;
 				}
 				//check in total map here?
@@ -218,13 +226,17 @@ int main (int argc, char *argv[]){
             			 mouse_tile_y >= 0 && mouse_tile_y < map_height)	//and pick up what we clicked on
 				{
 					dragging = true;
+					al_set_mouse_cursor(display, cursor2);
 					dragged_tile = tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH];	//pick up tile
 				}
             }
 			else if (mouse == 2)	//right click
 			{
 				if (dragging) 			//if we're dragging, stop it
+                {
 					dragging = false;
+					al_set_mouse_cursor(display, cursor);
+                }
 				else if (mouse_x >150)	//if not dragging, and not in status bar
 				{
 					if (mouse_tile_x >= 0 && mouse_tile_x < map_width &&	//and we're in the map
@@ -463,10 +475,14 @@ void sidebar_draw(void)
 	//if (mouse == 1)
 	if (dragging)
     	//al_draw_bitmap_region(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width, mouse_y-0.5*tile_height,0);
-		al_draw_scaled_bitmap(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width, mouse_y-0.5*tile_height, tile_width*zoom, tile_height*zoom, 0);
+		al_draw_scaled_bitmap(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width*zoom, mouse_y-0.5*tile_height*zoom, tile_width*zoom, tile_height*zoom, 0);
 
+	//look at https://www.allegro.cc/manual/5/mouse.html
 	#if RPI
-	al_draw_bitmap_region(mouse_bmp, 0, 0, 25, 25, mouse_x, mouse_y,0);	//mouse cursor
+	if (dragging)
+		al_draw_bitmap_region(mouse2_bmp, 0, 0, 25, 25, mouse_x, mouse_y,0);	//mouse cursor
+	else
+		al_draw_bitmap_region(mouse_bmp, 0, 0, 25, 25, mouse_x, mouse_y,0);	//mouse cursor
 	#endif
 }
 //parse:
@@ -762,3 +778,6 @@ void Exit(void)
     al_destroy_display(display);
 	exit(0);
 }
+
+
+
