@@ -297,11 +297,10 @@ Keyboard controls are:
 
 The mouse can be used to edit tiled maps as follows:
 - Left click and release to 'pick up' a tile (either from the map, or the preview area on the left)
-- Once a tile is picked up, left click and release to place a new copy of it in the map, or left click 
-  and drag to 'paint' a series of tiles. 
-- Right click and release to 'drop' the tile. 
-- To erase, just paint over with 'empty space' (tile zero) N.B. It can be hard to tell whether you have
-  an empty tile picked up, or no tile. 
+  When a tile is picked up, the mouse cursor changes from an arrow to a hand.
+- Once a tile is picked up, left click and release to place a new copy of it in the map, or left click and drag to 'paint' a series of tiles. 
+- Right click and release to 'drop' the tile. The cursor will change back to an arrow.
+- To erase, just paint over with 'empty space' (tile zero) N.B. You can tell whether you have  an empty tile picked up, or no tile by seeing if the mouse cursor is an arrow or a hand.
   
 Alternatively, you can edit the ascii map file in a text editor, and reload it using <return>.
 
