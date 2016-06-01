@@ -169,11 +169,12 @@ o map_type <0|1>
   1 - Tiled map
   
 o display_map <filename> only png format supported. REQUIRED
-  Image to display, or images of all the tiles, arranged in a single horizontal line. If tiles, each tile must be 64x64 pixels, so the whole image must be (n*64) x 64 pixels. Tiles are displayed 'normal' size;  single image maps are displayed double size. 
+  Image to display, or images of all the tiles, arranged with eight tiles per row. If tiles, each tile must be 64x64 pixels, so the whole image must be (8*64) x (n*64) pixels, where n=number of tiles/8. 
+  Tiles are displayed 'normal' size;  single image maps are displayed double size. 
   
 o collision_map <filename> only png format supported. REQUIRED
   Similar to display_map, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). 
-  If tiles, this should be HALF-SIZE, so each tile must be 32x32 pixels, and the whole image must be (n*32) x 32 pixels.
+  If tiles, this should be HALF-SIZE, so each tile must be 32x32 pixels, and the whole image must be (8*32) x (n*32) pixels.
   
 o ascii_map <filename> 
   Shows the arrangement of tiles to make the map. ASCII format, 0-9 for first 10 tiles, A-Z for next 26. ' ' (space) doubles as 0. Only applies if map_type = 1
@@ -216,16 +217,15 @@ o drag
 
 o pad <type> <y> <min x> <max x> <miners> <jewels>  REQUIRED (at least one)
   This describes a landing pad. Note that this does NOT draw graphics for the pad. These must be part of the display_map file. Maximum 12 pads allowed.
-  <type> is a 16-bit hexadecimal number.
-    Lowest nibble (digit) is the ship that this pad is 'home' for (0-3). Each ship always appears on its home pad, and will get shield, fuel and both types of ammo recharged when on it. If this digit is > 3 then this pad will be a general pad, not home for any ship.
-    Next nibble up determines which attributes will be recharged for any ship landing on this pad, mapped as follows:
+  <type> is a 16-bit *hexadecimal* number.
+    Lowest nibble (digit) is the ship that this pad is 'home' for (0-3). Each ship always appears on its home pad, and will get shield, fuel and both types of ammo recharged when on it. If this digit is >3 then this pad will be a general pad, not home for any ship.
+    Next nibble up determines which attributes will be recharged for *any* ship landing on this pad, mapped as follows:
     FUEL   0x0010
     AMMO1  0x0020
     AMMO2  0x0040
     SHIELD 0x0080
-    e.g. if pad type is 10 then it is home for ship 0, and will recharge fuel for any ship that lands on it
-         if pad type is 9F then it's not home for any ship (F = 15, which is > 3) but will recharge fuel and shield for any ship (8+1 = 9)
-  <y> is the y-coordinate of the pad. 0 is the top of the map, and it becomes more positive as you go down. The easiest way to find the y-coordinate is to start the game with the debug switch -d, try to land on the pad, and note the y-cordintae displayed in the status bar when you crash on the pad.
+    e.g. if pad type is 10 then it is home for ship 0, and will recharge fuel for any ship that lands on it. If pad type is 9F then it's not home for any ship (F = 15, which is > 3) but will recharge fuel and shield for any ship (8+1 = 9)
+  <y> is the y-coordinate of the pad. 0 is the top of the map, and it becomes more positive as you go down. The easiest way to find the y-coordinate is to start the game with the debug switch -d, try to land on the pad, and note the y-cordinate displayed in the status bar when you crash on the pad.
   <min x> and <max x> are the x coordinates of the left and right hand edges of the pad. If this is the home pad for a ship, it will appear half way in between these.
   <miners> and <jewels> are the number of miners stranded on this pad for the ship to rescue / number of jewels to be collected (both only applicable on 'mission' levels)
     
@@ -235,8 +235,7 @@ o blackhole <x> <y> <g>
   <g> gravity. Typically 5
 
 o sentry <x> <y> <direction> <type>(0/1/2) <period> <probability> <random> <range> <alive_sprite> <dead_sprite>
-  Describes a sentry; a stationary object wich fires bullets. This DOES draw the sentry, using a sprite taken from the 
-  sentry_display file defined earlier. Maximum 30 sentries allowed.
+  Describes a sentry; a stationary object wich fires bullets. This DOES draw the sentry, using a sprite taken from the sentry_display file defined earlier. Maximum 30 sentries allowed.
   
   <x> <y> position of the sentry. 
   
@@ -291,9 +290,9 @@ Keyboard controls are:
 - Home:              return to centre of map, zoom level 1.0
 - Q/A:               scroll tile preview on left
 - Return:            reload .txt file
-- S:		     save modified ASCII map file. N.B. Overwrites without warning!
+- S:		     save modified ASCII map file. 
 - G:                 toggle grid off/white/grey/black
-- Escape:            exit (without warning!)
+- Escape:            exit 
 
 The mouse can be used to edit tiled maps as follows:
 - Left click and release to 'pick up' a tile (either from the map, or the preview area on the left)
