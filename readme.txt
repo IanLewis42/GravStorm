@@ -15,7 +15,7 @@ REQUIREMENTS
 ------------
 o Raspberry Pi
   I built/ran it under Raspbian. If you just want to run it, you'll need Raspbian too. I've tested it under both Wheezy and Jessie versions of Raspbian and it seems OK. If you want to build it yourself, feel free to try under any OS you want ;-)
-  ~10MB free disk/SD card space.
+  ~20MB free disk/SD card space.
   TV / Monitor plugged into the Pi. It only runs full-screen (not in a window) and VNC doesn't display anything. I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your display isn't big enough. Feedback welcome :-)
   There don't seem to be any dependencies that aren't in the standard Raspbian Jessie image (as of 23/02/16).
     
@@ -25,7 +25,7 @@ o Windows
   If you run it on any other version, please let me know how you get on.
   
 o Android  
-  Possible (If you've ever made anything for Android, and want to help, please get in touch)
+  Development is under consideration (If you've ever made anything for Android, and want to help, please get in touch)
 
 o iOS
   No chance. Unless you want to do it :-)
@@ -33,7 +33,7 @@ o iOS
 INSTALLATION
 ------------
 Go to https://github.com/IanLewis42/GravStorm 
-Click the button labelled 'Download Zip'.
+Click the button labelled 'Clone or Download' and then 'Download Zip'.
 
 Save the zip file, and unzip the contents of this into the directory of your choice. 
 
@@ -46,7 +46,7 @@ o Raspberry Pi
 
   (Github seems to make the directory name 'gravstorm-master'. You can leave it, or change it. I'm going to refer to it as 'gravstorm').
 
-  You may then need to change the file permissions to make the game executable. Start up a terminal (e.g. lxterminal) 
+  You may then need to change the file permissions to make the game executable. Start up a terminal (e.g. LXterminal) 
     - change into the gravstorm directory:
       cd gravstorm
     - set file permissions:
@@ -65,7 +65,7 @@ o Raspberry Pi
   cd gravstorm
   ./gravstorm
 
-  NOTE: My Pi boots straight into the GUI, and I normally run Gravstorm via LXTerminal. It also works if you run it direct from the command line, without the desktop GUI running. If try to run it from the desktop/gui and get an error message (perhaps similar to the one shown below) then try it without the GUI.
+  NOTE: My Pi boots straight into the GUI, and I normally run Gravstorm via LXTerminal. It also works if you run it direct from the command line, without the desktop GUI running. If you try to run it from the desktop/gui and get an error message (perhaps similar to the one shown below) then try it without the GUI.
   ***
   XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":0.0"
   after 17 requests (17 known processed) with 0 events remaining.
@@ -80,7 +80,7 @@ MENU
 It's supposed to be intuitive / self explanatory, but just in case....
 
 Navigate the menu with the cursor keys or any of the selected control options.
-First column is the map/level you'll be playing on. Some levels allow up to 2 players, some allow up to 4.
+First column is the map/level you'll be playing on. Some levels are single player, allow up to 2 players, some allow up to 4.
 Next column selects the player.
 Next column selects the control method for the selected player (Keys, joystick, N/A). 
   The FIRST instance of N/A in this column sets the number of active players.
@@ -126,7 +126,7 @@ If you press Down/Fire2 when on your landing pad, a config menu will appear. Thi
 
 EXITING
 -------
-If the game is completed (i.e. one player loses all lives, or mission complete) press 'thust' to return to the menu. 
+If the game is completed (i.e. one player loses all lives, or mission completed) press 'thust' to return to the menu. 
 If you want to exit the level before completion, press 'escape' to go back to the menu. 
 Press 'escape' to exit from the menu back to the command prompt.
 
@@ -169,8 +169,14 @@ o map_type <0|1>
   1 - Tiled map
   
 o display_map <filename> only png format supported. REQUIRED
-  Image to display, or images of all the tiles, arranged with eight tiles per row. If tiles, each tile must be 64x64 pixels, so the whole image must be (8*64) x (n*64) pixels, where n=number of tiles/8. 
+  Image to display, or images of all the tiles, arranged with eight tiles per row. If tiles, each tile must be 64x64 pixels, so the whole image must be (8*64) x (n*64) pixels, where n=number of tiles/8. The first tile must be entirely empty space, i.e. contain no objects that the ship could collide with.
   Tiles are displayed 'normal' size;  single image maps are displayed double size. 
+  
+o background <filename> only png format supported.
+  This should specift a 128x128 image which will be used as a scrolling 'parallax' background. Currently only works for tiled maps (type 1)
+  
+o bg_fade <value>
+  Specifying this enables background fadng. This means that the background will be invisible at the top of the map, and become more visible as you go down. The value is the diatance from the top (in pixels) where the background starts to appear.
   
 o collision_map <filename> only png format supported. REQUIRED
   Similar to display_map, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). 
@@ -209,10 +215,10 @@ o time_limit <number of seconds>
 o max_players <1-4>
   Default = 1
 
-o gravity
+o gravity <value>
   Default = 0.05
   
-o drag
+o drag <value>
   Air resistance. Default = 2
 
 o pad <type> <y> <min x> <max x> <miners> <jewels>  REQUIRED (at least one)
@@ -299,7 +305,7 @@ The mouse can be used to edit tiled maps as follows:
   When a tile is picked up, the mouse cursor changes from an arrow to a hand.
 - Once a tile is picked up, left click and release to place a new copy of it in the map, or left click and drag to 'paint' a series of tiles. 
 - Right click and release to 'drop' the tile. The cursor will change back to an arrow.
-- To erase, just paint over with 'empty space' (tile zero) N.B. You can tell whether you have  an empty tile picked up, or no tile by seeing if the mouse cursor is an arrow or a hand.
+- To erase, either right click and release while no tile is picked up, or just paint over with 'empty space' (tile zero) N.B. You can tell whether you have an empty tile picked up, or no tile by seeing if the mouse cursor is an arrow or a hand.
   
 Alternatively, you can edit the ascii map file in a text editor, and reload it using <return>.
 
