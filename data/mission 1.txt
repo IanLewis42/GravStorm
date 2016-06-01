@@ -1,5 +1,5 @@
 map_type      1
-display_map   hex_orange.png
+display_map   hex_red.png
 collision_map hextiles_col.png
 ascii_map     m1_map.txt
 description   m1_desc.txt
