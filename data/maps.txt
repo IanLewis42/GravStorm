@@ -4,9 +4,10 @@ mission 2
 mission 3
 final mission
 :Multi Player
+forest
+reactor core
 cruciatus
 neutron star
-explono
 :TurboRaketti
 sitimus
 ekolos
