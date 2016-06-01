@@ -1,5 +1,6 @@
 map_type      1
 display_map   hex_blue.png
+background    hex_bg.png
 collision_map hextiles_col.png
 ascii_map     map.txt
 description   fm_desc.txt
@@ -10,6 +11,7 @@ time_limit 250
 sentry_display   sentries.png
 sentry_collision sentries_col.png
 
+bg_fade	      256
 ship_first    1
 
 gravity 0.05

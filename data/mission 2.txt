@@ -1,6 +1,7 @@
 map_type      1
 display_map   hex_green.png
 collision_map hextiles_col.png
+background    hex_bg.png
 ascii_map     m2_map.txt
 description   m2_desc.txt
 mission	      1
@@ -10,6 +11,7 @@ time_limit 120
 sentry_display   sentries.png
 sentry_collision sentries_col.png
 
+bg_fade	      256
 ship_first    1
 
 gravity 0.05
