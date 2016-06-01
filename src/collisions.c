@@ -396,7 +396,8 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 
 							if (ship_word & bullet_word)
 							{
-								al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+								//al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+								al_play_sample_instance(particle_inst[i]);
 								Bullet[j].ttl=0;	//decrement, picked up next time.
 								Ship[i].shield -= Bullet[j].damage;				//decrement shield
 								Ship[i].xv     += Bullet[j].mass*Bullet[j].xv;	//momentum from bullet to ship
@@ -466,7 +467,8 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 
 								if (sentry_word & bullet_word)
 								{
-									al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+									//al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+									al_play_sample_instance(sentry_particle_inst);
 									Bullet[j].ttl=0;	//decrement, picked up next time.
 									Map.sentry[i].shield -= Bullet[j].damage;				//decrement shield
 									break;
@@ -594,8 +596,9 @@ void CheckSWCollisions(int num_ships)
 					for (j=0 ; j<rows ; j++)
 					{
 						if (j==24) break;
-						map_word1 = map_col_mask[tile + current_row*words_per_row];
-						ship_word1 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
+						//map_word1 = map_col_mask[tile + current_row*words_per_row]; //here
+						map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+						ship_word1 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
 						ship_word1_shift = ship_word1 >> shift1;
 
 						if((ship_col_mask[j*NUM_ANGLES + Ship[i].angle] >> shift1) & map_word1)
@@ -626,7 +629,7 @@ void CheckSWCollisions(int num_ships)
 						for (j=rows ; j<24 ; j++)	//start j where we left off - it's only used to count the ship mask.
 						{
 							//map_word1 = map_col_mask[map_idx];
-							map_word1 = map_col_mask[tile + current_row*words_per_row];
+							map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row];
 							ship_word1 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
 							ship_word1_shift = ship_word1 >> shift1;
 
@@ -661,7 +664,8 @@ void CheckSWCollisions(int num_ships)
 						for (j=0 ; j<rows ; j++)
 						{
 							if (j==24) break;
-							map_word1 = map_col_mask[tile + current_row*words_per_row];
+							//map_word1 = map_col_mask[tile + current_row*words_per_row]; //again
+							map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row];
 							ship_word1 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
 							ship_word1_shift = ship_word1 << shift2;
 
@@ -695,7 +699,8 @@ void CheckSWCollisions(int num_ships)
 							for (j=rows ; j<24 ; j++)	//start j where we left off - it's only used to count the ship mask.
 							{
 								//map_word1 = map_col_mask[map_idx];
-								map_word1 = map_col_mask[tile + current_row*words_per_row];
+								//map_word1 = map_col_mask[tile + current_row*words_per_row]; //and finally
+								map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row];
 								ship_word1 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
 								ship_word1_shift = ship_word1 << shift2;
 
@@ -857,7 +862,8 @@ void CheckBWCollisions(void)
 
 				tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
 
-				map_word = map_col_mask[tile + current_row*words_per_row];
+				//map_word = map_col_mask[tile + current_row*words_per_row];
+				map_word = map_col_mask[(tile & 0x07) + (((tile & 0xfff8)<<2)+current_row)*words_per_row];
 
 				shift =  ( (int)(Bullet[i].xpos + 0.25*j*Bullet[i].xv ) >> 1) & 0x001F;
 

@@ -66,6 +66,7 @@ int init_map(int group, int map)
     Map.type = 0;
 
     Map.display_file_name[0] = 0;
+    Map.background_file_name[0] = 0;
     Map.collision_file_name[0] = 0;
     Map.display_file_name[0] = 0;
     Map.ascii_map_file_name[0] = 0;
@@ -73,6 +74,7 @@ int init_map(int group, int map)
     Map.sentry_file_name[0] = 0;
     Map.sentry_collision_file_name[0] = 0;
 
+    Map.background_fade = 0;
   	Map.ship_first = 0;
     Map.max_players=1;
     Map.mission = 0;
@@ -108,6 +110,20 @@ int init_map(int group, int map)
 		{
 			sscanf(line+11," %s",(char *)&Map.display_file_name);
 			fprintf(logfile,"Display Map:%s\n",Map.display_file_name);
+		}
+
+		else if (strncmp(line,"background",10) == 0)
+		{
+			sscanf(line+10," %s",(char *)&Map.background_file_name);
+			fprintf(logfile,"Map background:%s\n",Map.background_file_name);
+		}
+
+		else if (strncmp(line,"bg_fade",7) == 0)
+		{
+			Map.background_fade = true;
+			sscanf(line+7," %d",&Map.bg_fade_thresh);
+			fprintf(logfile,"Background fading: On\n");
+			fprintf(logfile,"Background fade threshold:%d\n",Map.bg_fade_thresh);
 		}
 
 		else if (strncmp(line,"collision_map",13) == 0)
@@ -371,7 +387,7 @@ void load_map_file(void)
 				tile_map[i+MAX_MAP_WIDTH*j] = 0;
 			else if (line[i] >='0' && line [i] <= '9')	//ascii 0-9 map to integer 0-9
 				tile_map[i+MAX_MAP_WIDTH*j] = line[i]-'0';
-			else if (toupper(line[i]) >='A' && toupper(line[i]) <= 'Z')	//ascii A-Z(or a-z) map to 10-36
+			else if (/*toupper*/(line[i]) >='A' /*&& toupper(line[i]) <= 'Z'*/)	//ascii A-Z(or a-z) map to 10-36
 				tile_map[i+MAX_MAP_WIDTH*j] = line[i]-'A'+10;
 
 			if (line[i] != ' ')

@@ -143,9 +143,19 @@
  // *angled sentries
     *Add to thrust 1,2
  // *cross map collisions on /| tiles 
+
+ //priority:
+ // *ship 3
+ // *more sounds (yippee, clunk, wind) - engine noise instead of /as well as wind speed?
+ // slime tiles for cross map (optional)
+ // filenames for new levels
+ // new level descriptions.
+ // github - VERSION
  
  // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
  // Thrust levels 4,5,6
+ // backgrounds for type 0
+ // alpha channel on scifi tiles
  
  // *mapmaker mouse/drag stuff
  // mapmaker lean on drawing.c (and init.c?)
@@ -190,7 +200,9 @@
    //levels
    //*fix to tile display - optimize more with shifts.
    //more sounds...
-   
+   //scoring - points for win, ships left, ranking, bonus points for kill by shot, kill by 'standard' shot
+     lap times, high scores for missions
+     log in for 1/2 player
  
  //*behaviour when landed - menu doesn't appear on down / sitimus 4p ; quickfire doesn't work....
  

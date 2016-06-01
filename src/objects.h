@@ -205,6 +205,7 @@ extern ALLEGRO_SAMPLE *shoota;
 extern ALLEGRO_SAMPLE *shootb;
 extern ALLEGRO_SAMPLE *particle;
 extern ALLEGRO_SAMPLE *dead;
+extern ALLEGRO_SAMPLE *yippee;
 
 int  UpdateShips(int num_ships);
 void UpdateBullets(void);

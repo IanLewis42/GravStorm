@@ -58,6 +58,7 @@ ALLEGRO_BITMAP *panel_bmp;
 ALLEGRO_BITMAP *panel_pressed_bmp;
 ALLEGRO_BITMAP *bullets_bmp;
 ALLEGRO_BITMAP *tr_map;
+ALLEGRO_BITMAP *background;
 ALLEGRO_BITMAP *sentries;
 ALLEGRO_BITMAP *pickups;
 ALLEGRO_BITMAP *miner;
@@ -67,14 +68,25 @@ ALLEGRO_BITMAP *icon;
 ALLEGRO_BITMAP *menu_bg_bmp;
 
 //Sounds
-
-
-//ALLEGRO_SAMPLE_INSTANCE *sample;
-//ALLEGRO_SAMPLE_INSTANCE *clunk_inst;
-
+ALLEGRO_VOICE *voice;
+ALLEGRO_MIXER *mixer;
 
 ALLEGRO_SAMPLE *clunk;
 ALLEGRO_SAMPLE *wind;
+ALLEGRO_SAMPLE *shoota;
+ALLEGRO_SAMPLE *shootb;
+ALLEGRO_SAMPLE *dead;
+ALLEGRO_SAMPLE *particle;
+ALLEGRO_SAMPLE *yippee;
+
+ALLEGRO_SAMPLE_INSTANCE *clunk_inst;
+ALLEGRO_SAMPLE_INSTANCE *wind_inst[MAX_SHIPS];
+ALLEGRO_SAMPLE_INSTANCE *shoota_inst[MAX_SHIPS];
+ALLEGRO_SAMPLE_INSTANCE *shootb_inst[MAX_SHIPS];
+ALLEGRO_SAMPLE_INSTANCE *dead_inst[MAX_SHIPS];
+ALLEGRO_SAMPLE_INSTANCE *particle_inst[MAX_SHIPS];
+ALLEGRO_SAMPLE_INSTANCE *sentry_particle_inst;
+ALLEGRO_SAMPLE_INSTANCE *yippee_inst;
 
 MapType Map;
 MenuType Menu;
@@ -211,31 +223,25 @@ int main (int argc, char *argv[]){
 	fflush(logfile);
 
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
-	//fprintf(logfile,"Creating Tilemap\n");
-	//tile_map_create();
-	//make_bullet_bitmap();
 
-    /*
     voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
     mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
     al_set_default_mixer(mixer);
     al_attach_mixer_to_voice(mixer, voice);
-    clunk = al_load_sample("clunk.wav");
-    clunk_inst = al_create_sample_instance(clunk);
-    al_attach_sample_instance_to_mixer(clunk_inst, mixer);
-    al_set_sample_instance_playmode(clunk_inst, ALLEGRO_PLAYMODE_ONCE);
-    */
+    fprintf(logfile,"Setup audio voice and mixer\n");
 
-	al_reserve_samples(6);
-	fprintf(logfile,"Reserved Audio Samples\n");
-	fflush(logfile);
+
 	if ((shoota = al_load_sample  ("shootA.wav"))   == NULL)  fprintf(logfile,"shootA.wav load fail");
 	if ((shootb = al_load_sample  ("shootB.wav"))   == NULL)  fprintf(logfile,"shootB.wav load fail");
 	if ((particle = al_load_sample("particle.wav")) == NULL)  fprintf(logfile,"particle.wav load fail");
 	if ((dead = al_load_sample    ("dead.wav"))     == NULL)  fprintf(logfile,"dead.wav load fail");
 	if ((clunk = al_load_sample   ("clunk.wav"))    == NULL)  fprintf(logfile,"clunk.wav load fail");
 	if ((wind = al_load_sample    ("wind.wav"))     == NULL)  fprintf(logfile,"wind.wav load fail");
+	if ((yippee = al_load_sample  ("yippee.wav"))   == NULL)  fprintf(logfile,"yippee.wav load fail");
 	fprintf(logfile,"Loaded Audio Samples\n");
+
+	clunk_inst = al_create_sample_instance(clunk);
+    al_attach_sample_instance_to_mixer(clunk_inst, mixer);
 
 	fflush(logfile);
 
@@ -287,7 +293,7 @@ int main (int argc, char *argv[]){
 	exit = DoTitle(queue, event);
 	if (exit) return 0;
 
-	//loop to here
+    //loop to here
 	while(1)
 	{
 		exit = DoMenu(queue, event);
@@ -308,12 +314,11 @@ int main (int argc, char *argv[]){
 		fflush(logfile);
         if ((ships = al_load_bitmap("ships.png")) == NULL)  fprintf(logfile,"ships.png load fail");
         if ((pickups = al_load_bitmap("pickups.png")) == NULL)  fprintf(logfile,"pickups.png load fail");
-        //if ((miner = al_load_bitmap("miner2.png")) == NULL)  fprintf(logfile,"miner.png load fail");;
-        if ((miner = al_load_bitmap("astronaut.png")) == NULL)  fprintf(logfile,"astronaut.png load fail");;
-        if ((jewel = al_load_bitmap("jewels.png")) == NULL)  fprintf(logfile,"jewels.png load fail");;
-        if ((status_bg = al_load_bitmap("status_bg.png")) == NULL)  fprintf(logfile,"status_bg.png load fail");;
-		if ((panel_bmp = al_load_bitmap("panel.png")) == NULL)  fprintf(logfile,"panel.png load fail");;
-		if ((panel_pressed_bmp = al_load_bitmap("panel_pressed.png")) == NULL)  fprintf(logfile,"panel_pressed.png load fail");;
+        if ((miner = al_load_bitmap("astronaut.png")) == NULL)  fprintf(logfile,"astronaut.png load fail");
+        if ((jewel = al_load_bitmap("jewels.png")) == NULL)  fprintf(logfile,"jewels.png load fail");
+        if ((status_bg = al_load_bitmap("status_bg.png")) == NULL)  fprintf(logfile,"status_bg.png load fail");
+		if ((panel_bmp = al_load_bitmap("panel.png")) == NULL)  fprintf(logfile,"panel.png load fail");
+		if ((panel_pressed_bmp = al_load_bitmap("panel_pressed.png")) == NULL)  fprintf(logfile,"panel_pressed.png load fail");
 
         make_bullet_bitmap();
 
@@ -366,6 +371,38 @@ int main (int argc, char *argv[]){
 
         FreeMenuBitmaps();
 
+        //into game here
+        for (i=0 ; i<num_ships ; i++)
+        {
+            wind_inst[i] = al_create_sample_instance(wind);
+            al_attach_sample_instance_to_mixer(wind_inst[i], mixer);
+            al_set_sample_instance_playmode(wind_inst[i], ALLEGRO_PLAYMODE_LOOP);
+
+            if (num_ships > 1)  //if only 1 ship, leave sound centred
+            {
+                if(i&1) //if more than 1 ship, set alternate ships in opposite L/R channels
+                    al_set_sample_instance_pan(wind_inst[i],  1.0);
+                else
+                    al_set_sample_instance_pan(wind_inst[i], -1.0);
+            }
+            al_play_sample_instance(wind_inst[i]);
+
+            shoota_inst[i] = al_create_sample_instance(shoota);
+            al_attach_sample_instance_to_mixer(shoota_inst[i], mixer);
+            shootb_inst[i] = al_create_sample_instance(shootb);
+            al_attach_sample_instance_to_mixer(shootb_inst[i], mixer);
+            dead_inst[i] = al_create_sample_instance(dead);
+            al_attach_sample_instance_to_mixer(dead_inst[i], mixer);
+            particle_inst[i] = al_create_sample_instance(particle);
+            al_attach_sample_instance_to_mixer(particle_inst[i], mixer);
+        }
+        yippee_inst = al_create_sample_instance(yippee);
+        al_attach_sample_instance_to_mixer(yippee_inst, mixer);
+        sentry_particle_inst = al_create_sample_instance(particle);
+        al_attach_sample_instance_to_mixer(sentry_particle_inst, mixer);
+
+        //max_v_squared = THRUST / Map.drag;
+
         if (Map.mission)							//start timer
         {
 			Map.race = true;
@@ -376,8 +413,6 @@ int main (int argc, char *argv[]){
 		//Main loop here
 		while (1)
 		{
-			//al_play_sample(wind, 1, 0, 1, ALLEGRO_PLAYMODE_LOOP, NULL);
-
 			al_wait_for_event(queue, &event);
 
 			if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -506,6 +541,12 @@ int main (int argc, char *argv[]){
 				if (game_over)
 				{
 					//al_stop_samples();	//stop the audio
+					if (game_over == GO_TIMER)
+                    {
+                        for (i=0 ; i<num_ships ; i++)
+                            al_stop_sample_instance(wind_inst[i]);
+                    }
+
 
 					if (!GameOver()) break;	//0 returned, break out of inner while(1) loop. Still in outer, so we'll re-init stuff
 				}
@@ -518,15 +559,27 @@ int main (int argc, char *argv[]){
 					UpdateSentries();	//Automatic guns / volcanoes
 					UpdateBullets();	//Calculate new bullet positions, expire old ones.
 
-					//if (Map.type == 0)
-					{
-						//check for collisions, modify shield parameter for ships, ttl for bullets.
-						CheckSSCollisions(num_ships);//Ship-to-ship collisions
-						CheckBSCollisions(num_ships);//bullet-to-ship collisions
-						CheckBSentryCollisions();
-						CheckSWCollisions(num_ships);//Ship-to-wall collisions
-						CheckBWCollisions();		 //Bullet-to-wall collisions
-					}
+					//check for collisions, modify shield parameter for ships, ttl for bullets.
+					CheckSSCollisions(num_ships);//Ship-to-ship collisions
+					CheckBSCollisions(num_ships);//bullet-to-ship collisions
+					CheckBSentryCollisions();
+					CheckSWCollisions(num_ships);//Ship-to-wall collisions
+					CheckBWCollisions();		 //Bullet-to-wall collisions
+
+                    for (i=0 ; i<num_ships ; i++)
+                    {
+                        if (Ship[i].thrust)
+                        {
+                            al_set_sample_instance_gain (wind_inst[i],2.0);
+                            al_set_sample_instance_speed(wind_inst[i],2.0);
+                        }
+                        else
+                        {
+                            al_set_sample_instance_gain (wind_inst[i],1.0);
+                            al_set_sample_instance_speed(wind_inst[i],1.0);
+                        }
+                    }
+
 				}
 
 				redraw = FALSE;
@@ -534,6 +587,22 @@ int main (int argc, char *argv[]){
 		}
 		fprintf(logfile,"Game Over\n");
         FreeGameBitmaps();
+
+        for (i=0 ; i<num_ships ; i++)
+        {
+            //al_stop_sample_instance(wind_inst[i]);
+            al_destroy_sample_instance(wind_inst[i]);
+            al_destroy_sample_instance(shoota_inst[i]);
+            al_destroy_sample_instance(shootb_inst[i]);
+            al_destroy_sample_instance(dead_inst[i]);
+            al_destroy_sample_instance(particle_inst[i]);
+        }
+        al_destroy_sample_instance(yippee_inst);
+        al_destroy_sample_instance(sentry_particle_inst);
+
+        //al_destroy_mixer(mixer);
+        //al_destroy_voice(voice);
+
         fflush(logfile);
         if (exit) break;
 	}
@@ -731,6 +800,9 @@ void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
 		mapy = map_height * TILE_HEIGHT;
 	}
 
+	if (Map.background_file_name[0] != 0)
+        background = al_load_bitmap(Map.background_file_name);
+
 	if (Map.num_sentries)
 		sentries = al_load_bitmap(Map.sentry_file_name);
 
@@ -787,6 +859,14 @@ void FreeGameBitmaps(void)
     {
         al_destroy_bitmap(tr_map);
         tr_map = NULL;
+        i++;
+    }
+    j++;
+
+    if (background)
+    {
+        al_destroy_bitmap(background);
+        background = NULL;
         i++;
     }
     j++;
@@ -876,12 +956,13 @@ extern float x_dis, y_dis, distance, direction;
 
 extern int tile_x, tile_y, tile_idx, tile, tl_tile;
 extern int start_row,current_row,rows;
+extern float soverm;
 
 void draw_debug(void)
 {
 	int level;
 
-	if (Map.mission) level = num_ships*150;
+	if (Map.mission) level = num_ships*180;
 	else             level = num_ships*120;
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
@@ -889,6 +970,8 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[0].ypos);
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Key: %d",debug_key);
+
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "S/M: %.2f", soverm);
 
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Mapx: %d", mapx);
 

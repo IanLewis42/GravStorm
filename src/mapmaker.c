@@ -60,10 +60,14 @@ int dragging;
 float w, h;
 int saved = 0;
 int grid = 0;
+int modified = 0;
+int save_query = 0;
+int load_query = 0;
 #define MAX_GRID 3
 
 void map_draw(void);
 void sidebar_draw(void);
+void draw_sprites(void);
 void load_map_file(void);
 void save_map_file (void);
 int init_map(char *map_file_name);
@@ -143,20 +147,67 @@ int main (int argc, char *argv[]){
         al_wait_for_event(queue, &event);
 
         if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-            break;
+        {
+            if (modified)
+                save_query = 1;
+            else
+                break;
+        }
 
         if (event.type == ALLEGRO_EVENT_KEY_DOWN)
         {
             //one-shot keys
             if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
-                break;
+            {
+                if (modified)
+                    save_query = 1;
+                else
+                    break;
+            }
+
+            if (event.keyboard.keycode == ALLEGRO_KEY_Y)
+            {
+                if (load_query)
+                {
+                    init_map(argv[1]);
+                    load_map_file();
+                    load_query = 0;
+                }
+
+                else
+                {
+                    if (save_query)
+                    {
+                        save_map_file();
+                        save_query = 0;
+                    }
+                    else
+                        break;
+                }
+            }
+
+            if (event.keyboard.keycode == ALLEGRO_KEY_N)
+            {
+                if (save_query)
+                    break;
+                if (load_query)
+                    load_query = 0;
+            }
+
             if (event.keyboard.keycode == ALLEGRO_KEY_ENTER)
             {
-                init_map(argv[1]);
-                load_map_file();
+                if (modified)
+                    load_query = 1;
+                else
+                {
+                    init_map(argv[1]);
+                    load_map_file();
+                }
             }
             if (event.keyboard.keycode == ALLEGRO_KEY_S)
+            {
                 save_map_file();
+            }
             if (event.keyboard.keycode == ALLEGRO_KEY_HOME)
             {
                 zoom = 1;
@@ -220,7 +271,13 @@ int main (int argc, char *argv[]){
 				else if (dragging)	//if we have already picked one up, then place it
 				{
 					if (dragged_tile != tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH])
-						tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH] = dragged_tile;
+                    {
+                        tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH] = dragged_tile;
+                        if (mouse_tile_x+1 > map_width) map_width = mouse_tile_x+1;
+                        if (mouse_tile_y+1 > map_height) map_height = mouse_tile_y+1;
+                        modified = 1;
+                    }
+
 				}
 				else if (mouse_tile_x >= 0 && mouse_tile_x < map_width &&	//otherwise, check we're in the map
             			 mouse_tile_y >= 0 && mouse_tile_y < map_height)	//and pick up what we clicked on
@@ -242,7 +299,8 @@ int main (int argc, char *argv[]){
 					if (mouse_tile_x >= 0 && mouse_tile_x < map_width &&	//and we're in the map
             			 mouse_tile_y >= 0 && mouse_tile_y < map_height)
 					{
-						tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH] = 0;	//erase what we clicked on.
+						tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH] = 0;	//erase what we clicked on
+						modified = 1;
 					}
 				}
 			}
@@ -264,7 +322,12 @@ int main (int argc, char *argv[]){
 					if (dragging)
 					{
 						if (dragged_tile != tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH])
-							tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH] = dragged_tile;
+                        {
+                            tile_map[mouse_tile_x + mouse_tile_y * MAX_MAP_WIDTH] = dragged_tile;
+                            if (mouse_tile_x+1 > map_width) map_width = mouse_tile_x+1;
+                            if (mouse_tile_y+1 > map_height) map_height = mouse_tile_y+1;
+                            modified = 1;
+                        }
 					}
 				}
 			}
@@ -336,8 +399,12 @@ void map_draw(void) {
 			for (x = 0; x < map_width; x++)
 			{
 				i = tile_map[x + y * MAX_MAP_WIDTH];
-				float u = i * tile_width;
-				float v = 0;
+				//float u = i * tile_width;
+				//float v = 0;
+
+				int u = (i & 0x0007)<<6;    //bottom 3 bits * 64
+				int v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+
 										   //sx  sy sw  sh  dx      dy      dw  dh
 				//al_draw_scaled_bitmap(tiles, u,  v, 64, 64, x * 32, y * 32, 32, 32, 0);
 				al_draw_bitmap_region(tiles, u, v, tile_width, tile_height, x*tile_width, y*tile_height,0);
@@ -354,11 +421,11 @@ void map_draw(void) {
 
 			for (i=0 ; i<map_width ; i++)
 			{
-				al_draw_filled_rectangle(i*tile_width,0,i*tile_width+1,map_height*tile_height,grid_colour);
+				al_draw_filled_rectangle(i*tile_width,0,i*tile_width+(1/zoom),map_height*tile_height,grid_colour);
 			}
 			for (i=0 ; i<map_height ; i++)
 			{
-				al_draw_filled_rectangle(0,i*tile_height,map_width*tile_width,i*tile_height+1,grid_colour);
+				al_draw_filled_rectangle(0,i*tile_height,map_width*tile_width,i*tile_height+(1/zoom),grid_colour);
 			}
 
 		}
@@ -437,23 +504,29 @@ void draw_sprites(void)
 //draws all the non-translated and scaled stuff, sidebar, mouse pointer, notifications etc....
 void sidebar_draw(void)
 {
-	int i, i_char;
+	int i, i_char, num_tiles, u, v;
 	float left_edge, top_edge;
 
 	al_draw_filled_rectangle(0,0,150,al_get_display_height(display),al_map_rgb(128, 128, 128));	//sidebar
 
 	if (Map.type == 1)	//tiled
 	{
-		for (i=0 ; i<al_get_bitmap_width(tiles)>>6 ; i++)	//draw tiles in sidebar
+		num_tiles = (al_get_bitmap_width(tiles)>>6) * (al_get_bitmap_height(tiles)>>6);
+
+		for (i=0 ; i<num_tiles ; i++)	//draw tiles in sidebar
 		{
 			if (i>=0 && i<=9) i_char = i+'0';
-			else if (i>=10 && i<=36) i_char = i-10+'A';
+			else if (i>=10 /*&& i<=36*/) i_char = i-10+'A';
 			al_draw_textf(font, al_map_rgb(255, 255, 255),10, (i+tile_offset)*(tile_height+5) ,  ALLEGRO_ALIGN_LEFT, "%c", i_char);
-			al_draw_bitmap_region(tiles, i*tile_width, 0, tile_width, tile_height, 50, (i+tile_offset)*(tile_height+5),0);
+
+			u = (i & 0x0007)<<6;    //bottom 3 bits * 64
+			v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+
+			al_draw_bitmap_region(tiles, u, v, tile_width, tile_height, 50, (i+tile_offset)*(tile_height+5),0);
 		}
 	}
 
-	al_draw_filled_rectangle(0,0,150,110,al_map_rgb(64, 64, 64));	//darker bit with info
+	al_draw_filled_rectangle(0,0,150,190,al_map_rgb(64, 64, 64));	//darker bit with info
 
 	left_edge = (-scroll_x*zoom)+(0.5*w);
 	top_edge  = (-scroll_y*zoom)+(0.5*h);
@@ -463,7 +536,10 @@ void sidebar_draw(void)
 	i=0;
 	al_draw_textf(font, al_map_rgb(255, 255, 255),10, i++*37,  ALLEGRO_ALIGN_LEFT, "x:%.0f %d", scroll_x+SHIP_SIZE_X/2, mouse_x);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),10, i++*37,  ALLEGRO_ALIGN_LEFT, "y:%.0f %d", scroll_y+SHIP_SIZE_Y/2, mouse_y);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),10, i++*37,  ALLEGRO_ALIGN_LEFT, "zoom:%.2f", zoom);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),10, i++*37,  ALLEGRO_ALIGN_LEFT, "Zoom:%.2f", zoom);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),10, i++*37,  ALLEGRO_ALIGN_LEFT, "Map:%dx%d", map_width,map_height);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),10, i++*37,  ALLEGRO_ALIGN_LEFT, "#Tiles:%d", num_tiles);
+
 
 	if (saved)
 	{
@@ -472,11 +548,28 @@ void sidebar_draw(void)
 		al_draw_textf(font, al_map_rgb(255, 255, 255),1280/2+10, 720/2, ALLEGRO_ALIGN_LEFT, "Saved.");
 	}
 
+	if (save_query)
+    {
+        al_draw_filled_rounded_rectangle(1280/2, 720/2, 1280/2+350, 720/2+60, 8, 8, al_map_rgba(0, 0, 0, 200));
+		al_draw_textf(font, al_map_rgb(255, 255, 255),1280/2+10, 720/2, ALLEGRO_ALIGN_LEFT, "Map modified.");
+		al_draw_textf(font, al_map_rgb(255, 255, 255),1280/2+10, 720/2+30, ALLEGRO_ALIGN_LEFT, "Do you want to save? Y/N");
+    }
+
+	if (load_query)
+    {
+        al_draw_filled_rounded_rectangle(1280/2, 720/2, 1280/2+350, 720/2+60, 8, 8, al_map_rgba(0, 0, 0, 200));
+		al_draw_textf(font, al_map_rgb(255, 255, 255),1280/2+10, 720/2, ALLEGRO_ALIGN_LEFT, "Map modified.");
+		al_draw_textf(font, al_map_rgb(255, 255, 255),1280/2+10, 720/2+30, ALLEGRO_ALIGN_LEFT, "Do you want to revert? Y/N");
+    }
+
 	//if (mouse == 1)
 	if (dragging)
+    {
+        u = (dragged_tile & 0x0007)<<6;    //bottom 3 bits * 64
+		v = (dragged_tile & 0xfff8)<<3;    //upper bits /8 then * 64
     	//al_draw_bitmap_region(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width, mouse_y-0.5*tile_height,0);
-		al_draw_scaled_bitmap(tiles, dragged_tile*tile_width, 0, tile_width, tile_height,  mouse_x-0.5*tile_width*zoom, mouse_y-0.5*tile_height*zoom, tile_width*zoom, tile_height*zoom, 0);
-
+		al_draw_scaled_bitmap(tiles, u,v, tile_width, tile_height,  mouse_x-0.5*tile_width*zoom, mouse_y-0.5*tile_height*zoom, tile_width*zoom, tile_height*zoom, 0);
+    }
 	//look at https://www.allegro.cc/manual/5/mouse.html
 	#if RPI
 	if (dragging)
@@ -712,7 +805,7 @@ void load_map_file(void)
 				tile_map[i+MAX_MAP_WIDTH*j] = 0;
 			else if (line[i] >='0' && line [i] <= '9')	//ascii 0-9 map to integer 0-9
 				tile_map[i+MAX_MAP_WIDTH*j] = line[i]-'0';
-			else if (toupper(line[i]) >='A' && toupper(line[i]) <= 'Z')	//ascii A-Z(or a-z) map to 10-36
+			else if (/*toupper*/(line[i]) >='A' /*&& toupper(line[i]) <= 'Z'*/)	//ascii A-Z(or a-z) map to 10-36
 				tile_map[i+MAX_MAP_WIDTH*j] = line[i]-'A'+10;
 
 			if (line[i] != ' ')
@@ -726,9 +819,12 @@ void load_map_file(void)
 		//fprintf(stderr,"%d ",j);
 		j++;
 		if (found) 	map_height = j;	//height is number of lines read
+		if (map_height < 10) map_height = 10;
+		if (map_width < 10) map_width = 10;
 	}
 
 	fclose(map_file);
+	modified = 0;
 
 	fprintf(stderr,"H:%d W:%d\n",map_height,map_width);
 }
@@ -750,7 +846,7 @@ void save_map_file (void)
 
 			if (tile == 0) tile_char = ' ';
 			else if (tile >   0 && tile <=9)  tile_char = tile + '0';
-			else if (tile >= 10 && tile <=36) tile_char = tile -10 + 'A';
+			else if (tile >= 10 /*&& tile <=36*/) tile_char = tile -10 + 'A';
 
 			fprintf(map_file,"%c",tile_char);
 		}
@@ -762,6 +858,7 @@ void save_map_file (void)
 	printf("Saved map: W=%d H=%d",map_width,map_height);
 
 	saved = 100;	//frame timer for display of saved message.
+	modified = 0;
 
 	//fprintf(stderr,"1");
 

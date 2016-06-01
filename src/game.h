@@ -21,7 +21,7 @@
 #define  WINDOWS 1
 
 #define NAME "GravStorm"
-#define VERSION "V0.2"
+#define VERSION "V0.3"
 
 #define TRUE 1
 #define FALSE 0
@@ -51,6 +51,8 @@ extern int map_height, map_width;
 
 #define SHIP_SIZE_X 48
 #define SHIP_SIZE_Y 48
+
+#define GO_TIMER    100
 
 typedef enum
 {
@@ -133,11 +135,14 @@ typedef struct
 {
 	int type;					//0 for TR-style whole map, 1 for tiled
 	char display_file_name[50];		//whole map for TR, or tiles for new style
+	char background_file_name[50];
 	char collision_file_name[50];	//whole map for TR, or tiles for new style
 	char ascii_map_file_name[50];	//ascii file for tilemap
 	char description_file_name[50]; //descriptive text for level.
 	char sentry_file_name[50];
 	char sentry_collision_file_name[50];
+	int background_fade;
+	int bg_fade_thresh;
 	int ship_first;
 	int max_players;
 	int mission;
@@ -206,6 +211,7 @@ extern ALLEGRO_BITMAP *panel_pressed_bmp;
 extern ALLEGRO_BITMAP *menu_bg_bmp;
 extern ALLEGRO_BITMAP *bullets_bmp;
 extern ALLEGRO_BITMAP *tr_map;
+extern ALLEGRO_BITMAP *background;
 
 #define MAP_NAME_LENGTH 50
 #define MAX_MAPS 20	//per group
@@ -234,8 +240,19 @@ extern MenuType Menu;
 
 extern FILE* logfile;
 
-extern ALLEGRO_SAMPLE *clunk;
+ALLEGRO_VOICE *voice;
+ALLEGRO_MIXER *mixer;
+
 extern ALLEGRO_SAMPLE *wind;
+
+extern ALLEGRO_SAMPLE_INSTANCE *clunk_inst;
+extern ALLEGRO_SAMPLE_INSTANCE *wind_inst[MAX_SHIPS];
+extern ALLEGRO_SAMPLE_INSTANCE *shoota_inst[MAX_SHIPS];
+extern ALLEGRO_SAMPLE_INSTANCE *shootb_inst[MAX_SHIPS];
+extern ALLEGRO_SAMPLE_INSTANCE *dead_inst[MAX_SHIPS];
+extern ALLEGRO_SAMPLE_INSTANCE *particle_inst[MAX_SHIPS];
+extern ALLEGRO_SAMPLE_INSTANCE *sentry_particle_inst;
+extern ALLEGRO_SAMPLE_INSTANCE *yippee_inst;
 
 extern bool pressed_keys[ALLEGRO_KEY_MAX];
 extern int gpio_active;

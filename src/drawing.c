@@ -35,6 +35,7 @@ int tile_map[MAX_MAP_WIDTH * MAX_MAP_HEIGHT];
 
 int map_height=0, map_width=0;
 
+void draw_background(int scrollx, int scrolly, int win_x, int win_y, int w, int h);
 void draw_map(int scrollx, int scrolly, int x, int y, int w, int h);
 void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h);
 void draw_menu(int ship_num, int x, int y, int w, int h);
@@ -361,16 +362,85 @@ void draw_split_screen(ViewportType viewport, int ship_num)
 
 	else if (Map.ship_first)
 	{
+		if (Map.background_file_name[0] != 0) draw_background(scrollx, scrolly,x,y,w,h);
 		draw_ships(scrollx, scrolly,x,y,w,h);
 		draw_map(scrollx, scrolly,x,y,w,h);
 	}
 	else
 	{
+		if (Map.background_file_name[0] != 0) draw_background(scrollx, scrolly,x,y,w,h);
 		draw_map(scrollx, scrolly,x,y,w,h);
 		draw_ships(scrollx, scrolly,x,y,w,h);
 	}
 
 	return;
+}
+
+float soverm;
+
+void draw_background(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
+{
+	ALLEGRO_TRANSFORM transform;
+	int x,y;
+	int min_x, min_y, max_x, max_y;
+	ALLEGRO_COLOR fade;
+
+	if (Map.background_fade)
+    {
+        soverm = (float)(scrolly-Map.bg_fade_thresh)/(float)mapy;
+
+        if (soverm < 0) soverm = 0;
+
+        fade = al_map_rgba_f(soverm,soverm,soverm,1.0);//(scrolly/mapy,scrolly/mapy,scrolly/mapy,scrolly/mapy);
+    }
+    else
+        fade = al_map_rgba_f(1.0,1.0,1.0,1.0);
+
+	scrollx >>= 1;
+	scrolly >>= 1;
+
+	if (Map.type)	//1 for tiled
+	{
+		al_identity_transform(&transform);  		            /* Initialize transformation. */
+		al_translate_transform(&transform, -scrollx, -scrolly); /* Move to scroll position. */
+		al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
+		al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
+
+		min_x = (scrollx - (w>>1) ) >> (TILE_SHIFTS+1);// /(tile_width);	//optimise by using shifts, rather than divides....
+		min_y = (scrolly - (h>>1) ) >> (TILE_SHIFTS+1);// /(tile_height);
+
+		max_x = ((scrollx + (w>>1) ) >> (TILE_SHIFTS+1) )+1;// /(tile_width)) +1;
+		max_y = ((scrolly + (h>>1) ) >> (TILE_SHIFTS+1) )+1;// /(tile_height)) +1;
+
+        //if (min_y < 0.5) min_y = 0.5;
+
+		al_hold_bitmap_drawing(1);
+		for (y = min_y; y < max_y; y++)
+		{
+			for (x = min_x; x < max_x; x++)
+			{
+				//int i = tile_map[x + y * MAX_MAP_WIDTH];    //pull tile index rom array
+				//int u = i << 6;                             //multiply by 64 to get pixel index
+				//int v=0;
+
+				//int u = (i & 0x0007)<<6;    //bottom 3 bits * 64
+				//int v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+
+                                            //sx sy sw         sh         dx                        dy
+				//al_draw_bitmap_region(tr_map, u, v, TILE_WIDTH, TILE_HEIGHT, win_x + (x<<TILE_SHIFTS), win_y + (y<<TILE_SHIFTS), 0);
+				//al_draw_bitmap(background, win_x + (x<<(TILE_SHIFTS+1)),  win_y + (y<<(TILE_SHIFTS+1)), 0 );
+				al_draw_tinted_bitmap(background, fade , win_x + (x<<(TILE_SHIFTS+1)),  win_y + (y<<(TILE_SHIFTS+1)), 0 );
+			}
+		}
+		al_hold_bitmap_drawing(0);
+
+		al_identity_transform(&transform);
+    	al_use_transform(&transform);
+	}
+	else	//tr-style single image map
+	{
+    	al_draw_scaled_bitmap(tr_map, (scrollx-w*0.5)/2,(scrolly-h*0.5)/2, w/2, h/2, win_x, win_y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
+	}
 }
 
 void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
@@ -399,10 +469,15 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 		{
 			for (x = min_x; x < max_x; x++)
 			{
-				int i = tile_map[x + y * MAX_MAP_WIDTH];
-				int u = i << 6;
+				int i = tile_map[x + y * MAX_MAP_WIDTH];    //pull tile index rom array
+				//int u = i << 6;                             //multiply by 64 to get pixel index
+				//int v=0;
+
+				int u = (i & 0x0007)<<6;    //bottom 3 bits * 64
+				int v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+
                                             //sx sy sw         sh         dx                        dy
-				al_draw_bitmap_region(tr_map, u, 0, TILE_WIDTH, TILE_HEIGHT, win_x + (x<<TILE_SHIFTS), win_y + (y<<TILE_SHIFTS), 0);
+				al_draw_bitmap_region(tr_map, u, v, TILE_WIDTH, TILE_HEIGHT, win_x + (x<<TILE_SHIFTS), win_y + (y<<TILE_SHIFTS), 0);
 			}
 		}
 		al_hold_bitmap_drawing(0);
@@ -563,6 +638,8 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 						Ship[i].miner_count = 0;	//restart
 						Map.pad[Ship[i].pad].miners--;	//don't do this in UpdateLandedShip() !!!
 						Ship[i].miners++;
+						//al_play_sample(yippee, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+						al_play_sample_instance(yippee_inst);
 					}
 					//                    bmp    srcx                      srcy size      dstx    dsty
 					al_draw_bitmap_region(miner,(Ship[i].miner_count%8)*24,0,   24,  24,  miner_x,Map.pad[Ship[i].pad].y-13,0);
@@ -577,11 +654,12 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 						Ship[i].jewel_count = 0;	//restart
 						Map.pad[Ship[i].pad].jewels--;	//don't do this in UpdateLandedShip() !!!
 						Ship[i].jewels++;
+						//al_play_sample(clunk, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+						al_play_sample_instance(clunk_inst);
 					}
 					//                    bmp    srcx                      srcy size      dstx    dsty
 					al_draw_bitmap_region(jewel,(Ship[i].jewel_count%16)*24,0,   24,  24,  jewel_x,Map.pad[Ship[i].pad].y-17,0);
 				}
-
 			}
 			//ship
 			al_draw_bitmap_region(ships,Ship[i].angle*SHIP_SIZE_X,(2*i + (Ship[i].thrust?1:0) )*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Ship[i].xpos-SHIP_SIZE_X/2,Ship[i].ypos-SHIP_SIZE_Y/2, 0);

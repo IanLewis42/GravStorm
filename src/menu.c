@@ -39,16 +39,16 @@
 int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
 	ALLEGRO_TRANSFORM transform;
-	ALLEGRO_MIXER *mixer;
+	//ALLEGRO_MIXER *mixer;
 	ALLEGRO_SAMPLE_INSTANCE *wind_inst;
-	ALLEGRO_VOICE *voice;
+	//ALLEGRO_VOICE *voice;
 
 	float ht = 100;	//total height (light)
 	float hc = 10;	//camera height
 	float y = 0;	//how far the text has fallen
 	float a = 10;	//width of text
 	float shadow_scale, text_scale;
-	int sound_latency = 15;
+	int sound_latency;
 
 	char fade_in[200],fade_out[200],visible[200];
 	int fade_in_y = 600, visible_y = 570, fade_out_y = 540;
@@ -65,10 +65,16 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	visible[0] = 0;
 	fade_out[0] = 0;
 
-    voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
-    mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
-    al_set_default_mixer(mixer);
-    al_attach_mixer_to_voice(mixer, voice);
+#if RPI
+    sound_latency = 15;
+#else
+    sound_latency = 1;
+#endif // RPI
+
+    //voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
+    //mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
+    //al_set_default_mixer(mixer);
+    //al_attach_mixer_to_voice(mixer, voice);
     wind_inst = al_create_sample_instance(wind);
     al_attach_sample_instance_to_mixer(wind_inst, mixer);
     al_set_sample_instance_playmode(wind_inst, ALLEGRO_PLAYMODE_LOOP);
@@ -91,9 +97,10 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 		{
 			if (y < ht) y++;
 
-			al_set_sample_instance_gain(wind_inst,7*y/ht);
+			al_set_sample_instance_gain(wind_inst,5*y/ht);
 			if (y == ht-sound_latency)
-				al_play_sample(clunk, 5, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+				//al_play_sample(clunk, 5, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+				al_play_sample_instance(clunk_inst);
 
 			shadow_scale = (ht*a/y)/hc;	//sin theta. try arcsin???
 			text_scale = a/(y-(ht-hc)); //ditto
@@ -148,6 +155,10 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	}
 	fclose(credits);
 	al_stop_sample_instance(wind_inst);
+	al_destroy_sample_instance(wind_inst);
+	//al_destroy_mixer(mixer);
+	//al_destroy_voice(voice);
+
 	FreeMenuBitmaps();
 	return 0;
 }
@@ -167,6 +178,15 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	AnyShip.fire1_down = false;
 	AnyShip.fire2_down = false;
 	AnyShip.thrust_down = false;
+
+	for (i=0 ; i<MAX_SHIPS ; i++)
+    {
+        Ship[i].left_down = false;
+        Ship[i].right_down = false;
+        Ship[i].fire1_down = false;
+        Ship[i].fire2_down = false;
+        Ship[i].thrust_down = false;
+    }
 
 	Menu.num_groups = read_maps();	//read 'maps.txt' and store strings
 	//RETURN VALUE HERE
@@ -222,8 +242,10 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 		else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
-			al_play_sample(clunk, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
-            //al_play_sample_instance(clunk_inst);
+			//al_play_sample(clunk, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+            if (al_get_sample_instance_playing(clunk_inst))
+                al_stop_sample_instance(clunk_inst);
+            al_play_sample_instance(clunk_inst);
 
 			//Escape to exit trumps everything
  			if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) Exit();

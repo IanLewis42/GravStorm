@@ -51,12 +51,7 @@ int last_bullet = END_OF_LIST;	//init this when you make a new bullet.
 int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   60,   5000, 150, 300,   300, 300};	//Life (in frames)
 int reload[BULLET_TYPES] = {5,     5,     5,     15,    0,    0,    0,   0,     0,   0};	//frames in between shots (if fire held down) N/A for heavy weapons
 float Mass[BULLET_TYPES] = {0.04,  0.04,  0.04,  0.04,  0.1,  0.1,  0.1, 0.04,  0.1, 0.1};	//Really bullet mass/ship mass; only used in collisions
-int Damage[BULLET_TYPES] = {3,     3,     3,     3,     80,   50,   50,  3,     10,  50};   //points off shield when collision happens
-
-ALLEGRO_SAMPLE *shoota;
-ALLEGRO_SAMPLE *shootb;
-ALLEGRO_SAMPLE *particle;
-ALLEGRO_SAMPLE *dead;
+int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   50,  9,     10,  50};   //points off shield when collision happens
 
 void UpdateLandedShip(int ship_num);	//int
 void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv);//float outward_v);
@@ -83,7 +78,7 @@ int UpdateShips(int num_ships)
 	{
 		if (Map.mission)
 			if(Ship[i].ypos < 64)
-				return(100);	//game over
+				return(GO_TIMER);	//game over
 
 		if (Ship[i].reincarnate_timer)	//we're waiting to watch the explosion
 		{
@@ -93,7 +88,7 @@ int UpdateShips(int num_ships)
 				if (Ship[i].lives == 0)
 				{
 					Ship[i].reincarnate_timer = 1;	//to stop it reappearing at the end of the game.
-					return(100);	//game over
+					return(GO_TIMER);	//game over
 				}
 				reinit_ship(i);
 				fprintf(logfile,"Ship %d reincarnated\n",i);
@@ -102,9 +97,11 @@ int UpdateShips(int num_ships)
 		else if (Ship[i].shield <= 0)
 		{
 			CreateExplosion(Ship[i].xpos, Ship[i].ypos, 2, 8, Ship[i].xv, Ship[i].yv);//float outward_v);
-			al_play_sample(dead, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+			//al_play_sample(dead, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+			al_play_sample_instance(dead_inst[i]);
 			Ship[i].reincarnate_timer = 100;
 			Ship[i].lives--;
+			Ship[i].thrust = 0; //stop engine noise
 			fprintf(logfile,"Ship %d destroyed\n",i);
 		}
 		else if(Ship[i].landed)
@@ -318,7 +315,8 @@ int UpdateShips(int num_ships)
 				{
 					if (Ship[i].fire1_reload == 0)
 					{
-						al_play_sample(shoota, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+						//al_play_sample(shoota, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+						//al_play_sample_instance(shoota_inst[i]);
 						Ship[i].fire1_reload = reload[Ship[i].ammo1_type];	//frames to reload
 						FireNormal(i);
 						//Ship[i].ammo1--;
@@ -341,7 +339,8 @@ int UpdateShips(int num_ships)
 
 				if (Ship[i].ammo2)
 				{
-					al_play_sample(shootb, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+					//al_play_sample(shootb, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+					//al_play_sample_instance(shootb_inst[i]);
 					FireSpecial(i);
 					Ship[i].fire2 = false;		//oneshot
 					Ship[i].ammo2--;
@@ -506,7 +505,7 @@ void UpdateLandedShip(int i)
 		{
 			if (Ship[i].fire1_reload == 0)
 			{
-				al_play_sample(shoota, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+				//al_play_sample(shoota, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 				Ship[i].fire1_reload = reload[Ship[i].ammo1_type];//RELOAD;	//10 frames to reload
 				FireNormal(i);
 				//Ship[i].ammo1--;
@@ -567,6 +566,11 @@ void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, f
 ****************************************************/
 void FireNormal(int i)
 {
+	if (al_get_sample_instance_playing(shoota_inst[i]))
+        al_stop_sample_instance(shoota_inst[i]);
+
+    al_play_sample_instance(shoota_inst[i]);
+
 	switch (Ship[i].ammo1_type)
 	{
 		case BLT_NORMAL:	//normal
@@ -613,6 +617,8 @@ void FireNormal(int i)
 void FireSpecial(int ship_num)
 {
 	int j,k;
+
+	al_play_sample_instance(shootb_inst[ship_num]);
 
 	switch (Ship[ship_num].ammo2_type)
 	{
@@ -809,7 +815,7 @@ void NewBullet (int x,int y,int xv,int yv,int angle,float speed,int type,int ran
 		default:
 			Bullet[i].colour = al_map_rgb(255,255,255);			//everything else white
 		break;
-}
+    }
 
 	Bullet[i].next_bullet = END_OF_LIST;	//show that this is the end of the list
 
