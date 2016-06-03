@@ -127,6 +127,7 @@ char screenshot_ext[5] = {'.','p','n','g',0};
 char screenshot_name[20];
 
 int debug_key = 0;
+float volume, v_squared;
 
 FILE* logfile;
 
@@ -401,8 +402,6 @@ int main (int argc, char *argv[]){
         sentry_particle_inst = al_create_sample_instance(particle);
         al_attach_sample_instance_to_mixer(sentry_particle_inst, mixer);
 
-        //max_v_squared = THRUST / Map.drag;
-
         if (Map.mission)							//start timer
         {
 			Map.race = true;
@@ -570,14 +569,21 @@ int main (int argc, char *argv[]){
                     {
                         if (Ship[i].thrust)
                         {
-                            al_set_sample_instance_gain (wind_inst[i],2.0);
-                            al_set_sample_instance_speed(wind_inst[i],2.0);
+                            //al_set_sample_instance_gain (wind_inst[i],2.0);
+                            //al_set_sample_instance_speed(wind_inst[i],2.0);
+                            volume = 2.0;
                         }
                         else
                         {
-                            al_set_sample_instance_gain (wind_inst[i],1.0);
-                            al_set_sample_instance_speed(wind_inst[i],1.0);
+                            //max_v_squared = (THRUST / Map.drag)^2;
+                            //              = (50/2)^2
+                            //              =  625
+                            v_squared = Ship[0].xv*Ship[0].xv + Ship[0].yv*Ship[0].yv;
+                            volume = 1+(v_squared/625)*2;
                         }
+
+                        al_set_sample_instance_gain (wind_inst[i],volume);
+                        al_set_sample_instance_speed(wind_inst[i],volume);
                     }
 
 				}
@@ -968,11 +974,15 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[0].xpos);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[0].ypos);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[0].angle);
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Key: %d",debug_key);
 
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "S/M: %.2f", soverm);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "XV: %.2f", Ship[0].xv);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "YV: %.2f", Ship[0].yv);
 
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Vol: %.2f", volume);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "V^2: %.2f", v_squared);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Mapx: %d", mapx);
 
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "M: %d", Ship[0].miners);
