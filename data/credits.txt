@@ -8,6 +8,8 @@
  and the authors of the Allegro libraries
  TurboRaketti maps provided by Asbjorn Djupdal
  Graphics provided by:
+ SpiralGraphics.biz
+ pzUH / GameArt2D.com
  Kaladun on imgur.com
  Marta Nowaczyk of www.ifu.deviantart.com
  kabecao.deviantart.com
