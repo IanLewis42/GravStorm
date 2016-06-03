@@ -784,7 +784,7 @@ void load_map_file(void)
 {
 	int i,j,found;
     FILE* map_file;
-	char line[200];
+	unsigned char line[200];
 
 	if (Map.type == 0) return;	//whole map file, not tiles
 
@@ -833,7 +833,7 @@ void save_map_file (void)
 {
 	int i,j;
     FILE* map_file;
-    char tile,tile_char;
+    unsigned char tile,tile_char;
 	//char line[200];
 
 	if ((map_file = fopen(Map.ascii_map_file_name,"w")) == NULL)  fprintf(stderr,"Couldn't open %s for writing.\n",Map.ascii_map_file_name);

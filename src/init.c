@@ -367,7 +367,7 @@ void load_map_file(void)
 {
 	int i,j,found;
     FILE* map_file;
-	char line[200];
+	unsigned char line[200];
 
 	if ((map_file = fopen(Map.ascii_map_file_name,"r")) == NULL)  fprintf(logfile,"Couldn't open %s for reading.\n",Map.ascii_map_file_name);
 
