@@ -367,8 +367,10 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 						//now do pixel checking
 						//mostly good, occasionally fast bullets miss the tip (presumably 'cos they go from one side to the other in a frame....)
 						//solution: check half/quarter frame back/forward
-
-						for (k=-5 ; k<3 ; k++)
+                        //Hmmmm.... checking back sometimes makes you hit yourself with just fired bullet. I think...
+                        //so just check forwards.
+						//for (k=-5 ; k<3 ; k++)
+						for (k=0 ; k<4 ; k++)
 						{
 							//Say ship centre is 100,100 ; bullet is 90, 90
 
@@ -412,14 +414,17 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 	}
 }
 
-#define NUM_SENTRY_SPRITES 5
+//#define NUM_SENTRY_SPRITES 5
 
 void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 {
 	int i,j,k;
 	int sentry_word, bullet_word, y_offset, shift;
+	int num_sentry_sprites;
 
 	if (first_bullet == END_OF_LIST) return;
+
+	num_sentry_sprites = al_get_bitmap_width(sentry_mask) >> 5;    //each sprite 32 pixels (= 1 word)
 
 	for (i=0 ; i<Map.num_sentries ; i++)
 	{
@@ -441,18 +446,18 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 
 							for (k=-5 ; k<3 ; k++)
 							{
-								//Say ship centre is 100,100 ; bullet is 90, 90
+								//Say sentry centre is 100,100 ; bullet is 90, 90
 
 								//y_offset = (Ship[i].ypos - (Bullet[j].ypos + 0.1*k*Bullet[j].yv));
 								y_offset = (Map.sentry[i].y - (Bullet[j].ypos + 0.25*k*Bullet[j].yv));
 
-								//y_offset is 10, meaning bullet centre is 10 above ship centre
-								//so we need ship mask row 10 above centre, except that ship_col_mask
-								//is half resolution, so it's 5 rows above centre. Centre is 12, so we need 7 down
+								//y_offset is 10, meaning bullet centre is 10 above sentry centre
+								//so we need sentry mask row 10 above centre, except that sentry_col_mask
+								//is half resolution, so it's 5 rows above centre. Centre is 16, so we need 7 down
 
 								y_offset = 16 - (y_offset>>1)-1; //what if y_offset is -ve??? - think it works OK.
 
-								sentry_word = (sentry_col_mask[y_offset*NUM_SENTRY_SPRITES + Map.sentry[i].alive_sprite]);
+								sentry_word = (sentry_col_mask[y_offset*num_sentry_sprites + Map.sentry[i].alive_sprite]);
 
 								shift = ((int)((Map.sentry[i].x)-(Bullet[j].xpos + 0.25*k*Bullet[j].xv)))>>1;
 								//shift is 10, meaning that bullet centre is 10 left of ship centre.
