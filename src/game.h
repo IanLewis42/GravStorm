@@ -52,7 +52,7 @@ extern int map_height, map_width;
 #define SHIP_SIZE_X 48
 #define SHIP_SIZE_Y 48
 
-#define GO_TIMER    100
+#define GO_TIMER    50
 
 typedef enum
 {
