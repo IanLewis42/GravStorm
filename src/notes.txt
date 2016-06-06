@@ -151,12 +151,13 @@
  // new level descriptions (forest, reactor core)
  // *github - VERSION
 
- // slime tiles for cross map? 
+ // slime tiles for cross map? Or canyon....
+ // pretty fonts
  // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
  // Thrust levels 4,5,6
  // backgrounds for type 0?
  // alpha channel on scifi tiles
- 
+ // colours
  // *mapmaker mouse/drag stuff
  // mapmaker lean on drawing.c (and init.c?)
  // *mapmaker static linked build.
