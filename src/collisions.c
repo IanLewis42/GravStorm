@@ -424,8 +424,9 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 
 	if (first_bullet == END_OF_LIST) return;
 
-	if (sentry_mask)
-        num_sentry_sprites = al_get_bitmap_width(sentry_mask) >> 5;    //each sprite 32 pixels (= 1 word)
+	if (!sentry_mask) return;   //no collision mask => no sentries, or indestructible sentries (e.g. volcanoes)
+
+    num_sentry_sprites = al_get_bitmap_width(sentry_mask) >> 5;    //each sprite 32 pixels (= 1 word)
 
 	for (i=0 ; i<Map.num_sentries ; i++)
 	{
