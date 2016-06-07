@@ -166,6 +166,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
 	int i;
+	int w,h,xoffset,yoffset;
 	ShipType AnyShip;
 
 	fprintf(logfile,"Init Keyboard\n");
@@ -192,6 +193,19 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	//RETURN VALUE HERE
 	//MAYBE NEED CURRENT GROUP / CURRENT MAP in struct somewhere???
 
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+
+    al_set_clipping_rectangle(0, 0, w, h);
+
+    yoffset = (h-SCREENY)/2;
+    if (yoffset < 0) yoffset = 0;
+
+    xoffset = (w-SCREENX)/2;
+    if (xoffset < 0) xoffset = 0;
+
+    Menu.x_origin = xoffset;
+    Menu.y_origin = yoffset;
 
 	//Menu.map = 0;
 	Menu.col = 0;
@@ -215,7 +229,28 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
             return 1;
 
 			if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
-				al_acknowledge_resize(display);
+            {
+                al_acknowledge_resize(display);
+
+                w = al_get_display_width(display);
+                h = al_get_display_height(display);
+
+                al_set_clipping_rectangle(0, 0, w, h);
+
+                yoffset = (h-SCREENY)/2;
+                if (yoffset < 0) yoffset = 0;
+
+                xoffset = (w-SCREENX)/2;
+                if (xoffset < 0) xoffset = 0;
+
+                Menu.x_origin = xoffset;
+                Menu.y_origin = yoffset;
+
+                if (Menu.col >= 2)
+                    Menu.offset = Menu.x_origin-460;
+                else
+                    Menu.offset = Menu.x_origin;
+            }
 
 		if (event.type == ALLEGRO_EVENT_TIMER && al_is_event_queue_empty(queue))
 		{
@@ -224,12 +259,12 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 			//sliding columns
 			if (Menu.col >= 2)
 			{
-				if (Menu.offset > -460)
+				if (Menu.offset > Menu.x_origin-460)
 					Menu.offset -= 20;
 			}
 			else
 			{
-				if (Menu.offset < 0)
+				if (Menu.offset < Menu.x_origin)
 					Menu.offset += 20;
 			}
 

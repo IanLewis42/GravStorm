@@ -72,7 +72,7 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 	xoffset = (w-SCREENX)/2;
     if (xoffset < 0) xoffset = 0;
 
-    Menu.offset += xoffset;
+    //Menu.offset += xoffset;
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 

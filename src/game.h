@@ -188,6 +188,8 @@ typedef struct
 	int controls;	//0,1 keys, 2 GPIO joystick? 3 onwards USB joysticks.
 	int current_key;
 	int offset;		//to make columns slide
+	int x_origin;
+	int y_origin;
 	int expand;
 } MenuType;
 
