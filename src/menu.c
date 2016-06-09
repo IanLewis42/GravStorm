@@ -39,9 +39,10 @@
 int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
 	ALLEGRO_TRANSFORM transform;
-	//ALLEGRO_MIXER *mixer;
+    ALLEGRO_SAMPLE *slam;
+    ALLEGRO_SAMPLE_INSTANCE *slam_inst;
 	ALLEGRO_SAMPLE_INSTANCE *wind_inst;
-	//ALLEGRO_VOICE *voice;
+
 
 	float ht = 100;	//total height (light)
 	float hc = 10;	//camera height
@@ -58,6 +59,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	FILE* credits;
 
 	if ((menu_bg_bmp = al_load_bitmap("menu_bg.png")) == NULL) fprintf(logfile,"menu_bg.png load fail\n");
+	if ((logo = al_load_bitmap("gs.png")) == NULL) fprintf(logfile,"gs.png load fail\n");
 	if ((credits = fopen ("credits.txt","r")) == NULL)  fprintf(logfile,"credits.txt load fail\n");
 	fflush(logfile);
 
@@ -71,10 +73,10 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     sound_latency = 1;
 #endif // RPI
 
-    //voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
-    //mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
-    //al_set_default_mixer(mixer);
-    //al_attach_mixer_to_voice(mixer, voice);
+    if ((slam = al_load_sample   ("slam.wav"))    == NULL)  fprintf(logfile,"slam.wav load fail");
+	slam_inst = al_create_sample_instance(slam);
+    al_attach_sample_instance_to_mixer(slam_inst, mixer);
+
     wind_inst = al_create_sample_instance(wind);
     al_attach_sample_instance_to_mixer(wind_inst, mixer);
     al_set_sample_instance_playmode(wind_inst, ALLEGRO_PLAYMODE_LOOP);
@@ -100,7 +102,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 			al_set_sample_instance_gain(wind_inst,5*y/ht);
 			if (y == ht-sound_latency)
 				//al_play_sample(clunk, 5, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
-				al_play_sample_instance(clunk_inst);
+				al_play_sample_instance(slam_inst);
 
 			shadow_scale = (ht*a/y)/hc;	//sin theta. try arcsin???
 			text_scale = a/(y-(ht-hc)); //ditto
@@ -124,7 +126,8 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 				al_scale_transform(&transform, text_scale, text_scale);	/* Rotate and scale around the center first. */
 				al_translate_transform(&transform,SCREENX/2-10,SCREENY/2-10);
 				al_use_transform(&transform);
-				al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, -1*al_get_font_ascent(title_font)/2,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
+				//al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, -1*al_get_font_ascent(title_font)/2,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
+				al_draw_bitmap(logo,-SCREENX/2+15,-12,0);
 			}
 
 			al_identity_transform(&transform);
@@ -418,6 +421,8 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 						fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 						init_map(Menu.group, Menu.map);
+						if (Menu.player > Map.max_players-1)
+                            Menu.player = Map.max_players-1;
 					}
 					//else if (event.keyboard.keycode == ALLEGRO_KEY_UP)
 					else if(AnyShip.fire1_down)
@@ -435,6 +440,8 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 						fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 						init_map(Menu.group, Menu.map);
+						if (Menu.player > Map.max_players-1)
+                            Menu.player = Map.max_players-1;
 					}
 					for (i=0 ; i<MAX_SHIPS ; i++)	//work out number of players (1st N/A signals the end)
 					{

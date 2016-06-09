@@ -195,13 +195,15 @@ typedef struct
 
 extern ALLEGRO_DISPLAY *display;
 extern ALLEGRO_FONT *menu_font;
+extern ALLEGRO_FONT *glow_font;
 extern ALLEGRO_FONT *small_font;
+extern ALLEGRO_FONT *small_glow_font;
 extern ALLEGRO_FONT *race_font;
 extern ALLEGRO_FONT *font;
 extern ALLEGRO_FONT *title_font;
 
 //extern int num_ships;
-
+extern ALLEGRO_BITMAP *logo;
 extern ALLEGRO_BITMAP *ships;
 extern ALLEGRO_BITMAP *sentries;
 extern ALLEGRO_BITMAP *pickups;

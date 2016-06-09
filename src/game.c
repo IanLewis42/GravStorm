@@ -43,7 +43,9 @@ ALLEGRO_DISPLAY *display;
 
 ALLEGRO_FONT *font;         //debug
 ALLEGRO_FONT *menu_font;
+ALLEGRO_FONT *glow_font;
 ALLEGRO_FONT *small_font;
+ALLEGRO_FONT *small_glow_font;
 ALLEGRO_FONT *big_font;
 ALLEGRO_FONT *race_font;
 ALLEGRO_FONT *title_font;
@@ -52,6 +54,7 @@ int fps, fps_accum;
 double fps_time;
 
 //Bitmaps
+ALLEGRO_BITMAP *logo;
 ALLEGRO_BITMAP *ships;
 ALLEGRO_BITMAP *status_bg;
 ALLEGRO_BITMAP *panel_bmp;
@@ -214,7 +217,9 @@ int main (int argc, char *argv[]){
     //font = al_load_font("arial.ttf", 20, 0);	//debug font
     if ((font       = al_load_font("miriam.ttf", 20, 0))          == NULL)  fprintf(logfile,"miriam.ttf load fail\n"); //debug font
     if ((menu_font  = al_load_font("Audiowide-Regular.ttf", 40,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
+    if ((glow_font  = al_load_font("Audiowide-500.ttf", 40,0))== NULL)      fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
     if ((small_font = al_load_font("Audiowide-Regular.ttf", 30,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
+    if ((small_glow_font  = al_load_font("Audiowide-500.ttf", 30,0))== NULL)fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
     if ((big_font   = al_load_font("northstar.ttf", 200, 0))      == NULL)  fprintf(logfile,"northstar.ttf load fail\n");
     if ((race_font  = al_load_font("7seg.ttf", 20, 0))            == NULL)  fprintf(logfile,"7seg.ttf load fail\n");
 	//if ((title_font = al_load_font("41155_WESTM.ttf", 200, 0))    == NULL)  fprintf(logfile,"41155_WESTM.ttf load fail");
