@@ -148,17 +148,25 @@
  // *ship 3
  // *more sounds (yippee, clunk, wind) - engine noise instead of /as well as wind speed?
  // *filenames for new levels
- // new level descriptions (forest, reactor core)
  // *github - VERSION
-
- // *sliding menu on resized window
- // slime tiles for cross map? Or canyon....
- // *(pretty fonts (logo in cracked sandstone?, )
- // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
- // Thrust levels 4,5,6
- // backgrounds for type 0?
+ 
  // *alpha channel on scifi tiles
  // *colours
+ // *sliding menu on resized window
+ // *(pretty fonts (logo in cracked sandstone?, )
+ 
+ // *slime tiles for cross map? Or canyon.... -> canyon tiles -> 64
+ // *canyon collision - plants not solid. Struts?
+ // *canyon background.... 
+ // Thrust levels *3,*4, 5, 6 
+ // new level descriptions (forest, reactor core, canyon)
+ // contact canyon / *old tr 
+ 
+ //AUTO BUILD FOR DIFFERENT TARGETS!!!
+ 
+ // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
+ // backgrounds for type 0?
+ // networking - enet...
  
  // *mapmaker mouse/drag stuff
  // mapmaker lean on drawing.c (and init.c?)
@@ -166,6 +174,21 @@
  // *Game name....
  // *readme (map making)
  // *menu slow response. Sounds? or file opening? Neither - should only redraw when event queue empty!
+ // *default to 2 player on >2 player maps??
+ 
+ //Hi scores / ranking
+ // open nature of levels makes it difficult to store info - how do you associate hi score/ time data with a specific level????
+ // Can do ranking, allocate points for kills, lives etc - just tied to player. 
+ // so 1 file (on server) with 1 entry per player name, with name, and score, that's it??
+ // read all on powerup into array of structs
+ // pick names from list / anon / new on game start
+ // (remember for next game)
+ // save all back to file at game end. Read again at game start???
+ // I guess you could do 1 score / time file per level, so append _scores or something, i.e. mission 1_scores.txt
+ // this couldn't be tied to player easily. 
+ // actually, just put logged-in player in table....
+ 
+ 
  
  // Windows port....
  //  Variable resolution? 
@@ -176,6 +199,22 @@
      *window sizing
      *shuffle text to match background (status and menu)
       also title and text screen?
+
+//Network...
+// Use ENet (works :-)
+// Rejig menu so first col selects types of thing e.g. map selection. # players, controls etc.
+// menu behaviour can be modified by nserver messages.
+// (ship selection? - indirection in ship struct)
+// Menu item for network, start server, join server, join game
+// if networking, 'live' server messages (at bottom?) - first, not first, game started.....
+// server name, message in txt file
+// client sends keypresses (down, held??)
+// server *broadcasts* position/angle (shield?, landed?) of all ships, position (colour?) of bullets.
+// convert float positions to ints for sending to clients - should be sufficient for drawing,
+// (well, will be, 'cos pixels are integers....)
+// but keep in float for calculation.
+// NB use htonl / htons etc. for host-to-netwok byte swapping :-)
+
      
 //windows static buid:
   many distributions of mingw
@@ -202,7 +241,7 @@
    //MM lean on drawing/init more??
    //levels
    //*fix to tile display - optimize more with shifts.
-   //more sounds...
+   //*more sounds...
    //scoring - points for win, ships left, ranking, bonus points for kill by shot, kill by 'standard' shot
      lap times, high scores for missions
      log in for 1/2 player
