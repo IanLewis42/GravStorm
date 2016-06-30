@@ -35,6 +35,8 @@
 #include "objects.h"
 #include "inputs.h"
 
+//#include "enet/enet.h"
+
 #if RPI
 #include <wiringPi.h>
 #endif
@@ -185,6 +187,17 @@ int main (int argc, char *argv[]){
 
     srand(time(NULL));
 
+/*
+    if (enet_initialize () != 0)
+    {
+        fprintf (logfile, "An error occurred while initializing ENet.\n");
+        return EXIT_FAILURE;
+    }
+
+    else
+        fprintf (logfile, "Initialized ENet.\n");
+*/
+
 	//move to objects / init??
     for(i=0 ; i<NUM_ANGLES ; i++)
     {
@@ -219,13 +232,13 @@ int main (int argc, char *argv[]){
     if ((menu_font  = al_load_font("Audiowide-Regular.ttf", 40,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
     if ((glow_font  = al_load_font("Audiowide-500.ttf", 40,0))== NULL)      fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
     if ((small_font = al_load_font("Audiowide-Regular.ttf", 30,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
-    if ((small_glow_font  = al_load_font("Audiowide-500.ttf", 30,0))== NULL)fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
+    if ((small_glow_font = al_load_font("Audiowide-500.ttf", 30,0))== NULL) fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
     if ((big_font   = al_load_font("northstar.ttf", 200, 0))      == NULL)  fprintf(logfile,"northstar.ttf load fail\n");
     if ((race_font  = al_load_font("7seg.ttf", 20, 0))            == NULL)  fprintf(logfile,"7seg.ttf load fail\n");
 	//if ((title_font = al_load_font("41155_WESTM.ttf", 200, 0))    == NULL)  fprintf(logfile,"41155_WESTM.ttf load fail");
 	if ((title_font = al_load_font("Zebulon.otf", 130, 0))    == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
 	//if ((title_font = al_load_font("Rapier Zero.otf", 160, 0))    == NULL)  fprintf(logfile,"Rapier Zero.otf load fail");
-	fprintf(logfile,"Loaded 6 fonts\n");
+	fprintf(logfile,"Loaded fonts\n");
 	fflush(logfile);
 
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
@@ -654,7 +667,7 @@ int GameOver()
 			score += Ship[0].jewels*200;
 			score += Ship[0].sentries*100;
 
-			if (Ship[0].lives)
+			if (Ship[0].lives && Ship[0].miners == Map.total_miners)
 				al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  100,  ALLEGRO_ALIGN_LEFT, "MISSION COMPLETE");
 			else
 				al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  100,  ALLEGRO_ALIGN_LEFT, "MISSION FAILED");
@@ -931,6 +944,13 @@ void FreeMenuBitmaps()
         i++;
     }
 
+    if (logo)
+    {
+        al_destroy_bitmap(logo);
+        logo = NULL;
+        i++;
+    }
+
     fprintf(logfile,"Freed %d menu bitmaps\n",i);
     fflush(logfile);
 }
@@ -939,11 +959,13 @@ void FreeFonts(void)
 {
 	al_destroy_font(font      );
 	al_destroy_font(menu_font );
+	al_destroy_font(glow_font );
 	al_destroy_font(small_font);
+	al_destroy_font(small_glow_font);
 	al_destroy_font(big_font  );
 	al_destroy_font(race_font );
 	al_destroy_font(title_font);
-	fprintf(logfile,"Freed 6 fonts\n");
+	fprintf(logfile,"Freed fonts\n");
 }
 
 void Exit(void)

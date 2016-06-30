@@ -88,6 +88,8 @@ int init_map(int group, int map)
     Map.num_special_areas = 0;
     Map.num_forcefields = 0;
 
+    Map.total_miners = 0;
+
     Map.gravity = 0.05;
     Map.drag = 2;
     Map.wrap = 0;
@@ -218,6 +220,8 @@ int init_map(int group, int map)
 			if ((Map.pad[i].type & 0x000f) < MAX_SHIPS)
 	            Ship[Map.pad[i].type & 0x000f].home_pad = i;    //bottom nibble of type gives ship which this is home pad for.
 
+            Map.total_miners += Map.pad[i].miners;
+
             i++;
 		}
 
@@ -330,7 +334,7 @@ int init_map(int group, int map)
 	//for (k=Map.max_players ; k<MAX_SHIPS ; k++)
 	for (k=0 ; k<MAX_SHIPS ; k++)
 	{
-		if (k >= Map.max_players)
+		if (k >= Map.max_players || k > 1)
 			Ship[k].controller = NA;
 		else
 			Ship[k].controller = Ship[k].selected_controller;

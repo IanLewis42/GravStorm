@@ -141,6 +141,7 @@ typedef struct
 	char description_file_name[50]; //descriptive text for level.
 	char sentry_file_name[50];
 	char sentry_collision_file_name[50];
+	int num_sentry_sprites;
 	int background_fade;
 	int bg_fade_thresh;
 	int ship_first;
@@ -150,6 +151,7 @@ typedef struct
 	int time_limit;
 	PadType pad[MAX_PADS];
 	int num_pads;
+	int total_miners;
 	int radial_gravity;
 	BlackHoleType blackhole[MAX_BLACKHOLES];
 	int num_blackholes;
@@ -177,6 +179,12 @@ typedef struct
 	int after_maxy;
 
 } MapType;
+
+typedef struct
+{
+    char name[50];
+    int points;
+}PlayerType;
 
 typedef struct
 {
