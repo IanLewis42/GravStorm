@@ -215,6 +215,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	Menu.offset = 0;
 
 	menu_bg_bmp = al_load_bitmap("menu_bg.png");
+    logo = al_load_bitmap("gs.png");;
 
 	fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 
@@ -421,8 +422,8 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 						fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 						init_map(Menu.group, Menu.map);
-						if (Menu.player > Map.max_players-1)
-                            Menu.player = Map.max_players-1;
+						//if (Menu.player > Map.max_players-1)
+                        //    Menu.player = Map.max_players-1;
 					}
 					//else if (event.keyboard.keycode == ALLEGRO_KEY_UP)
 					else if(AnyShip.fire1_down)
@@ -440,8 +441,8 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 						fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 						init_map(Menu.group, Menu.map);
-						if (Menu.player > Map.max_players-1)
-                            Menu.player = Map.max_players-1;
+						//if (Menu.player > Map.max_players-1)
+                        //    Menu.player = Map.max_players-1;
 					}
 					for (i=0 ; i<MAX_SHIPS ; i++)	//work out number of players (1st N/A signals the end)
 					{
@@ -452,6 +453,9 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 						}
 					}
 					num_ships = i;
+					if (Menu.player > num_ships-1)
+                        Menu.player = num_ships-1;
+
 				break;
 
 				case 1:	//player list
