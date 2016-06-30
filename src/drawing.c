@@ -208,10 +208,9 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 		al_draw_textf(menu_font, colour,Menu.offset+940, y+i*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
 		if (glow)al_draw_textf(glow_font, ItemCurrentGlow,Menu.offset+940, y+i*LINE_SPACE ,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
 	}
-
     colour = ItemUnselected;
-    al_draw_textf(small_font, colour, Menu.offset+940, (i+2)*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%d Active Players",num_ships);
-
+    al_draw_textf(small_font, colour, Menu.offset+940, y+(i+1)*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Max Players: %d",Map.max_players);
+    al_draw_textf(small_font, colour, Menu.offset+940, y+(i+2)*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Active Players: %d",num_ships);
 
 	if (Ship[Menu.player].controller == KEYS)
 	{
