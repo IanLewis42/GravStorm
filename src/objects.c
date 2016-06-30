@@ -825,8 +825,9 @@ void NewBullet (int x,int y,int xv,int yv,int angle,float speed,int type,int ran
 //float x,y,r,r_squared,hsax,hsay;	//heatseeker vars
 void UpdateBullets(void)
 {
-	int i,current_bullet, previous_bullet;
+	int i,j,current_bullet, previous_bullet;
 	float x,y,r,r_squared,hsax,hsay;	//heatseeker vars
+	float xg,yg;	//blackhole vars
 
 	current_bullet = first_bullet;
 	previous_bullet = END_OF_LIST;
@@ -894,11 +895,41 @@ void UpdateBullets(void)
 				}
 			}
 
-			Bullet[current_bullet].xv += hsax;// - Bullet[current_bullet].xv*Map.drag/300;
-			Bullet[current_bullet].xpos += Bullet[current_bullet].xv;
 
-			Bullet[current_bullet].yv -= hsay + Map.gravity/2;// + Bullet[current_bullet].yv*Map.drag/300;
-			Bullet[current_bullet].ypos -= Bullet[current_bullet].yv;
+			if (Map.radial_gravity)
+			{
+				xg = 0;
+				yg = 0;
+
+				for (j=0 ; j<Map.num_blackholes ; j++)
+				{
+					x = Bullet[current_bullet].xpos - Map.blackhole[j].x;
+					y = Bullet[current_bullet].ypos - Map.blackhole[j].y;
+
+					r_squared = x*x + y*y;
+					r = sqrt(r_squared);                            //distance between blackhole and ship
+					xg += 5*G*Map.blackhole[j].g * x/(r*r_squared);     //acceleration proportional to 1/r^2...
+					yg += 5*G*Map.blackhole[j].g * y/(r*r_squared);     //..and scale along normalised (unit) vector
+					                                                //These accumulate up for all blackholes to get a final overall value
+				}
+				//velocity = velocity + (Thrust - Drag)/Mass
+				Bullet[current_bullet].xv += hsax - xg;
+				//Position = position + velocity
+				Bullet[current_bullet].xpos += Bullet[current_bullet].xv;
+
+				//velocity = velocity + ((Thrust - Drag)/Mass) - Gravity
+				Bullet[current_bullet].yv += (-hsay + yg);
+				//Position = position + velocity
+				Bullet[current_bullet].ypos -= Bullet[current_bullet].yv;
+			}
+			else
+			{
+                Bullet[current_bullet].xv += hsax;// - Bullet[current_bullet].xv*Map.drag/300;
+                Bullet[current_bullet].xpos += Bullet[current_bullet].xv;
+
+                Bullet[current_bullet].yv -= hsay + Map.gravity/2;// + Bullet[current_bullet].yv*Map.drag/300;
+                Bullet[current_bullet].ypos -= Bullet[current_bullet].yv;
+			}
 
 			//wrapping / position limit copied from ships.
 			if (Bullet[current_bullet].xpos < 0)
