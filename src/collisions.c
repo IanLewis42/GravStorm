@@ -90,6 +90,7 @@ void make_ship_col_mask()
 
 	}
 	al_destroy_bitmap(ship_mask);
+    ship_mask = NULL;
 	al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
 	//return 0;
 }
@@ -116,29 +117,32 @@ void make_sentry_col_mask()
 
 	fprintf(logfile,"sentry mask:%d,%d \n",mask_width,mask_height);
 
+	Map.num_sentry_sprites = mask_width/32;
+
 	for (i=0 ; i<mask_height ; i++)
 	{
-		//fprintf(logfile,"%d ",i);
+		//fprintf(logfile,"%02d ",i);
 
-		for(j=0 ; j<(mask_width/32) ; j++)
+		for(j=0 ; j<(Map.num_sentry_sprites) ; j++)
 		{
-			sentry_col_mask[i*(mask_width/32)+j] = 0;
+			sentry_col_mask[i*(Map.num_sentry_sprites)+j] = 0;
 
 			for(k=0 ; k<32 ; k++)
 			{
 				if(!EquivalentColour(al_get_pixel(sentry_mask,(j*32)+k,i), al_map_rgb(255,0,255))) //SHIP_SIZE/2
 				{
-					sentry_col_mask[i*(mask_width/32)+j] |= (0x80000000 >> k);
+					sentry_col_mask[i*(Map.num_sentry_sprites)+j] |= (0x80000000 >> k);
 					//fprintf(logfile,"1,");
 				}
-				//else fprintf(logfile,"0,");
+				//else fprintf(logfile,"0");
 			}
-			//fprintf(logfile,"%08X ",ship_col_mask[i*24+j]);
+			//fprintf(logfile,"%08X ",sentry_col_mask[i*(mask_width/32)+j]);
 		}
 		//fprintf(logfile,"\n");
 
 	}
 	al_destroy_bitmap(sentry_mask);
+	sentry_mask = NULL;
 	al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
 	//return 0;
 }
@@ -246,6 +250,7 @@ void make_map_col_mask(void)
 
 
 	al_destroy_bitmap(map_mask);
+	map_mask = NULL;
 	fclose(map_file);
 	//fprintf(logfile,"File done\n");
 
@@ -420,13 +425,8 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 {
 	int i,j,k;
 	int sentry_word, bullet_word, y_offset, shift;
-	int num_sentry_sprites;
 
 	if (first_bullet == END_OF_LIST) return;
-
-	if (!sentry_mask) return;   //no collision mask => no sentries, or indestructible sentries (e.g. volcanoes)
-
-    num_sentry_sprites = al_get_bitmap_width(sentry_mask) >> 5;    //each sprite 32 pixels (= 1 word)
 
 	for (i=0 ; i<Map.num_sentries ; i++)
 	{
@@ -438,47 +438,49 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 				if (Bullet[j].type != BLT_SENTRY && Bullet[j].type != BLT_LAVA)
 				{
 					//check collision between sentry[i] and bullet[j];
-					if (abs(Map.sentry[i].x-Bullet[j].xpos) < 64/2)	//does bounding box save you much here??
+					if (abs(Map.sentry[i].x-Bullet[j].xpos) < 100)	//does bounding box save you much here??
 					{
-						if (abs(Map.sentry[i].y-Bullet[j].ypos) < 64/2)
+						if (abs(Map.sentry[i].y-Bullet[j].ypos) < 100)
 						{
 							//now do pixel checking
 							//mostly good, occasionally fast bullets miss the tip (presumably 'cos they go from one side to the other in a frame....)
-							//solution: check half/quarter frame back/forward
-
-							for (k=-5 ; k<3 ; k++)
+							//solution: check quarter frames forward
+							for (k=0 ; k<3 ; k++)
 							{
 								//Say sentry centre is 100,100 ; bullet is 90, 90
 
-								//y_offset = (Ship[i].ypos - (Bullet[j].ypos + 0.1*k*Bullet[j].yv));
 								y_offset = (Map.sentry[i].y - (Bullet[j].ypos + 0.25*k*Bullet[j].yv));
 
-								//y_offset is 10, meaning bullet centre is 10 above sentry centre
-								//so we need sentry mask row 10 above centre, except that sentry_col_mask
-								//is half resolution, so it's 5 rows above centre. Centre is 16, so we need 7 down
-
-								y_offset = 16 - (y_offset>>1)-1; //what if y_offset is -ve??? - think it works OK.
-
-								sentry_word = (sentry_col_mask[y_offset*num_sentry_sprites + Map.sentry[i].alive_sprite]);
-
 								shift = ((int)((Map.sentry[i].x)-(Bullet[j].xpos + 0.25*k*Bullet[j].xv)))>>1;
-								//shift is 10, meaning that bullet centre is 10 left of ship centre.
-								//so left shift bullet_word by 10.
-								//except it's all half reolution, so its 5.
-								//apparently shift by negative number doesn't work, so....
 
-								if (shift >=0)
-									bullet_word = 0x00180000 << shift;
-								else
-									bullet_word = 0x00180000 >> -1*shift;
-
-								if (sentry_word & bullet_word)
+								if ( (abs(shift) <= 16) && (abs(y_offset) <= 16) ) //collision map is 32x32, sentry x,y co-ords are centre.
 								{
-									//al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
-									al_play_sample_instance(sentry_particle_inst);
-									Bullet[j].ttl=0;	//decrement, picked up next time.
-									Map.sentry[i].shield -= Bullet[j].damage;				//decrement shield
-									break;
+                                    //example continued. y_offset is 10, meaning bullet centre is 10 above sentry centre
+                                    //so we need sentry mask row 10 above centre, except that sentry_col_mask
+                                    //is half resolution, so it's 5 rows above centre. Centre is 16, so we need 11 down
+
+                                    y_offset = 16 - (y_offset>>1)-1; //what if y_offset is -ve??? - think it works OK.
+
+                                    sentry_word = (sentry_col_mask[y_offset*Map.num_sentry_sprites + Map.sentry[i].alive_sprite]);
+
+                                    //shift is 10, meaning that bullet centre is 10 left of ship centre.
+                                    //so left shift bullet_word by 10.
+                                    //except it's all half reolution, so its 5.
+                                    //apparently shift by negative number doesn't work, so....
+
+                                    if (shift >=0)
+                                        bullet_word = 0x00180000 << shift;
+                                    else
+                                        bullet_word = 0x00180000 >> -1*shift;
+
+                                    if (sentry_word & bullet_word)
+                                    {
+                                        //al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+                                        al_play_sample_instance(sentry_particle_inst);
+                                        Bullet[j].ttl=0;	//decrement, picked up next time.
+                                        Map.sentry[i].shield -= Bullet[j].damage;				//decrement shield
+                                        break;
+                                    }
 								}
 							}
 						}
