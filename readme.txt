@@ -162,7 +162,7 @@ I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusio
   
 - This .txt file contains all the information about the level. Each parameter should be typed on its own line. 
   Pretty much anything can be used as a single-line comment, but I tend to use a semicolon ;
-  The easiest thing to do is take a look at some af the existing  files, but for reference, I'll describe all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly. These should be edited in a text editor (e.g. nano or leafpad on Raspberry Pi, notepad on windows.)
+  The easiest thing to do is take a look at some of the existing  files, but for reference, I'll describe all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly. These should be edited in a text editor (e.g. nano or leafpad on Raspberry Pi, notepad on windows.)
   
 o map_type <0|1>
   0 - Single image file for map (default)
@@ -241,7 +241,7 @@ o blackhole <x> <y> <g>
   <g> gravity. Typically 5
 
 o sentry <x> <y> <direction> <type>(0/1/2) <period> <probability> <random> <range> <alive_sprite> <dead_sprite>
-  Describes a sentry; a stationary object wich fires bullets. This DOES draw the sentry, using a sprite taken from the sentry_display file defined earlier. Maximum 30 sentries allowed.
+  Describes a sentry; a stationary object which fires bullets. This DOES draw the sentry, using a sprite taken from the sentry_display file defined earlier. Maximum 30 sentries allowed.
   
   <x> <y> position of the sentry. 
   
