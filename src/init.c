@@ -37,16 +37,17 @@
 #endif
 FILE* map_file;	//text file containing map-specific data
 const char txt[5] = ".txt\0";
+const char scores[7] = "_s.bin\0";
 
 void load_map_file(void);
-
+void swap(int* a, int* b);
 //parse:
 //align label first column, parameters separated by spaces, suits scanf I think.
 //so read line, check label, scanf, pattern determined by label.
 int init_map(int group, int map)
 {
-	int i=0, j=0,k=0,l=0,m=0,n=0;	//counters for pads, special areas, blackholes, sentries, forcefields etc.
-
+	int i=0, j=0,k=0,l=0,m=0,n=0,o=0,p=0;	//counters for pads, special areas, blackholes, sentries, forcefields etc.
+    int length;
 	char map_file_name[MAP_NAME_LENGTH];
 	char str[100];
 	char *line;
@@ -61,6 +62,7 @@ int init_map(int group, int map)
 		fprintf(logfile,"Couldn't open file %s\n",map_file_name);
 		return 1;
 	}
+	fprintf(logfile,"Opened map file %s\n",map_file_name);
 
     //defaults.
     Map.type = 0;
@@ -87,6 +89,8 @@ int init_map(int group, int map)
     Map.num_sentries = 0;
     Map.num_special_areas = 0;
     Map.num_forcefields = 0;
+    Map.num_switches = 0;
+    Map.num_racelines = 0;
 
     Map.total_miners = 0;
 
@@ -259,47 +263,54 @@ int init_map(int group, int map)
 
 		else if (strncmp(line,"race",4) == 0)
 		{
-			sscanf(line+4," %d %d %d %d",&Map.raceline_minx,&Map.raceline_maxx,&Map.raceline_miny,&Map.raceline_maxy);
+			sscanf(line+4," %d %d %d %d %d",&Map.raceline[p].line_minx,&Map.raceline[p].line_maxx,&Map.raceline[p].line_miny,&Map.raceline[p].line_maxy,&Map.raceline[p].reverse);
 			Map.race = true;
-			if (Map.raceline_minx == Map.raceline_maxx)
+			if (Map.raceline[p].line_minx == Map.raceline[p].line_maxx)
 			{
-				Map.before_maxx = Map.raceline_minx + 20;	//experimental
-				Map.after_minx  = Map.raceline_minx - 20;
+				Map.raceline[p].before_maxx = Map.raceline[p].line_minx + 20;	//experimental
+				Map.raceline[p].after_minx  = Map.raceline[p].line_minx - 20;
 
-                Map.before_minx = Map.raceline_minx;
-                Map.after_maxx  = Map.raceline_minx;
+                Map.raceline[p].before_minx = Map.raceline[p].line_minx;
+                Map.raceline[p].after_maxx  = Map.raceline[p].line_minx;
 
-				Map.before_miny = Map.raceline_miny;
-				Map.after_miny  = Map.raceline_miny;
+				Map.raceline[p].before_miny = Map.raceline[p].line_miny;
+				Map.raceline[p].after_miny  = Map.raceline[p].line_miny;
 
-				Map.before_maxy = Map.raceline_maxy;
-				Map.after_maxy  = Map.raceline_maxy;
+				Map.raceline[p].before_maxy = Map.raceline[p].line_maxy;
+				Map.raceline[p].after_maxy  = Map.raceline[p].line_maxy;
 			}
-			else if (Map.raceline_miny == Map.raceline_maxy)
+			else if (Map.raceline[p].line_miny == Map.raceline[p].line_maxy)
 			{
-				Map.before_miny = Map.raceline_miny - 20;
-				Map.after_maxy  = Map.raceline_miny + 20;
+				Map.raceline[p].before_miny = Map.raceline[p].line_miny - 20;
+				Map.raceline[p].after_maxy  = Map.raceline[p].line_miny + 20;
 
-				Map.before_maxy = Map.raceline_miny;
-				Map.after_miny  = Map.raceline_miny;
+				Map.raceline[p].before_maxy = Map.raceline[p].line_miny;
+				Map.raceline[p].after_miny  = Map.raceline[p].line_miny;
 
-				Map.before_minx = Map.raceline_minx;
-				Map.after_minx  = Map.raceline_minx;
+				Map.raceline[p].before_minx = Map.raceline[p].line_minx;
+				Map.raceline[p].after_minx  = Map.raceline[p].line_minx;
 
-				Map.before_maxx = Map.raceline_maxx;
-				Map.after_maxx  = Map.raceline_maxx;
+				Map.raceline[p].before_maxx = Map.raceline[p].line_maxx;
+				Map.raceline[p].after_maxx  = Map.raceline[p].line_maxx;
 			}
-
 			else fprintf(logfile,"X or Y values must match in race start/finish line (i.e. line must be horizontal or vertical)\n");
 
-			fprintf(logfile,"Race:   x:%d x:%d y:%d y:%d\n",Map.raceline_minx,Map.raceline_maxx,Map.raceline_miny,Map.raceline_maxy);
-			fprintf(logfile,"Before: x:%d x:%d y:%d y:%d\n",Map.before_minx,Map.before_maxx,Map.before_miny,Map.before_maxy);
-			fprintf(logfile,"After:  x:%d x:%d y:%d y:%d\n",Map.after_minx,Map.after_maxx,Map.after_miny,Map.after_maxy);
+            if (Map.raceline[p].reverse)
+            {
+                swap(&Map.raceline[p].before_miny, &Map.raceline[p].after_miny);
+                swap(&Map.raceline[p].before_maxy, &Map.raceline[p].after_maxy);
+                swap(&Map.raceline[p].before_minx, &Map.raceline[p].after_minx);
+                swap(&Map.raceline[p].before_maxx, &Map.raceline[p].after_maxx);
+            }
+			fprintf(logfile,"Race %d: x:%d x:%d y:%d y:%d\n",p,Map.raceline[p].line_minx,Map.raceline[p].line_maxx,Map.raceline[p].line_miny,Map.raceline[p].line_maxy);
+			fprintf(logfile,"Before: x:%d x:%d y:%d y:%d\n",Map.raceline[p].before_minx,Map.raceline[p].before_maxx,Map.raceline[p].before_miny,Map.raceline[p].before_maxy);
+			fprintf(logfile,"After:  x:%d x:%d y:%d y:%d\n",Map.raceline[p].after_minx,Map.raceline[p].after_maxx,Map.raceline[p].after_miny,Map.raceline[p].after_maxy);
+			p++;
 		}
 
 		else if (strncmp(line,"forcefield",10) == 0)
 		{
-			sscanf(line+10," %d %d %d %d %f %d %d %d",&Map.forcefield[n].min_x,&Map.forcefield[n].max_x,&Map.forcefield[n].min_y,&Map.forcefield[n].max_y,&Map.forcefield[n].strength,&Map.forcefield[n].sentry,&Map.forcefield[n].alive_sprite,&Map.forcefield[n].dead_sprite);
+			sscanf(line+10," %d %d %d %d %f %d %d %d %d",&Map.forcefield[n].min_x,&Map.forcefield[n].max_x,&Map.forcefield[n].min_y,&Map.forcefield[n].max_y,&Map.forcefield[n].strength,&Map.forcefield[n].switch1,&Map.forcefield[n].switch2,&Map.forcefield[n].closed_sprite,&Map.forcefield[n].open_sprite);
 			if (Map.forcefield[n].min_x == Map.forcefield[n].max_x)	//vertical line
 			{
 				Map.forcefield[n].half_x = Map.forcefield[n].min_x;
@@ -319,17 +330,38 @@ int init_map(int group, int map)
 
 			else fprintf(logfile,"X or Y values must match in forcefield (i.e. line must be horizontal or vertical)\n");
 
+			Map.forcefield[n].alpha = 255;
+			Map.forcefield[n].state = CLOSED;
+
 			fprintf(logfile,"ForceField: x:%d x:%d x:%d y:%d y:%d y:%d\n",Map.forcefield[n].min_x,Map.forcefield[n].half_x,Map.forcefield[n].max_x,Map.forcefield[n].min_y,Map.forcefield[n].half_y,Map.forcefield[n].max_y);
-			fprintf(logfile,"ForceField: strength:%0.0f sentry:%d\n",Map.forcefield[n].strength,Map.forcefield[n].sentry);
+			fprintf(logfile,"ForceField: strength:%0.0f switch1:%d, switch2:%d\n",Map.forcefield[n].strength,Map.forcefield[n].switch1,Map.forcefield[n].switch2);
 			n++;
+		}
+
+		else if (strncmp(line,"switch",6) == 0)
+		{
+			sscanf(line+6," %i %i %i %i %i ",                                        &Map.switches[o].x, &Map.switches[o].y, &Map.switches[o].closed_sprite, &Map.switches[o].open_sprite, &Map.switches[o].open_time);
+			fprintf(logfile,"Switch %i: x:%i, y:%i, Sprite%d, Sprite%d, Time:%d\n",o, Map.switches[o].x,  Map.switches[o].y,  Map.switches[o].closed_sprite,  Map.switches[o].open_sprite,  Map.switches[o].open_time);
+			Map.switches[o].shield = SENTRY_SHIELD;		//init shield
+			Map.switches[o].open = 0;
+			o++;
 		}
 	}
 
 	Map.num_pads = i;
+	fprintf(logfile,"%d pads\n",Map.num_pads);
 	Map.num_special_areas = j;
+	fprintf(logfile,"%d areas\n",Map.num_special_areas);
 	Map.num_blackholes = l;
+	fprintf(logfile,"%d blackholes\n",Map.num_blackholes);
 	Map.num_sentries = m;
+	fprintf(logfile,"%d sentries\n",Map.num_sentries);
 	Map.num_forcefields = n;
+	fprintf(logfile,"%d forcefields\n",Map.num_forcefields);
+	Map.num_switches = o;
+	fprintf(logfile,"%d switches\n",Map.num_switches);
+	Map.num_racelines = p;
+	fprintf(logfile,"%d racelines\n",Map.num_racelines);
 
 	//for (k=Map.max_players ; k<MAX_SHIPS ; k++)
 	for (k=0 ; k<MAX_SHIPS ; k++)
@@ -364,14 +396,74 @@ int init_map(int group, int map)
 
 	fflush(logfile);
 	fclose  (map_file);
+
+	//read hi scores
+	if (Map.mission || Map.race)
+    {
+        strncpy(map_file_name, (char*)&MapNames[group].Map[map], MAP_NAME_LENGTH);
+        strcat(map_file_name, scores);
+
+        map_file = fopen(map_file_name,"r");
+        if (map_file == NULL)
+        {
+            fprintf(logfile,"Couldn't open scores/times file %s. Using default high scores/times.\n",map_file_name);
+            for (i=0 ; i<MAX_SCORES ; i++)
+            {
+                if (Map.mission)
+                {
+                    Map.oldscore[i].score = 5000-500*i;
+                    strncpy(Map.oldscore[i].name,"IPL",4);
+                }
+                else if (Map.race)
+                {
+                    Map.oldtime[i].time = 40+5*i;
+                    strncpy(Map.oldtime[i].name,"IPL",4);
+                }
+            }
+        }
+        else
+        {
+            fprintf(logfile,"Opened scores/times file %s\n",map_file_name);
+            j=0;
+            while (fgets(str, 100, map_file) != NULL)
+            {
+                length = strlen(str);
+                for (i=0 ; i<length-1 ; i++)
+                    str[i] -= 0x81+j;
+                if (Map.mission)
+                {
+                    sscanf(str,"%d %s",&Map.oldscore[j].score,&Map.oldscore[j].name[0]);
+                    //fprintf(logfile,"%d %s\n",Map.oldscore[j].score,Map.oldscore[j].name);
+                }
+                else if (Map.race)
+                {
+                    sscanf(str,"%f %s",&Map.oldtime[j].time,&Map.oldtime[j].name[0]);
+                    fprintf(logfile,"%.3f %s\n",Map.oldtime[j].time,Map.oldtime[j].name);
+                }
+                j++;
+                if (j==MAX_SCORES) break;
+            }
+            fclose(map_file);
+        }
+
+    }
+
 	return 0;
+}
+
+void swap(int* a, int*b)
+{
+    int temp;
+    temp=*a;
+    *a=*b;
+    *b=temp;
 }
 
 void load_map_file(void)
 {
 	int i,j,found;
     FILE* map_file;
-	unsigned char line[200];
+	unsigned char line[200];    //unsigned to allow values up to 256 for maps with many tiles.
 
 	if ((map_file = fopen(Map.ascii_map_file_name,"r")) == NULL)  fprintf(logfile,"Couldn't open %s for reading.\n",Map.ascii_map_file_name);
 
@@ -380,7 +472,7 @@ void load_map_file(void)
 	j=0;
 	while(1)
 	{
-		if (fgets(line,200,map_file) == NULL)	//get a line from the file, exit on end of file
+		if (fgets((char *)line,200,map_file) == NULL)	//get a line from the file, exit on end of file
 			break;
 
 		i=0;
@@ -477,6 +569,7 @@ void init_ships(int num_ships)
 
 		Ship[i].lap_complete = false;
 		Ship[i].last_lap_time = 0;
+        Ship[i].best_lap_time = 999999;
 
 		Ship[i].miners = 0;
 		Ship[i].jewels = 0;
@@ -531,9 +624,11 @@ void reinit_ship(int i)
 
 	if (!Map.mission)	//keep timer running on mission levels
 	{
-		Ship[i].approaching = false;
+		Ship[i].approaching_sf = false;
+		Ship[i].approaching_next = false;
 		Ship[i].racing = false;
 		Ship[i].current_lap_time = 0;
+        Ship[i].current_raceline = 0;
 	}
 }
 
@@ -558,7 +653,7 @@ void init_keys(bool* pressed_keys)
 void init_joystick(void)
 {
 #if RPI
-	fprintf(logfile,"Init GPIO joystick\n");
+	//fprintf(logfile,"Init GPIO joystick\n");
 
 	wiringPiSetupPhys();	//set up wiring pi lib. Using phsical piun numbers (ie the numbers on th eheader)
 	pinMode (26, INPUT) ;	//using pins 26,24,22,18,16. All input and pull up.
