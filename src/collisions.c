@@ -61,7 +61,7 @@ void make_ship_col_mask()
 
 	for (i=0 ; i<mask_height ; i++)
 	{
-		//fprintf(logfile,"%d ",i);
+		//fprintf(logfile,"%02d ",i);
 
 		for(j=0 ; j<NUM_ANGLES ; j++)
 		{
@@ -76,7 +76,7 @@ void make_ship_col_mask()
 				}
 				//else fprintf(logfile,"0,");
 			}
-			//fprintf(logfile,"%08X ",ship_col_mask[i*24+j]);
+			//fprintf(logfile,"%08X ",ship_col_mask[i*40+j]);
 
 			//if(j==1)	//duplicate middle column
 			//{
@@ -165,14 +165,14 @@ void make_map_col_mask(void)
 
 	words_per_row = (mask_width/32);//+2;// +2 for padding.
 
-	if (Map.type == 0)
+	if (Map.type == 0 || Map.type == 2)
 		words_per_row +=2;
 
 	fprintf(logfile,"map:%d,%d wpr:%d (including padding)\n",mask_width,mask_height,words_per_row);
 	if ((mask_width & 0x001f) != 0)
 		fprintf(logfile,"ERROR:map width must be a multiple of 32!\n");
 
-	if (Map.type == 0)
+	if (Map.type == 0 || Map.type == 2)
 	{
 		for (i=0 ; i<12 ; i++)
 		{
@@ -198,7 +198,7 @@ void make_map_col_mask(void)
 
 	for (i=row_start ; i<row_end ; i++)
 	{
-		if (Map.type == 0)
+		if (Map.type == 0 || Map.type == 2)
 		{
 			map_col_mask[i*words_per_row+0] = 0;	//left hand padding column
 			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
@@ -219,7 +219,7 @@ void make_map_col_mask(void)
 			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
-		if (Map.type == 0)
+		if (Map.type == 0 || Map.type == 2)
 		{
 			map_col_mask[i*words_per_row+j] = 0;	//right hand padding column
 			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
@@ -235,7 +235,7 @@ void make_map_col_mask(void)
 
 	}
 
-	if (Map.type == 0)
+	if (Map.type == 0 || Map.type == 2)
 	{
 		for (i=mask_height+12 ; i<mask_height+24 ; i++)
 		{
@@ -405,7 +405,7 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 							{
 								//al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 								al_play_sample_instance(particle_inst[i]);
-								Bullet[j].ttl=0;	//decrement, picked up next time.
+								Bullet[j].ttl=1;	//decrement, picked up next time.
 								Ship[i].shield -= Bullet[j].damage;				//decrement shield
 								Ship[i].xv     += Bullet[j].mass*Bullet[j].xv;	//momentum from bullet to ship
 								Ship[i].yv     += Bullet[j].mass*Bullet[j].yv;
@@ -438,32 +438,33 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 				if (Bullet[j].type != BLT_SENTRY && Bullet[j].type != BLT_LAVA)
 				{
 					//check collision between sentry[i] and bullet[j];
-					if (abs(Map.sentry[i].x-Bullet[j].xpos) < 100)	//does bounding box save you much here??
+					//bounding box, arbitrary 100 pixels from sentry centre (to allow for forward checking, see later)
+					if (abs(Map.sentry[i].x-Bullet[j].xpos) < 100)
 					{
 						if (abs(Map.sentry[i].y-Bullet[j].ypos) < 100)
 						{
 							//now do pixel checking
-							//mostly good, occasionally fast bullets miss the tip (presumably 'cos they go from one side to the other in a frame....)
-							//solution: check quarter frames forward
+							//Occasionally fast bullets missed the tip (presumably 'cos they go from one side to the other in a frame....)
+							//solution: check forwards in quarter frames.
 							for (k=0 ; k<3 ; k++)
 							{
 								//Say sentry centre is 100,100 ; bullet is 90, 90
+                                //find diffenece in position, divide by 2 'cos collision masks are half size.
+								y_offset = (int)(Map.sentry[i].y - (Bullet[j].ypos + 0.25*k*Bullet[j].yv))>>1;
+								shift    = (int)(Map.sentry[i].x - (Bullet[j].xpos + 0.25*k*Bullet[j].xv))>>1;
 
-								y_offset = (Map.sentry[i].y - (Bullet[j].ypos + 0.25*k*Bullet[j].yv));
-
-								shift = ((int)((Map.sentry[i].x)-(Bullet[j].xpos + 0.25*k*Bullet[j].xv)))>>1;
-
+                                //check if the bullet is inside collision mask
 								if ( (abs(shift) <= 16) && (abs(y_offset) <= 16) ) //collision map is 32x32, sentry x,y co-ords are centre.
 								{
                                     //example continued. y_offset is 10, meaning bullet centre is 10 above sentry centre
                                     //so we need sentry mask row 10 above centre, except that sentry_col_mask
                                     //is half resolution, so it's 5 rows above centre. Centre is 16, so we need 11 down
 
-                                    y_offset = 16 - (y_offset>>1)-1; //what if y_offset is -ve??? - think it works OK.
+                                    y_offset = 16 - (y_offset);//-1; //what if y_offset is -ve??? - think it works OK.
 
                                     sentry_word = (sentry_col_mask[y_offset*Map.num_sentry_sprites + Map.sentry[i].alive_sprite]);
 
-                                    //shift is 10, meaning that bullet centre is 10 left of ship centre.
+                                    //shift is 10, meaning that bullet centre is 10 left of sentry centre.
                                     //so left shift bullet_word by 10.
                                     //except it's all half reolution, so its 5.
                                     //apparently shift by negative number doesn't work, so....
@@ -477,8 +478,79 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
                                     {
                                         //al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
                                         al_play_sample_instance(sentry_particle_inst);
-                                        Bullet[j].ttl=0;	//decrement, picked up next time.
+                                        Bullet[j].ttl=1;	//decrement, picked up next time.
                                         Map.sentry[i].shield -= Bullet[j].damage;				//decrement shield
+                                        break;
+                                    }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void CheckBSwitchCollisions(void)	//Bullet-to-switch collisions, copied from ..sentry
+{
+	int i,j,k;
+	int sentry_word, bullet_word, y_offset, shift;
+
+	if (first_bullet == END_OF_LIST) return;
+
+	for (i=0 ; i<Map.num_switches ; i++)
+	{
+		//if (Map.sentry[i].alive)
+		{
+			for (j=first_bullet ; j != END_OF_LIST ; j = Bullet[j].next_bullet)
+			{
+				if (j > MAX_BULLETS) fprintf(logfile,"ERROR:bullet index = %d\n",j);
+				if (Bullet[j].type != BLT_SENTRY && Bullet[j].type != BLT_LAVA)
+				{
+					//check collision between sentry[i] and bullet[j];
+					//bounding box, arbitrary 100 pixels from sentry centre (to allow for forward checking, see later)
+					if (abs(Map.switches[i].x-Bullet[j].xpos) < 100)
+					{
+						if (abs(Map.switches[i].y-Bullet[j].ypos) < 100)
+						{
+							//now do pixel checking
+							//Occasionally fast bullets missed the tip (presumably 'cos they go from one side to the other in a frame....)
+							//solution: check forwards in quarter frames.
+							for (k=0 ; k<3 ; k++)
+							{
+								//Say sentry centre is 100,100 ; bullet is 90, 90
+                                //find diffenece in position, divide by 2 'cos collision masks are half size.
+								y_offset = (int)(Map.switches[i].y - (Bullet[j].ypos + 0.25*k*Bullet[j].yv))>>1;
+								shift    = (int)(Map.switches[i].x - (Bullet[j].xpos + 0.25*k*Bullet[j].xv))>>1;
+
+                                //check if the bullet is inside collision mask
+								if ( (abs(shift) <= 16) && (abs(y_offset) <= 16) ) //collision map is 32x32, sentry x,y co-ords are centre.
+								{
+                                    //example continued. y_offset is 10, meaning bullet centre is 10 above sentry centre
+                                    //so we need sentry mask row 10 above centre, except that sentry_col_mask
+                                    //is half resolution, so it's 5 rows above centre. Centre is 16, so we need 11 down
+
+                                    y_offset = 16 - (y_offset);//-1; //what if y_offset is -ve??? - think it works OK.
+
+                                    sentry_word = (sentry_col_mask[y_offset*Map.num_sentry_sprites + Map.sentry[i].alive_sprite]);
+
+                                    //shift is 10, meaning that bullet centre is 10 left of sentry centre.
+                                    //so left shift bullet_word by 10.
+                                    //except it's all half reolution, so its 5.
+                                    //apparently shift by negative number doesn't work, so....
+
+                                    if (shift >=0)
+                                        bullet_word = 0x00180000 << shift;
+                                    else
+                                        bullet_word = 0x00180000 >> -1*shift;
+
+                                    if (sentry_word & bullet_word)
+                                    {
+                                        //al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+                                        al_play_sample_instance(sentry_particle_inst);
+                                        Bullet[j].ttl=1;	//decrement, picked up next time.
+                                        Map.switches[i].shield -= Bullet[j].damage;				//decrement shield
                                         break;
                                     }
 								}
@@ -510,7 +582,7 @@ void CheckSWCollisions(int num_ships)
 	//int tile_x, tile_y, tile_idx, tile;
 	//int start_row,current_row,rows;
 
-	if (Map.type == 0)
+	if (Map.type == 0 || Map.type == 2)
 	{
 		for (i=0 ; i<num_ships ; i++)
 		//need to start top left
@@ -523,15 +595,24 @@ void CheckSWCollisions(int num_ships)
 				map_idx =  map_idx_x + map_idx_y * words_per_row;	//This assumes that display map and collision map are the same size
 
 				shift1 =  ((((int)Ship[i].xpos)-24 ) >> 1) & 0x001F;
+                shift2 = 31-shift1;
 
-				//j=12;
+				//DEBUG
+				j=12;
+				ship_word1 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
+				ship_word1_shift = ship_word1 >> shift1;
+				//shift2 = 30-shift1;	//seems better. don't know why!
+				ship_word2 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
+				ship_word2_shift = ship_word2 << shift2;
+                collision=0;
+                //END DEBUG
+
 				for (j=0 ; j<24 ; j++)
 				{
 					map_word1 = map_col_mask[map_idx];
 
-					ship_word1 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
-
-					ship_word1_shift = ship_word1 >> shift1;
+					//ship_word1 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
+					//ship_word1_shift = ship_word1 >> shift1;
 
 					if((ship_col_mask[j*NUM_ANGLES + Ship[i].angle] >> shift1) & map_word1)
 					{
@@ -539,20 +620,20 @@ void CheckSWCollisions(int num_ships)
 						if (!Ship[i].landed)
 						{
 							Ship[i].shield = 0;
-							//collision = 1;
+							collision = 1;
 							break;
 						}
 					}
 					//else collision = 0;
 
 					//shift2 = 32-shift1;
-					shift2 = 30-shift1;	//seems better. don't know why!
+					//shift2 = 30-shift1;	//seems better. don't know why!
 
-					ship_word2 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
+					//ship_word2 = (ship_col_mask[j*NUM_ANGLES + Ship[i].angle]);
 
-					ship_word2_shift = ship_word2 << shift2;
+					//ship_word2_shift = ship_word2 << shift2;
 
-					//if (!(shift2 > 23))
+					if (shift2 < 32)
 					{
 						map_word2 = map_col_mask[map_idx+1];
 
@@ -562,14 +643,14 @@ void CheckSWCollisions(int num_ships)
 							if (!Ship[i].landed)
 							{
 								Ship[i].shield = 0;
-								//collision = 1;
+								collision = 2;
 								break;
 							}
 						}
 						//else collision = 0;
 					}
 					map_idx += words_per_row;//mapx>>6;//This assumes that display map and collision map are the same size
-					collision=0;
+
 				}
 			}		//end of (if reincarnate timer)
 		}			//end of for (ships)
@@ -665,7 +746,7 @@ void CheckSWCollisions(int num_ships)
 					if (tile != 0)	//if it's not an empty tile
 					{
 						//shift1 = ((((int)Ship[i].xpos)-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
-						shift2 = 32-shift1;
+						shift2 = 31-shift1;
 						start_row = ((((int)Ship[i].ypos)-24) & 0x003f)>>1;	//
 						current_row = start_row;
 						rows = 32-start_row;
@@ -701,7 +782,7 @@ void CheckSWCollisions(int num_ships)
 						if (tile != 0)	//if it's not an empty tile
 						{
 							//shift1 = ((((int)Ship[i].xpos)-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
-							shift2 = 32-shift1;
+							shift2 = 31-shift1;
 							start_row = 0;
 							current_row = start_row;
 
@@ -816,7 +897,7 @@ void CheckBWCollisions(void)
 {
 	int i,j=0,shift;
 
-	if (Map.type == 0)
+	if (Map.type == 0 || Map.type == 2)
 	{
 		for (i=first_bullet ; i != END_OF_LIST ; i = Bullet[i].next_bullet)
 		{

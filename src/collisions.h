@@ -25,6 +25,7 @@ void CheckBSCollisions(int num_ships);
 void CheckSWCollisions(int num_ships);
 void CheckBWCollisions(void);
 void CheckBSentryCollisions(void);
+void CheckBSwitchCollisions(void);
 
 int EquivalentColour(ALLEGRO_COLOR col1, ALLEGRO_COLOR col2);
 
