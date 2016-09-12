@@ -1,23 +1,25 @@
        
         
  Credits:
- Game design and coding by Ian Lewis
+ Game design and coding by Ian Lewis.
  Huge thanks to Heikki Kossola, 
- the creator of the original TurboRaketti
+ the creator of the original TurboRaketti.
  Also thanks to the Raspberry Pi Foundation 
- and the authors of the Allegro libraries
- TurboRaketti maps provided by Asbjorn Djupdal
+ and the authors of the Allegro libraries.
+ TurboRaketti maps provided by Asbjorn Djupdal.
  Graphics provided by:
  SpiralGraphics.biz
  pzUH / GameArt2D.com
+ justinredfield.deviantart.com
  Kaladun on imgur.com
- Marta Nowaczyk of www.ifu.deviantart.com
- kabecao.deviantart.com
+ thefirstfleet.deviantart.com
+ KIIRA
+ Todd Vance
  Fonts Used
  Audiowide (Astigmatic One Eye)
- Zebulon (Pixel Sagas)
- Northstar (Iconian)
+ Zebulon (Pixel Sagas) 
  7-Segment (IPL)
+
  
  
         
