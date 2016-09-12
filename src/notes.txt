@@ -20,8 +20,8 @@
  //*level metadata - start pos, landing pad pos & properties (refuelling etc), water, updrafts.....
  
  //Level 3 - finish TR
- //?sound
- // more sounds (wind, engine, menu sound)
+ //*sound
+ //*more sounds (wind, engine, menu sound)
  //*more levels - need to sort out making collision map - all TR levels done
  //*all weapon types
  //*front end menu 
@@ -149,25 +149,67 @@
  // *more sounds (yippee, clunk, wind) - engine noise instead of /as well as wind speed?
  // *filenames for new levels
  // *github - VERSION
- 
  // *alpha channel on scifi tiles
  // *colours
  // *sliding menu on resized window
  // *(pretty fonts (logo in cracked sandstone?, )
- 
  // *slime tiles for cross map? Or canyon.... -> canyon tiles -> 64
  // *canyon collision - plants not solid. Struts?
  // *canyon background.... 
- // Thrust levels *3,*4, 5, 6 
- // new level descriptions (forest, reactor core, canyon)
- // contact canyon / *old tr 
+ // *forcefield fading 
+ // *AUTO BUILD FOR DIFFERENT TARGETS!!!
+ // *second switch - L5 & final
+ // *Hidden passage on canyon 
+ // *escape from text screen -> back to menu
+ // *Hi scores (test some more...)
+ // *improve race integrity...
+ // *fastest times.
+ // *new level descriptions (*forest, *reactor core, *canyon)
+ // *credits.
+ // *more graphics tart up (eggs, slime) 
+ // *Thrust levels *3,*4,*5,*6 
+ // *New FF/switch behaviour
+ // another level???
+ // *neutron star gfx rework?? - sliding background, so new rocks, and neutron star.... 960x720? - alpha on asteroids
+   // type 2 map - single image, no rescaling - yup, but => big image. 1280x1280 *just* big enough.....
+   // change map - no rock borders, just scattered asteroids.... wrap everywhere, so nothing too close to edges, I guess....
+   // layout good; 1920x1920, better pad rocks. background 1280 seems good.....
+   //drag and drop files to maintain alpha - copy/paste via irfan view loses it.
+   //P2 gap too small???
  
- //AUTO BUILD FOR DIFFERENT TARGETS!!!
+ // ?re-jig menu (as per network section)- animated ship selection.
+ // Check all levels - starting, lives, sentries etc....
+    *slime on orange and purple tiles - colours in general.
+    *render all new hex tilesets (apart from blue). Check colours against thrust.
+    *fade levels
+    *check all .txt files.
+    *time limits for missions. And points for sentries / time ??
+    *VERSION NUMBER
+ // *build both targets
+ // *try usb joy on windows.
+ // RELEASE 1.0.0.0
+ // contact canyon / *gurkoz
+ // finnish thread, mp, tb, mc, zimeon, Asbjorn, Alex?, RPi guy.
  
  // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
  // backgrounds for type 0?
  // networking - enet...
  
+ //Colours
+ 1,pink,	145,61,62	,237,153,154
+ 2,green,	22,111,38	,144,208,113
+ 3,blue,	23,112,111,	119,203,202
+ 4,lilac,	87,72,163	,185,159,255
+ 5,orange,	120,83,14	,120,83,14
+ 6,magenta,	136,52,134,	227,144,225
+
+ // New struct (SwitchType)+ array in MapType
+ // new init keyword switch x y closed sprite open sprite open time
+ // New fns, UpdateSwitches, CheckBSwitchCollision (duplicate BSentry)
+ // add drawing code.
+ // State machines for FF and switch. FF CLOSED, FADE OUT, OPEN, FADE IN
+ // add second switch to ff init
+
  // *mapmaker mouse/drag stuff
  // mapmaker lean on drawing.c (and init.c?)
  // *mapmaker static linked build.
@@ -175,6 +217,11 @@
  // *readme (map making)
  // *menu slow response. Sounds? or file opening? Neither - should only redraw when event queue empty!
  // *default to 2 player on >2 player maps??
+ 
+  // Home pad assignment logic - ah, on mission levels, any pad you land on becomes your home pad
+     This was originally intended to allow multi-life missions, which didn't send you back to the start,
+     but I'm now intending 1 life only. The side effect is that all mission pads allow menu, and recharge everything.
+    I think I'm happy with that.....
  
  //Hi scores / ranking
  // open nature of levels makes it difficult to store info - how do you associate hi score/ time data with a specific level????
@@ -203,7 +250,7 @@
 //Network...
 // Use ENet (works :-)
 // Rejig menu so first col selects types of thing e.g. map selection. # players, controls etc.
-// menu behaviour can be modified by nserver messages.
+// menu behaviour can be modified by server messages.
 // (ship selection? - indirection in ship struct)
 // Menu item for network, start server, join server, join game
 // if networking, 'live' server messages (at bottom?) - first, not first, game started.....
@@ -214,6 +261,18 @@
 // (well, will be, 'cos pixels are integers....)
 // but keep in float for calculation.
 // NB use htonl / htons etc. for host-to-netwok byte swapping :-)
+
+
+menu
+mode
+[local, network]
+map
+[list from local or network]
+player 1
+[controls, ship]
+num players???
+
+
 
      
 //windows static buid:
