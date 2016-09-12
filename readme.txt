@@ -1,7 +1,7 @@
 README.TXT
 ----------
 
-INTRODUCTION
+INTRODUCTION 
 ------------
 Welcome to GravStorm.
 
@@ -100,7 +100,8 @@ Down/Back fires your 'special' weapon (limited ammo, more damage, various types)
 Thrust/Joystick Button fires your engine.
 
 Some levels have a race track. This should be described in the level text.
-Current lap time and last completed lap time are displayed in the status panel.
+Current lap time, last completed lap time and best lap time for this game are displayed in the status panel.
+If you complete a lap, the best times (and players who set them) will be displayed at the end of the game.
 
 o Single player 'Mission' levels
   These are largely based on the 'Thrust' maps. Here, the objective is to rescue the miners who are stuck at the bottom of the cave system. Land on the 'blue' pads to rescue them. Land on the 'red' pads to collect jewels for bonus points. Beware that your ship will be heavier with extra passengers and cargo! Fly off away from the surface to complete the level.
@@ -116,7 +117,7 @@ Cyan   - Special Ammo
 Yellow - Fuel
 
 White triangles are lives remaining.
-Current and last completed lap times are displayed at the bottom of the panel.
+Current, last completed and best lap times are displayed at the bottom of the panel.
 
 For 'Mission' levels, miners rescued and jewels collected are shown, along with the elapsed time.
 
@@ -161,42 +162,48 @@ I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusio
 - The file 'data/maps.txt' lists all the maps(/levels) that can be played. A : at the start of an entry indicates a group. Each entry in maps.txt (apart from the groups) must have a corresponding .txt file in the /data directory. So if the entry in maps.txt is my_level, you must have a file called data/my_level.txt
   
 - This .txt file contains all the information about the level. Each parameter should be typed on its own line. 
-  Pretty much anything can be used as a single-line comment, but I tend to use a semicolon ;
+  Pretty much anything (other than whitespace) can be used as a single-line comment, but I tend to use a semicolon ;
   The easiest thing to do is take a look at some of the existing  files, but for reference, I'll describe all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly. These should be edited in a text editor (e.g. nano or leafpad on Raspberry Pi, notepad on windows.)
   
-o map_type <0|1>
-  0 - Single image file for map (default)
-  1 - Tiled map
-  
+o map_type <0|1|2>
+  0 - Single image file for map, displayed double size (default)
+  1 - Tiled map, displayed normal size.
+  2 - Single image file for map, displayed normal size
+    
 o display_map <filename> only png format supported. REQUIRED
-  Image to display, or images of all the tiles, arranged with eight tiles per row. If tiles, each tile must be 64x64 pixels, so the whole image must be (8*64) x (n*64) pixels, where n=number of tiles/8. The first tile must be entirely empty space, i.e. contain no objects that the ship could collide with.
-  Tiles are displayed 'normal' size;  single image maps are displayed double size. 
-  
-o background <filename> only png format supported.
-  This should specift a 128x128 image which will be used as a scrolling 'parallax' background. Currently only works for tiled maps (type 1)
+  Image to display, or images of all the tiles, arranged with eight tiles per row. 
+  If this is a single image, it must be an exact multiple of 32 pixels wide (e.g. 32*20 = 640. 32*25=800). 
+  Maximum size is 1440x512 pixels.
+  If tiles, each tile must be 64x64 pixels, so the whole image must be (8*64) x (n*64) pixels, where n=number of tiles/8. The first (i.e. top-left) tile must be entirely empty space, i.e. contain no objects that the ship could collide with.
+
+o background <filename> png or jpg format supported.
+  For a type 1 (tiled) map, this should specify a 128x128 image which will be tiled and used as a scrolling 'parallax' background.
+  For a type 2 map, the background can be any size.
   
 o bg_fade <value>
-  Specifying this enables background fadng. This means that the background will be invisible at the top of the map, and become more visible as you go down. The value is the diatance from the top (in pixels) where the background starts to appear.
+  Specifying this enables background fading. This means that the background will be invisible at the top of the map, and become more visible as you go down. The value is the distance from the top (in pixels) where the background starts to appear.
   
 o collision_map <filename> only png format supported. REQUIRED
-  Similar to display_map, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). 
-  If tiles, this should be HALF-SIZE, so each tile must be 32x32 pixels, and the whole image must be (8*32) x (n*32) pixels.
+  The same as display_map, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). 
+  For map type 0, this should be the same size as the display map.
+  For map type 1 (tiled), this should be HALF-SIZE, so each tile must be 32x32 pixels, and the whole image must be (8*32) x (n*32) pixels.
+  For map type 2, this should be HALF-SIZE.
   
 o ascii_map <filename> 
-  Shows the arrangement of tiles to make the map. ASCII format, 0-9 for first 10 tiles, A-Z for next 26. ' ' (space) doubles as 0. Only applies if map_type = 1
+  Shows the arrangement of tiles to make the map. ASCII format, 0-9 for first 10 tiles, A-Z for next 26. ' ' (space) doubles as 0. Only applies if map_type = 1.
   
 o sentry_display <filename> only png format supported.
-  Images of all the sentries and forcefields, arranged in a single horizontal line. Each image must be 64x64 pixels, so the whole image must be (n*64) x 64 pixels
+  Images of all the sentries and forcefields, arranged in a single horizontal line. Each image must be 64x64 pixels, so the whole image must be (n*64) x 64 pixels.
 
 o sentry_collision <filename> only png format supported.
-  Similar to sentry_display, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). This should be HALF-SIZE, so each tile must be 32x32 pixels, and the whole image must be (n*32) x 32 pixels.
+  The same as sentry_display, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). This should be HALF-SIZE, so each tile must be 32x32 pixels, and the whole image must be (n*32) x 32 pixels.
   
 o description <filename> 
-  Text displayed after selecting map
+  Text displayed after selecting map.
   
 o ship_first <0|1>
   0 - Map gets drawn first, then ship (also sentries, forcefields etc.) on top (default)
-  1 - ship (also sentries, forcefields etc.) get drawn first, then map on top
+  1 - Ship (also sentries, forcefields etc.) get drawn first, then map on top.
   
 o wrap <0|1>
   0 - Ship stops at edge of map (if there's no wall)  (default)
@@ -251,23 +258,32 @@ o sentry <x> <y> <direction> <type>(0/1/2) <period> <probability> <random> <rang
                  1 is 'targeted' (i.e. aims at nearest ship) damage = 50
                  2 is 'volcano' (lava coloured bullets) damage = 10
   
-  <period> <probability> every <period> frames, the sentry has <probability> of firing.
-    e.g. if period is 30 and probability is 50, then the sentry has a 50% chance of firing every second.
+  <period> <probability> every <period> frames, the sentry has <probability> of firing. Each frame is 1/30th of a second.
+    e.g. if period is 30 and probability is 50, then each secondd, the sentry has a 50% chance of firing.
   
-  <random> amount of randomness applied to each shot. Typically 0-20
+  <random> amount of randomness applied to each shot. Typically 0-20.
   
   <range> distance at which targeted sentries will start firing.
   
   <alive_sprite> <dead_sprite> index into sentry_display file to define image to be drawn for when the sentry is active / destroyed. 0 for first 64x64 image, 1 for next image etc.
 
-o forcefield <min_x> <max_x> <min_y> <max_y> <strength> <sentry> <alive_sprite> <dead_sprite>
+o forcefield <min_x> <max_x> <min_y> <max_y> <strength> <switch> <alive_sprite> <dead_sprite>
   <min_x> <max_x> <min_y> <max_y> define endpoints of forcefield. Forcefield must be either horizontal or vertical, i.e. EITHER min_x = max_x (vertical) OR min_y = max_y (horizontal). Maximum 5 forcefields allowed.
     
   <strength> force of repulsion. Typically 1000
   
-  <sentry> If this sentry is destroyed, the forcefield is deactivated. Sentries are numbered in the order they are defined in this file.
+  <switch> If this switch is hit with a bullet, the forcefield is deactivated. Switches are numbered in the order they are defined in this file.
   
   <alive_sprite> <dead_sprite> index into sentry_display file to define image to be drawn for when the forcefield is active / deactivated. 0 for first 64x64 image, 1 for next image etc.
+
+o switch <x> <y> <closed sprite> <open sprite> <open time>
+  creates a switch to open a forcefield.
+
+  <x> <y> position
+
+  <closed sprite> <open sprite> index into sentry_display file to define image to be drawn for when the switch is closed / open. 0 for first 64x64 image, 1 for next image etc.
+  
+  <open time> forcefield will stay open for this many frames before closing again. Each frame is 1/30th of a second. 
 
 o area <min_x> <max_x> <min_y> <max_y> <gravity> <drag>
   defines a rectangular area where gravity and/or drag are different from the rest of the map. Maximum 4 areas allowed.
@@ -276,18 +292,20 @@ o area <min_x> <max_x> <min_y> <max_y> <gravity> <drag>
   
   <gravity> <drag> as per normal definitions for the level.
 
-o race <min_x> <max_x> <min_y> <max_y>
-  defines the start/finish line of the race.
+o race <min_x> <max_x> <min_y> <max_y> <reverse>
+  defines the start/finish and progress lines of the race.
   
   <min_x> <max_x> <min_y> <max_y> define endpoints of line. Line must be either horizontal or vertical, i.e. EITHER min_x = max_x (vertical) OR min_y = max_y (horizontal).
+  
+  'normal' horizontal lines are traversed right-left; 'normal' vertical lines are traversed top-bottom. If 'reverse' is set to 1, then this direction is reversed. The lines can be viewed in mapmaker; press G to turn grid on; racelines are shown as red/green lines - traversed red-green, and in the order they're declared in the map file. 
 
-There is a separate mapmaker program. This is unimaginatively called 'mapmaker'. It reads the same .txt file, which should be passed on the command line, e.g. 
+There is a separate map maker program. This is unimaginatively called 'mapmaker'. It reads the same .txt file, which should be passed on the command line, e.g. 
 
 mapmaker "mission 1.txt"
   
-Quotes are required if there's a space in the filename. If you run it without an filename, it will immediately exit, so double clicking from Windows explorer won't work. In Windows, open a command window by clicking on the start button and typing cmd <return>, then navigate to the 'gravstorm' directory, and type the command line as above. 
+Quotes are required if there's a space in the filename. If you run it without a filename, it will immediately exit, so double clicking from Windows explorer won't work. In Windows, open a command window by clicking on the start button and typing cmd <return>, then navigate to the 'gravstorm' directory, and type the command line as above. 
 
-Note that the Windows executable is called 'mapmaker.exe' ; the Raspberry Pi executabe is just 'mapmaker'. You can delete whichever one you don't need.
+Note that the Windows executable is called 'mapmaker.exe' ; the Raspberry Pi executable is just 'mapmaker'. You can delete whichever one you don't need.
 
 Keyboard controls are:
 
@@ -297,8 +315,10 @@ Keyboard controls are:
 - Q/A:               scroll tile preview on left
 - Return:            reload .txt file
 - S:		     save modified ASCII map file. 
-- G:                 toggle grid off/white/grey/black
+- G:                 toggle grid off/white/grey/black. 
 - Escape:            exit 
+
+N.B. When the grid is shown, you can also see pads (red bar), black holes (cyan circle), racelines (red/green) and altered gravity/drag areas (yellow).
 
 The mouse can be used to edit tiled maps as follows:
 - Left click and release to 'pick up' a tile (either from the map, or the preview area on the left)
@@ -320,5 +340,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 10/03/16
+IPL 11/09/16
 gravstorm9@gmail.com
