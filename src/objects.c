@@ -30,6 +30,7 @@
 #include "game.h"
 #include "objects.h"
 #include "init.h"
+#include "gameover.h"
 
 //Trig LUTs
 float sinlut[NUM_ANGLES];
@@ -51,7 +52,7 @@ int last_bullet = END_OF_LIST;	//init this when you make a new bullet.
 int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   60,   5000, 150, 300,   300, 300};	//Life (in frames)
 int reload[BULLET_TYPES] = {5,     5,     5,     15,    0,    0,    0,   0,     0,   0};	//frames in between shots (if fire held down) N/A for heavy weapons
 float Mass[BULLET_TYPES] = {0.04,  0.04,  0.04,  0.04,  0.1,  0.1,  0.1, 0.04,  0.1, 0.1};	//Really bullet mass/ship mass; only used in collisions
-int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   50,  9,     10,  50};   //points off shield when collision happens
+int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   30,  9,     10,  50};   //points off shield when collision happens
 
 void UpdateLandedShip(int ship_num);	//int
 void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv);//float outward_v);
@@ -91,7 +92,7 @@ int UpdateShips(int num_ships)
 					return(GO_TIMER);	//game over
 				}
 				reinit_ship(i);
-				fprintf(logfile,"Ship %d reincarnated\n",i);
+				//fprintf(logfile,"Ship %d reincarnated\n",i);
 			}
 		}
 		else if (Ship[i].shield <= 0)
@@ -102,7 +103,7 @@ int UpdateShips(int num_ships)
 			Ship[i].reincarnate_timer = 100;
 			Ship[i].lives--;
 			Ship[i].thrust = 0; //stop engine noise
-			fprintf(logfile,"Ship %d destroyed\n",i);
+			//fprintf(logfile,"Ship %d destroyed\n",i);
 		}
 		else if(Ship[i].landed)
 		{
@@ -131,8 +132,8 @@ int UpdateShips(int num_ships)
 			if (Ship[i].thrust_held && Ship[i].fuel)
 				{
 					//Ship[i].angle++;	//DEBUG
-					//if (Ship[i].angle == NUM_ANGLES)
-				  	//	Ship[i].angle = 0;
+					if (Ship[i].angle == NUM_ANGLES)
+				  		Ship[i].angle = 0;
 
 					Ship[i].thrust = THRUST;
 					Ship[i].fuel--;
@@ -162,11 +163,11 @@ int UpdateShips(int num_ships)
 				Ship[i].xpos += Ship[i].xv;
 
 				//velocity = velocity + ((Thrust - Drag)/Mass) - Gravity
-				Ship[i].yv += (((Ship[i].thrust*coslut[Ship[i].angle]) - Ship[i].yv*Ship[i].drag)/Ship[i].mass) + yg;
+				Ship[i].yv += (((Ship[i].thrust*coslut[Ship[i].angle]) - Ship[i].yv*Ship[i].drag)/Ship[i].mass) + yg  - Ship[i].gravity;
 				//Position = position + velocity
 				Ship[i].ypos -= Ship[i].yv;
 			}
-			else
+			else //if (Ship[i].gravity)
 			{
 				//velocity = velocity + (Thrust - Drag)/Mass
 				Ship[i].xv += ((Ship[i].thrust*sinlut[Ship[i].angle]) - Ship[i].xv*Ship[i].drag + Ship[i].x_force)/Ship[i].mass;
@@ -192,14 +193,14 @@ int UpdateShips(int num_ships)
 				{
 					Ship[i].gravity = Map.gravity;
 					Ship[i].drag = Map.drag;
-					break;
+					//break;
 				}
 			}
 
 			//Forcefields
 			for (j=0 ; j<Map.num_forcefields ; j++)
 			{
-				if (Map.sentry[Map.forcefield[j].sentry].alive)
+				if (Map.forcefield[j].state == CLOSED)
 				{
 					//first check if inside entire ff box (both sides of line)
 					if ( (Ship[i].xpos > Map.forcefield[j].min_x) && (Ship[i].xpos < Map.forcefield[j].max_x)
@@ -231,31 +232,59 @@ int UpdateShips(int num_ships)
 
 			if (Map.race)
 			{
+				int p = Ship[i].current_raceline;   //convenience....
+
 				if (Ship[i].racing)
 					Ship[i].current_lap_time += FrameTime;
 
-				if (Ship[i].approaching == true)	//if we were approaching last frame
+                //Always do start/finish line
+				if (Ship[i].approaching_sf == true)	//if we were approaching start/finish line last frame
+                {
+					//Check 'after' area
+					if ( (Ship[i].xpos > Map.raceline[0].after_minx) && (Ship[i].xpos < Map.raceline[0].after_maxx)
+					  && (Ship[i].ypos > Map.raceline[0].after_miny) && (Ship[i].ypos < Map.raceline[0].after_maxy) )
+					{
+                        //crossed s/f line
+                        if (Ship[i].current_raceline == Map.num_racelines)	//if we were about to finish
+                        {
+                            Ship[i].last_lap_time = Ship[i].current_lap_time; //remember lap time;
+                            if (Ship[i].last_lap_time < Ship[i].best_lap_time)
+                                Ship[i].best_lap_time = Ship[i].last_lap_time;
+                            Ship[i].lap_complete = true;
+                        }
+                        //always reset lap time and start looking for line 1
+                        Ship[i].current_lap_time = 0;
+                        Ship[i].current_raceline = 1;
+                        Ship[i].racing = true;
+					}
+                }
+
+				//Check if we're approaching s/f line
+				if ( (Ship[i].xpos > Map.raceline[0].before_minx) && (Ship[i].xpos < Map.raceline[0].before_maxx)
+				  && (Ship[i].ypos > Map.raceline[0].before_miny) && (Ship[i].ypos < Map.raceline[0].before_maxy) )
+					Ship[i].approaching_sf = true;
+				else
+					Ship[i].approaching_sf = false;
+
+
+				//Do 'next line'
+				if (Ship[i].approaching_next == true)	//if we were approaching last frame
 				{
 					//Check 'after' area
-					if ( (Ship[i].xpos > Map.after_minx) && (Ship[i].xpos < Map.after_maxx)
-					  && (Ship[i].ypos > Map.after_miny) && (Ship[i].ypos < Map.after_maxy) )
+					if ( (Ship[i].xpos > Map.raceline[p].after_minx) && (Ship[i].xpos < Map.raceline[p].after_maxx)
+					  && (Ship[i].ypos > Map.raceline[p].after_miny) && (Ship[i].ypos < Map.raceline[p].after_maxy) )
 					{
-						if (Ship[i].racing)	//if we were on a lap
-						{
-							Ship[i].last_lap_time = Ship[i].current_lap_time; //remember it;
-							Ship[i].lap_complete = true;
-						}
-						Ship[i].current_lap_time = 0;
-						Ship[i].racing = true;
+						//we have just crossed the line, so look for next one. Reset on s/f line.
+						Ship[i].current_raceline++;
 					}
 				}
 
 				//Check 'before' area
-				if ( (Ship[i].xpos > Map.before_minx) && (Ship[i].xpos < Map.before_maxx)
-				  && (Ship[i].ypos > Map.before_miny) && (Ship[i].ypos < Map.before_maxy) )
-					Ship[i].approaching = true;
+				if ( (Ship[i].xpos > Map.raceline[p].before_minx) && (Ship[i].xpos < Map.raceline[p].before_maxx)
+				  && (Ship[i].ypos > Map.raceline[p].before_miny) && (Ship[i].ypos < Map.raceline[p].before_maxy) )
+					Ship[i].approaching_next = true;
 				else
-					Ship[i].approaching = false;
+					Ship[i].approaching_next = false;
 			}
 
 			//Limit position to map, just while we don't have collision detection!
@@ -331,7 +360,7 @@ int UpdateShips(int num_ships)
 			//'Special' firing
 			//if (Ship[i].fire2)
 			//if (Ship[i].fire2_held)
-				//Ship[i].ypos++;		//DEBUG
+			//	Ship[i].ypos++;		//DEBUG
 
 			if (Ship[i].fire2_down)
 			{
@@ -551,6 +580,8 @@ void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, f
 {
 	int j,k;
 
+	//fprintf(logfile,"Explosion.\n");
+
 	for (k=1 ; k<num_rings+1 ; k++)	//1-2 for 2 rings of particles; fast and slow
 	{
 		for (j=0 ; j<num_particles ; j++)
@@ -652,8 +683,68 @@ void FireSpecial(int ship_num)
 }
 
 
-//float x_dis, y_dis, distance, direction;  //global for debug
+ void UpdateSwitches(void)
+ {
+    int i;
+	for(i=0 ; i<Map.num_switches ; i++)
+	{
+        if (Map.switches[i].open)
+        {
+            Map.switches[i].open_timer--;
+            if (Map.switches[i].open_timer == 0)
+            {
+                Map.switches[i].open = 0;
+                Map.switches[i].shield = SENTRY_SHIELD;
+            }
+        }
+        else
+        {
+            if (Map.switches[i].shield < 0)
+            {
+                Map.switches[i].open = 1;
+                Map.switches[i].open_timer = Map.switches[i].open_time;
+            }
+        }
+	}
+ }
 
+void UpdateForcefields(void)
+{
+    int i;
+	for(i=0 ; i<Map.num_forcefields ; i++)
+	{
+		switch(Map.forcefield[i].state)
+		{
+        case CLOSED:
+                if (Map.switches[Map.forcefield[i].switch1].open || Map.switches[Map.forcefield[i].switch2].open)
+                    Map.forcefield[i].state = FADE_OUT;
+        break;
+        case FADE_OUT:
+                Map.forcefield[i].alpha-=10;
+                if (Map.forcefield[i].alpha < 0)
+                {
+                    Map.forcefield[i].alpha = 0;
+                    Map.forcefield[i].state = OPEN;
+                }
+        break;
+        case OPEN:
+                if (!Map.switches[Map.forcefield[i].switch1].open && !Map.switches[Map.forcefield[i].switch2].open)
+                    Map.forcefield[i].state = FADE_IN;
+        break;
+        case FADE_IN:
+                Map.forcefield[i].alpha+=10;
+                if (Map.forcefield[i].alpha > 255)
+                {
+                    Map.forcefield[i].alpha = 255;
+                    Map.forcefield[i].state = CLOSED;
+                }
+        break;
+		}
+	}
+}
+
+//float x_dis, y_dis, distance, direction;  //global for debug
+//int random, random100,shots=0,count=0;
 void UpdateSentries(void)
 {
 	int i,j;
@@ -673,8 +764,13 @@ void UpdateSentries(void)
 			Map.sentry[i].count--;
 			if (Map.sentry[i].count == 0)
 			{
+				//count++;
+				//random = rand();
+				//random100 = random%100;
+				//if (random100 < Map.sentry[i].probability)
 				if (rand()%100 < Map.sentry[i].probability)
 				{
+					//shots++;
 					if (Map.sentry[i].type == 1)	//volcano
 						NewBullet(Map.sentry[i].x, Map.sentry[i].y, 0, 0, Map.sentry[i].direction, BULLET_SPEED, BLT_LAVA, Map.sentry[i].random);
 
@@ -783,6 +879,8 @@ void NewBullet (int x,int y,int xv,int yv,int angle,float speed,int type,int ran
 		}
 	}
 
+	//fprintf(logfile,"Made Bullet %d\n",i);
+
 	if (first_bullet == END_OF_LIST)	//if we have no live bullets currently
 		first_bullet = i;		//remember that this is the first one
 	else
@@ -838,6 +936,7 @@ void UpdateBullets(void)
 
 		if (Bullet[current_bullet].ttl <= 0)	//if expired
 		{										//pass index up the list
+            //fprintf(logfile,"Expired Bullet %d\n",current_bullet);
 
 			if (previous_bullet == END_OF_LIST)							//if we're the first bullet
 			//if (current_bullet == first_bullet)					//(should be equivalent to above)

@@ -166,11 +166,15 @@ typedef struct
 	int menu;
 	int menu_state;
 
-	int	approaching;	//race
+	int	approaching_next;	//next checkpoint
+	int	approaching_sf;	    //start/finish line
 	int racing;
+    int current_raceline;
 	int lap_complete;
 	float current_lap_time;
 	float last_lap_time;
+	float best_lap_time;
+	int lap_table_pos;
 
 	ALLEGRO_COLOR colour;	//background colour for status display
 	ALLEGRO_BITMAP* status_bg;
@@ -196,7 +200,7 @@ extern int num_ships;
 extern BulletType Bullet[MAX_BULLETS];
 extern int first_bullet;
 extern int mapx, mapy;
-
+//extern int random, random100, count, shots;
 //Trig LUTs
 extern float sinlut[NUM_ANGLES];
 extern float coslut[NUM_ANGLES];
@@ -209,4 +213,6 @@ extern ALLEGRO_SAMPLE *yippee;
 
 int  UpdateShips(int num_ships);
 void UpdateBullets(void);
+void UpdateForcefields(void);
 void UpdateSentries(void);
+void UpdateSwitches(void);
