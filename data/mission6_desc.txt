@@ -1,0 +1,9 @@
+MISSION 6
+
+Your objective is to rescue the miners who are 
+stuck at the bottom of the cave system. Land on 
+the 'blue' pads to rescue them. Land on the 'red' 
+pads to collect jewels for bonus points. Beware 
+that your ship will be heavier with extra passengers 
+and cargo! Fly off away from the surface to complete 
+the level.

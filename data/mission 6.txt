@@ -1,0 +1,56 @@
+map_type      1
+display_map   hex_magenta.png
+background    hex_bg.png
+collision_map hextiles_col.png
+ascii_map     m6_map.txt
+description   mission6_desc.txt
+mission	      1
+
+bg_fade	      300
+
+time_limit 170
+
+sentry_display   sentries.png
+sentry_collision sentries_col.png
+
+ship_first    1
+
+gravity 0.05
+drag 2
+
+wrap 0
+lives 1
+
+; pads
+;   type y    xmin xmax miners jewels
+pad 0    634  341  491       
+pad F1   1976 2263 2407         
+pad F2	 3386 1106 1257
+pad F3   5563 1236 1387    5     0 
+pad F4   6010 1750 1900    0     5 
+
+;      x     y    D type frames prob% random range image image
+sentry 1700 930  30 2    15     50    2      1000  7     0
+sentry 2467 1760 30 2    15     50    2      1000  7     0  
+sentry 1370 1730 30 2    15     50    2      1000  8     0
+sentry 1700 2144 30 2    15     50    2      1000  6     0  
+sentry 1508 2625 30 2    15     50    2      1000  7     0  
+sentry 1508 2944 30 2    15     50    2      1000  6     0
+sentry 538  3810 30 2    15     50    2      1000  8     0
+sentry 1122 3965 30 2    15     50    2      1000  7     0  
+sentry 1500 4800 30 2    15     50    2      1000  8     0
+sentry 1244 5120 30 2    15     50    2      1000  8     0
+sentry 1634 5440 30 2    15     50    2      1000  6     0
+sentry 2020 5885 30 2    15     50    2      1000  4     0
+
+switch 1896 4416 9 10 150
+switch 1368 4930 9 10 150
+;          x    x    y    y    strength   switches sprite sprite
+forcefield 1610 1910 4562 4562 1000       0 1      11      0 
+forcefield 1610 1910 4626 4626 1000       0 1      11      0 
+forcefield 1610 1910 4690 4690 1000       0 1      11      0 
+
+max_players 1
+
+
+
