@@ -43,13 +43,15 @@
 			</Target>
 			<Target title="mapmaker">
 				<Option output="mapmaker" prefix_auto="1" extension_auto="1" />
-				<Option type="0" />
+				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
 				<Compiler>
+					<Add option="-Os" />
 					<Add option="-m32" />
-					<Add option="-g" />
 				</Compiler>
 				<Linker>
+					<Add option="-s" />
 					<Add option="-m32" />
 				</Linker>
 			</Target>
@@ -59,6 +61,7 @@
 			<Add option="-m32" />
 			<Add option="-DALLEGRO_STATICLINK" />
 			<Add directory="C:/IPL/TurboRaketti/AllegroDLLs/a5113_new/include" />
+			<Add directory="C:/IPL/gravstorm/src" />
 		</Compiler>
 		<Linker>
 			<Add option="-m32" />
@@ -91,6 +94,9 @@
 			<Add library="../../mingw32/i686-w64-mingw32/lib/libadvapi32.a" />
 			<Add library="../../mingw32/i686-w64-mingw32/lib/libws2_32.a" />
 			<Add library="../../mingw32/i686-w64-mingw32/lib/libshlwapi.a" />
+			<Add library="../enet/enet.lib" />
+			<Add library="C:/Program Files/Microsoft SDKs/Windows/v7.0/Lib/ws2_32.lib" />
+			<Add library="C:/Program Files/Microsoft SDKs/Windows/v7.0/Lib/winmm.lib" />
 		</Linker>
 		<Unit filename="src/collisions.c">
 			<Option compilerVar="CC" />
@@ -121,6 +127,12 @@
 			<Option target="dynamic" />
 		</Unit>
 		<Unit filename="src/game.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="dynamic" />
+		</Unit>
+		<Unit filename="src/gameover.c">
+			<Option compilerVar="CC" />
 			<Option target="Debug" />
 			<Option target="Release" />
 			<Option target="dynamic" />
