@@ -16,6 +16,9 @@ pad F3   1010 870  1040
 
 max_players 4
 
-;    x   x   y   y
-race 960 960 440 640
-
+;    x   x   y    y    reverse
+race 960 960 470  600  0
+race 390 390 48   342  1
+race 316 316 1030 1247 0
+race 968 968 1110 1250 0
+race 960 960 40   256  1

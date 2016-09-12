@@ -6,8 +6,8 @@ ascii_map     forest_map.txt
 description   forest_desc.txt
 mission	      0
 
-sentry_display   sentries.png	;need this even though we're not displaying anything
-;sentry_collision sentries_col.png
+sentry_display   sentries.png		;need this even though the sentries are fixed / indestructible
+;sentry_collision sentries_col.png	;
 
 ship_first    1
 
@@ -26,9 +26,6 @@ sentry 191  1282 0 1    3      50   10         200   0  0
 sentry 1600 258  0 1    3      50   10         424   0  0
 sentry 2560 1541 0 1    3      50   10         424   0  0
 
- 
-
 max_players 2
 
-;    xmin xmax ymin ymax g    drag
-;area 2105 2245 836  1726 -0.05 2
+

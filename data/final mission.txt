@@ -2,11 +2,11 @@ map_type      1
 display_map   hex_blue.png
 background    hex_bg.png
 collision_map hextiles_col.png
-ascii_map     map.txt
-description   fm_desc.txt
+ascii_map     fm_map.txt
+description   fmission_desc.txt
 mission	      1
 
-time_limit 250
+time_limit 240
 
 sentry_display   sentries.png
 sentry_collision sentries_col.png
@@ -21,52 +21,47 @@ wrap 0
 
 ; pads
 ;   type y    xmin xmax miners jewels
-pad 0    186  979  1131        
-pad 1    2107 1236 1387  5      
-pad 2    1018 1107 1260  0     5
-pad 3    1211 2260 2413  5
-;pad 4    185  1619 1771
+pad 0   442  979  1131        
+pad 1    2363 1236 1387  5      
+pad 2    1274 1107 1260  0     5
+pad 3    1467 2260 2413  5
+;pad 4   441  1619 1771
 
-;pad 3    1226 1110 1220 ;new, bottom right
-;pad 24   412  670  815  ;ammo1
-;pad 45   827  240  410  ;ammo2
-;pad 16   827  670  815  ;fuel
+;       x    y    D  type frames prob% random range image image
+sentry  544  672 30 2   15      50    10      400   4 0
+;sentry 160  864 10 2   15      50    10      400   9 10
+;sentry 544  992 10 2   15      50    10      400   4 0
+sentry  160  1120 10 2   15      50    10      400   2 0 
+;sentry 544  1248 10 2   15      50    10      400   4 0
+;sentry 160  1440 10 2   15      50    10      400   2 0
+sentry  544  1568 10 2   15      50    10      400   4 0
+;sentry 160  1760 10 2   15      50    10      400   2 0
+;sentry 544  1888 10 2   15      50    10     400   4 0
+sentry  160  2080 10 2   15      50    10      400   2 0
 
-;      x    y    D  type frames prob% random range image image
-sentry 544  416  30 2   15      50    10      400   4 0
-;sentry 160  608  10 2   15      50    10      400   9 10
-;sentry 544  736  10 2   15      50    10      400   4 0
-sentry 160  864  10 2   15      50    10      400   2 0 
-;sentry 544  992  10 2   15      50    10      400   4 0
-;sentry 160  1184 10 2   15      50    10      400   2 0
-sentry 544  1312 10 2   15      50    10      400   4 0
-;sentry 160  1504 10 2   15      50    10      400   2 0
-;sentry 544  1632 10 2   15      50    10     400   4 0
-sentry 160  1824 10 2   15      50    10      400   2 0
+sentry  1376 1472 10 2   10     100   10      150   2 0
+sentry  1504 1408 10 2   10     100   10      150   4 0
 
-sentry 1376 1216 10 2   30     100   0      100   2 0
-sentry 1504 1152 10 2   30     100   0      100   4 0
+sentry  992  1920 10 2   15     50   10      1000   2 0
+sentry  1440 2146 10 2   30     50   10      400   3 0
 
-sentry 992  1664 10 2   30     50   20      400   2 0
-sentry 1312 1312 10 2   30     50   20      400   9 10
-sentry 1440 1890 10 2   30     50   5      400   3 0
-sentry 1888 1792 10 2   30     50   20      400   9 10
+sentry  2656 1728 10 2   15     50   10      400   4 0
+sentry  2592 2400 10 2   15     50   10      400   1 0
 
-sentry 2656 1472 10 2   30     50   20      400   4 0
-sentry 2592 2144 10 2   30     50   20      400   1 0
+sentry  2144 1344 10 2   15     50   10      400   2 0
+sentry  2208 928 10 2   15     50   10      400   3 0
 
-sentry 2144 1088 10 2   30     50   20      400   2 0
-sentry 2208 672  10 2   30     50   20      400   3 0
+;       x       sprites open time
+switch  1312 1568   9 10    90
+switch  1760 1279   9 10    90
 
-;          x    x    y    y    strength   sentry sprite sprite
-forcefield 1359 1521 1106 1106 1000       7      11      0 
-forcefield 2004 2004 1893 2139 1000       9      12      0 
-
-;forcefield 64 192 64 64 1000       0      9      0 
+switch  1888 2048   9 10    90
+switch  2143 2050   9 10    90
+;          x    x    y    y    strength   switches sprite sprite
+forcefield 1350 1530 1362 1362 1000       0  1     11      0 
+forcefield 2004 2004 2146 2398 1000       2  3     12      0 
 
 max_players 1
-lives 2
+lives 1
 
-;    x  x   y   y
-;race 50 200 400 400
 

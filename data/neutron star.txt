@@ -1,24 +1,26 @@
-map_type      0
-display_map   black_hole_800.png
-collision_map black_hole_col_800.png
+map_type      2
+display_map   ns_final.png
+collision_map ns_final_col.png
+background    hyades1280.jpg
+
 description   ns_desc.txt
 
-ship_first    0
+ship_first    1
 
-gravity 0.05
+gravity 0
 drag    2
 
 wrap 1
 
-blackhole 800 500 5 ;10
+blackhole 960 960 10
 
 ;   type y    xmin xmax
-pad 0    91   640  720  
-pad 1    91   830  920 
-;pad 12   962  350  415  
+pad 0    228  180  300
+pad 1    1393 1547 1668
 
 ;    xmin xmax ymin ymax g     drag
-;area 800  1190 835  1024 -0.05 10
+area 180  300  50   230  0.05  2
+area 1547 1668 1200 1395 0.05  2
 
 max_players 2
 

@@ -9,10 +9,13 @@ gravity 0.05
 drag    2
 
 ;   type y    xmin xmax
-pad 0    712  110  170  
-pad 1    169  720  780 
+pad 0    713  110  180  
+pad 1    169  710  780 
 
 max_players 2
 
-;    x   x   y   y
-race 448 448 520 780
+;    x   x   y   y   reverse
+race 448 448 520 780 0
+race 448 448 34  224 1
+
+

@@ -3,8 +3,11 @@ display_map   scifitiles64.png
 background    rc_bg.png
 collision_map scifitiles32_col.png
 ascii_map     rcmap.txt
+description   rc_desc.txt
 
 ship_first 1
+
+gravity 0.05
 
 pad 0   889 249 390     ;bottom left
 pad 1	185 1782 1927	;top right
@@ -19,4 +22,5 @@ pad F5   441 1482 1655
 area 66 2110 1111 1538 -0.05 6
 
 max_players 4
+
 
