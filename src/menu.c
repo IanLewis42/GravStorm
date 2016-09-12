@@ -63,6 +63,8 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	if ((credits = fopen ("credits.txt","r")) == NULL)  fprintf(logfile,"credits.txt load fail\n");
 	fflush(logfile);
 
+	fprintf(logfile,"Title Screen\n");
+
 	fade_in[0] = 0;
 	visible[0] = 0;
 	fade_out[0] = 0;
@@ -163,6 +165,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	//al_destroy_voice(voice);
 
 	FreeMenuBitmaps();
+	fprintf(logfile,"Exit Title Screen\n");
 	return 0;
 }
 
@@ -171,6 +174,8 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	int i;
 	int w,h,xoffset,yoffset;
 	ShipType AnyShip;
+
+	fprintf(logfile,"\nStart Menu\n");
 
 	fprintf(logfile,"Init Keyboard\n");
 	init_keys(pressed_keys);
@@ -522,7 +527,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 		//
 	}
 
-	fprintf(logfile,"Final Selected map %d\n",Menu.map);
+	fprintf(logfile,"\nPlaying map %s (%d,%d)\n",(char*)&MapNames[Menu.group].Map[Menu.map],Menu.group,Menu.map);
 	fprintf(logfile,"Number of players %d\n",num_ships);
 
 	for (i=0 ; i<30 ; )
