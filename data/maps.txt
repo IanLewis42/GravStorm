@@ -2,11 +2,14 @@
 mission 1
 mission 2
 mission 3
+mission 4
+mission 5
+mission 6
 final mission
 :Multi Player
+canyon
 forest
 reactor core
-cruciatus
 neutron star
 :TurboRaketti
 sitimus
@@ -15,8 +18,8 @@ likvidius
 metarola
 tropulus
 :TR Beta
-sinneau
+isemania
 mutolos
 keurakea
-isemania
 ekolos beta
+sinneau
