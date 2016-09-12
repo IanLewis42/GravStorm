@@ -34,6 +34,7 @@
 #include "collisions.h"
 #include "objects.h"
 #include "inputs.h"
+#include "gameover.h"
 
 //#include "enet/enet.h"
 
@@ -115,8 +116,6 @@ typedef struct
 */
 MapGroupType MapNames[MAX_GROUPS];
 
-
-int game_over = 0;
 int mapx, mapy;
 //int tile_width = 64, tile_height = 64;
 
@@ -132,6 +131,8 @@ char screenshot_ext[5] = {'.','p','n','g',0};
 char screenshot_name[20];
 
 int debug_key = 0;
+int keypress = false;
+char current_key = 0;
 float volume, v_squared;
 
 FILE* logfile;
@@ -152,7 +153,7 @@ int main (int argc, char *argv[]){
     bool redraw = true;
 	int i;//,j,k,temp;
 	//int num_maps,selected_map;
-	int exit;
+	int exit, back_to_menu = false;
 
 	//parse command line arguments
 	for (i=1 ; i<argc ; i++)
@@ -209,10 +210,10 @@ int main (int argc, char *argv[]){
     #if RPI
     al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);//ALLEGRO_WINDOWED);// | ALLEGRO_RESIZABLE);
     #else
-    #if WINDOWS
+    #ifdef _WIN32
     al_set_new_display_flags(ALLEGRO_RESIZABLE);//ALLEGRO_WINDOWED);// | ALLEGRO_RESIZABLE);
     #endif
-    #endif // WINDOWS
+    #endif // _WIN32
 
     fprintf(logfile,"Creating display\n");
     display = al_create_display(SCREENX, SCREENY);
@@ -233,15 +234,14 @@ int main (int argc, char *argv[]){
     if ((glow_font  = al_load_font("Audiowide-500.ttf", 40,0))== NULL)      fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
     if ((small_font = al_load_font("Audiowide-Regular.ttf", 30,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
     if ((small_glow_font = al_load_font("Audiowide-500.ttf", 30,0))== NULL) fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
-    if ((big_font   = al_load_font("northstar.ttf", 200, 0))      == NULL)  fprintf(logfile,"northstar.ttf load fail\n");
+    //if ((big_font   = al_load_font("northstar.ttf", 200, 0))      == NULL)  fprintf(logfile,"northstar.ttf load fail\n");
+    if ((big_font   = al_load_font("Zebulon.otf", 200, 0))      == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
     if ((race_font  = al_load_font("7seg.ttf", 20, 0))            == NULL)  fprintf(logfile,"7seg.ttf load fail\n");
 	//if ((title_font = al_load_font("41155_WESTM.ttf", 200, 0))    == NULL)  fprintf(logfile,"41155_WESTM.ttf load fail");
 	if ((title_font = al_load_font("Zebulon.otf", 130, 0))    == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
 	//if ((title_font = al_load_font("Rapier Zero.otf", 160, 0))    == NULL)  fprintf(logfile,"Rapier Zero.otf load fail");
 	fprintf(logfile,"Loaded fonts\n");
 	fflush(logfile);
-
-	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
     voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
     mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
@@ -355,6 +355,12 @@ int main (int argc, char *argv[]){
         {
             al_wait_for_event(queue, &event);
 
+            if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+            {
+				al_acknowledge_resize(display);
+				display_map_text(true,30);	//this is the description text file, plus 'press fire' message
+            }
+
             if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
                 return 0;
 
@@ -367,7 +373,11 @@ int main (int argc, char *argv[]){
             else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
             {
                 if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
-                    Exit();
+                {
+                    //Exit();
+                    back_to_menu = true;
+                    break;
+                }
                 else
                     key_down_log[event.keyboard.keycode]=true;
             }
@@ -389,6 +399,8 @@ int main (int argc, char *argv[]){
         }
 
         FreeMenuBitmaps();
+
+        fprintf(logfile,"Game Start\n");
 
         //into game here
         for (i=0 ; i<num_ships ; i++)
@@ -430,6 +442,12 @@ int main (int argc, char *argv[]){
 		//Main loop here
 		while (1)
 		{
+			if (back_to_menu)
+            {
+                back_to_menu = false;
+                break;
+            }
+
 			al_wait_for_event(queue, &event);
 
 			if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -458,7 +476,11 @@ int main (int argc, char *argv[]){
 				}
 				//END DEBUG
 
-				if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) break;//Exit();
+				if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                {
+                    game_over = 0;//1;
+                    break;//Exit();
+                }
 
 				else if  (event.keyboard.keycode == ALLEGRO_KEY_PRINTSCREEN ||
                           event.keyboard.keycode == ALLEGRO_KEY_F12)
@@ -478,6 +500,14 @@ int main (int argc, char *argv[]){
 				pressed_keys[event.keyboard.keycode]=false;
 				key_up_log[event.keyboard.keycode]=true;
 			}
+			if (event.type == ALLEGRO_EVENT_KEY_CHAR)
+            {
+                if (game_over==1)
+                {
+                    keypress = true;
+                    current_key = event.keyboard.unichar;
+                }
+            }
 
 			//USB Joystick events here
 			CheckUSBJoyStick(event);
@@ -569,10 +599,12 @@ int main (int argc, char *argv[]){
 				}
 				else
 				{
+					//ScanInputs(num_ships);		//Convert keypresses/joystick input to ship controls (for n ships)
 					game_over = UpdateShips(num_ships);		//Calculate Ship positions based on controls
 															//Also handle firing, updating fuel, ammo, lives etc.
 															//if lives go down to 0, return game_over countdown.
-
+                    UpdateSwitches();
+                    UpdateForcefields();
 					UpdateSentries();	//Automatic guns / volcanoes
 					UpdateBullets();	//Calculate new bullet positions, expire old ones.
 
@@ -580,6 +612,7 @@ int main (int argc, char *argv[]){
 					CheckSSCollisions(num_ships);//Ship-to-ship collisions
 					CheckBSCollisions(num_ships);//bullet-to-ship collisions
 					CheckBSentryCollisions();
+					CheckBSwitchCollisions();
 					CheckSWCollisions(num_ships);//Ship-to-wall collisions
 					CheckBWCollisions();		 //Bullet-to-wall collisions
 
@@ -634,106 +667,6 @@ int main (int argc, char *argv[]){
 }
 
 
-/****************************************************
-** int GameOver()
-** Draw increasing white overlay on screen.
-** UpdateShips() isn't called while game_over > 0,
-** so screen is effectively frozen.
-** Decrement game_over timer and display GAME OVER
-** text when expired, then wait for thrust key/button to exit
-****************************************************/
-int GameOver()
-{
-	int i,temp,score;
-	int w,h;
-
-    w = al_get_display_width(display);
-    h = al_get_display_height(display);
-
-	//	draw game over screen, gradually getting whiter
-	temp = 2*(100-game_over);
-	al_set_clipping_rectangle(0, 0, w, h);
-	al_draw_filled_rectangle(0,0,w,h,al_map_rgba(temp,temp,temp,temp));
-
-	if (game_over > 1)					//decrement timer
-		game_over--;
-	else								//if timer has expired (to 1)
-	{
-		//draw the text
-		if (Map.mission)
-		{
-			score = 0;
-			score += Ship[0].miners*500;
-			score += Ship[0].jewels*200;
-			score += Ship[0].sentries*100;
-
-			if (Ship[0].lives && Ship[0].miners == Map.total_miners)
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  100,  ALLEGRO_ALIGN_LEFT, "MISSION COMPLETE");
-			else
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  100,  ALLEGRO_ALIGN_LEFT, "MISSION FAILED");
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  200,  ALLEGRO_ALIGN_LEFT, "RESCUED");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),400,  200,  ALLEGRO_ALIGN_LEFT, "%02d x 500= ",Ship[0].miners);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  200,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].miners*500);
-
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  250,  ALLEGRO_ALIGN_LEFT, "JEWELS");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),400,  250,  ALLEGRO_ALIGN_LEFT, "%02d x 200= ",Ship[0].jewels);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  250,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].jewels*200);
-
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  300,  ALLEGRO_ALIGN_LEFT, "SENTRIES");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),400,  300,  ALLEGRO_ALIGN_LEFT, "%02d x 100 = ",Ship[0].sentries);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  300,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].sentries*100);
-
-			if (Ship[0].lives)
-			{
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  350,  ALLEGRO_ALIGN_LEFT, "TIME BONUS");
-
-				temp = Map.time_limit - Ship[0].current_lap_time;
-				if (temp < 0) temp = 0;
-
-				score += temp*100;
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),400,  350,  ALLEGRO_ALIGN_LEFT, "%02d x 100 = ",temp);
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  350,  ALLEGRO_ALIGN_RIGHT, "%d",temp*100);
-			}
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  400,  ALLEGRO_ALIGN_LEFT, "SCORE:");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  400,  ALLEGRO_ALIGN_RIGHT, "%d",score);
-
-			/*
-			score += Ship[0].miners*500;
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),250,  250,  ALLEGRO_ALIGN_LEFT, "%02d x 200 = %d",Ship[0].jewels,Ship[0].jewels*200);
-			score += Ship[0].jewels*200;
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),250,  300,  ALLEGRO_ALIGN_LEFT, "%02d x 10 = %d",Ship[0].sentries,Ship[0].sentries*100);
-			score += Ship[0].sentries*100;
-
-			temp = Ship[0].current_lap_time - Map.time_limit;
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),250,  350,  ALLEGRO_ALIGN_LEFT, "%02d x 10 = %d",temp,temp*10);
-			score += temp*10;
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),300,  400,  ALLEGRO_ALIGN_LEFT, "%d",score);
-			*/
-
-		}
-		else
-		{
-			al_draw_textf(big_font, al_map_rgb(0,0,0),SCREENX/2,  SCREENY/8,  ALLEGRO_ALIGN_CENTER, "GAME");
-			al_draw_textf(big_font, al_map_rgb(0,0,0),SCREENX/2, 5*SCREENY/8,  ALLEGRO_ALIGN_CENTER, "OVER");
-		}
-		for(i=0 ; i<num_ships ; i++)	//and enable check for each ships fire/thrust button to go back to start (menu)
-		{
-			if(Ship[i].thrust_down)
-			{
-				Ship[i].thrust_down = false;
-				game_over = 0;
-			}
-		}
-	}
-	return game_over;	//return 0 when we want to restart the game
-}
 
 
 int read_maps(void)
@@ -813,21 +746,30 @@ void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
     //fflush(logfile);
 
     tr_map = al_load_bitmap(Map.display_file_name);
-	if (Map.type == 0)
-	{
-    	mapx = 2*al_get_bitmap_width(tr_map);
-    	mapy = 2*al_get_bitmap_height(tr_map);
-	}
-	else
+	if (Map.type == 1)  //tiled
 	{
 		mapx = map_width * TILE_WIDTH;
 		mapy = map_height * TILE_HEIGHT;
+	}
+	else if (Map.type == 2) //single image, not scaled
+	{
+    	mapx = al_get_bitmap_width(tr_map);
+    	mapy = al_get_bitmap_height(tr_map);
+        map_width = mapx/64;
+        map_height = mapy/64;
+	}
+	else    //0, tr style, single image, x2
+	{
+    	mapx = 2*al_get_bitmap_width(tr_map);
+    	mapy = 2*al_get_bitmap_height(tr_map);
+        map_width = mapx/64;
+        map_height = mapy/64;
 	}
 
 	if (Map.background_file_name[0] != 0)
         background = al_load_bitmap(Map.background_file_name);
 
-	if (Map.num_sentries)
+	if (Map.sentry_file_name)
 		sentries = al_load_bitmap(Map.sentry_file_name);
 
     fprintf(logfile,"tr_map size %d x %d\n",mapx,mapy);
@@ -951,7 +893,7 @@ void FreeMenuBitmaps()
         i++;
     }
 
-    fprintf(logfile,"Freed %d menu bitmaps\n",i);
+    fprintf(logfile,"Freed %d menu/title bitmaps\n",i);
     fflush(logfile);
 }
 
@@ -1002,14 +944,20 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[0].xpos);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[0].ypos);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[0].angle);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "G: %.2f", Ship[0].gravity);
 
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Key: %d",debug_key);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "R: %d", random);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "R1:%d", random100);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "S: %d", shots);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "C: %d", count);
 
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "XV: %.2f", Ship[0].xv);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "YV: %.2f", Ship[0].yv);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Key: %d",debug_key);
 
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Vol: %.2f", volume);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "V^2: %.2f", v_squared);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "XV: %.2f", Ship[0].xv);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "YV: %.2f", Ship[0].yv);
+
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Vol: %.2f", volume);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "V^2: %.2f", v_squared);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Mapx: %d", mapx);
 
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "M: %d", Ship[0].miners);
@@ -1078,21 +1026,21 @@ void draw_debug(void)
 	//}
 
 	//Ship-to-wall collisions
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MX:%d", map_idx_x);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MY:%d", map_idx_y);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MI:%d", map_idx);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Sh1:%d", shift1);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Sh2:%d", shift2);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MW1: %08X", map_word1);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW1S:%08X", ship_word1_shift);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MW2: %08X", map_word2);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW2S:%08X", ship_word2_shift);
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW:%08X", ship_word1);
-
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MX:%d", map_idx_x);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MY:%d", map_idx_y);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MI:%d", map_idx);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Sh1:%d", shift1);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Sh2:%d", shift2);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MW1: %08X", map_word1);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW1S:%08X", ship_word1_shift);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MW2: %08X", map_word2);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW2S:%08X", ship_word2_shift);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW:%08X", ship_word1);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Coll:%d", collision);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "S0.s:%d", Map.sentry[0].shield);
 
 	//Tiled
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "TX:%d", tile_x);
+	/*al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "TX:%d", tile_x);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "TY:%d", tile_y);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "TI:%d", tile_idx);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Tile:%d", tl_tile);
@@ -1105,7 +1053,7 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "CR:%d", current_row);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Rows:%d", rows);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Collision:%d", collision);
-
+    */
 	//Bullet to ship collisions
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW:%08X", ship_word);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "BW: %08X", bullet_word);

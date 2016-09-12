@@ -17,11 +17,12 @@
 */
 
 //Target
-#define  RPI 0
-#define  WINDOWS 1
+//now done in project/command line / automagically.
+//#define  RPI 0
+//#define  WINDOWS 1
 
 #define NAME "GravStorm"
-#define VERSION "V0.3"
+#define VERSION "V1.0.0.0"
 
 #define TRUE 1
 #define FALSE 0
@@ -51,8 +52,6 @@ extern int map_height, map_width;
 
 #define SHIP_SIZE_X 48
 #define SHIP_SIZE_Y 48
-
-#define GO_TIMER    50
 
 typedef enum
 {
@@ -111,6 +110,28 @@ typedef struct
   int shield;
 } SentryType;
 
+//Sentry guns and volcanoes
+typedef struct
+{
+  int x;			//centre
+  int y;
+  int closed_sprite; //index into spite sheet for display
+  int open_sprite;
+  int open_time;
+  int open_timer;
+  int open;		//open / closed state
+  int shield;
+} SwitchType;
+
+typedef enum
+{
+    CLOSED = 0,
+    FADE_OUT,
+    OPEN,
+    FADE_IN
+}FFStateType;
+
+
 typedef struct
 {
 	int min_x;	//boundaries of area - has to be rectangular
@@ -120,16 +141,51 @@ typedef struct
 	int half_y;
 	int max_y;
 	float strength;
-	int sentry;			//key to forcefield - when this dies, ff also dies
-	int alive_sprite;	//index to sprite sheet - sprites from sentry sheet....
-	int dead_sprite;
+	int switch1;			//key to forcefield - when this dies, ff also dies
+	int switch2;
+	int closed_sprite;	//index to sprite sheet - sprites from sentry sheet....
+	int open_sprite;
+	FFStateType state;
+	int alpha;
 } ForcefieldType;
 
+typedef struct
+{
+    int score;
+    char name[50];
+}ScoreType;
+
+typedef struct
+{
+    float time;
+    char name[50];
+}TimeType;
+
+typedef struct
+{
+	int line_minx;	//race start/finish line
+	int line_maxx;
+	int line_miny;
+	int line_maxy;
+	int before_minx;	//areas before/after start finish line to spot crossing
+	int before_maxx;
+	int before_miny;
+	int before_maxy;
+	int after_minx;
+	int after_maxx;
+	int after_miny;
+	int after_maxy;
+	int reverse;
+}RacelineType;
+
 #define MAX_SENTRIES 30
+#define MAX_SWITCHES 8
 #define MAX_PADS 12
 #define MAX_AREAS 4
 #define MAX_BLACKHOLES 4
 #define MAX_FORCEFIELDS 5
+#define MAX_SCORES  10
+#define MAX_RACELINES 10
 
 typedef struct
 {
@@ -147,6 +203,10 @@ typedef struct
 	int ship_first;
 	int max_players;
 	int mission;
+	ScoreType oldscore[MAX_SCORES];
+	ScoreType newscore[MAX_SCORES];
+	TimeType oldtime[MAX_SCORES];
+	TimeType newtime[MAX_SCORES];
 	int lives;
 	int time_limit;
 	PadType pad[MAX_PADS];
@@ -157,6 +217,8 @@ typedef struct
 	int num_blackholes;
 	SentryType sentry[MAX_SENTRIES];
 	int num_sentries;
+	SwitchType switches[MAX_SWITCHES];
+	int num_switches;
 	float gravity;
 	float drag;
 	int wrap;
@@ -165,26 +227,9 @@ typedef struct
 	ForcefieldType forcefield[MAX_FORCEFIELDS];
 	int num_forcefields;
 	int race;
-	int raceline_minx;	//race start/finish line
-	int raceline_maxx;
-	int raceline_miny;
-	int raceline_maxy;
-	int before_minx;	//areas before/after start finish line to spot crossing
-	int before_maxx;
-	int before_miny;
-	int before_maxy;
-	int after_minx;
-	int after_maxx;
-	int after_miny;
-	int after_maxy;
-
+    RacelineType raceline[MAX_RACELINES];
+    int num_racelines;
 } MapType;
-
-typedef struct
-{
-    char name[50];
-    int points;
-}PlayerType;
 
 typedef struct
 {
@@ -202,6 +247,7 @@ typedef struct
 } MenuType;
 
 extern ALLEGRO_DISPLAY *display;
+
 extern ALLEGRO_FONT *menu_font;
 extern ALLEGRO_FONT *glow_font;
 extern ALLEGRO_FONT *small_font;
@@ -209,6 +255,7 @@ extern ALLEGRO_FONT *small_glow_font;
 extern ALLEGRO_FONT *race_font;
 extern ALLEGRO_FONT *font;
 extern ALLEGRO_FONT *title_font;
+extern ALLEGRO_FONT *big_font;
 
 //extern int num_ships;
 extern ALLEGRO_BITMAP *logo;
@@ -268,6 +315,8 @@ extern ALLEGRO_SAMPLE_INSTANCE *yippee_inst;
 
 extern bool pressed_keys[ALLEGRO_KEY_MAX];
 extern int gpio_active;
+extern int keypress;
+extern char current_key;
 
 int  ShipMass(int ship_num);
 void FreeMenuBitmaps(void);
