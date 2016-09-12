@@ -1,14 +1,16 @@
 #!/bin/bash
 #shared lib build
-#gcc -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../game ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c-pthread -lrt -lm -lwiringPi `pkg-config --libs allegro-5 allegro_image-5 allegro_primitives-5 allegro_font-5 allegro_ttf-5 allegro_audio-5 allegro_acodec-5` -Wl,--verbose
+#gcc -march=armv6j -mfpu=vfp -mfloat-abi=hard -o -DRPI ../gravstorm ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c ./gameover.c -pthread -lrt -lm -lwiringPi `pkg-config --libs allegro-5 allegro_image-5 allegro_primitives-5 allegro_font-5 allegro_ttf-5 allegro_audio-5 allegro_acodec-5` -Wl,--verbose
 
 #static linked build
 #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/vc/lib/
 export LDFLAGS="-rpath /opt/vc/lib/ "$LDFLAGS
-#gcc -O2 -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../game ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c -pthread -lrt -lm -lwiringPi `pkg-config --libs --static allegro-static-5 allegro_image-static-5 allegro_primitives-static-5 allegro_font-static-5 allegro_ttf-static-5 allegro_audio-static-5 allegro_acodec-static-5`
-gcc -O2 -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../gravstorm ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c -pthread -lrt -lm -lwiringPi `pkg-config --libs --static allegro-static-5 allegro_image-static-5 allegro_primitives-static-5 allegro_font-static-5 allegro_ttf-static-5 allegro_audio-static-5 allegro_acodec-static-5`
+#gcc -O2 -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../game ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c ./gameover.c -pthread -lrt -lm -lwiringPi `pkg-config --libs --static allegro-static-5 allegro_image-static-5 allegro_primitives-static-5 allegro_font-static-5 allegro_ttf-static-5 allegro_audio-static-5 allegro_acodec-static-5`
+gcc -DRPI -O2 -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../gravstorm ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c ./gameover.c -pthread -lrt -lm -lwiringPi `pkg-config --libs --static allegro-static-5 allegro_image-static-5 allegro_primitives-static-5 allegro_font-static-5 allegro_ttf-static-5 allegro_audio-static-5 allegro_acodec-static-5`
 
+#helpful error messages from attemting static build.....
 #/usr/bin/ld: cannot find -lGLESv2
 #found libGLESv2.so at /opt/vc/lib/libGLESv2.so
 #/usr/bin/ld: cannot find -lEGL
 #/usr/bin/ld: cannot find -lbcm_host
+ 
