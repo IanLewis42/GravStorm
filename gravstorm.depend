@@ -704,15 +704,16 @@
 	"allegro5/allegro.h"
 	"allegro5/allegro_audio.h"
 
-1473076803 source:c:\ipl\gravstorm\src\mapmaker.c
+1473756896 source:c:\ipl\gravstorm\src\mapmaker.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
-	<conio.h>
+	<ctype.h>
 	"allegro5/allegro.h"
 	"allegro5/allegro_image.h"
 	"allegro5/allegro_primitives.h"
 	"allegro5/allegro_font.h"
+	"allegro5/allegro_ttf.h"
 	"allegro5/allegro_audio.h"
 	"allegro5/allegro_acodec.h"
 	"game.h"

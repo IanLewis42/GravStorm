@@ -16,12 +16,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <conio.h>
+#include <ctype.h>
+//#include <conio.h>
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
 #include "allegro5/allegro_primitives.h"
 #include "allegro5/allegro_font.h"
+#include "allegro5/allegro_ttf.h"
 #include "allegro5/allegro_audio.h"
 #include "allegro5/allegro_acodec.h"
 
@@ -76,6 +78,7 @@ void draw_sprites(void);
 void load_map_file(void);
 void save_map_file (void);
 int init_map(char *map_file_name);
+void swap(int* a, int*b);
 void Exit(void);
 
 int main (int argc, char *argv[]){
@@ -83,8 +86,8 @@ int main (int argc, char *argv[]){
     ALLEGRO_EVENT_QUEUE *queue;
     bool redraw = true;
 	int up_key = false,down_key = false,left_key = false,right_key = false;
-	int pgup_key = false, pgdn_key = false, tileup_key = false, tiledown_key = false;
-	int i,j;
+	int pgup_key = false, pgdn_key = false;//, tileup_key = false, tiledown_key = false;
+	int i;
 
 	if (argc != 2)
     {
@@ -107,11 +110,11 @@ int main (int argc, char *argv[]){
     al_install_mouse();
     al_install_keyboard();
 
-    logfile = fopen("mmlog.txt","w");
-
-	//set path
+    	//set path
     ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
+	logfile = fopen("mmlog.txt","w");
+
 	//change directory to data, where all resources live (images, fonts, sounds and text files)
 	al_append_path_component(path, "data");
 	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
@@ -565,6 +568,8 @@ void sidebar_draw(void)
 
 	al_draw_filled_rectangle(0,0,150,al_get_display_height(display),al_map_rgb(128, 128, 128));	//sidebar
 
+    num_tiles=0;    //stop compiler whinging.
+
 	if (Map.type == 1)	//tiled
 	{
 		num_tiles = (al_get_bitmap_width(tiles)>>6) * (al_get_bitmap_height(tiles)>>6);
@@ -572,7 +577,7 @@ void sidebar_draw(void)
 		for (i=0 ; i<num_tiles ; i++)	//draw tiles in sidebar
 		{
 			if (i>=0 && i<=9) i_char = i+'0';
-			else if (i>=10 /*&& i<=36*/) i_char = i-10+'A';
+			else i_char = i-10+'A';
 			al_draw_textf(font, al_map_rgb(255, 255, 255),10, (i+tile_offset)*(tile_height+5) ,  ALLEGRO_ALIGN_LEFT, "%c", i_char);
 
 			u = (i & 0x0007)<<6;    //bottom 3 bits * 64
@@ -656,7 +661,7 @@ int init_map(char *map_file_name)
 	FILE* map_file;
 	char str[100];
 	char *line;
-	int i=0, j=0,k=0,l=0,m=0,n=0,o=0,p=0;	//counters for pads, special areas, blackholes, sentries etc.
+	int i=0, j=0,/*k=0,*/l=0,m=0,n=0,o=0,p=0;	//counters for pads, special areas, blackholes, sentries etc.
 
 	map_file = fopen(map_file_name,"r");
 
@@ -684,7 +689,7 @@ int init_map(char *map_file_name)
 
 		else if (strncmp(line,"display_map",11) == 0)
 		{
-			sscanf(line+11," %s",&Map.display_file_name);
+			sscanf(line+11," %s",(char *)&Map.display_file_name);
 			fprintf(logfile,"Display Map:%s\n",Map.display_file_name);
 		}
 
@@ -716,7 +721,7 @@ int init_map(char *map_file_name)
 
 		else if (strncmp(line,"sentry_display",14) == 0)
 		{
-			sscanf(line+14," %s",&Map.sentry_file_name);
+			sscanf(line+14," %s",(char *)&Map.sentry_file_name);
 			fprintf(logfile,"Sentry Image file:%s\n",Map.sentry_file_name);
 		}
 
@@ -976,7 +981,7 @@ void load_map_file(void)
 	j=0;
 	while(1)
 	{
-		if (fgets(line,200,map_file) == NULL)	//get a line from the file, exit on end of file
+		if (fgets((char *)line,200,map_file) == NULL)	//get a line from the file, exit on end of file
 			break;
 
 		i=0;
