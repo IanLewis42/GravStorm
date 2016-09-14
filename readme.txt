@@ -52,6 +52,13 @@ o Raspberry Pi
     - set file permissions:
       chmod +x gravstorm
       
+  One level (neutron star) requires the Raspberry Pi to be configured with at least 128MB of Graphics RAM. The default is 64MB. This can be changed by running the config utiliy. In LXterminal type:
+    sudo raspi-config
+    select 'Advanced Options', then 'Memory Split' and type '128'. You probably need to reboot for this to take effect. 
+  
+  More on raspi-config here:
+  https://www.raspberrypi.org/documentation/configuration/raspi-config.md
+      
 o Windows
   Unzip wherever you like. You should get a folder named 'gravstorm' (or gravstorm-master if GitHub changes it) and inside that, folders called 'data' and 'src'. 
   
