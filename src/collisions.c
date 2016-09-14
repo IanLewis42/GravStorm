@@ -35,8 +35,8 @@ extern ALLEGRO_SAMPLE *particle;
 
 FILE *map_file;
 
-#define MAX_MAP_X	1440 + 64 //sizes in pixels for tr-style single-picture maps
-#define MAX_MAP_Y	512  + 24 //extra is for padding to prevent collisions on 'wrapping' maps
+#define MAX_MAP_X	(1440 + 64) //sizes in pixels for tr-style single-picture maps (isemania = 1440 wide)
+#define MAX_MAP_Y	(960  + 24) //extra is for padding to prevent collisions on 'wrapping' maps (neutron start = 960 high)
 
 unsigned long int ship_col_mask[1*NUM_ANGLES*24];
 unsigned long int sentry_col_mask[1*MAX_SENTRIES*32];
