@@ -187,6 +187,10 @@
     *VERSION NUMBER
  // *build both targets
  // *try usb joy on windows.
+ // *changes -> github
+ // *build mm on rpi
+ // readme 128MB
+ // screenshots
  // RELEASE 1.0.0.0
  // contact canyon / *gurkoz
  // finnish thread, mp, tb, mc, zimeon, Asbjorn, Alex?, RPi guy.
