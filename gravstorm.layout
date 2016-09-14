@@ -2,6 +2,16 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Release" />
+	<File name="src\collisions.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1402" topLine="19" />
+		</Cursor>
+	</File>
+	<File name="src\collisions.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1018" topLine="10" />
+		</Cursor>
+	</File>
 	<File name="src\drawing.c" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="16167" topLine="436" />
@@ -12,9 +22,9 @@
 			<Cursor1 position="868" topLine="9" />
 		</Cursor>
 	</File>
-	<File name="src\game.c" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src\game.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="28398" topLine="939" />
+			<Cursor1 position="24695" topLine="474" />
 		</Cursor>
 	</File>
 	<File name="src\game.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -29,7 +39,7 @@
 	</File>
 	<File name="src\init.c" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7407" topLine="247" />
+			<Cursor1 position="17115" topLine="460" />
 		</Cursor>
 	</File>
 	<File name="src\init.h" open="0" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -47,19 +57,9 @@
 			<Cursor1 position="859" topLine="12" />
 		</Cursor>
 	</File>
-	<File name="src\collisions.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2822" topLine="95" />
-		</Cursor>
-	</File>
 	<File name="src\mapmaker.c" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="5489" topLine="250" />
-		</Cursor>
-	</File>
-	<File name="src\collisions.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1018" topLine="10" />
+			<Cursor1 position="3588" topLine="110" />
 		</Cursor>
 	</File>
 	<File name="src\menu.c" open="1" top="0" tabpos="5" split="0" active="1" splitpos="223" zoom_1="0" zoom_2="0">
@@ -72,7 +72,7 @@
 			<Cursor1 position="22983" topLine="754" />
 		</Cursor>
 	</File>
-	<File name="src\objects.h" open="1" top="1" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src\objects.h" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="5240" topLine="199" />
 		</Cursor>

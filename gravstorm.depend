@@ -3,7 +3,7 @@
 	<stdio.h>
 	<stdlib.h>
 
-1471435089 source:c:\ipl\gravstorm\src\collisions.c
+1473759071 source:c:\ipl\gravstorm\src\collisions.c
 	<stdio.h>
 	"allegro5/allegro.h"
 	"allegro5/allegro_image.h"
@@ -329,7 +329,7 @@
 
 1457045543 c:\ipl\gravstorm\src\inputs.h
 
-1473623710 source:c:\ipl\gravstorm\src\game.c
+1473760837 source:c:\ipl\gravstorm\src\game.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
