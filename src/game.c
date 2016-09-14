@@ -746,6 +746,12 @@ void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
     //fflush(logfile);
 
     tr_map = al_load_bitmap(Map.display_file_name);
+	if (tr_map == NULL)
+    {
+        fprintf(logfile,"Display Map load error\n");
+        return;
+    }
+
 	if (Map.type == 1)  //tiled
 	{
 		mapx = map_width * TILE_WIDTH;
@@ -767,10 +773,18 @@ void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
 	}
 
 	if (Map.background_file_name[0] != 0)
+    {
         background = al_load_bitmap(Map.background_file_name);
+        if (background == NULL)
+            fprintf(logfile,"Background bitmap load fail.\n");
+    }
 
-	if (Map.sentry_file_name)
+	if (Map.sentry_file_name[0] != 0)
+    {
 		sentries = al_load_bitmap(Map.sentry_file_name);
+		if (sentries == NULL)
+            fprintf(logfile,"Sentries bitmap load fail.\n");
+    }
 
     fprintf(logfile,"tr_map size %d x %d\n",mapx,mapy);
     fflush(logfile);
