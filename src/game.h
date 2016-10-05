@@ -233,11 +233,18 @@ typedef struct
 
 typedef struct
 {
+	//MenuEntryType entry[7]; //mode, map,num players,p1-p4
+
+	int state;
+	int col_pos;
+    int player;
+    int item;
+    int define_keys;
+
 	int col;		//0,1,2
 	int group;		//0-n
 	int map;		//0-n
 	int num_groups;	//
-	int player;		//0-4
 	int controls;	//0,1 keys, 2 GPIO joystick? 3 onwards USB joysticks.
 	int current_key;
 	int offset;		//to make columns slide
@@ -245,6 +252,7 @@ typedef struct
 	int y_origin;
 	int expand;
 } MenuType;
+
 
 extern ALLEGRO_DISPLAY *display;
 
@@ -299,10 +307,11 @@ extern MenuType Menu;
 
 extern FILE* logfile;
 
-ALLEGRO_VOICE *voice;
-ALLEGRO_MIXER *mixer;
+//extern ALLEGRO_VOICE *voice;
+extern ALLEGRO_MIXER *mixer;
 
 extern ALLEGRO_SAMPLE *wind;
+extern ALLEGRO_SAMPLE *loop;
 
 extern ALLEGRO_SAMPLE_INSTANCE *clunk_inst;
 extern ALLEGRO_SAMPLE_INSTANCE *wind_inst[MAX_SHIPS];

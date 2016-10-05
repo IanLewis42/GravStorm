@@ -35,6 +35,8 @@
 #include "objects.h"
 #include "inputs.h"
 
+int DoOldMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip);
+int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip);
 
 int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
@@ -174,6 +176,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	int i;
 	int w,h,xoffset,yoffset;
 	ShipType AnyShip;
+	ALLEGRO_SAMPLE_INSTANCE *loop_inst;
 
 	fprintf(logfile,"\nStart Menu\n");
 
@@ -220,7 +223,8 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	Menu.offset = 0;
 
 	menu_bg_bmp = al_load_bitmap("menu_bg.png");
-    logo = al_load_bitmap("gs.png");;
+    logo = al_load_bitmap("gs.png");
+    if ((ships = al_load_bitmap("ships.png")) == NULL)  fprintf(logfile,"ships.png load fail");
 
 	fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 
@@ -229,8 +233,380 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 		fprintf(logfile,"Failed to open map file\n");
 		return 0;
 	}
+    //play background music
+    loop_inst = al_create_sample_instance(loop);
+    al_attach_sample_instance_to_mixer(loop_inst, mixer);
+    al_set_sample_instance_playmode(loop_inst, ALLEGRO_PLAYMODE_LOOP);
+    al_play_sample_instance(loop_inst);
 
-	while(1)
+	//if (DoOldMenu(queue, event, AnyShip)) return 1;
+	if (DoNewMenu(queue, event, AnyShip)) return 1;
+
+	//stop music
+	al_stop_sample_instance(loop_inst);
+	al_destroy_sample_instance(loop_inst);
+
+	fprintf(logfile,"\nPlaying map %s (%d,%d)\n",(char*)&MapNames[Menu.group].Map[Menu.map],Menu.group,Menu.map);
+	fprintf(logfile,"Number of players %d\n",num_ships);
+
+	for (i=0 ; i<30 ; )
+	{
+		al_wait_for_event(queue, &event);
+		if (event.type == ALLEGRO_EVENT_TIMER)
+		{
+			i++;
+			display_map_text(0,i);	//this is the description text file. i fades the colours in and out
+		}
+	}
+
+	return 0;
+}
+
+int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
+{
+	int i;
+	int w,h,xoffset,yoffset;
+
+    Ship[0].angle = 0;
+    Ship[1].angle = 10;
+    Ship[2].angle = 20;
+    Ship[3].angle = 30;
+
+    event.keyboard.keycode = 0;
+
+    while(1)
+	{
+		al_wait_for_event(queue, &event);
+
+        if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+            return 1;
+
+        else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+        {
+            al_acknowledge_resize(display);
+
+            w = al_get_display_width(display);
+            h = al_get_display_height(display);
+
+            al_set_clipping_rectangle(0, 0, w, h);
+
+            yoffset = (h-SCREENY)/2;
+            if (yoffset < 0) yoffset = 0;
+
+            xoffset = (w-SCREENX)/2;
+            if (xoffset < 0) xoffset = 0;
+
+            Menu.x_origin = xoffset;
+            Menu.y_origin = yoffset;
+
+            if (Menu.col >= 2)
+                Menu.offset = Menu.x_origin-460;
+            else
+                Menu.offset = Menu.x_origin;
+        }
+
+		else if (event.type == ALLEGRO_EVENT_TIMER && al_is_event_queue_empty(queue))
+		{
+			display_new_menu();
+
+			//expanding maps
+			if (Menu.expand < 35)
+				Menu.expand += 5;
+
+            if (gpio_active) ReadGPIOJoystick();
+		}
+
+		else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
+		{
+            if (al_get_sample_instance_playing(clunk_inst))
+                al_stop_sample_instance(clunk_inst);
+            al_play_sample_instance(clunk_inst);
+
+            //non-joystick things
+            if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                if (Menu.state == 0) Exit();   //escape to exit
+                else Menu.state = 0;            //or back to first menu
+
+			else if (Menu.define_keys)// && event.type == ALLEGRO_EVENT_KEY_DOWN)
+			{
+				switch (Menu.current_key)
+				{
+					case 0:
+						Ship[Menu.player].left_key = event.keyboard.keycode;
+						//event.keyboard.keycode = 0;
+						Menu.current_key++;
+						break;
+					case 1:
+						Ship[Menu.player].right_key = event.keyboard.keycode;
+						//event.keyboard.keycode = 0;
+						Menu.current_key++;
+						break;
+					case 2:
+						Ship[Menu.player].up_key = event.keyboard.keycode;
+						//event.keyboard.keycode = 0;
+						Menu.current_key++;
+						break;
+					case 3:
+						Ship[Menu.player].down_key = event.keyboard.keycode;
+						//event.keyboard.keycode = 0;
+						Menu.current_key++;
+						break;
+					case 4:
+						Ship[Menu.player].thrust_key = event.keyboard.keycode;
+						//event.keyboard.keycode = 0;
+						Menu.current_key = 0;
+						Menu.define_keys = false;
+						break;
+				}
+			}
+            else
+            key_down_log[event.keyboard.keycode]=true;  //log it
+
+		}
+
+		//See if it's a USB joystick event. If it is, log it.
+ 		else CheckUSBJoyStick(event);
+
+		//finished checking events
+
+		//turn any pending keypresses / Joystick events into Ship controls
+        ScanInputs(MAX_SHIPS);
+
+		//Take any ship control to control menu. Also, cursor keys / return always work.
+        for (i=0 ; i<MAX_SHIPS ; i++)
+        {
+			if (Ship[i].left_down || key_down_log[ALLEGRO_KEY_LEFT])
+			{
+				AnyShip.left_down = true;
+				Ship[i].left_down = false;
+	 			key_down_log[ALLEGRO_KEY_LEFT] = false;
+
+			}
+			if (Ship[i].right_down || key_down_log[ALLEGRO_KEY_RIGHT])
+			{
+				AnyShip.right_down = true;
+				Ship[i].right_down = false;
+				key_down_log[ALLEGRO_KEY_RIGHT] = false;
+			}
+			if (Ship[i].fire1_down || key_down_log[ALLEGRO_KEY_UP])
+			{
+				AnyShip.fire1_down = true;
+				Ship[i].fire1_down = false;
+				key_down_log[ALLEGRO_KEY_UP] = false;
+			}
+			if (Ship[i].fire2_down || key_down_log[ALLEGRO_KEY_DOWN])
+			{
+				AnyShip.fire2_down = true;
+				Ship[i].fire2_down = false;
+				key_down_log[ALLEGRO_KEY_DOWN] = false;
+			}
+			if (Ship[i].thrust_down || key_down_log[ALLEGRO_KEY_ENTER])
+			{
+				AnyShip.thrust_down = true;
+				Ship[i].thrust_down = false;
+				key_down_log[ALLEGRO_KEY_ENTER] = false;
+			}
+		}
+
+		//now have all inputs recorded as AnyShip elements (non-ship keypresses will be in key_down_log)
+		//actions are dependent on state....
+
+		switch (Menu.state)
+        {
+            case 0: //network/local + map selection
+                if (AnyShip.thrust_down)
+                {
+                    AnyShip.thrust_down = false;
+                    Menu.state = 1;               //thrust to go to next menu
+                    if (Map.max_players == 1) num_ships = 1;    //default 2 players, unless max is 1
+                    else num_ships = 2;
+                }
+
+                else if (AnyShip.fire2_down)    //down
+                {
+                    AnyShip.fire2_down = false;
+
+                    if (Menu.map < MapNames[Menu.group].Count-1)	//more maps in group, so inc map count
+                        Menu.map++;
+                    else if(Menu.group < Menu.num_groups-1)		//no more maps, but another group so inc group
+                    {
+                        Menu.group++;
+                        Menu.map = 0;
+                        Menu.expand = 0;
+                    }
+
+                    fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
+                    init_map(Menu.group, Menu.map);
+                }
+
+                else if(AnyShip.fire1_down) //up!
+                {
+                    AnyShip.fire1_down = false;
+
+                    if (Menu.map > 0)	//more maps in group, so dec map count
+                        Menu.map--;
+                    else if(Menu.group > 0)		//no more maps, but another group so dec group
+                    {
+                        Menu.group--;
+                        Menu.map = MapNames[Menu.group].Count-1;
+                        Menu.expand = 0;
+                    }
+
+                    fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
+                    init_map(Menu.group, Menu.map);
+                }
+            break;
+
+            case 1: //players/ship/controls
+                 if (AnyShip.thrust_down)
+                {
+                    AnyShip.thrust_down = false;
+                    Menu.state = 0;               //thrust to start game;
+                    return 0;
+                }
+                else if (AnyShip.fire2_down)    //down
+                {
+                    AnyShip.fire2_down = false;
+                    if (Menu.col_pos < num_ships*3) Menu.col_pos++;
+                    Menu.player = (Menu.col_pos-1) / 3;
+                    Menu.item   = (Menu.col_pos-1) % 3;
+                    if (Menu.item == 2 && Ship[Menu.player].controller != KEYS)
+                    {
+                        if (Menu.col_pos < num_ships*3)
+                            Menu.col_pos++;
+                        else Menu.col_pos--;
+                    }
+                }
+                else if (AnyShip.fire1_down)    //up
+                {
+                    AnyShip.fire1_down = false;
+                    if (Menu.col_pos > 0) Menu.col_pos--;
+                    Menu.player = (Menu.col_pos-1) / 3;
+                    Menu.item   = (Menu.col_pos-1) % 3;
+                    if (Menu.item == 2 && Ship[Menu.player].controller != KEYS)
+                        Menu.col_pos--;
+                }
+                else if (AnyShip.left_down)    //left
+                {
+                    AnyShip.left_down = false;
+                    if (Menu.col_pos == 0)
+                    {
+                        if (num_ships > 1)
+                            num_ships--;
+                    }
+                    else if (Menu.item == 0) //ship
+                    {
+                        Ship[Menu.player].image--;
+                        Ship[Menu.player].image&=0x07;
+                    }
+                    else if (Menu.item == 1)    //controls
+                    {
+                        if (Ship[Menu.player].controller > 0)
+                        Ship[Menu.player].controller--;
+                    }
+                }
+                else if (AnyShip.right_down)    //right
+                {
+                    AnyShip.right_down = false;
+                    if (Menu.col_pos == 0)
+                    {
+                        if (num_ships < Map.max_players)
+                            num_ships++;
+                    }
+
+                    else if (Menu.item == 0) //ship
+                    {
+                        Ship[Menu.player].image++;
+                        Ship[Menu.player].image&=0x07;
+                    }
+                    else if (Menu.item == 1)    //controls
+                    {
+                        if (Ship[Menu.player].controller < 3)
+                            Ship[Menu.player].controller++;
+                    }
+                    else if (Menu.item == 2)    //define keys
+                    {
+                        Menu.define_keys = true;
+                    }
+                }
+
+                Menu.player = (Menu.col_pos-1) / 3;
+                Menu.item   = (Menu.col_pos-1) % 3;
+
+
+
+
+            break;
+            default:
+                Menu.state = 0;
+            break;
+        }
+        event.keyboard.keycode = 0;
+	}
+			//Escape to exit trumps everything
+ 			//if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) Exit();
+
+			//Otherwise, check if we're defining keys, so we can allow any keys (other than escape) here
+			//NB only way out of column 3 is to get to the end of this process (i.e. define all 5 keys
+			//which automagically dumps us back into col 2.
+/*
+			else if (Menu.col == 3)
+			{
+				switch (Menu.current_key)
+				{
+					case 0:
+						Ship[Menu.player].left_key = event.keyboard.keycode;
+						Menu.current_key++;
+						break;
+					case 1:
+						Ship[Menu.player].right_key = event.keyboard.keycode;
+						Menu.current_key++;
+						break;
+					case 2:
+						Ship[Menu.player].up_key = event.keyboard.keycode;
+						Menu.current_key++;
+						break;
+					case 3:
+						Ship[Menu.player].down_key = event.keyboard.keycode;
+						Menu.current_key++;
+						break;
+					case 4:
+						Ship[Menu.player].thrust_key = event.keyboard.keycode;
+						Menu.current_key = 0;
+						Menu.col = 2;
+						break;
+
+					default:
+					break;
+				}
+			}
+			//otherwise just log the key
+            else
+            {
+
+	 		}
+		}
+
+
+
+		//Next, check to see if we're exiting menu to game
+		//else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER)// || event.keyboard.keycode == ALLEGRO_KEY_LCTRL)
+		if (AnyShip.thrust_down)
+		{
+			AnyShip.thrust_down = false;
+			//break;
+		}
+
+*/
+
+}
+
+int DoOldMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
+{
+	int i;
+	int w,h,xoffset,yoffset;
+
+    while(1)
 	{
 		al_wait_for_event(queue, &event);
 
@@ -526,20 +902,5 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 		}
 		//
 	}
-
-	fprintf(logfile,"\nPlaying map %s (%d,%d)\n",(char*)&MapNames[Menu.group].Map[Menu.map],Menu.group,Menu.map);
-	fprintf(logfile,"Number of players %d\n",num_ships);
-
-	for (i=0 ; i<30 ; )
-	{
-		al_wait_for_event(queue, &event);
-		if (event.type == ALLEGRO_EVENT_TIMER)
-		{
-			i++;
-			display_map_text(0,i);	//this is the description text file. i fades the colours in and out
-		}
-	}
-
 	return 0;
 }
-

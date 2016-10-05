@@ -19,7 +19,8 @@
 void LoadMap(void);
 void FreeMap(void);
 void draw_status_bar(int num_ships);
-void display_menu(void);//int num_maps, int selected);
+void display_menu(void);
+void display_new_menu(void);
 void display_map_text(int done, int timer);
 void make_bullet_bitmap(void);
 void draw_split_screen(ViewportType viewport, int ship_num);

@@ -46,7 +46,7 @@ void swap(int* a, int* b);
 //so read line, check label, scanf, pattern determined by label.
 int init_map(int group, int map)
 {
-	int i=0, j=0,k=0,l=0,m=0,n=0,o=0,p=0;	//counters for pads, special areas, blackholes, sentries, forcefields etc.
+	int i=0, j=0,l=0,m=0,n=0,o=0,p=0;	//counters for pads, special areas, blackholes, sentries, forcefields etc.
     int length;
 	char map_file_name[MAP_NAME_LENGTH];
 	char str[100];
@@ -363,15 +363,6 @@ int init_map(int group, int map)
 	Map.num_racelines = p;
 	fprintf(logfile,"%d racelines\n",Map.num_racelines);
 
-	//for (k=Map.max_players ; k<MAX_SHIPS ; k++)
-	for (k=0 ; k<MAX_SHIPS ; k++)
-	{
-		if (k >= Map.max_players || k > 1)
-			Ship[k].controller = NA;
-		else
-			Ship[k].controller = Ship[k].selected_controller;
-	}
-
 	if (Map.display_file_name[0] == 0)
 		fprintf(logfile,"ERROR: No display file specified\n");
 	if (Map.collision_file_name[0] == 0)
@@ -505,6 +496,7 @@ void load_map_file(void)
 
 void init_controls(void)
 {
+	int i;
 	//key mapping
 	Ship[0].controller = KEYS;	//keys or joystick
 	Ship[0].selected_controller = KEYS;	//keys or joystick
@@ -523,7 +515,7 @@ void init_controls(void)
 	Ship[1].right_key  = ALLEGRO_KEY_T;
 	Ship[1].thrust_key = ALLEGRO_KEY_ALT;
 
-	Ship[2].controller = NA;	//keys or joystick
+	Ship[2].controller = USB_JOYSTICK0;	//keys or joystick
 	Ship[2].selected_controller = USB_JOYSTICK0;
     Ship[2].up_key     = ALLEGRO_KEY_Q;
     Ship[2].down_key   = ALLEGRO_KEY_A;
@@ -531,13 +523,16 @@ void init_controls(void)
     Ship[2].right_key  = ALLEGRO_KEY_T;
     Ship[2].thrust_key = ALLEGRO_KEY_ALT;
 
-	Ship[3].controller = NA;	//keys or joystick
+	Ship[3].controller = USB_JOYSTICK1;	//keys or joystick
 	Ship[3].selected_controller = USB_JOYSTICK1;
 	Ship[3].up_key     = ALLEGRO_KEY_UP;
 	Ship[3].down_key   = ALLEGRO_KEY_DOWN;
 	Ship[3].left_key   = ALLEGRO_KEY_LEFT;
 	Ship[3].right_key  = ALLEGRO_KEY_RIGHT;
-	Ship[3].thrust_key = ALLEGRO_KEY_LCTRL;
+	Ship[3].thrust_key = ALLEGRO_KEY_RCTRL;
+
+    for (i=0 ; i<MAX_SHIPS ; i++)
+        Ship[i].image = i;
 }
 
 void init_ships(int num_ships)
@@ -550,6 +545,7 @@ void init_ships(int num_ships)
 
 	for (i=0 ; i<num_ships ; i++)
 	{
+		//Ship[i].image      = i+4;
 		Ship[i].lives      = Map.lives;
 		Ship[i].user_fuel  = DEFAULT_FUEL;
 		Ship[i].user_ammo1 = DEFAULT_AMMO1;

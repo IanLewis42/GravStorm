@@ -84,6 +84,7 @@ ALLEGRO_SAMPLE *shootb;
 ALLEGRO_SAMPLE *dead;
 ALLEGRO_SAMPLE *particle;
 ALLEGRO_SAMPLE *yippee;
+ALLEGRO_SAMPLE *loop;
 
 ALLEGRO_SAMPLE_INSTANCE *clunk_inst;
 ALLEGRO_SAMPLE_INSTANCE *wind_inst[MAX_SHIPS];
@@ -257,6 +258,7 @@ int main (int argc, char *argv[]){
 	if ((clunk = al_load_sample   ("clunk.wav"))    == NULL)  fprintf(logfile,"clunk.wav load fail");
 	if ((wind = al_load_sample    ("wind.wav"))     == NULL)  fprintf(logfile,"wind.wav load fail");
 	if ((yippee = al_load_sample  ("yippee.wav"))   == NULL)  fprintf(logfile,"yippee.wav load fail");
+	if ((loop = al_load_sample    ("gsloop.ogg"))   == NULL)  fprintf(logfile,"gsloop.ogg load fail");
 	fprintf(logfile,"Loaded Audio Samples\n");
 
 	clunk_inst = al_create_sample_instance(clunk);
@@ -304,7 +306,7 @@ int main (int argc, char *argv[]){
 		fprintf(logfile,"Skip GPIO joystick\n");
 
 	init_controls();	//setup defaults for what controls which ship.
-
+    init_ships(MAX_SHIPS);
 	fflush(logfile);
 
 	Menu.map = 0;	//start on first map, but only first time. After that, remember it.
