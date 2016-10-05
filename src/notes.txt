@@ -178,7 +178,8 @@
    //P2 gap too small???
  
  // ?re-jig menu (as per network section)- animated ship selection.
- // Check all levels - starting, lives, sentries etc....
+ // *backgrounds for type 0 - became type 2....
+ // *Check all levels - starting, lives, sentries etc....
     *slime on orange and purple tiles - colours in general.
     *render all new hex tilesets (apart from blue). Check colours against thrust.
     *fade levels
@@ -189,14 +190,14 @@
  // *try usb joy on windows.
  // *changes -> github
  // *build mm on rpi
- // readme 128MB
- // screenshots: *mission 5 (FF), *canyon (start?), *neutron star (star, plus bullets), sitimus (battle) - no gravity!
- // RELEASE 1.0.0.0
- // contact canyon / *gurkoz
- // finnish thread, mp, tb, mc, zimeon, Asbjorn, Alex?, RPi guy.
+ // *readme 128MB
+ // *screenshots: *mission 5 (FF), *canyon (start?), *neutron star (star, plus bullets), sitimus (battle) - no gravity!
+ // *RELEASE 1.0.0.0
+ // contact:
+ // *gurkoz, *mp, *tb, *Asbjorn, *Alex, *canyon, *KIIRA, 
+ // finnish thread, mc?, Zimeon,  RPi guy (malman), 
  
  // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
- // backgrounds for type 0?
  // networking - enet...
  
  //Colours
@@ -269,16 +270,62 @@
 
 menu
 mode
-[local, network]
+ [local, network -> IP address:port]
 map
-[list from local or network]
+ [list from local or network]
+num players
+ [default 1/2 from map, max from map]
 player 1
-[controls, ship]
-num players???
+ [controls -> keys, ship]
+player...
 
 
+so.....
+array [struct {string, fn_ptr}]
+string is mode,map, etc
+fn_ptr points to fn to do remaining enu
 
-     
+long sliding map list? or keep expanding?
+
+mode     | local | network [on change to local load local map list. on change to network, enable IP address, search]
+           address: 192.168.0.1
+
+player 1 | ship [image]
+           keys | gpio joy | usb joy etc
+           [if keys]
+           left: <left key>           [pop down on keypress]
+           right: <right key> etc
+           
+           
+try chronological, so state machine,
+1: network / map (incidentally, need matching maps on client/server......)
+   mode
+   local | netowrk
+   server
+   xxx.xxx.xxx
+   maps.....	(show max players)
+   
+2:  players
+  0 1|2|3|4
+    P1
+  1 ship....
+  2 controls....  keys (if needed)
+  3 define keys ->
+    P2
+  4 ship....
+  5 controls....  keys (if needed)  
+  6 define keys ->
+    P3
+  7 ship....
+  8 controls....  keys (if needed)     
+  9 define keys ->  
+    P4
+ 10 ship....
+ 11 controls....  keys (if needed)     
+ 12 define keys ->  
+   
+   escape to go back, enter/thrust to go on.
+   
 //windows static buid:
   many distributions of mingw
   official binaries + deps + mingw-w64 https://sourceforge.net/projects/mingw-w64/
