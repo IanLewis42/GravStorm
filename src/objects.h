@@ -83,6 +83,7 @@
 
 typedef struct
 {
+	int image;      //what does it look like?
 	//key mapping
 	int controller;	//keys or joystick - live
 	int selected_controller; //remember what we chose to replace N/As in menu
