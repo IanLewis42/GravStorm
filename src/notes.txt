@@ -295,8 +295,7 @@ player 1 | ship [image]
            [if keys]
            left: <left key>           [pop down on keypress]
            right: <right key> etc
-           
-           
+                      
 try chronological, so state machine,
 1: network / map (incidentally, need matching maps on client/server......)
    mode
@@ -325,7 +324,19 @@ try chronological, so state machine,
  12 define keys ->  
    
    escape to go back, enter/thrust to go on.
-   
+
+OK, good.
+Maybe initial state for network:
+ Local
+ Host Network game (=> start server, connect to (local) server)
+ Join Network game (connect to (remote) server)
+   Address?
+ 
+ Display network messages  on all menu screens, e.g.
+  Host started, Address = x.x.x.x 
+  Connected to host, waiting for game to strart
+  n players connected
+  
 //windows static buid:
   many distributions of mingw
   official binaries + deps + mingw-w64 https://sourceforge.net/projects/mingw-w64/

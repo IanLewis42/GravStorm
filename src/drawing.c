@@ -46,6 +46,7 @@ void draw_menu(int ship_num, int x, int y, int w, int h);
 
 int grid = 0;
 
+#if 0
 void display_menu(void)//int num_maps, int selected)	//show list of maps
 {
 	ALLEGRO_TRANSFORM transform;
@@ -252,7 +253,7 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 
 	return;
 }
-
+#endif
 
 void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 {
@@ -319,7 +320,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	y+= 25;
     y+= yoffset;
 
-	if (Menu.state == 0)
+	if (Menu.state == LEVEL)
     {
 	//Display maps; display all group names, and maps in current group
         for (i=0 ; i<Menu.num_groups ; i++)
@@ -364,7 +365,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         }
     }
 
-    else    //state = 1
+    else if (Menu.state == PLAYERS)
     {
         y=40;
         y+= yoffset;
@@ -400,7 +401,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
             y+=2;
 
-            al_draw_bitmap_region(ships,Ship[i].angle*SHIP_SIZE_X,(2*Ship[i].image + (Ship[i].thrust?1:0) )*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+65,y, 0);
+            al_draw_bitmap_region(ships,Ship[i].angle*SHIP_SIZE_X,(2*Ship[i].image)*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+65,y, 0);
             Ship[i].angle++;
             if (Ship[i].angle == 40) Ship[i].angle = 0;
 

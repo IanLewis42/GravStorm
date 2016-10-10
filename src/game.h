@@ -231,11 +231,16 @@ typedef struct
     int num_racelines;
 } MapType;
 
+typedef enum
+{
+    NETWORK = 0,
+    LEVEL,
+    PLAYERS
+}MenuStateType;
+
 typedef struct
 {
-	//MenuEntryType entry[7]; //mode, map,num players,p1-p4
-
-	int state;
+	MenuStateType state;
 	int col_pos;
     int player;
     int item;
@@ -253,6 +258,18 @@ typedef struct
 	int expand;
 } MenuType;
 
+typedef struct
+{
+    int net;        //are we networked?
+    int host;       //are we a host?
+    int clients;    //number of clients connected (only valid if we're a host)
+    int connected;  //are connected to a host?
+
+
+
+} NetworkType;
+
+extern NetworkType Net;
 
 extern ALLEGRO_DISPLAY *display;
 
