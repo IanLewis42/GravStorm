@@ -31,6 +31,7 @@
 #include "objects.h"
 #include "init.h"
 #include "gameover.h"
+#include "network.h"
 
 //Trig LUTs
 float sinlut[NUM_ANGLES];
@@ -49,7 +50,7 @@ int last_bullet = END_OF_LIST;	//init this when you make a new bullet.
 
 //Parameters for bullets
 //                          normal random double triple heavy mine  heat spread lava sentry
-int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   60,   5000, 150, 300,   300, 300};	//Life (in frames)
+int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   50,   5000, 150, 300,   256, 300};	//Life (in frames)
 int reload[BULLET_TYPES] = {5,     5,     5,     15,    0,    0,    0,   0,     0,   0};	//frames in between shots (if fire held down) N/A for heavy weapons
 float Mass[BULLET_TYPES] = {0.04,  0.04,  0.04,  0.04,  0.1,  0.1,  0.1, 0.04,  0.1, 0.1};	//Really bullet mass/ship mass; only used in collisions
 int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   30,  9,     10,  50};   //points off shield when collision happens
@@ -57,7 +58,7 @@ int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   30,  9,     
 void UpdateLandedShip(int ship_num);	//int
 void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv);//float outward_v);
 void NewShipBullet (int ship_num, int type, int flags); //int
-void NewBullet (int x,int y,int xv,int yv,int angle,float speed, int type,int random);
+void NewBullet (int x,int y,int xv,int yv,int angle,float speed, int type,int random,int owner);
 void FireNormal(int i);	//int
 void FireSpecial(int i);	//int
 
@@ -100,6 +101,7 @@ int UpdateShips(int num_ships)
 			CreateExplosion(Ship[i].xpos, Ship[i].ypos, 2, 8, Ship[i].xv, Ship[i].yv);//float outward_v);
 			//al_play_sample(dead, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 			al_play_sample_instance(dead_inst[i]);
+			Net.sounds |= DEAD;
 			Ship[i].reincarnate_timer = 100;
 			Ship[i].lives--;
 			Ship[i].thrust = 0; //stop engine noise
@@ -578,15 +580,17 @@ void UpdateLandedShip(int i)
 //void CreateExplosion(ship_num)
 void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv)//float outward_v);
 {
-	int j,k;
+	int j,k,angle_inc;
 
 	//fprintf(logfile,"Explosion.\n");
+
+	angle_inc = 40/num_particles;
 
 	for (k=1 ; k<num_rings+1 ; k++)	//1-2 for 2 rings of particles; fast and slow
 	{
 		for (j=0 ; j<num_particles ; j++)
 		{
-			NewBullet(xpos, ypos, xv, yv, j*5, 0.5 * k * BULLET_SPEED, BLT_NORMAL, 0);
+			NewBullet(xpos, ypos, xv, yv, j*angle_inc, 0.5 * k * BULLET_SPEED, BLT_NORMAL, 0, NO_OWNER);
 		}
 	}
 }
@@ -601,6 +605,7 @@ void FireNormal(int i)
         al_stop_sample_instance(shoota_inst[i]);
 
     al_play_sample_instance(shoota_inst[i]);
+    Net.sounds |= SHOOTA;
 
 	switch (Ship[i].ammo1_type)
 	{
@@ -650,6 +655,7 @@ void FireSpecial(int ship_num)
 	int j,k;
 
 	al_play_sample_instance(shootb_inst[ship_num]);
+	Net.sounds |= SHOOTB;
 
 	switch (Ship[ship_num].ammo2_type)
 	{
@@ -672,7 +678,7 @@ void FireSpecial(int ship_num)
 				{
 					NewBullet(Ship[ship_num].xpos + (SHIP_SIZE_X/2 * sinlut[Ship[ship_num].angle]), Ship[ship_num].ypos - (SHIP_SIZE_Y/2 * coslut[Ship[ship_num].angle]),
 					          Ship[ship_num].xv + (BULLET_SPEED * sinlut[Ship[ship_num].angle]), Ship[ship_num].yv + (BULLET_SPEED * coslut[Ship[ship_num].angle]),
-					          j*5, 0.02 * k * BULLET_SPEED, BLT_NORMAL, 0);
+					          j*5, 0.02 * k * BULLET_SPEED, BLT_NORMAL, 0, ship_num);
 				}
 			}
 
@@ -772,7 +778,7 @@ void UpdateSentries(void)
 				{
 					//shots++;
 					if (Map.sentry[i].type == 1)	//volcano
-						NewBullet(Map.sentry[i].x, Map.sentry[i].y, 0, 0, Map.sentry[i].direction, BULLET_SPEED, BLT_LAVA, Map.sentry[i].random);
+						NewBullet(Map.sentry[i].x, Map.sentry[i].y, 0, 0, Map.sentry[i].direction, BULLET_SPEED, BLT_LAVA, Map.sentry[i].random, NO_OWNER);
 
 					else if (Map.sentry[i].type == 2)	//targeted gun
 					{
@@ -806,12 +812,12 @@ void UpdateSentries(void)
 								direction = (40/(2*3.14)) * atan2(x_dis,y_dis);	//scaled to 40 = 2*PI
 								if (direction < 0) direction += 40;
 
-								NewBullet(Map.sentry[i].x, Map.sentry[i].y, 0, 0, direction, BULLET_SPEED, BLT_SENTRY, Map.sentry[i].random);
+								NewBullet(Map.sentry[i].x, Map.sentry[i].y, 0, 0, direction, BULLET_SPEED, BLT_SENTRY, Map.sentry[i].random, NO_OWNER);
 							}
 						}
 					}
 					else	//normal gun
-						NewBullet(Map.sentry[i].x, Map.sentry[i].y, 0, 0, Map.sentry[i].direction, BULLET_SPEED, BLT_SENTRY, Map.sentry[i].random);
+						NewBullet(Map.sentry[i].x, Map.sentry[i].y, 0, 0, Map.sentry[i].direction, BULLET_SPEED, BLT_SENTRY, Map.sentry[i].random, NO_OWNER);
 				}
 				Map.sentry[i].count = Map.sentry[i].period;
 			}
@@ -845,7 +851,7 @@ void NewShipBullet (int ship_num, int type, int flags)// signed int position, in
 
 	if (flags & RANDOM) random = 1;
 
-	NewBullet(Ship[ship_num].xpos + (SHIP_SIZE_X/2 * sinlut[angle]), Ship[ship_num].ypos - (SHIP_SIZE_Y/2 * coslut[angle]), Ship[ship_num].xv, Ship[ship_num].yv, Ship[ship_num].angle, speed, type, random);
+	NewBullet(Ship[ship_num].xpos + (SHIP_SIZE_X/2 * sinlut[angle]), Ship[ship_num].ypos - (SHIP_SIZE_Y/2 * coslut[angle]), Ship[ship_num].xv, Ship[ship_num].yv, Ship[ship_num].angle, speed, type, random, ship_num);
 
 	return;
 
@@ -866,7 +872,7 @@ void NewShipBullet (int ship_num, int type, int flags)// signed int position, in
 //when you make next bullet, copy next bullets index into first ones' n_b field, and END_OF_LIST into that one.
 //when you destroy (ttl decremented to zero) copy next bullet index up the chain.
 //if you destroy first one, copy it's n_b into first_bullet.
-void NewBullet (int x,int y,int xv,int yv,int angle,float speed,int type,int random)//(int ship_num, int type, int flags)// signed int position, int random)
+void NewBullet (int x,int y,int xv,int yv,int angle,float speed,int type,int random,int owner)//(int ship_num, int type, int flags)// signed int position, int random)
 {
 	int i;
 
@@ -895,7 +901,7 @@ void NewBullet (int x,int y,int xv,int yv,int angle,float speed,int type,int ran
 	Bullet[i].ypos = y;
 	Bullet[i].xv = xv + (speed * sinlut[angle]) + (random * 0.1 * ((rand()&0xf) - 7));
 	Bullet[i].yv = yv + (speed * coslut[angle]) + (random * 0.1 * ((rand()&0xf) - 7));
-
+    Bullet[i].owner = owner;
 	switch(Bullet[i].type)
 	{
 		case BLT_HEAVY:
@@ -938,6 +944,8 @@ void UpdateBullets(void)
 		{										//pass index up the list
             //fprintf(logfile,"Expired Bullet %d\n",current_bullet);
 
+
+
 			if (previous_bullet == END_OF_LIST)							//if we're the first bullet
 			//if (current_bullet == first_bullet)					//(should be equivalent to above)
 				first_bullet = Bullet[current_bullet].next_bullet;	//first_bullet is now the next one.
@@ -948,7 +956,12 @@ void UpdateBullets(void)
 			if (Bullet[current_bullet].next_bullet == END_OF_LIST)		//in either case, if we were the last bullet, last bullet is
 				last_bullet = previous_bullet;						// now one up the list.
 
+			if (Bullet[current_bullet].type == BLT_HEAVY)
+                CreateExplosion(Bullet[current_bullet].xpos, Bullet[current_bullet].ypos, 1, 8, 0, 0);
+
 		}
+
+
 		else	//update bullet position
 		{
 			hsax = 0;
@@ -993,7 +1006,6 @@ void UpdateBullets(void)
 					}
 				}
 			}
-
 
 			if (Map.radial_gravity)
 			{

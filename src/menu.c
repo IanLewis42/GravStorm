@@ -34,8 +34,9 @@
 #include "collisions.h"
 #include "objects.h"
 #include "inputs.h"
+#include "network.h"
 
-int DoOldMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip);
+//int DoOldMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip);
 int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip);
 
 int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
@@ -262,6 +263,8 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	return 0;
 }
 
+FILE *hostfile,*clientfile;
+
 int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 {
 	int i;
@@ -273,6 +276,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
     Ship[3].angle = 30;
 
     event.keyboard.keycode = 0;
+
+    Net.pingtimer = 0;
 
     while(1)
 	{
@@ -314,6 +319,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 				Menu.expand += 5;
 
             if (gpio_active) ReadGPIOJoystick();
+
+             Net.pingtimer++;   //used by client searching for server
 		}
 
 		else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
@@ -324,8 +331,54 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 
             //non-joystick things
             if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
-                if (Menu.state == LEVEL) Exit();   //escape to exit
-                else Menu.state = NETWORK;            //or back to first menu
+            {
+                switch (Menu.state)
+                {
+                case NETWORK:
+                    Exit();   //escape to exit
+                break;
+                case LEVEL:
+                    Menu.state = NETWORK;            //or back to previous menu
+                break;
+                case PLAYERS:
+                    if (Menu.netmode == CLIENT)
+                    {
+                        Menu.state = NETWORK;            //or back to previous menu
+
+                        if (Net.client_state == CONNECTED || Net.client_state == RUNNING)
+                        {
+                            NetDisconnectClient();
+
+                            while (Net.client_state != IDLE)
+                            {
+                                ServiceNetwork();
+                            }
+                            NetStopClient();
+                        }
+                        //Net.client_state = IDLE;        //stop client ping
+                        //Net.client = false;
+                    }
+                    else if (Menu.netmode == HOST)
+                    {
+                        Menu.state = LEVEL;
+                        //disconnect clients
+                        NetStopListen();    //stop new connections
+
+                        NetSendAbort();         //tell clients to disconnect
+                        while (num_ships > 1)   //wait until they do
+                            ServiceNetwork();
+
+                        NetStopServer();        //kill server
+                        Net.server = false;
+                    }
+                    else
+                        Menu.state = LEVEL;
+
+                break;
+                }
+                //Menu.col_pos = 0;
+                //Menu.netmode = LOCAL;
+            }
 
 			else if (Menu.define_keys)// && event.type == ALLEGRO_EVENT_KEY_DOWN)
 			{
@@ -359,9 +412,27 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 						break;
 				}
 			}
+
             else
             key_down_log[event.keyboard.keycode]=true;  //log it
 		}
+		//_CHAR event for typing in IP address
+		/*
+		else if (event.type == ALLEGRO_EVENT_KEY_CHAR)
+        {
+            if (Menu.state == NETWORK && Menu.col_pos == 1) //defining address
+            {
+                //return picked up elsewhere....
+                if (event.keyboard.keycode == ALLEGRO_KEY_BACKSPACE)  //backspace
+                {
+                    if (strlen(Net.temp_address) > 0)
+                        Net.temp_address[strlen(Net.temp_address)-1] = 0;   //so terminate string one earlier
+                }
+                else
+                    strncat(Net.temp_address,(char*)&event.keyboard.unichar,1);    //append char
+            }
+        }
+        */
 
 		//See if it's a USB joystick event. If it is, log it.
  		else CheckUSBJoyStick(event);
@@ -408,20 +479,124 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 
 		//now have all inputs recorded as AnyShip elements (non-ship keypresses will be in key_down_log)
 		//actions are dependent on state....
-
 		switch (Menu.state)
         {
             case NETWORK:
-                Menu.state = LEVEL; //no network yet....
+                //Menu.state = LEVEL; //no network yet....
+                if (AnyShip.thrust_down)
+                {
+                    AnyShip.thrust_down = false;
+                    /*
+                    if (Menu.col_pos == 1)  //editing address
+                    {
+                        strncpy(Net.menuaddress,Net.temp_address,16);
+                        //Net.temp_address[0] = 0;
+                    }
+                    */
+                    if (Menu.netmode == HOST)
+                    {
+                        Menu.state = LEVEL;               //go to next menu
+                        //Menu.col_pos = 0;
+                        Menu.group = 1;
+                        init_map(Menu.group, Menu.map);
+                    }
+                    if (Menu.netmode == CLIENT)
+                    {
+                        Menu.ships = 1;
+                        Menu.state = PLAYERS;
+                        Menu.col_pos = 1;
+
+                        //Net.net = true;
+                        Net.server = false;
+                        Net.client = true;
+                        //Net.connected = 0;
+                        clientfile = fopen("../client.txt","w");
+                        NetStartNetwork();
+                        //NetStartClient();
+                        Net.client_state = SEARCHING;   //starts pinging
+                    }
+                    else
+                    {
+                        //Net.net = false;
+                        Menu.state = LEVEL;               //go to next menu
+                        Menu.col_pos = 0;
+                    }
+                }
+
+                else if (AnyShip.fire2_down)    //down
+                {
+                    AnyShip.fire2_down = false;
+                    //if (Menu.col_pos < 2/*Menu.max_col_pos*/)
+                    if (Menu.netmode < CLIENT)
+                    {
+                        //Menu.col_pos++;
+                        Menu.netmode++;
+                    }
+                }
+
+                else if(AnyShip.fire1_down) //up!
+                {
+                    AnyShip.fire1_down = false;
+                    //if (Menu.col_pos > 0)
+                    if (Menu.netmode > LOCAL)
+                    {
+                        //Menu.col_pos--;
+                        Menu.netmode--;
+                    }
+                }
+
+                //Menu.netmode = Menu.col_pos;
+                /*
+                else if (AnyShip.left_down)    //left
+                {
+                    AnyShip.left_down = false;
+                    //if (Menu.col_pos == 0)          //
+                    {
+                        if (Menu.netmode > 0)
+                            Menu.netmode--;
+                    }
+                }
+                else if (AnyShip.right_down)    //right
+                {
+                    AnyShip.right_down = false;
+                    //if (Menu.col_pos == 0)
+                    {
+                        if (Menu.netmode < 2)
+                            Menu.netmode++;
+                    }
+                }
+                //if (Menu.netmode == CLIENT)
+                //    Menu.max_col_pos = 1;
+                //else
+                    Menu.max_col_pos = 0;
+                */
             break;
-            case LEVEL: //network/local + map selection
+            case LEVEL: //map selection
                 if (AnyShip.thrust_down)
                 {
                     AnyShip.thrust_down = false;
                     Menu.state = PLAYERS;               //thrust to go to next menu
+
                     if (Map.max_players == 1) num_ships = 1;    //default 2 players, unless max is 1
                     else num_ships = 2;
+
+                    Menu.ships = num_ships; //for local
                     Menu.col_pos = 0;
+
+                    if (Menu.netmode == HOST)
+                    {
+                        //Net.net = true;
+                        Net.server = true;
+                        //Net.clients = 1;    //that's us!
+                        num_ships = 1;
+                        //Net.clients_ready = 0;
+                        hostfile = fopen("../host.txt","w");
+                        NetStartNetwork();
+                        NetStartHost(Map.max_players);
+                        Menu.state = PLAYERS;               //go to next menu
+                        Menu.ships = 1;
+                        Menu.col_pos = 1;
+                    }
                 }
 
                 else if (AnyShip.fire2_down)    //down
@@ -460,21 +635,50 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             break;
 
             case PLAYERS: //players/ship/controls
-                 if (AnyShip.thrust_down)
+                if (Net.client)
                 {
-                    AnyShip.thrust_down = false;
-                    Menu.state = NETWORK;               //thrust to start game;
-                    return 0;
+                    if (Net.client_state == IDLE)
+                    {
+                        NetStopClient();
+                        Net.client = true;
+                        Net.client_state = SEARCHING;       //start looking again
+                    }
+                }
+
+                if (AnyShip.thrust_down)
+                {
+                    AnyShip.thrust_down = false;    //thrust to start game;
+                    if (Menu.netmode == HOST)
+                    {
+                        Menu.state = LEVEL;           //set state for when we return to menu
+                        return 0;                       //return from function to start game
+                    }
+                    if (Menu.netmode == CLIENT)
+                    {
+                        if (Net.client_state == CONNECTED)  //if not connected, ignore.
+                        {
+                            Menu.state = NETWORK;           //set state for when we return to menu
+                            Menu.col_pos = 1;
+                            return 0;                       //return from function to start game
+                        }
+                    }
+                    else
+                    {
+                        Menu.state = LEVEL;
+                        Menu.col_pos = 0;
+                        return 0;                       //return from function to start game
+                    }
+
                 }
                 else if (AnyShip.fire2_down)    //down
                 {
                     AnyShip.fire2_down = false;
-                    if (Menu.col_pos < num_ships*3) Menu.col_pos++;             //move down, unless we're at the end -
+                    if (Menu.col_pos < Menu.ships*3) Menu.col_pos++;             //move down, unless we're at the end -
                     Menu.player = (Menu.col_pos-1) / 3;                         //work out player
                     Menu.item   = (Menu.col_pos-1) % 3;                         //..and item (ship, controller, define keys)
                     if (Menu.item == 2 && Ship[Menu.player].controller != KEYS) //skip 'define keys' if we haven't selected keys
                     {
-                        if (Menu.col_pos < num_ships*3)
+                        if (Menu.col_pos < Menu.ships*3)
                             Menu.col_pos++;
                         else Menu.col_pos--;
                     }
@@ -482,7 +686,12 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 else if (AnyShip.fire1_down)    //up
                 {
                     AnyShip.fire1_down = false;
-                    if (Menu.col_pos > 0) Menu.col_pos--;
+                    if (Menu.col_pos > 0)
+                    {
+                        Menu.col_pos--;
+                        if (Menu.col_pos == 0 && (Net.client || Net.server))            //can't change this if networked.
+                            Menu.col_pos++;
+                    }
                     Menu.player = (Menu.col_pos-1) / 3;
                     Menu.item   = (Menu.col_pos-1) % 3;
                     if (Menu.item == 2 && Ship[Menu.player].controller != KEYS)
@@ -493,13 +702,19 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     AnyShip.left_down = false;
                     if (Menu.col_pos == 0)          //num of players
                     {
-                        if (num_ships > 1)
-                            num_ships--;
+                        //if (!Net.net)
+                            if (num_ships > 1)
+                            {
+                                num_ships--;
+                                Menu.ships--;
+                            }
                     }
                     else if (Menu.item == 0)        //ship image
                     {
                         Ship[Menu.player].image--;
                         Ship[Menu.player].image&=0x07;
+                        Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
+                        Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
                     }
                     else if (Menu.item == 1)        //controls
                     {
@@ -512,14 +727,23 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     AnyShip.right_down = false;
                     if (Menu.col_pos == 0)
                     {
-                        if (num_ships < Map.max_players)
-                            num_ships++;
+                       // if (!Net.net)
+                        {
+
+                            if (num_ships < Map.max_players)
+                            {
+                                num_ships++;
+                                Menu.ships++;
+                            }
+                        }
                     }
 
                     else if (Menu.item == 0) //ship
                     {
                         Ship[Menu.player].image++;
                         Ship[Menu.player].image&=0x07;
+                        Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
+                        Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
                     }
                     else if (Menu.item == 1)    //controls
                     {
@@ -541,5 +765,9 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             break;
         }
         event.keyboard.keycode = 0;
+
+        ServiceNetwork();
+
 	}
 }
+

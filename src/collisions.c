@@ -29,6 +29,7 @@
 #include "collisions.h"
 #include "game.h"
 #include "objects.h"
+#include "network.h"
 
 ALLEGRO_BITMAP *ship_mask,*map_mask,*sentry_mask;
 extern ALLEGRO_SAMPLE *particle;
@@ -154,12 +155,19 @@ void make_map_col_mask(void)
 	int i,j=0,k;
 	int row_start, row_end, col_start, col_end;
 	//int words_per_row;
+	//int radar[200*200];     //array to be turned into bitmap
+
+	//for (i=0 ; i<200*200 ; i++) radar[i] = 0;   //zero it
+
+    for (i=0 ; i< ( ( (MAX_MAP_X/32)+1) * MAX_MAP_Y) ; i++ )
+        map_col_mask[i] = 0;
 
 	al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
 	map_mask = al_load_bitmap(Map.collision_file_name);
 
 	mask_width = al_get_bitmap_width(map_mask);
 	mask_height = al_get_bitmap_height(map_mask);
+
 
 	map_file = fopen("mapfile.txt","w");
 
@@ -213,6 +221,8 @@ void make_map_col_mask(void)
 				if(!EquivalentColour(al_get_pixel(map_mask,((j-col_start)*32)+k,i-row_start), al_map_rgb(255,0,255)))
 				{
 					map_col_mask[i*words_per_row+j] |= (0x80000000 >> k);	//20
+					//radartemp = 1;
+
 				}
 			}
 			//if (i<320)
@@ -270,10 +280,109 @@ void make_map_col_mask(void)
 
 	//return 0;
 
-
 	al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
 }
 
+void make_radar_bitmap(void)
+{
+    int i,j,k;
+    int x, startx=0, y=0;
+
+    if (Map.type == 0 || Map.type == 2)
+    {
+        startx=1;
+        y=12;
+    }
+
+    Radar.height = (mask_height)/8;
+    Radar.width  = (mask_width)/8;
+    fprintf(logfile,"Radar Mask Height = %d, Width = %d\n",Radar.height, Radar.width);
+
+    //al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
+    Radar.mask = al_create_bitmap(Radar.width, Radar.height);	//create a bitmap - 400
+    al_set_target_bitmap(Radar.mask);				//set it as the default target for all al_draw_ operations
+
+    al_clear_to_color(al_map_rgba(0, 0, 0, 128));
+
+    for (k=0 ; k<Radar.height ; k++)
+    //for (k=320 ; k<400 ; k++)
+    //for (k=(MAX_MAP_HEIGHT * RADAR_PPT)-Radar.height ; k<(MAX_MAP_HEIGHT * RADAR_PPT) ; k++)
+    {
+        x=startx;
+
+        for (j=0 ; j<Radar.width/4 ; j++)
+        {
+            //one square - 8x8 in col map = 1 pixel in radar
+            for (i=0 ; i<8 ; i++)
+            {
+                if ((map_col_mask[(y+i)*words_per_row + x] >> 24 & 0xf) != 0)
+                {
+                    al_put_pixel(4*j,k,al_map_rgba(128,128,128,128));//(255,255,255));    ////make pixel opaque , break
+                    break;
+                }
+            }
+            //next square / pixel
+            for (i=0 ; i<8 ; i++)
+            {
+                if ((map_col_mask[(y+i)*words_per_row + x] >> 16 & 0xf) != 0)
+                {
+                    al_put_pixel(4*j+1,k,al_map_rgba(128,128,128,128));//255,255,255));  //make pixel opaque
+                    break;
+                }
+            }
+            //next...
+            for (i=0 ; i<8 ; i++)
+            {
+                if ((map_col_mask[(y+i)*words_per_row + x] >> 8 & 0xf) != 0)
+                {
+                    al_put_pixel(4*j+2,k,al_map_rgba(128,128,128,128));//(255,255,255));  //make pixel opaque , break
+                    break;
+                }
+            }
+            //next square / pixel
+            for (i=0 ; i<8 ; i++)
+            {
+                if ((map_col_mask[(y+i)*words_per_row + x] >> 0 & 0xf) != 0)
+                {
+                    al_put_pixel(4*j+3,k,al_map_rgba(128,128,128,128));//(255,255,255));  //make pixel opaque
+                    break;
+                }
+            }
+            x++;
+        }
+        y+=8;
+    }
+
+    if (Map.type == 0 || Map.type == 2)
+        Radar.display = Radar.mask;
+    else    //tiled
+    {
+        Radar.height = map_height*4;
+        Radar.width  = map_width*4;
+        Radar.display = al_create_bitmap(Radar.width, Radar.height);	//create a bitmap -
+        fprintf(logfile,"Radar Display Height = %d, Width = %d\n",Radar.height, Radar.width);
+
+        al_set_target_bitmap(Radar.display);				//set it as the default target for all al_draw_ operations
+        al_clear_to_color(al_map_rgba(0, 0, 0, 0));
+
+        //use al_draw_bitmap_region to copy 4x4 chunks from .mask to .display
+        for (y=0 ; y<map_height ; y++)
+        {
+            for (x=0 ; x<map_width ; x++)
+            {
+                i = tile_map[x + y * MAX_MAP_WIDTH];    //pull tile index From array
+                int u = (i & 0x0007)<<2;    //bottom 3 bits * 4
+				int v = (i & 0xfff8)>>1;    //upper bits RS by 3 then * 4
+
+                                                //sx sy sw sh dx dy
+                al_draw_bitmap_region(Radar.mask, u,v,4,4,x*4,y*4,0);
+            }
+        }
+    }
+
+    al_set_target_backbuffer(display);			//Put default target back
+    al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
+}
 
 //int y_overlap,y_offset,i_row,j_row,shift,shipi_word,shipj_word; //global for debug
 
@@ -335,6 +444,8 @@ void CheckSSCollisions(int num_ships)	//Ship-to-ship collisions
 									{
 										Ship[i].shield = 0;
 										Ship[j].shield = 0;
+										Ship[i].crashed++;
+										Ship[j].crashed++;
 									}
 								}
 							}
@@ -405,8 +516,20 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 							{
 								//al_play_sample(particle, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 								al_play_sample_instance(particle_inst[i]);
+								Net.sounds |= PARTICLE;
 								Bullet[j].ttl=1;	//decrement, picked up next time.
 								Ship[i].shield -= Bullet[j].damage;				//decrement shield
+
+                                if (Bullet[j].type == BLT_HEAVY)    //stop explosion on hitting ship
+                                    Bullet[j].type = BLT_NORMAL;
+
+								if (Ship[i].shield <= 0)
+                                {
+                                    Ship[i].killed++;
+                                    if (Bullet[j].owner != NO_OWNER)
+                                        Ship[Bullet[j].owner].kills++;
+                                }
+
 								Ship[i].xv     += Bullet[j].mass*Bullet[j].xv;	//momentum from bullet to ship
 								Ship[i].yv     += Bullet[j].mass*Bullet[j].yv;
 								break;
@@ -620,6 +743,7 @@ void CheckSWCollisions(int num_ships)
 						if (!Ship[i].landed)
 						{
 							Ship[i].shield = 0;
+							Ship[i].crashed++;
 							collision = 1;
 							break;
 						}
@@ -643,6 +767,7 @@ void CheckSWCollisions(int num_ships)
 							if (!Ship[i].landed)
 							{
 								Ship[i].shield = 0;
+								Ship[i].crashed++;
 								collision = 2;
 								break;
 							}
@@ -696,8 +821,12 @@ void CheckSWCollisions(int num_ships)
 							CheckForLanding(i);			//check for landing
 							if (!Ship[i].landed)		//if not landed, we're dead
 							{
-								Ship[i].shield = 0;
-								collision = 1;
+								if (!collision)
+                                {
+                                    Ship[i].shield = 0;
+                                    Ship[i].crashed++;
+                                    collision = 1;
+                                }
 								break;
 							}
 						}
@@ -728,8 +857,12 @@ void CheckSWCollisions(int num_ships)
 								CheckForLanding(i);			//check for landing
 								if (!Ship[i].landed)		//if not landed, we're dead
 								{
-									Ship[i].shield = 0;
-									collision = 2;
+									if (!collision)
+									{
+									    Ship[i].shield = 0;
+                                        Ship[i].crashed++;
+                                        collision = 2;
+									}
 									break;
 								}
 							}
@@ -764,8 +897,12 @@ void CheckSWCollisions(int num_ships)
 								CheckForLanding(i);			//check for landing
 								if (!Ship[i].landed)		//if not landed, we're dead
 								{
-									collision = 3;
-									Ship[i].shield = 0;
+									if (!collision)
+                                    {
+                                        collision = 3;
+                                        Ship[i].shield = 0;
+                                        Ship[i].crashed++;
+                                    }
 									break;
 								}
 							}
@@ -799,8 +936,12 @@ void CheckSWCollisions(int num_ships)
 									CheckForLanding(i);			//check for landing
 									if (!Ship[i].landed)		//if not landed, we're dead
 									{
-										Ship[i].shield = 0;
-										collision = 4;
+										if (!collision)
+                                        {
+                                            Ship[i].shield = 0;
+                                            Ship[i].crashed++;
+                                            collision = 4;
+                                        }
 										break;
 									}
 								}

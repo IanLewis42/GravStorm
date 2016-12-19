@@ -42,8 +42,7 @@
 extern int tile_map[MAX_MAP_WIDTH * MAX_MAP_HEIGHT];
 extern int map_height, map_width;
 
-#define MAP_X 100	//tiles
-#define MAP_Y 100
+#define RADAR_PPT  4    //pixels per tile
 
 #define TILE_SIZE	64
 #define TILE_SHIFTS 6      //2^6 = 64
@@ -151,7 +150,11 @@ typedef struct
 
 typedef struct
 {
-    int score;
+    int player;     //used in ranking table for multiplayer games
+    int kills;
+    int lives;
+
+    int score;      //used in hi score table for mission levels
     char name[50];
 }ScoreType;
 
@@ -203,6 +206,7 @@ typedef struct
 	int ship_first;
 	int max_players;
 	int mission;
+	ScoreType score[MAX_SHIPS];
 	ScoreType oldscore[MAX_SCORES];
 	ScoreType newscore[MAX_SCORES];
 	TimeType oldtime[MAX_SCORES];
@@ -238,20 +242,30 @@ typedef enum
     PLAYERS
 }MenuStateType;
 
+typedef enum
+{
+    LOCAL = 0,
+    HOST,
+    CLIENT
+}NetModeType;
+
 typedef struct
 {
 	MenuStateType state;
+    NetModeType netmode;
 	int col_pos;
+	int max_col_pos;
     int player;
     int item;
     int define_keys;
+    int ships;          //same as num_ships for local, 1 for network.
 
 	int col;		//0,1,2
 	int group;		//0-n
 	int map;		//0-n
 	int num_groups;	//
 	int controls;	//0,1 keys, 2 GPIO joystick? 3 onwards USB joysticks.
-	int current_key;
+	char current_key;
 	int offset;		//to make columns slide
 	int x_origin;
 	int y_origin;
@@ -260,16 +274,14 @@ typedef struct
 
 typedef struct
 {
-    int net;        //are we networked?
-    int host;       //are we a host?
-    int clients;    //number of clients connected (only valid if we're a host)
-    int connected;  //are connected to a host?
+   ALLEGRO_BITMAP *mask;
+   ALLEGRO_BITMAP *display;
+   int on;
+   int width;
+   int height;
+} RadarType;
 
-
-
-} NetworkType;
-
-extern NetworkType Net;
+extern RadarType Radar;
 
 extern ALLEGRO_DISPLAY *display;
 
@@ -343,6 +355,8 @@ extern bool pressed_keys[ALLEGRO_KEY_MAX];
 extern int gpio_active;
 extern int keypress;
 extern char current_key;
+extern int fpsnet, fpsnet_acc;
+extern bool redraw;
 
 int  ShipMass(int ship_num);
 void FreeMenuBitmaps(void);

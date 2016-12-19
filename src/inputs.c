@@ -460,5 +460,4 @@ void ScanInputs(int num_ships)
 			//Ship[i].thrust_held = USBJoystick[0].button;
 		}
 	}
-
 }

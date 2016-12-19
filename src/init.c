@@ -31,6 +31,7 @@
 #include "objects.h"
 #include "inputs.h"
 #include "drawing.h"
+#include "network.h"
 
 #if RPI
 #include <wiringPi.h>
@@ -39,11 +40,19 @@ FILE* map_file;	//text file containing map-specific data
 const char txt[5] = ".txt\0";
 const char scores[7] = "_s.bin\0";
 
+ALLEGRO_COLOR ShipColour[8];
+ALLEGRO_COLOR StatusColour[8];
+
 void load_map_file(void);
 void swap(int* a, int* b);
 //parse:
 //align label first column, parameters separated by spaces, suits scanf I think.
 //so read line, check label, scanf, pattern determined by label.
+
+//for network client: get sent name of map file, as that doesn't assume identical list of maps.
+//so can either scan through list, to match name, and work out group and map then call this,
+//or store received map name somewhere, come here and overwrite
+
 int init_map(int group, int map)
 {
 	int i=0, j=0,l=0,m=0,n=0,o=0,p=0;	//counters for pads, special areas, blackholes, sentries, forcefields etc.
@@ -52,6 +61,9 @@ int init_map(int group, int map)
 	char str[100];
 	char *line;
 	strncpy(map_file_name, (char*)&MapNames[group].Map[map], MAP_NAME_LENGTH);
+
+	if (Net.client)
+        strncpy(map_file_name, Net.mapfile ,MAP_NAME_LENGTH);
 
 	strcat(map_file_name, txt);
 
@@ -531,22 +543,43 @@ void init_controls(void)
 	Ship[3].right_key  = ALLEGRO_KEY_RIGHT;
 	Ship[3].thrust_key = ALLEGRO_KEY_RCTRL;
 
+	StatusColour[0] = al_map_rgba(0, 32, 0, 20);  //used for background to status (ammo, fuel, lives etc)
+    StatusColour[1] = al_map_rgba(32, 0, 0, 20);
+    StatusColour[2] = al_map_rgba(0, 0, 32, 20);
+    StatusColour[3] = al_map_rgba(32, 32, 0, 20);
+    StatusColour[4] = al_map_rgba(32, 16, 0, 20);
+    StatusColour[5] = al_map_rgba(0, 32, 32, 20);
+    StatusColour[6] = al_map_rgba(32, 32,32, 20);
+    StatusColour[7] = al_map_rgba(32, 0, 32, 20);
+
+	ShipColour[0] = al_map_rgb(0, 255, 0);  //used for radar
+    ShipColour[1] = al_map_rgb(255, 0, 0);
+    ShipColour[2] = al_map_rgb(0, 0, 255);
+    ShipColour[3] = al_map_rgb(255, 255, 0);
+    ShipColour[4] = al_map_rgb(255, 128, 0);
+    ShipColour[5] = al_map_rgb(0, 255, 255);
+    ShipColour[6] = al_map_rgb(255, 255 ,255);
+    ShipColour[7] = al_map_rgb(255, 0, 255);
+
     for (i=0 ; i<MAX_SHIPS ; i++)
+    {
         Ship[i].image = i;
+        Ship[i].colour = ShipColour[i];
+        Ship[i].statuscolour = StatusColour[i];
+    }
 }
 
 void init_ships(int num_ships)
 {
 	int i;
-	Ship[0].colour = 	al_map_rgba(0, 32, 0, 20);  //used for background to status (ammo, fuel, lives etc)
-	Ship[1].colour = 	al_map_rgba(32, 0, 0, 20);
-	Ship[2].colour = 	al_map_rgba(0, 0, 32, 20);
-	Ship[3].colour = 	al_map_rgba(32, 32, 0, 20);
 
-	for (i=0 ; i<num_ships ; i++)
+	for (i=0 ; i<MAX_SHIPS ; i++)   //init all, as we can have late joiner on network games.
 	{
 		//Ship[i].image      = i+4;
 		Ship[i].lives      = Map.lives;
+		Ship[i].crashed    = 0;
+		Ship[i].killed     = 0;
+		Ship[i].kills      = 0;
 		Ship[i].user_fuel  = DEFAULT_FUEL;
 		Ship[i].user_ammo1 = DEFAULT_AMMO1;
 		Ship[i].ammo1_type = DEFAULT_AMMO1_TYPE;

@@ -208,6 +208,14 @@
  5,orange,	120,83,14	,120,83,14
  6,magenta,	136,52,134,	227,144,225
 
+//Radar:
+//work from collision map. 
+//display map is always 2x collision, so that's ok.
+//1:32 scale is 1 pixel per tile / word, so easy, but I guess a bit small - sitimus only 20x20 pixels....
+//1:16 may be better, if a bit more fiddly.
+//When scanning collision map, make 1/16th scale copy. For type 0/2, that's it
+//for type 1, then use ascii map to create radar image from 2x tiles.
+
  // New struct (SwitchType)+ array in MapType
  // new init keyword switch x y closed sprite open sprite open time
  // New fns, UpdateSwitches, CheckBSwitchCollision (duplicate BSentry)
@@ -267,6 +275,69 @@
 // but keep in float for calculation.
 // NB use htonl / htons etc. for host-to-netwok byte swapping :-)
 
+net startup:
+HOST:   Select 'host game'
+HOST:   Select level -> Player setup, IP Address displayed, host started with connections = max players
+CLIENT: Select 'join game', enter IP address -> Player Setup
+HOST:   Accept connection, Net.clients++, send level to client.
+HOST:   Send ID, so client knows it's home pad.  
+ALL:    DO player setup -> wait screen
+CLIENT: Send 'ready;
+HOST:   Wait for all 'readys', send 'go'
+
+message handler
+client:connect (not really a message, but hey...)
+client:disconnect
+host:level
+client:ready
+host:go
+client:key(s)
+host:gamestate
+host:gameover....
+
+//Misc network
+Client:
+  Menu / key handling thinks it's dealing with ship 0
+  Host sends id back with connect. 
+  Client remembers ID and sends with key messages.
+  Client uses ID to know which ship to centre, and ststus to display
+  
+  Host broadcasts everything.
+  Maybe need to do individual messages for win/lose/score???
+  or broadcast results to all.....
+  could broadcast and client uses id to filter and display
+  
+
+//drawing code on client needs :
+# ships (fixed...) - in go message??
+for each ship: x,y,direction,thrust
+#bullets
+for each bullet: x,y,type?(for colouring)
+#sentries/switches (fixed) - in Map.
+for each: x,y,sprite. Actually, just alive/dead
+
+//conditional?? this or everything else?
+//need diff message, I guess - GAMESTATE_MENU, ah no, cos it's broadcast....
+ship.menu
+ship.menu_state
+.ammo1_type
+.ammo2_type
+.user_ammo1
+.user_ammo2
+.user_fuel
+
+bullet.x
+bullet.y
+bullet.type	;max ttl = 5000 = 0x1388 => 3 bits spare. 10 bullet types, requires 4 bits. arse.
+bullet.ttl	;could make max ttl = 0xfff = 4095. then 4 bits for type....
+
+//bullets - drawing routine needs linked list, so de-serialize needs to recreate that.
+  I guess serialize can just send 6 bytes as above, then create (dumb) linked list where [0]->[1]->[2] etc.
+  Serialize needs to read linked list.
+
+FF.alpha
+Sentry.alive
+switch.open
 
 menu
 mode
@@ -279,6 +350,185 @@ player 1
  [controls -> keys, ship]
 player...
 
+//network todo
+Network seems good with while loops on both host and client net servicing, & reliable packet on GAMESTATE.
+  KEYS still 'unreliable' packet, but haven't tried it the other way.....
+*init ship image to id.
+*max packet diagnostics
+*ff/sentry/switch
+*radar
+
+*test separate computers
+test 4 player?? more??
+8 player map 
+MAX_SHIPS.... 
+
+PORT???
+
+*looks like num_ships is 2 for net games. Need to make it reflect Net.clients.....
+
+For client, read own IP address, use to init host address string??? maybe not possible. Shame.....
+
+late joiner (var game_started, if game_started and connect then send go. maybe....)
+Or, just send go when ready. In which case, do you need 'go'?
+  Host has max players from level selection, doesn't let any more join (could send 'full' message and disconnect)
+  
+HOST:
+  Select level, read max players.
+  Start host with max players connections (i.e. max clients + 1)  
+  Jump to ship/control selection
+  
+  Allow connections:
+    If < max players, issue id & level, increment num_ships. If game started, send go
+    If = max players, allow connection, respond with FULL message, disconnect
+  
+  Allow disconnections, decrement num ships.
+  
+  Jump to game, send go, continue allowing connections.
+  
+  Game END
+  
+Net.client_state? IDLE, SEARCHING, CONNECTED, FULL, NO_LEVEL  
+  
+CLIENT:
+  Jump to ship/control selection
+  Start to look for host
+  If connected, check map, if !map, then disconnect, displaying message. (clear message on back to 1st level)
+  If full, display message. clear as above
+  
+  if OK, allow jump to game, wait for go.
+
+Game completion, go back to: 
+  level selection if host
+  ship/controls if client - everyone stays connected. 
+  What if host chooses level with fewer players allowed than are connected?
+  warn? then what??
+  OR
+  disconnect clients, send host to level selection, stop host, restart when level selected.
+  clients will reconnect automagically. in above scenario, slowest are out.
+  disconnect at game over?
+  kill server/reset everything when back to 1st menu.
+
+GAME END:
+  Server detects game end.
+  Server stops looking for pings
+  Server sends gameover message (broadcast) (and displays)
+  clients receive game over message, display
+  clients disconnect from Server
+  when Server goes back to menu (level selection), restart ping checking
+  when clients go back to menu (ship/control selection), start pinging
+  
+  IN MENU
+  when moving back from NETWORK
+    exit, so close everything
+  when moving forward from NETWORK
+    if mode = LOCAL
+      go to LEVEL, no network
+    if mode = HOST 
+      go to LEVEL, start host, look for pings
+    if mode = CLIENT
+      go to PLAYERS, start client, ping
+    
+  when moving back from LEVEL
+    go to NETWORK
+    
+  when moving forward from LEVEL
+
+
+If Server ESCAPES out of game then:
+ HOST: send ABORT message to all clients (broadcast)
+ CLIENT:rx message and disconnect
+ HOST: wait until num_ships == 1 (i.e. all disconnected) then
+       stop network / back to menu
+ CLIENT:wait until disconnected (Net.client_mode == IDLE?) then 
+       stop network / back to menu. Display game aborted somewhow???
+
+gameover. winner, scores, accounts/login???
+stats - log hits? (owner in bullet) deaths?
+crashes logged multiple times....??? on net game??? 
+
+*Display host IP in title bar?? - num players instead, on client as well
+*clean up network code
+*change menu to vertical for netmode selection
+*lava colours not there???? (network & local) do fading???
+*what happens if client doesn't have map?
+*sounds. (check)
+*coloured dot not matching ship colour on host radar....
+*kill servers etc.
+*subsequent games
+*escape from 'waiting'
+*robustify menu. (multi games) disconnects??
+scoring/sorting
+score = ships + kills - [crashes, or killed?] ships = lives-crashes-killed     so counting all 3 is redundant...
+could apply weightings, but how to decide them....
+ships + kills might be as good as anything. Or ships + 2*kills????
+gone for 10*kills+ships, so effectively just #kills, with #lives left as a tiebreaker.
+
+sorting: copy across.
+need Ship[i].score (have it already, for mission....)
+ start: max score = 99999999
+ 
+*prob with crediting kills:
+ HEAVY splits when expired, but also does when it hits something.
+ Quite like this on walls, but not on ships, as you get mega damage.
+ So one HEAVY kills a ship.
+ Shrapnel from HEAVY doesn't inherit owner (gets NO_OWNER, hardcoded in CreateExplosion(), 
+ which is the cause of the observed symptom. I think....
+
+*client locks up (waiting for disconnect) if host exits first from network game over.
+*Eventually recovers (10secs??)
+*client has thrust stuck on at start. sometimes.
+*Disconnecting:
+  from menu, back up
+  from game, client hits escape
+  from game, host hits escape, sends message  
+  in final case (only) want to flag message
+
+*client jerky....
+*kill counting wrong...
+*network byte order!!! - just in ping stuff, I think.... done, but only tested win<->win
+*rpi build....
+  copy enet-master
+  ./configure && make && make install
+  or... sudo apt-get install libenet (libenet7? libenet-dev?). 
+  Hmmm.. 7 may relate to Wheezy, 8 to jessie ?? can't find an 8....
+  sudo apt-cache search enet      might be useful...
+  built eventually - needed sudo ./configure && sudo make && sudo make install
+  
+*Better client sounds: stop if running, engine/wind noise. - test
+*Host IP address dispaly on RPi (fudged)
+*Status panel at top for all clients
+
+Improved response with poor network:
+  Currently spot missing packet, and move ships on inertia. 
+  Rotating locally would be nice, and seems reasonable, but can't quite figure out how to do it.
+  Doing rotation locally always, and sending absolute angle always seems robust.
+  Server then ignores rotation.
+  Problem is that collision detection will be done on server's angle, which in the case of delay won't be the
+    same as clients. Hopefully not too bad, as at least position is the same.
+    Other clients will be further behind.
+  Thrust locally seems harder. I s'pose you could do the same; position updates locally, send position to server.
+    you get lag on collision detection, but could try it. (and more lag on other clients)
+  Firing has to be passed up, I think; Need server to keep track of all bullets.
+    could pass 'fire normal' or 'fire special' field in message.
+  Navigating ship config could also be done locally. Then need to pass config to server.
+  
+  Summary:
+  ARCHIVE CURRENT CODE!!!!!!!
+    call UpdateShips for clients.
+    Send ship pos, angle, thrust etc to server, instead of keys
+    Server only calls UpdateShips for itself
+      instead, copy net message to Ship[id]
+    Client also sends fire message (0,1,2) - flag in Update ships, append and clear flag in SendKeys (or whatever)
+    Client sends ammo levels, ammo types, fuel, to server too.
+    probably not that simple.....
+    Server will need to re-broadcast all this, so each client will need to ignore its own info.  
+    ...except shield, and lives, as these will be changed by collision detection, and therefore need to come from server.
+  See if this works better....
+  
+broken local things:
+*no status display
+*cant have more than default number of players (in ship/control select screen)
 
 so.....
 array [struct {string, fn_ptr}]

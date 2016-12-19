@@ -18,6 +18,7 @@
 
 void make_ship_col_mask(void);
 void make_map_col_mask(void);
+void make_radar_bitmap(void);
 void make_sentry_col_mask(void);
 
 void CheckSSCollisions(int num_ships);

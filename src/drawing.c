@@ -28,6 +28,7 @@
 #include "drawing.h"
 #include "objects.h"
 #include "inputs.h"
+#include "network.h"
 
 #define MAX_MAP_WIDTH 100
 #define MAX_MAP_HEIGHT 100
@@ -266,8 +267,17 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	char gpio[]  = "GPIO Joy";
 	char usb0[]  = "USB Joy 1";
 	char usb1[]  = "USB Joy 2";
-	char na[]    = "N/A";
+	//char na[]    = "N/A";
 	char* control_string;
+	char local[]  = "Local Game";
+	char host[]  = "Host Network Game";
+	char client[]    = "Join Network Game";
+	//char* netmodestr;
+	//static int timer = 0;
+	//char cursor;
+	//char display_address[17];
+
+
 	//static int temp = 0,temp2=0;
 
 	ALLEGRO_COLOR colour;
@@ -317,10 +327,88 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	//reset transform
 	al_identity_transform(&transform);
 	al_use_transform(&transform);
-	y+= 25;
+	y+= 40;
     y+= yoffset;
 
-	if (Menu.state == LEVEL)
+    //timer++;            //blinking cursor
+    //if (timer & 0x10)
+    //    cursor = ' ';
+    //else
+    //    cursor = '_';
+
+    if (Menu.state == NETWORK)
+    {
+        al_draw_textf(small_font, ItemUnselected,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Mode");
+        /*
+             if (Menu.netmode == LOCAL)  netmodestr = local;
+        else if (Menu.netmode == HOST)   netmodestr = host;
+        else                             netmodestr = client;
+        */
+        y+=35;
+
+        if (Menu.netmode == LOCAL)
+        {
+           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
+           al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
+           al_draw_textf(small_font, ItemUnselected,Menu.offset+470, y,  ALLEGRO_ALIGN_LEFT, "Single player, or all players on one device.");
+        }
+        else
+            al_draw_textf(small_font, ItemUnselected,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
+
+        y+=35;
+
+        if (Menu.netmode == HOST)
+        {
+           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+           al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+           al_draw_textf(small_font, ItemUnselected,Menu.offset+470, y,  ALLEGRO_ALIGN_LEFT, "Host chooses level to play on.");
+        }
+        else
+            al_draw_textf(small_font, ItemUnselected,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+
+        y+=35;
+
+        if (Menu.netmode == CLIENT)
+        {
+           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
+           al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
+           al_draw_textf(small_font, ItemUnselected,Menu.offset+470, y,  ALLEGRO_ALIGN_LEFT, "Join a game someone else is hosting.");
+        }
+        else
+            al_draw_textf(small_font, ItemUnselected,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
+
+        y+=135;
+        if (Net.client_state == ABORTED)
+            al_draw_textf(small_font, ItemUnselected, Menu.offset+SCREENX/2, y,  ALLEGRO_ALIGN_CENTRE, "Previous game aborted by host.");
+
+        //else
+        //    al_draw_textf(small_font, ItemUnselected,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",netmodestr);
+        /*
+        y+=35;
+
+        if (Menu.netmode == CLIENT)
+            colour = ItemUnselected;
+        else colour = ItemExcluded;
+
+        al_draw_textf(small_font, colour,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "Address:");
+
+        y+=35;
+
+        strncpy(display_address,Net.temp_address,16);
+        strncat(display_address,&cursor,1);
+
+        if (Menu.col_pos == 1)
+        {
+           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",display_address);
+           //al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",Net.temp_address);
+        }
+        else
+            al_draw_textf(small_font, colour,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",Net.menuaddress);
+
+        //al_draw_textf(small_font, colour,Menu.offset+30, y+35,  ALLEGRO_ALIGN_LEFT, "%08X",timer);
+        */
+    }
+	else if (Menu.state == LEVEL)
     {
 	//Display maps; display all group names, and maps in current group
         for (i=0 ; i<Menu.num_groups ; i++)
@@ -363,6 +451,20 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                 al_draw_textf(small_font, colour ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
             }
         }
+        if (Menu.netmode == HOST)
+        {
+            al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Select level to start network game.");
+            //al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "%d players connected", Net.clients);
+        }
+ /*
+        else if (Menu.netmode == CLIENT)
+        {
+            if (Net.connected)
+                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "Connected to host at %s ", Net.menuaddress);
+            else
+                al_draw_textf(small_font, ItemUnselected,   Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "Searching for host at %s", Net.menuaddress);
+        }
+*/
     }
 
     else if (Menu.state == PLAYERS)
@@ -370,15 +472,25 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         y=40;
         y+= yoffset;
 
-        al_draw_textf(small_font, ItemUnselected,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
-
-        if (Menu.col_pos == 0)
+        //if (!Net.net || Net.server)
+        if (!Net.client)
         {
-           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+200, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
-           al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+200, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+            al_draw_textf(small_font, ItemUnselected,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
+
+            if (Menu.col_pos == 0)
+            {
+               al_draw_textf(small_font, ItemCurrent    ,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+               al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+            }
+            else
+            {
+                //if (!Net.client)
+                //if (!Net.net)
+                    al_draw_textf(small_font, ItemUnselected,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                //else if (Net.server)
+                //    al_draw_textf(small_font, ItemUnselected,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",Net.clients);
+            }
         }
-        else
-            al_draw_textf(small_font, ItemUnselected,Menu.offset+200, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
 
         y+=35;
 
@@ -386,12 +498,14 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         //al_draw_textf(small_font, ItemUnselected,Menu.offset+300, y,  ALLEGRO_ALIGN_LEFT, "player:%d item:%d",Menu.player,Menu.item);
         //end debug
 
-        for (i=0 ; i<MAX_SHIPS ; i++)			//List players
+        for (i=0 ; i<Menu.ships ; i++)			//List players
         {
             if (i>num_ships-1) colour = ItemExcluded;
             else colour = ItemUnselected;
 
-            al_draw_textf(small_font, colour,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+            //if (!Net.net)
+            if (!Net.client && !Net.server)
+                al_draw_textf(small_font, colour,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
 
             y+=40;
 
@@ -414,10 +528,10 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                 control_string = gpio;
             else if (Ship[i].controller == USB_JOYSTICK0)
                 control_string = usb0;
-            else if (Ship[i].controller == USB_JOYSTICK1)
+            else /*if (Ship[i].controller == USB_JOYSTICK1)*/
                 control_string = usb1;
-            else//if (Ship[i].controller == NA)
-                control_string = na;
+            //else if (Ship[i].controller == NA)
+            //    control_string = na;
 
             if (Menu.item == 1 && Menu.player == i)
             {
@@ -475,6 +589,35 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
             y+=35;
         }
+        if (Menu.netmode == HOST)
+        {
+            if (Net.address.host == 0)
+                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Network host started");
+            else
+                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Network host started on %s", Net.myaddress);
+            al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "%d players", num_ships);//Net.clients);
+        }
+
+        else if (Menu.netmode == CLIENT)
+        {
+            if (Net.client_state == SEARCHING)
+                al_draw_textf(small_font, ItemUnselected,   Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Searching for host...");
+            else if (Net.client_state == FOUND)
+                al_draw_textf(small_font, ItemUnselected,   Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Found host at %s", Net.menuaddress);
+
+            else if (Net.client_state == CONNECTED)
+            {
+                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Connected to host at %s", Net.menuaddress);
+                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "Host selected level '%s'", Net.mapfile);
+            }
+
+            else if (Net.client_state == NO_SPACE)
+                al_draw_textf(small_font, ItemUnselected,   Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Host at %s has no space", Net.menuaddress);
+
+            else if (Net.client_state == NO_MAP)
+                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "Failed to open host selected level '%s'", Net.mapfile);
+        }
+
     }
 /*
         for (i=0 ; i<4 ; i++)			//List controls
@@ -595,6 +738,16 @@ void display_map_text(int done, int timer)
     return;
 }
 
+void display_wait_text(void)
+{
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    al_draw_bitmap(menu_bg_bmp,0,0,0);
+
+    al_draw_textf(small_font, al_map_rgb_f(1, 1, 0.8), SCREENX/2, SCREENY/2,  ALLEGRO_ALIGN_CENTRE, "Waiting for host...");
+
+    al_flip_display();
+}
+
 void make_bullet_bitmap(void)
 {
     fprintf(logfile,"Creating bullets bitmap\n");
@@ -608,6 +761,7 @@ void make_bullet_bitmap(void)
 int component;
 void draw_split_screen(ViewportType viewport, int ship_num)
 {
+    int i;
     int x, y;
     int w, h;
 	int scrollx, scrolly;	//These are the centre of the 'viewport' - normally the ship position, except when you get near an edge.
@@ -709,6 +863,18 @@ void draw_split_screen(ViewportType viewport, int ship_num)
 		draw_ships(scrollx, scrolly,x,y,w,h);
 	}
 
+	if (Radar.on)
+    {
+        //al_draw_bitmap(Radar.display,SCREENX-Radar.width,-1*((MAX_MAP_HEIGHT * RADAR_PPT)-Radar.height),0);   //tinted? alpha?
+        //al_draw_bitmap(Radar.display,SCREENX-Radar.width,-320,0);   //tinted? alpha?
+        al_draw_bitmap(Radar.display,SCREENX-Radar.width,0,0);   //tinted? alpha?
+        //draw ships. flashing? coloured?
+        for (i=0 ; i<num_ships ; i++)
+        {
+            al_draw_tinted_bitmap(bullets_bmp, Ship[i].colour,(SCREENX-Radar.width + Ship[i].xpos/16)-2, (Ship[i].ypos/16)-2,0);
+        }
+    }
+
 	return;
 }
 
@@ -752,8 +918,6 @@ void draw_background(int scrollx, int scrolly, int win_x, int win_y, int w, int 
 		scrolly = mapy-0.5*h;
 	else
 		scrolly = scrolly;
-
-
 
 	if (Map.type==1)	//1 for tiled
 	{
@@ -830,7 +994,7 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 		{
 			for (x = min_x; x < max_x; x++)
 			{
-				int i = tile_map[x + y * MAX_MAP_WIDTH];    //pull tile index rom array
+				int i = tile_map[x + y * MAX_MAP_WIDTH];    //pull tile index From array
 				//int u = i << 6;                             //multiply by 64 to get pixel index
 				//int v=0;
 
@@ -942,7 +1106,14 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 					r += 16;
 				Bullet[current_bullet].colour = al_map_rgb(r,r,0);
 			break;
+			case BLT_HEAVY:
+                Bullet[current_bullet].colour = al_map_rgb(255,0,0);
+            break;
+            case BLT_LAVA:
+                Bullet[current_bullet].colour = al_map_rgb(255,(Bullet[current_bullet].ttl*Bullet[current_bullet].ttl/256),0);
+            break;
 			default:
+			    Bullet[current_bullet].colour = al_map_rgb(255,255,255);
 			break;
 		}
 
@@ -1103,6 +1274,7 @@ void draw_status_bar(int num_ships)
 	int i,j;
 	int w,h,yoffset;
 	int bs;	//size of coloured block;
+	int first_ship;
 
     w = al_get_display_width(display);
     h = al_get_display_height(display);
@@ -1122,10 +1294,22 @@ void draw_status_bar(int num_ships)
 
 	yoffset += 5;
 
-	for (i=0 ; i<num_ships ; i++)
+	//if (Net.net)
+	if (Net.client || Net.server)
+    {
+        first_ship = Net.id;
+        num_ships = first_ship+1;
+        yoffset -= first_ship*bs;
+    }
+    else
+    {
+        first_ship=0;
+    }
+
+	for (i=first_ship ; i<num_ships ; i++)
 	{
 		//al_draw_filled_rectangle(0,i*100,120,i*100+90,Ship[i].colour);	//120*90 - make a nice bitmap background.
-		al_draw_filled_rectangle(15,yoffset+i*bs,135,yoffset+i*bs+(bs-10),Ship[i].colour);
+		al_draw_filled_rectangle(15,yoffset+i*bs,135,yoffset+i*bs+(bs-10),Ship[i].statuscolour);
 		//al_draw_bitmap(Ship[i].status_bg,0,i*100,0);
 
 		al_draw_filled_rectangle(15,yoffset+i*bs+10,15+Ship[i].shield,yoffset+i*bs+20,al_map_rgb(0, 128, 0));
@@ -1167,12 +1351,15 @@ void draw_status_bar(int num_ships)
 	}
 
 	//dividers
-	if (num_ships > 1)
-		//al_draw_filled_rectangle(STATUS_BAR_WIDTH,SCREENY/2-5,SCREENX,SCREENY/2+5,al_map_rgb(128, 128, 128));
-		al_draw_filled_rectangle(STATUS_BAR_WIDTH,h/2-5,w,h/2+5,al_map_rgb(128, 128, 128));
-	if (num_ships > 2)
-		al_draw_filled_rectangle(((w-STATUS_BAR_WIDTH)/2)+STATUS_BAR_WIDTH-5,0,(w-STATUS_BAR_WIDTH)/2+STATUS_BAR_WIDTH+5,h,al_map_rgb(128, 128, 128));
-
+	//if (!Net.net)
+	if (!Net.client && !Net.server)
+    {
+        if (num_ships > 1)
+            //al_draw_filled_rectangle(STATUS_BAR_WIDTH,SCREENY/2-5,SCREENX,SCREENY/2+5,al_map_rgb(128, 128, 128));
+            al_draw_filled_rectangle(STATUS_BAR_WIDTH,h/2-5,w,h/2+5,al_map_rgb(128, 128, 128));
+        if (num_ships > 2)
+            al_draw_filled_rectangle(((w-STATUS_BAR_WIDTH)/2)+STATUS_BAR_WIDTH-5,0,(w-STATUS_BAR_WIDTH)/2+STATUS_BAR_WIDTH+5,h,al_map_rgb(128, 128, 128));
+    }
 
 	return;
 }

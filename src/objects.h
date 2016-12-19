@@ -81,6 +81,8 @@
 
 #define SENTRY_SHIELD	15
 
+#define NO_OWNER 0xff
+
 typedef struct
 {
 	int image;      //what does it look like?
@@ -114,6 +116,8 @@ typedef struct
 	int fire1_held;
 	int fire2_held;
 
+	int score;
+
 	//constants, but allow local variation
 	float drag;
 	float gravity;
@@ -134,6 +138,9 @@ typedef struct
 
 	//Stuff
 	int lives;
+	int kills;
+	int crashed;
+	int killed;
 	int shield;
 	int fuel;
 	int ammo1;		//normal - only 1 type for now
@@ -177,7 +184,8 @@ typedef struct
 	float best_lap_time;
 	int lap_table_pos;
 
-	ALLEGRO_COLOR colour;	//background colour for status display
+	ALLEGRO_COLOR colour;
+	ALLEGRO_COLOR statuscolour; //background colour for status display
 	ALLEGRO_BITMAP* status_bg;
 
 } ShipType;
@@ -194,6 +202,7 @@ typedef struct
 	float mass;
 	ALLEGRO_COLOR colour;
 	int next_bullet;
+	int owner;
 } BulletType;
 
 extern ShipType Ship[MAX_SHIPS];

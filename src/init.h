@@ -22,3 +22,6 @@ void reinit_ship(int i);
 void init_bullets(void);
 void init_keys(bool *pressed_keys);
 void init_joystick(void);
+
+extern ALLEGRO_COLOR ShipColour[8];
+extern ALLEGRO_COLOR StatusColour[8];

@@ -35,8 +35,7 @@
 #include "objects.h"
 #include "inputs.h"
 #include "gameover.h"
-
-//#include "enet/enet.h"
+#include "network.h"
 
 #if RPI
 #include <wiringPi.h>
@@ -55,6 +54,8 @@ ALLEGRO_FONT *title_font;
 
 int fps, fps_accum;
 double fps_time;
+int fpsnet, fpsnet_acc;
+int missed_packets = 0;
 
 //Bitmaps
 ALLEGRO_BITMAP *logo;
@@ -97,6 +98,7 @@ ALLEGRO_SAMPLE_INSTANCE *yippee_inst;
 
 MapType Map;
 MenuType Menu;
+RadarType Radar;
 
 char map_names[MAP_NAME_LENGTH * MAX_MAPS];
 
@@ -135,6 +137,7 @@ int debug_key = 0;
 int keypress = false;
 char current_key = 0;
 float volume, v_squared;
+bool redraw = true;
 
 FILE* logfile;
 
@@ -142,16 +145,21 @@ FILE* logfile;
 int  DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  GameOver(void);
+int  FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 void FreeGameBitmaps(void);
 void FreeFonts(void);
+void StopNetwork(void);
 void draw_debug(void);
+
+#define FIRE 1
+#define ESCAPE 2
 
 int main (int argc, char *argv[]){
 //int main(void) {
     ALLEGRO_TIMER *timer;
     ALLEGRO_EVENT_QUEUE *queue;
     ALLEGRO_EVENT event;
-    bool redraw = true;
+
 	int i;//,j,k,temp;
 	//int num_maps,selected_map;
 	int exit, back_to_menu = false;
@@ -189,16 +197,6 @@ int main (int argc, char *argv[]){
 
     srand(time(NULL));
 
-/*
-    if (enet_initialize () != 0)
-    {
-        fprintf (logfile, "An error occurred while initializing ENet.\n");
-        return EXIT_FAILURE;
-    }
-
-    else
-        fprintf (logfile, "Initialized ENet.\n");
-*/
 
 	//move to objects / init??
     for(i=0 ; i<NUM_ANGLES ; i++)
@@ -249,7 +247,6 @@ int main (int argc, char *argv[]){
     al_set_default_mixer(mixer);
     al_attach_mixer_to_voice(mixer, voice);
     fprintf(logfile,"Setup audio voice and mixer\n");
-
 
 	if ((shoota = al_load_sample  ("shootA.wav"))   == NULL)  fprintf(logfile,"shootA.wav load fail");
 	if ((shootb = al_load_sample  ("shootB.wav"))   == NULL)  fprintf(logfile,"shootB.wav load fail");
@@ -314,7 +311,7 @@ int main (int argc, char *argv[]){
 	exit = DoTitle(queue, event);
 	if (exit) return 0;
 
-    //loop to here
+    //back to here when exiting game
 	while(1)
 	{
 		exit = DoMenu(queue, event);
@@ -330,6 +327,8 @@ int main (int argc, char *argv[]){
         make_ship_col_mask();
         make_sentry_col_mask();
 		make_map_col_mask();
+
+		make_radar_bitmap();
 
         fprintf(logfile,"Loading game bitmaps\n");
 		fflush(logfile);
@@ -350,63 +349,68 @@ int main (int argc, char *argv[]){
 
 		fprintf(logfile,"Init done\n");
 		fflush(logfile);
-        display_map_text(true,30);	//this is the description text file, plus 'press fire' message
 
         //wait for fire(thrust) to clear text / enter map
         while(1)
         {
-            al_wait_for_event(queue, &event);
+            ServiceNetwork();
 
-            if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+            display_map_text(true,30);	//this is the description text file, plus 'press fire' message
+
+            int f_or_e = FireOrEscape(queue, event);
+
+            if (f_or_e == FIRE)
+                break;
+            else if (f_or_e == ESCAPE)
             {
-				al_acknowledge_resize(display);
-				display_map_text(true,30);	//this is the description text file, plus 'press fire' message
+                back_to_menu = true;
+                StopNetwork();          //exit back to menu
+                break;
             }
+        }
 
-            if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-                return 0;
+        //if client, wait for host
+        if (Net.client)
+        {
+            NetSendReady();
 
-            if (event.type == ALLEGRO_EVENT_TIMER)
+            while(1)
             {
-                if (gpio_active)
-                	ReadGPIOJoystick();
-			}
+                display_wait_text();
+                ServiceNetwork();
 
-            else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
-            {
-                if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                if (Net.started == true)
                 {
-                    //Exit();
-                    back_to_menu = true;
+                    Net.client_state = RUNNING;
                     break;
                 }
-                else
-                    key_down_log[event.keyboard.keycode]=true;
+
+                if (FireOrEscape(queue, event) == ESCAPE)
+                {
+                    back_to_menu = true;
+                    StopNetwork();          //exit back to menu
+                    break;
+                }
             }
-
-            else CheckUSBJoyStick(event);
-
-            ScanInputs(num_ships);
-
-			for (i=0 ; i<num_ships ; i++)
-			{
-				if (Ship[i].thrust_down || key_down_log[ALLEGRO_KEY_ENTER])
-            	{
-					Ship[i].thrust_down = false;
-					key_down_log[ALLEGRO_KEY_ENTER] = false;
-					break;			//out of the for loop
-				}
-			}
-			if (i<num_ships) break;	//if we came out of for() loop early, must have had a button, so exit while() loop.
         }
+
+        //if server, just go!
+        else if (Net.server)
+        {
+            NetStartGame();
+            ServiceNetwork();
+        }
+        missed_packets = 0;
 
         FreeMenuBitmaps();
 
         fprintf(logfile,"Game Start\n");
 
         //into game here
-        for (i=0 ; i<num_ships ; i++)
+        for (i=0 ; i<MAX_SHIPS ; i++)
         {
+            //Ship[i].thrust = 0; //just in case....
+
             wind_inst[i] = al_create_sample_instance(wind);
             al_attach_sample_instance_to_mixer(wind_inst[i], mixer);
             al_set_sample_instance_playmode(wind_inst[i], ALLEGRO_PLAYMODE_LOOP);
@@ -437,11 +441,11 @@ int main (int argc, char *argv[]){
         if (Map.mission)							//start timer
         {
 			Map.race = true;
-			Ship[i].current_lap_time = 0;
-			Ship[i].racing = true;
+			Ship[0].current_lap_time = 0;
+			Ship[0].racing = true;
 		}
 
-		//Main loop here
+		//Main game loop here
 		while (1)
 		{
 			if (back_to_menu)
@@ -474,14 +478,22 @@ int main (int argc, char *argv[]){
 						grid++;
 						if (grid > MAX_GRID) grid = 0;
 					}
-
 				}
 				//END DEBUG
 
 				if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
                 {
                     game_over = 0;//1;
-                    break;//Exit();
+
+                    if (Net.server)
+                    {
+                        NetSendAbort();         //tell clients to abort
+
+                        while (num_ships > 1)   //wait for them all to disconnect
+                            ServiceNetwork();
+                    }
+                    StopNetwork();          //exit back to menu
+                    break;
                 }
 
 				else if  (event.keyboard.keycode == ALLEGRO_KEY_PRINTSCREEN ||
@@ -490,6 +502,14 @@ int main (int argc, char *argv[]){
 					take_screenshot = true;
 					fprintf(logfile,"Screenshot %d\n",screenshot_count);
 				}
+				else if (event.keyboard.keycode == ALLEGRO_KEY_F10) //radar
+                {
+                    if (Net.client || Net.server)
+                    {
+                        Radar.on = !Radar.on;
+                    }
+                }
+
 				else
 				{
 					pressed_keys[event.keyboard.keycode]=true;
@@ -502,7 +522,7 @@ int main (int argc, char *argv[]){
 				pressed_keys[event.keyboard.keycode]=false;
 				key_up_log[event.keyboard.keycode]=true;
 			}
-			if (event.type == ALLEGRO_EVENT_KEY_CHAR)
+			if (event.type == ALLEGRO_EVENT_KEY_CHAR)   //used for high score entry
             {
                 if (game_over==1)
                 {
@@ -514,10 +534,9 @@ int main (int argc, char *argv[]){
 			//USB Joystick events here
 			CheckUSBJoyStick(event);
 
-			//clients post to network server???
-
 			if (event.type == ALLEGRO_EVENT_TIMER)
-				redraw = true;
+				//if (!Net.client)
+                    redraw = true;
 			if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 				al_acknowledge_resize(display);
 				redraw = true;
@@ -551,7 +570,16 @@ int main (int argc, char *argv[]){
 					fps = fps_accum;
 					fps_accum = 0;
 					fps_time = t;
+
+					fpsnet = fpsnet_acc;
+					fpsnet_acc = 0;
 				}
+
+                if (Net.server)
+                {
+                    NetSendGameState();
+                    ServiceNetwork();
+                }
 
 				al_clear_to_color(al_map_rgb(0, 0, 0));	//clear the screen
 
@@ -559,66 +587,117 @@ int main (int argc, char *argv[]){
 				//needs paramter FULL, TOP, BOTTOM, TL, TR, BL, BR
 				//it gets window/screen coords from this and figures out where to put the ship etc.
 				//Ship numbers passed in. This is used to centre the 'viewport' on the ship
-				switch(num_ships)
-				{
-				case 1:
-  						draw_split_screen(FULL,0);
-						break;
-				case 2:
-						draw_split_screen(TOP,1);
-						draw_split_screen(BOTTOM,0);
-						break;
-				case 3:
-				case 4:
-						//draw_split_screen(TOPLEFT,0);
-						//draw_split_screen(TOPRIGHT,1);
-						//draw_split_screen(BOTTOMLEFT,2);
-						//draw_split_screen(BOTTOMRIGHT,3);
-						draw_split_screen(TOPLEFT,2);		//better for sitimus....
-						draw_split_screen(TOPRIGHT,1);
-						draw_split_screen(BOTTOMLEFT,0);
-						draw_split_screen(BOTTOMRIGHT,3);
-						break;
-				}
 
-				draw_status_bar(num_ships);	//also does dividers
+				//if (Net.net)
+                if (Net.client || Net.server)
+				{
+                    draw_split_screen(FULL,Net.id);
+                }
+				else
+                {
+                    switch(num_ships)
+                    {
+                    case 1:
+                            draw_split_screen(FULL,0);
+                            break;
+                    case 2:
+                            draw_split_screen(TOP,1);
+                            draw_split_screen(BOTTOM,0);
+                            break;
+                    case 3:
+                    case 4:
+                            //draw_split_screen(TOPLEFT,0);
+                            //draw_split_screen(TOPRIGHT,1);
+                            //draw_split_screen(BOTTOMLEFT,2);
+                            //draw_split_screen(BOTTOMRIGHT,3);
+                            draw_split_screen(TOPLEFT,2);		//better for sitimus....
+                            draw_split_screen(TOPRIGHT,1);
+                            draw_split_screen(BOTTOMLEFT,0);
+                            draw_split_screen(BOTTOMRIGHT,3);
+                            break;
+                    }
+                }
+
+                draw_status_bar(Menu.ships);	//also does dividers
 
 				if (debug_on) draw_debug();
 
-				ScanInputs(num_ships);		//Convert keypresses/joystick input to ship controls (for n ships)
+				ScanInputs(Menu.ships);		//Convert keypresses/joystick input to ship controls (for n ships)
+
+				if (Net.client)
+                {
+                    if (!game_over)
+                    {
+                        NetSendKeys();  //send keypresses to server
+
+                        if (Net.client_state == IDLE)   //must have disconnected after receiving an abort
+                        {
+                            StopNetwork();
+                            if (Net.aborted)
+                            {
+                                Net.client_state = ABORTED;
+                                Net.aborted = false;
+                            }
+
+                            break;
+                        }
+                    }
+                    ServiceNetwork();                   //must do this regularly....
+                    if (!Net.updated)                   //if we didn't get a game state packet
+                    {
+                        UpdateBullets();                //update positions locally
+                        for (i=0 ; i<num_ships ; i++)
+                        {
+                            Ship[i].xpos += Ship[i].xv;
+                            Ship[i].ypos -= Ship[i].yv;
+                        }
+                        missed_packets++;
+                    }
+                }
 
 				if (game_over)
 				{
 					//al_stop_samples();	//stop the audio
-					if (game_over == GO_TIMER)
+					if (game_over == GO_TIMER-1)    //wait 1 tick to calculate / sort scores.
                     {
-                        for (i=0 ; i<num_ships ; i++)
+                        if (Net.server) NetSendGameOver();
+
+                        //for (i=0 ; i<num_ships ; i++)
+                        for (i=0 ; i<MAX_SHIPS ; i++)
                             al_stop_sample_instance(wind_inst[i]);
                     }
 
-
-					if (!GameOver()) break;	//0 returned, break out of inner while(1) loop. Still in outer, so we'll re-init stuff
+					if (!GameOver())
+                    {
+                        //0 returned, break out of inner while(1) loop. Still in outer, so we'll re-init stuff
+                        StopNetwork();
+                        break;
+                    }
 				}
 				else
 				{
-					//ScanInputs(num_ships);		//Convert keypresses/joystick input to ship controls (for n ships)
-					game_over = UpdateShips(num_ships);		//Calculate Ship positions based on controls
-															//Also handle firing, updating fuel, ammo, lives etc.
-															//if lives go down to 0, return game_over countdown.
-                    UpdateSwitches();
-                    UpdateForcefields();
-					UpdateSentries();	//Automatic guns / volcanoes
-					UpdateBullets();	//Calculate new bullet positions, expire old ones.
+					if (!Net.client)    //i.e. local or host
+					{
+					    game_over = UpdateShips(num_ships);		//Calculate Ship positions based on controls
+                                                                //Also handle firing, updating fuel, ammo, lives etc.
+                                                                //if lives go down to 0, return game_over countdown.
+                        UpdateSwitches();
+                        UpdateForcefields();
+                        UpdateSentries();	//Automatic guns / volcanoes
+                        UpdateBullets();	//Calculate new bullet positions, expire old ones.
 
-					//check for collisions, modify shield parameter for ships, ttl for bullets.
-					CheckSSCollisions(num_ships);//Ship-to-ship collisions
-					CheckBSCollisions(num_ships);//bullet-to-ship collisions
-					CheckBSentryCollisions();
-					CheckBSwitchCollisions();
-					CheckSWCollisions(num_ships);//Ship-to-wall collisions
-					CheckBWCollisions();		 //Bullet-to-wall collisions
+                        //check for collisions, modify shield parameter for ships, ttl for bullets.
+                        CheckSSCollisions(num_ships);//Ship-to-ship collisions
+                        CheckBSCollisions(num_ships);//bullet-to-ship collisions
+                        CheckBSentryCollisions();
+                        CheckBSwitchCollisions();
+                        CheckSWCollisions(num_ships);//Ship-to-wall collisions
+                        CheckBWCollisions();		 //Bullet-to-wall collisions
+					}
 
-                    for (i=0 ; i<num_ships ; i++)
+                    //for (i=0 ; i<num_ships ; i++)
+                    //for (i=0 ; i<Menu.ships ; i++)
+                    for (i=0 ; i<MAX_SHIPS ; i++)
                     {
                         if (Ship[i].thrust)
                         {
@@ -638,16 +717,16 @@ int main (int argc, char *argv[]){
                         al_set_sample_instance_gain (wind_inst[i],volume);
                         al_set_sample_instance_speed(wind_inst[i],volume);
                     }
-
 				}
-
 				redraw = FALSE;
 			}
 		}
 		fprintf(logfile,"Game Over\n");
         FreeGameBitmaps();
 
-        for (i=0 ; i<num_ships ; i++)
+        //for (i=0 ; i<num_ships ; i++)
+        //for (i=0 ; i<Menu.ships ; i++)
+        for (i=0 ; i<MAX_SHIPS ; i++)
         {
             //al_stop_sample_instance(wind_inst[i]);
             al_destroy_sample_instance(wind_inst[i]);
@@ -668,7 +747,52 @@ int main (int argc, char *argv[]){
     return 0;
 }
 
+int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
+{
+    int i;
 
+    al_wait_for_event(queue, &event);
+
+    if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+        al_acknowledge_resize(display);
+
+    else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+        Exit();
+
+    else if (event.type == ALLEGRO_EVENT_TIMER)
+    {
+        if (gpio_active)
+            ReadGPIOJoystick();
+    }
+
+    else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
+    {
+        if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+            return ESCAPE;
+        else
+            key_down_log[event.keyboard.keycode]=true;
+    }
+
+    else if (event.type == ALLEGRO_EVENT_KEY_UP)
+        key_up_log[event.keyboard.keycode]=true;
+
+    else CheckUSBJoyStick(event);
+
+    ScanInputs(num_ships);
+
+    for (i=0 ; i<num_ships ; i++)
+    {
+        if (Ship[i].thrust_down || key_down_log[ALLEGRO_KEY_ENTER])
+        {
+            Ship[i].thrust_down = false;
+            key_down_log[ALLEGRO_KEY_ENTER] = false;
+            break;			//out of the for loop
+        }
+    }
+    if (i<num_ships) return FIRE;//break;	//if we came out of for() loop early, must have had a button, so exit while() loop.
+
+    return 0;
+}
 
 
 int read_maps(void)
@@ -885,6 +1009,25 @@ void FreeGameBitmaps(void)
     }
     j++;
 
+    if (Radar.display)
+    {
+        al_destroy_bitmap(Radar.display);
+        Radar.display = NULL;
+        i++;
+    }
+    j++;
+
+    if (Radar.mask)
+    {
+        if (Map.type == 1)  //in map type 0 & 2, radar display is the same as radar mask.
+        {
+            al_destroy_bitmap(Radar.mask);
+            Radar.mask = NULL;
+            i++;
+        }
+    }
+    j++;
+
     fprintf(logfile,"Freed %d/%d game bitmaps\n",i,j);
     fflush(logfile);
 
@@ -926,6 +1069,31 @@ void FreeFonts(void)
 	fprintf(logfile,"Freed fonts\n");
 }
 
+void StopNetwork(void)
+{
+    if (Net.server)
+    {
+        NetStopServer();    //stop the server
+    }
+    if (Net.client)
+    {
+        if (Net.client_state == CONNECTED || Net.client_state == RUNNING)
+        {
+            NetDisconnectClient();
+        }
+
+        while (Net.client_state != IDLE)
+        {
+            ServiceNetwork();
+        }
+        NetStopClient();
+
+       // NetStopClient();
+    }
+    Net.started = false;
+}
+
+
 void Exit(void)
 {
 	fprintf(logfile,"Exiting\n");
@@ -934,6 +1102,8 @@ void Exit(void)
     FreeFonts();
     al_destroy_display(display);
 	fclose(logfile);
+	if (hostfile) fclose (hostfile);
+	if (clientfile) fclose (clientfile);
 	exit(0);
 }
 
@@ -957,10 +1127,23 @@ void draw_debug(void)
 	else             level = num_ships*120;
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[0].xpos);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[0].ypos);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[0].angle);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "G: %.2f", Ship[0].gravity);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Net: %d", fpsnet);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Missed: %d", missed_packets);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[1].xpos);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[1].ypos);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Xv: %.0f", Ship[1].xv);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Yv: %.0f", Ship[1].yv);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[1].angle);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "G: %.2f", Ship[1].gravity);
+
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Kills:%d",Ship[0].kills);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Killed:%d",Ship[0].killed);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Crashes:%d",Ship[0].crashed);
+
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Clients:%d",Net.clients );
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Clients Ready:%d",Net.clients_ready);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Connected:%d",Net.connected);
+
 
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "R: %d", random);
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "R1:%d", random100);
@@ -1042,17 +1225,17 @@ void draw_debug(void)
 	//}
 
 	//Ship-to-wall collisions
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MX:%d", map_idx_x);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MY:%d", map_idx_y);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MI:%d", map_idx);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Sh1:%d", shift1);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Sh2:%d", shift2);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MW1: %08X", map_word1);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW1S:%08X", ship_word1_shift);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MW2: %08X", map_word2);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW2S:%08X", ship_word2_shift);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW:%08X", ship_word1);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Coll:%d", collision);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MX:%d", map_idx_x);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MY:%d", map_idx_y);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MI:%d", map_idx);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Sh1:%d", shift1);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Sh2:%d", shift2);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MW1: %08X", map_word1);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW1S:%08X", ship_word1_shift);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "MW2: %08X", map_word2);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW2S:%08X", ship_word2_shift);
+	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "SW:%08X", ship_word1);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Coll:%d", collision);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "S0.s:%d", Map.sentry[0].shield);
 
 	//Tiled
