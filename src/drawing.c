@@ -338,7 +338,8 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
     if (Menu.state == NETWORK)
     {
-        al_draw_textf(small_font, ItemUnselected,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Mode");
+        al_draw_textf(small_font,      GroupActive,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Mode");
+        al_draw_textf(small_glow_font, GroupGlow,  Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Mode");
         /*
              if (Menu.netmode == LOCAL)  netmodestr = local;
         else if (Menu.netmode == HOST)   netmodestr = host;
@@ -411,6 +412,9 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	else if (Menu.state == LEVEL)
     {
 	//Display maps; display all group names, and maps in current group
+        al_draw_textf(small_font, GroupActive, Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Level");
+        al_draw_textf(small_glow_font, GroupGlow,   Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Level");
+
         for (i=0 ; i<Menu.num_groups ; i++)
         {
             if (i == Menu.group)
@@ -475,20 +479,17 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         //if (!Net.net || Net.server)
         if (!Net.client)
         {
-            al_draw_textf(small_font, ItemUnselected,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
-
             if (Menu.col_pos == 0)
             {
-               al_draw_textf(small_font, ItemCurrent    ,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
-               al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                al_draw_textf(small_font, GroupActive,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
+                al_draw_textf(small_glow_font, GroupGlow,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
+                al_draw_textf(small_font, ItemCurrent    ,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
             }
             else
             {
-                //if (!Net.client)
-                //if (!Net.net)
-                    al_draw_textf(small_font, ItemUnselected,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
-                //else if (Net.server)
-                //    al_draw_textf(small_font, ItemUnselected,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",Net.clients);
+                al_draw_textf(small_font, ItemUnselected,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
+                al_draw_textf(small_font, ItemUnselected,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
             }
         }
 
@@ -505,7 +506,15 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
             //if (!Net.net)
             if (!Net.client && !Net.server)
-                al_draw_textf(small_font, colour,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+            {
+                if (Menu.player == i && Menu.col_pos != 0)
+                {
+                    al_draw_textf(small_font, GroupActive,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+                    al_draw_textf(small_glow_font, GroupGlow,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+                }
+                else
+                    al_draw_textf(small_font, colour,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+            }
 
             y+=40;
 
