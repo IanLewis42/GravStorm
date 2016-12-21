@@ -684,7 +684,7 @@ void init_joystick(void)
 #if RPI
 	//fprintf(logfile,"Init GPIO joystick\n");
 
-	wiringPiSetupPhys();	//set up wiring pi lib. Using phsical piun numbers (ie the numbers on th eheader)
+	wiringPiSetupPhys();	//set up wiring pi lib. Using physical pin numbers (i.e. the numbers on the header)
 	pinMode (26, INPUT) ;	//using pins 26,24,22,18,16. All input and pull up.
 	pullUpDnControl(26,PUD_UP);
 	pinMode (24, INPUT) ;
