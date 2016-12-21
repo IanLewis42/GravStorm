@@ -720,6 +720,13 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     {
                         if (Ship[Menu.player].controller > 0)
                         Ship[Menu.player].controller--;
+                        if (Ship[Menu.player].controller == GPIO_JOYSTICK)
+                        {
+                            if (!gpio_active)
+                            {
+                                Ship[Menu.player].controller--;
+                            }
+                        }
                     }
                 }
                 else if (AnyShip.right_down)    //right
@@ -729,7 +736,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     {
                        // if (!Net.net)
                         {
-
                             if (num_ships < Map.max_players)
                             {
                                 num_ships++;
@@ -749,6 +755,13 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     {
                         if (Ship[Menu.player].controller < 3)
                             Ship[Menu.player].controller++;
+                        if (Ship[Menu.player].controller == GPIO_JOYSTICK)
+                        {
+                            if (!gpio_active)
+                            {
+                                Ship[Menu.player].controller++;
+                            }
+                        }
                     }
                     else if (Menu.item == 2)    //define keys
                     {
