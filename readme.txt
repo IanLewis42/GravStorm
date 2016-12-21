@@ -86,14 +86,34 @@ MENU
 -----
 It's supposed to be intuitive / self explanatory, but just in case....
 
-Navigate the menu with the cursor keys or any of the selected control options.
-First column is the map/level you'll be playing on. Some levels are single player, allow up to 2 players, some allow up to 4.
-Next column selects the player.
-Next column selects the control method for the selected player (Keys, joystick, N/A). 
-  The FIRST instance of N/A in this column sets the number of active players.
-Final column allows you to define keys.
-Press Return or Fire/Thrust to display the level description, then again to start the game.
-Escape to exit.
+Press any key to skip the title screen and go to the menu.
+
+In general, use up and down cursor keys to navigate the menu, left and right to change a highlighted item.
+'Enter' will take you forward to the next menu level, 'Escape' will take you back to the previous level.
+
+o MODE
+  Use cursor 'up' and 'down' to select game mode.
+    Local Game        - Select this for single player, or for up to 4 players in split-screen mode on the same device.
+    Host Network Game - Select this to allow other players to join 'your' game. As the host, you get to select the level.
+    Join Network Game - Select this to join a game hosted by another player.
+  
+    NOTE: Network support is ONLY for a local network, not over the internet.
+  Enter:  Next menu
+  Escape: Exit 
+
+o LEVEL
+  Use cursor 'up' and 'down' to select level.
+  Enter:  Next menu
+  Escape: Previous menu 
+  
+o PLAYERS  
+  Use cursor 'up' and 'down' to select item.
+  Use left and right cursor keys to select number of players, ship type, and controller type when highlighted.
+    If you press 'right' when 'define keys->' is highlighted, the next five keypresses will be used as your controls.
+  Enter:  Start Game
+  Escape: Previous menu 
+
+NOTE: Any set of player defined keys, or joystick can also be used to navigate the menu. 
 
 PLAYING
 -------
@@ -109,6 +129,8 @@ Thrust/Joystick Button fires your engine.
 Some levels have a race track. This should be described in the level text.
 Current lap time, last completed lap time and best lap time for this game are displayed in the status panel.
 If you complete a lap, the best times (and players who set them) will be displayed at the end of the game.
+
+In network play only, F10 will toggle a 'radar' display at the top-right of the screen, showing the terrain, and all ships.
 
 o Single player 'Mission' levels
   These are largely based on the 'Thrust' maps. Here, the objective is to rescue the miners who are stuck at the bottom of the cave system. Land on the 'blue' pads to rescue them. Land on the 'red' pads to collect jewels for bonus points. Beware that your ship will be heavier with extra passengers and cargo! Fly off away from the surface to complete the level.
@@ -153,6 +175,7 @@ sudo is required for access to the GPIO hardware. If you want to know which pins
 TROUBLESHOOTING
 ----------------
 Gravstorm makes a logfile every time it runs. This is called 'logfile.txt' and is in the 'gravstorm' directory. If gravstorm crashes, or won't start, then have a look in here and see if there's anything helpful. If it doesn't make any sense, then feel free to send it to me.
+For network games, a file called 'host.txt' or 'client.txt' will also be produced. Likewise, have a look in it, or send it to me.
 
 KNOWN ISSUES
 ------------
@@ -160,7 +183,7 @@ On Raspberry Pi, there's a significant lag between events that cause sounds and 
 
 MAKING MAPS
 -----------
-*** Only read this bit if you want to make your own maps / levels.***
+*** Only read this bit if you want to make your own maps / levels (or modify the existing ones)***
 
 The game has been designed to make creating your own levels as easy as possible. It's still quite complicated though :-)
 
@@ -170,7 +193,7 @@ I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusio
   
 - This .txt file contains all the information about the level. Each parameter should be typed on its own line. 
   Pretty much anything (other than whitespace) can be used as a single-line comment, but I tend to use a semicolon ;
-  The easiest thing to do is take a look at some of the existing  files, but for reference, I'll describe all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly. These should be edited in a text editor (e.g. nano or leafpad on Raspberry Pi, notepad on windows.)
+  The easiest thing to do is take a look at some of the existing  files, but for reference, I'll describe all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly. The file should be edited in a plain ASCII text editor (e.g. nano or leafpad on Raspberry Pi, notepad on windows.)
   
 o map_type <0|1|2>
   0 - Single image file for map, displayed double size (default)
@@ -194,7 +217,7 @@ o collision_map <filename> only png format supported. REQUIRED
   The same as display_map, but all empty space MUST be 'magic pink' (i.e. R=255, G=0, B=255). 
   For map type 0, this should be the same size as the display map.
   For map type 1 (tiled), this should be HALF-SIZE, so each tile must be 32x32 pixels, and the whole image must be (8*32) x (n*32) pixels.
-  For map type 2, this should be HALF-SIZE.
+  For map type 2, this should be HALF-SIZE (i.e. half the size of the display map)
   
 o ascii_map <filename> 
   Shows the arrangement of tiles to make the map. ASCII format, 0-9 for first 10 tiles, A-Z for next 26. ' ' (space) doubles as 0. Only applies if map_type = 1.
@@ -325,7 +348,7 @@ Keyboard controls are:
 - G:                 toggle grid off/white/grey/black. 
 - Escape:            exit 
 
-N.B. When the grid is shown, you can also see pads (red bar), black holes (cyan circle), racelines (red/green) and altered gravity/drag areas (yellow).
+N.B. Grid is only shown for tiled maps (i.e. type 1), However, for all map types, 'G' also turns on colouring for pads (red bar), black holes (cyan circle), racelines (red/green) and altered gravity/drag areas (yellow).
 
 The mouse can be used to edit tiled maps as follows:
 - Left click and release to 'pick up' a tile (either from the map, or the preview area on the left)
