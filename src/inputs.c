@@ -30,6 +30,7 @@
 #include "game.h"
 #include "inputs.h"
 #include "objects.h"
+#include "network.h"
 
 ALLEGRO_JOYSTICK *USBJOY[2];
 
@@ -251,83 +252,96 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event)
 void ScanInputs(int num_ships)
 {
 
-	int i, joy_idx;
+	int i, j, first_ship, joy_idx;
 	//static int joystick_down_state = RELEASED;
 
-	for (i=0 ; i<num_ships ; i++)
+	if (Net.client)
+    {
+        first_ship = Net.id;
+        num_ships = first_ship+1;
+    }
+    else
+        first_ship = 0;
+
+	for (i=first_ship ; i<num_ships ; i++)
 	{
-		if (Ship[i].controller == KEYS)
+		if (Net.client)
+            j=0;    //take inputs from ship 0
+        else
+            j=i;
+
+		if (Ship[j].controller == KEYS)
 		{
 			//Up key, fire1
-			if (key_down_log[Ship[i].up_key])
+			if (key_down_log[Ship[j].up_key])
 			{
 				Ship[i].fire1_down = true;
 				Ship[i].fire1_held = true;
-				key_down_log[Ship[i].up_key] = false;
+				key_down_log[Ship[j].up_key] = false;
 			}
-			if (key_up_log[Ship[i].up_key])
+			if (key_up_log[Ship[j].up_key])
 			{
 				Ship[i].fire1_held = false;
-				key_up_log[Ship[i].up_key] = false;
+				key_up_log[Ship[j].up_key] = false;
 			}
 
 			//Down key, fire2
-			if (key_down_log[Ship[i].down_key])
+			if (key_down_log[Ship[j].down_key])
 			{
 				Ship[i].fire2_down = true;
 				Ship[i].fire2_held = true;
-				key_down_log[Ship[i].down_key] = false;
+				key_down_log[Ship[j].down_key] = false;
 
 			}
-			if (key_up_log[Ship[i].down_key])
+			if (key_up_log[Ship[j].down_key])
 			{
 				Ship[i].fire2_held = false;
-				key_up_log[Ship[i].down_key] = false;
+				key_up_log[Ship[j].down_key] = false;
 			}
 
 			//Left key, left
-			if (key_down_log[Ship[i].left_key])
+			if (key_down_log[Ship[j].left_key])
 			{
 				Ship[i].left_down = true;
 				Ship[i].left_held = true;
-				key_down_log[Ship[i].left_key] = false;
+				key_down_log[Ship[j].left_key] = false;
 
 			}
-			if (key_up_log[Ship[i].left_key])
+			if (key_up_log[Ship[j].left_key])
 			{
 				Ship[i].left_held = false;
-				key_up_log[Ship[i].left_key] = false;
+				key_up_log[Ship[j].left_key] = false;
 			}
 
 			//Right key, right
-			if (key_down_log[Ship[i].right_key])
+			if (key_down_log[Ship[j].right_key])
 			{
 				Ship[i].right_down = true;
 				Ship[i].right_held = true;
-				key_down_log[Ship[i].right_key] = false;
+				key_down_log[Ship[j].right_key] = false;
 			}
-			if (key_up_log[Ship[i].right_key])
+			if (key_up_log[Ship[j].right_key])
 			{
 				Ship[i].right_held = false;
-				key_up_log[Ship[i].right_key] = false;
+				key_up_log[Ship[j].right_key] = false;
 			}
 
 			//Thrust key, thrust
-			if (key_down_log[Ship[i].thrust_key])
+			if (key_down_log[Ship[j].thrust_key])
 			{
 				Ship[i].thrust_down = true;
 				Ship[i].thrust_held = true;
-				key_down_log[Ship[i].thrust_key] = false;
+				key_down_log[Ship[j].thrust_key] = false;
 			}
-			if (key_up_log[Ship[i].thrust_key])
+			if (key_up_log[Ship[j].thrust_key])
 			{
 				Ship[i].thrust_down = false;
 				Ship[i].thrust_held = false;
-				key_up_log[Ship[i].thrust_key] = false;
+				key_up_log[Ship[j].thrust_key] = false;
 			}
 		}
 
-		else if (Ship[i].controller == GPIO_JOYSTICK)
+		else if (Ship[j].controller == GPIO_JOYSTICK)
 		{
 			if (GPIOJoystick.left_down)
 			{
@@ -392,10 +406,10 @@ void ScanInputs(int num_ships)
 			//Ship[i].thrust_held = GPIOJoystick.button;
 		}
 
-		else if (Ship[i].controller == USB_JOYSTICK0 || Ship[i].controller == USB_JOYSTICK1 )
+		else if (Ship[j].controller == USB_JOYSTICK0 || Ship[j].controller == USB_JOYSTICK1 )
 		{
-			if (Ship[i].controller == USB_JOYSTICK0) joy_idx = 0;
-			if (Ship[i].controller == USB_JOYSTICK1) joy_idx = 1;
+			if (Ship[j].controller == USB_JOYSTICK0) joy_idx = 0;
+			if (Ship[j].controller == USB_JOYSTICK1) joy_idx = 1;
 
 			if (USBJoystick[joy_idx].left_down)
 			{
@@ -460,4 +474,31 @@ void ScanInputs(int num_ships)
 			//Ship[i].thrust_held = USBJoystick[0].button;
 		}
 	}
+
+	/*
+	if (Net.client) //copy inputs from Ship[0] to Ship[Net.id]
+    {
+        Ship[Net.id].fire1_down  = Ship[0].fire1_down;
+        Ship[Net.id].fire1_held  = Ship[0].fire1_held;
+        Ship[Net.id].fire2_down  = Ship[0].fire2_down;
+        Ship[Net.id].fire2_held  = Ship[0].fire2_held;
+        Ship[Net.id].left_down   = Ship[0].left_down;
+        Ship[Net.id].left_held   = Ship[0].left_held;
+        Ship[Net.id].right_down  = Ship[0].right_down;
+        Ship[Net.id].right_held  = Ship[0].right_held;
+        Ship[Net.id].thrust_down = Ship[0].thrust_down;
+        Ship[Net.id].thrust_held = Ship[0].thrust_held;
+
+        //Ship[0].fire1_down  = false;
+        //Ship[0].fire1_held  = false;
+        //Ship[0].fire2_down  = false;
+        //Ship[0].fire2_held  = false;
+        //Ship[0].left_down   = false;
+        //Ship[0].left_held   = false;
+        //Ship[0].right_down  = false;
+        //Ship[0].right_held  = false;
+        //Ship[0].thrust_down = false;
+        //Ship[0].thrust_held = false;
+    }
+    */
 }

@@ -18,7 +18,8 @@
 
 void LoadMap(void);
 void FreeMap(void);
-void draw_status_bar(int num_ships);
+void draw_status_bar(int ship, int x, int y);
+void draw_dividers(void);
 void display_menu(void);
 void display_new_menu(void);
 void display_map_text(int done, int timer);

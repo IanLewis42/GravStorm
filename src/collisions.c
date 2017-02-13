@@ -446,6 +446,8 @@ void CheckSSCollisions(int num_ships)	//Ship-to-ship collisions
 										Ship[j].shield = 0;
 										Ship[i].crashed++;
 										Ship[j].crashed++;
+										Ship[i].bullet.damage+=100;    //for network play
+										Ship[j].bullet.damage+=100;
 									}
 								}
 							}
@@ -518,20 +520,32 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 								al_play_sample_instance(particle_inst[i]);
 								Net.sounds |= PARTICLE;
 								Bullet[j].ttl=1;	//decrement, picked up next time.
-								Ship[i].shield -= Bullet[j].damage;				//decrement shield
+
+                                if (Net.server && i!=0)				//for other ships in network play.
+                                {
+                                    Ship[i].bullet.damage += Bullet[j].damage;
+                                    Ship[i].bullet.owner = Bullet[j].owner;
+                                    Ship[i].bullet.type = Bullet[j].type;
+                                    Ship[i].bullet.xv = Bullet[j].xv;
+                                    Ship[i].bullet.yv = Bullet[j].yv;
+                                }
+                                else //local, or network, and it's the server that's been hit
+                                {
+                                    Ship[i].shield -= Bullet[j].damage;				//decrement shield
+                                    if (Ship[i].shield <= 0)
+                                    {
+                                        Ship[i].killed++;
+                                        if (Bullet[j].owner != NO_OWNER)
+                                            Ship[Bullet[j].owner].kills++;
+                                    }
+                                    Ship[i].xv     += Bullet[j].mass*Bullet[j].xv;	//momentum from bullet to ship
+                                    Ship[i].yv     += Bullet[j].mass*Bullet[j].yv;
+                                }
 
                                 if (Bullet[j].type == BLT_HEAVY)    //stop explosion on hitting ship
                                     Bullet[j].type = BLT_NORMAL;
 
-								if (Ship[i].shield <= 0)
-                                {
-                                    Ship[i].killed++;
-                                    if (Bullet[j].owner != NO_OWNER)
-                                        Ship[Bullet[j].owner].kills++;
-                                }
 
-								Ship[i].xv     += Bullet[j].mass*Bullet[j].xv;	//momentum from bullet to ship
-								Ship[i].yv     += Bullet[j].mass*Bullet[j].yv;
 								break;
 							}
 						}
@@ -603,6 +617,9 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
                                         al_play_sample_instance(sentry_particle_inst);
                                         Bullet[j].ttl=1;	//decrement, picked up next time.
                                         Map.sentry[i].shield -= Bullet[j].damage;				//decrement shield
+                                        if (Bullet[j].type == BLT_HEAVY)    //stop explosion on hitting sentry
+                                            Bullet[j].type = BLT_NORMAL;
+
                                         break;
                                     }
 								}
@@ -705,9 +722,22 @@ void CheckSWCollisions(int num_ships)
 	//int tile_x, tile_y, tile_idx, tile;
 	//int start_row,current_row,rows;
 
+	int first_ship = 0;
+
+	if (Net.client)
+    {
+        first_ship = Net.id;
+        num_ships = first_ship+1;
+    }
+    if (Net.server)
+    {
+        first_ship = 0;
+        num_ships = first_ship+1;
+    }
+
 	if (Map.type == 0 || Map.type == 2)
 	{
-		for (i=0 ; i<num_ships ; i++)
+		for (i=first_ship ; i<num_ships ; i++)
 		//need to start top left
 		//need to increment map word in y direction in j loop
 		{
@@ -783,7 +813,7 @@ void CheckSWCollisions(int num_ships)
 
 	else	//Map.type == 1, i.e. tiled
 	{
-		for (i=0 ; i<num_ships ; i++)
+		for (i=first_ship ; i<num_ships ; i++)
 		{
 			collision = 0;
 

@@ -14,6 +14,9 @@ typedef enum
     //messages from client
     CLIENT_READY,
     CLIENT_KEYS,
+    CLIENT_SHIPSTATE,
+    CLIENT_KILLED,
+    CLIENT_OUTOFLIVES
 } NetMessageType;
 
 typedef enum
@@ -67,6 +70,7 @@ typedef struct
     ENetEvent event;
     int eventStatus;
 
+    float quality;
 } NetworkType;
 
 typedef struct
@@ -99,8 +103,11 @@ void NetSendReady(void);
 void NetSendGameState(void);
 void NetSendGameOver(void);
 void NetSendKeys(void);
+void NetSendShipState(void);
 void NetStartGame(void);
 void NetSendAbort(void);
+void NetSendKilled(int killer);
+void NetSendOutOfLives(void);
 
 void AddressToString(int address, char* string);
 NetMessageType ServiceNetwork(void);

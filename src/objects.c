@@ -49,18 +49,16 @@ int first_bullet = END_OF_LIST;	//index to first bullet in list END_OF_LIST => '
 int last_bullet = END_OF_LIST;	//init this when you make a new bullet.
 
 //Parameters for bullets
-//                          normal random double triple heavy mine  heat spread lava sentry
-int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   50,   5000, 150, 300,   256, 300};	//Life (in frames)
-int reload[BULLET_TYPES] = {5,     5,     5,     15,    0,    0,    0,   0,     0,   0};	//frames in between shots (if fire held down) N/A for heavy weapons
-float Mass[BULLET_TYPES] = {0.04,  0.04,  0.04,  0.04,  0.1,  0.1,  0.1, 0.04,  0.1, 0.1};	//Really bullet mass/ship mass; only used in collisions
-int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   30,  9,     10,  50};   //points off shield when collision happens
+//                          normal random double triple heavy mine  heat spread lava sentry shrapnel
+int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   50,   5000, 150, 300,   256, 300,   300};   //Life (in frames)
+int reload[BULLET_TYPES] = {5,     5,     5,     15,    0,    0,    0,   0,     0,   0,     0};	    //frames in between shots (if fire held down) N/A for heavy weapons
+float Mass[BULLET_TYPES] = {0.04,  0.04,  0.04,  0.04,  0.1,  0.1,  0.1, 0.04,  0.1, 0.1,   0.04};	//Really bullet mass/ship mass; only used in collisions
+int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   30,  9,     10,  50,    4};     //points off shield when collision happens
 
 void UpdateLandedShip(int ship_num);	//int
-void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv);//float outward_v);
 void NewShipBullet (int ship_num, int type, int flags); //int
 void NewBullet (int x,int y,int xv,int yv,int angle,float speed, int type,int random,int owner);
-void FireNormal(int i);	//int
-void FireSpecial(int i);	//int
+
 
 
 /****************************************************
@@ -76,7 +74,15 @@ int UpdateShips(int num_ships)
 	int i,j;
 	float x,y,r,r_squared,xg,yg;	//blackhole vars
 
-	for (i=0 ; i<num_ships ; i++)
+	int first_ship = 0;
+
+	if (Net.client || Net.server)
+    {
+        first_ship = Net.id;
+        num_ships = 1;
+    }
+
+	for (i=first_ship ; i<first_ship+num_ships ; i++)
 	{
 		if (Map.mission)
 			if(Ship[i].ypos < 64)
@@ -89,7 +95,13 @@ int UpdateShips(int num_ships)
 			{
 				if (Ship[i].lives == 0)
 				{
-					Ship[i].reincarnate_timer = 1;	//to stop it reappearing at the end of the game.
+					Ship[i].reincarnate_timer = 100;	//to stop it reappearing at the end of the game.
+					if (Net.client)
+                    {
+                        NetSendOutOfLives();
+                        return 0;
+                    }
+
 					return(GO_TIMER);	//game over
 				}
 				reinit_ship(i);
@@ -98,7 +110,15 @@ int UpdateShips(int num_ships)
 		}
 		else if (Ship[i].shield <= 0)
 		{
-			CreateExplosion(Ship[i].xpos, Ship[i].ypos, 2, 8, Ship[i].xv, Ship[i].yv);//float outward_v);
+			//send to server?? - or put in collision??
+			if (Net.client)
+            {
+                Ship[i].actions |= EXPLODE;
+            }
+            else
+            {
+                CreateExplosion(Ship[i].xpos, Ship[i].ypos, 2, 8, Ship[i].xv, Ship[i].yv);//float outward_v);
+            }
 			//al_play_sample(dead, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 			al_play_sample_instance(dead_inst[i]);
 			Net.sounds |= DEAD;
@@ -132,14 +152,14 @@ int UpdateShips(int num_ships)
 
 			//if (Ship[i].thrust)
 			if (Ship[i].thrust_held && Ship[i].fuel)
-				{
-					//Ship[i].angle++;	//DEBUG
-					if (Ship[i].angle == NUM_ANGLES)
-				  		Ship[i].angle = 0;
+            {
+                //Ship[i].angle++;	//DEBUG
+                //if (Ship[i].angle == NUM_ANGLES)
+                //	Ship[i].angle = 0;
 
-					Ship[i].thrust = THRUST;
-					Ship[i].fuel--;
-				}
+                Ship[i].thrust = THRUST;
+                Ship[i].fuel--;
+            }
 			else
 				Ship[i].thrust = 0;
 
@@ -395,6 +415,73 @@ int  ShipMass(int ship_num)
 	return EMPTY_SHIP_MASS + (Ship[ship_num].fuel>>5) + (Ship[ship_num].ammo1>>1) + (6 * Ship[ship_num].ammo2) + (MINER_MASS * Ship[ship_num].miners) + (JEWEL_MASS * Ship[ship_num].jewels);
 }
 
+//Called by client if no packet rx'd from server
+void UpdateRemoteShips(void)
+{
+    int i,j;
+    float x,y,r,r_squared,xg,yg;	//blackhole vars
+
+    for (i=0 ; i<num_ships ; i++)
+    {
+        if (i != Net.id)
+        {
+            if (Ship[i].right_held)
+            {
+                Ship[i].angle++;
+                if (Ship[i].angle == NUM_ANGLES)
+                  Ship[i].angle = 0;
+            }
+            if (Ship[i].left_held)
+            {
+                Ship[i].angle--;
+                if (Ship[i].angle == -1)
+                  Ship[i].angle = NUM_ANGLES-1;
+            }
+
+			if (Map.radial_gravity)
+			{
+				xg = 0;
+				yg = 0;
+
+				for (j=0 ; j<Map.num_blackholes ; j++)
+				{
+					x = Ship[i].xpos - Map.blackhole[j].x;
+					y = Ship[i].ypos - Map.blackhole[j].y;
+
+					r_squared = x*x + y*y;
+					r = sqrt(r_squared);                            //distance between blackhole and ship
+					xg += G*Map.blackhole[j].g * x/(r*r_squared);     //acceleration proportional to 1/r^2...
+					yg += G*Map.blackhole[j].g * y/(r*r_squared);     //..and scale along normalised (unit) vector
+					                                                //These accumulate up for all blackholes to get a final overall value
+				}
+				//velocity = velocity + (Thrust - Drag)/Mass
+				Ship[i].xv += (((Ship[i].thrust*sinlut[Ship[i].angle]) - Ship[i].xv*Map.drag)/Ship[i].mass) - xg;
+				//Position = position + velocity
+				Ship[i].xpos += Ship[i].xv;
+
+				//velocity = velocity + ((Thrust - Drag)/Mass) - Gravity
+				Ship[i].yv += (((Ship[i].thrust*coslut[Ship[i].angle]) - Ship[i].yv*Map.drag)/Ship[i].mass) + yg  - Map.gravity;
+				//Position = position + velocity
+				Ship[i].ypos -= Ship[i].yv;
+			}
+			else
+            //normal gravity
+            {
+                //velocity = velocity + (Thrust - Drag)/Mass
+                Ship[i].xv += ((Ship[i].thrust*sinlut[Ship[i].angle]) - Ship[i].xv*Map.drag)/Ship[i].mass;
+                //Position = position + velocity
+                Ship[i].xpos += Ship[i].xv;
+
+                //velocity = velocity + ((Thrust - Drag)/Mass) - Gravity
+                Ship[i].yv += (((Ship[i].thrust*coslut[Ship[i].angle]) - Ship[i].yv*Map.drag)/Ship[i].mass) - Map.gravity;
+                //Position = position + velocity
+                Ship[i].ypos -= Ship[i].yv;
+            }
+        }
+    }
+    return;
+}
+
 /****************************************************
 ** void UpdateLandedShip(int i)
 ** Called from UpdateShips()
@@ -590,7 +677,7 @@ void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, f
 	{
 		for (j=0 ; j<num_particles ; j++)
 		{
-			NewBullet(xpos, ypos, xv, yv, j*angle_inc, 0.5 * k * BULLET_SPEED, BLT_NORMAL, 0, NO_OWNER);
+			NewBullet(xpos, ypos, xv, yv, j*angle_inc, 0.5 * k * BULLET_SPEED, BLT_SHRAPNEL, 0, NO_OWNER);
 		}
 	}
 }
@@ -606,6 +693,14 @@ void FireNormal(int i)
 
     al_play_sample_instance(shoota_inst[i]);
     Net.sounds |= SHOOTA;
+
+    Ship[i].ammo1--;
+
+	if (Net.client)
+    {
+        Ship[i].actions |= FIRE_NORMAL;   //sent to server
+        return;
+    }
 
 	switch (Ship[i].ammo1_type)
 	{
@@ -641,7 +736,7 @@ void FireNormal(int i)
 		default:
 		break;
 	}
-	Ship[i].ammo1--;
+
 	return;
 
 }
@@ -656,6 +751,12 @@ void FireSpecial(int ship_num)
 
 	al_play_sample_instance(shootb_inst[ship_num]);
 	Net.sounds |= SHOOTB;
+
+	if (Net.client)
+    {
+        Ship[ship_num].actions |= FIRE_SPECIAL;   //sent to server
+        return;
+    }
 
 	switch (Ship[ship_num].ammo2_type)
 	{
@@ -938,13 +1039,18 @@ void UpdateBullets(void)
 
 	while(current_bullet != END_OF_LIST)		//handle all 'live' bullets.
 	{
+		if (current_bullet >= MAX_BULLETS)
+        {
+            fprintf(logfile,"ERROR: Bullet index outside array!!!\n");
+            fflush(logfile);
+            break;   //just in case...
+        }
+
 		Bullet[current_bullet].ttl--;			//decrement life
 
 		if (Bullet[current_bullet].ttl <= 0)	//if expired
 		{										//pass index up the list
             //fprintf(logfile,"Expired Bullet %d\n",current_bullet);
-
-
 
 			if (previous_bullet == END_OF_LIST)							//if we're the first bullet
 			//if (current_bullet == first_bullet)					//(should be equivalent to above)
@@ -960,7 +1066,6 @@ void UpdateBullets(void)
                 CreateExplosion(Bullet[current_bullet].xpos, Bullet[current_bullet].ypos, 1, 8, 0, 0);
 
 		}
-
 
 		else	//update bullet position
 		{

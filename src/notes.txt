@@ -526,9 +526,77 @@ Improved response with poor network:
     ...except shield, and lives, as these will be changed by collision detection, and therefore need to come from server.
   See if this works better....
   
+  so.... for net client, it uses controls from 0, so update ships will update ship 0. 
+  we then send position etc to server with Net.id, so server updates position of ship[Net.id], to broadcast to other clients.
+  client then ignores server message for ship[Net.id]
+  err..... OK, fixed by copying Ship[0] controls to Ship[Net.id] controls in ScanInputs() (I think)
+   ah no, redone with a 'mapping' from 'controls' to 'ship'
+  
+  Found problem with Ship[].landed - cleared on client in UpdateLandedShip when thrust pressed, and sent to server,
+  but server sets it in collision detection, and sends it back. odd conflicts, seemed timing dependent.....
+  
+  So, do Ship-wall collision locally as well - landing/taking off and crashing all good :-) (as long as you igbnore 'shield' 
+  field from server.
+  
+  Need to do ship-ship collision on server, as otherwise 2 clients might not agree over a crash happening! Bullet-ship on server
+  also seems desirable, otherwise bullet updating may get messy....
+  
+  So need some way for server to notify clients - add 'damage' field to ship struct, accumulate damage in bullet-ship and 
+  ship-ship collisions (use 100 for ship-ship) and send in GAMESTATE, then zero on server. Client modifies local shield.
+  
+  Don't need to send any 'local' ship info over network 
+  DON'T NEED:
+  landed, shield, fuel, ammo
+  menu, menu_state, user_ammox, user_fuel
+  xv,yv
+  DO NEED
+  ammo_type (for bullet creation - simpler)
+  reincarnate timer (to not draw exploded ships)
+  NOT SURE
+  lives (depends how we do game over)
+  
+  add field to CLIENT_SHIPSTATE - could be fire normal, fire special or explode. 
+  (0x00 - nothing, 0b 0001 0000 explode 0b 0000 1xyy - fire, xyy is type, so normal/special can be inferred from x. Might be easier to 
+   just send ammo types in every packet...)
+
+  Ah, need to notify server of kills/killed...... and think about game over stuff.
+  
+  game over could be checked by server when rx shipstate (have to send lives) and poked there. 
+  This is similar to what the client does when it rx's GAMEOVER message....
+  Better maybe, client sends CLIENT_DEAD message when its lives used up.
+  Server responds with GAMEOVER, as before.
+  
+  bullet-ship collisions done on server, but shield modified by client. Tricky to allocate kills.....
+  could attach owner to damage field, then client knows who killed it (2 bullets in 1 frame, don't worry about it...)
+  Client sends separate message : 'credit 1 kill to ship x'?
+  
+  *momentum from bullet to ship.....  
+  *send xv and yv but then modifying in two places....? better to add momentum to damage...
+  send bullet xv, yv, also bullet type, so mass can be looked up (mass is float, so easier to send type, as it's int :-)
+  calculate momentum change. Remember xv/yv must be cast as signed. 
+  It's tempting to think that you can look up damage from type, but that's accumulated, in case you get two impacts in 1 frame. 
+  This is unlikely, but better to not screw it up...
+  
+  *also good to send xv yv for wind speed sound 
+  
+  check network sounds
+  
+  probs: 
+    *client crash on exit game. 
+    *client has wrong colour/image for server ship 
+    *client draws server ship, even when destroyed
+  
 broken local things:
 *no status display
 *cant have more than default number of players (in ship/control select screen)
+
+Updating github:
+collisions.c - network.
+drawing.c - make menu fit display dimensions
+          - remove status bar / redo UI
+          - start android controls
+game.c - all of above!
+objects.c - add shrapnel bullet type
 
 so.....
 array [struct {string, fn_ptr}]
@@ -549,7 +617,7 @@ player 1 | ship [image]
 try chronological, so state machine,
 1: network / map (incidentally, need matching maps on client/server......)
    mode
-   local | netowrk
+   local | network
    server
    xxx.xxx.xxx
    maps.....	(show max players)
@@ -620,6 +688,20 @@ Maybe initial state for network:
  //*behaviour when landed - menu doesn't appear on down / sitimus 4p ; quickfire doesn't work....
  
  // Android port?
+   ANdroid Studio: (IDE, SDK=toolchain?, )
+   NDK - Native Dev Kit. allows use of 'native' languages i.e. other than Java, e.g. C, C+
+   CMake - Studios default 'build tool' for 'native' code.
+   
+   download android studio - install
+   run, needs jdk, download, install
+   run again, more downloads - retry, unattended
+   new project - domain name
+   if 32-bit windows, point to downloaded JDK, not bundled (file, project structure)
+   then download ndk (also F,PS)
+   Whinge about cmake, can't install from gui, maybe because of 32-bit?
+   download (32 bit version) install
+   
+Error while executing 'C:\Users\ilewis\AppData\Local\Android\Sdk\cmake\bin\cmake.exe' with arguments {-HC:\Users\ilewis\AndroidStudioProjects\Test1\app -BC:\Users\ilewis\AndroidStudioProjects\Test1\app\.externalNativeBuild\cmake\release\armeabi -GAndroid Gradle - Ninja -DANDROID_ABI=armeabi -DANDROID_NDK=C:\Users\ilewis\AppData\Local\Android\Sdk\ndk-bundle -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=C:\Users\ilewis\AndroidStudioProjects\Test1\app\build\intermediates\cmake\release\obj\armeabi -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=C:\Users\ilewis\AppData\Local\Android\Sdk\cmake\bin\ninja.exe -DCMAKE_TOOLCHAIN_FILE=C:\Users\ilewis\AppData\Local\Android\Sdk\ndk-bundle\build\cmake\android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=15 -DCMAKE_CXX_FLAGS=}   
  
  // Sentry damage shield:
     TR has rapid fire bullets, (max 100) with low damage (3)

@@ -543,6 +543,54 @@ void init_controls(void)
 	Ship[3].right_key  = ALLEGRO_KEY_RIGHT;
 	Ship[3].thrust_key = ALLEGRO_KEY_RCTRL;
 
+  #ifdef ANDROID
+	//On-screen controls
+    if ((Ctrl.direction.bmp = al_load_bitmap("ctrl_direction.png")) == NULL)  fprintf(logfile,"ctrl_direction.png load fail");
+    //if ((Ctrl.directionbg.bmp = al_load_bitmap("ctrl_directionbg.png")) == NULL)  fprintf(logfile,"ctrl_directionbg.png load fail");
+    if ((Ctrl.thrust.bmp = al_load_bitmap("ctrl_thrust.png")) == NULL)  fprintf(logfile,"ctrl_thrust.png load fail");
+    if ((Ctrl.escape.bmp = al_load_bitmap("ctrl_escape.png")) == NULL)  fprintf(logfile,"ctrl_escape.png load fail");
+    //if ((Ctrl.start.bmp = al_load_bitmap("ctrl_start.png")) == NULL)  fprintf(logfile,"ctrl_start.png load fail");
+    //if ((Ctrl.select.bmp = al_load_bitmap("ctrl_select.png")) == NULL)  fprintf(logfile,"ctrl_select.png load fail");
+
+	int dw,dh;//,bw,bh;
+	dw = al_get_display_width(display);
+	dh = al_get_display_height(display);
+
+	Ctrl.reversed = false;
+
+	Ctrl.direction.w = al_get_bitmap_width(Ctrl.direction.bmp);
+	Ctrl.direction.h = al_get_bitmap_width(Ctrl.direction.bmp);
+	Ctrl.direction.x = 0.98*dw-Ctrl.direction.w;
+	Ctrl.direction.y = 0.98*dh-Ctrl.direction.h;
+
+	//Ctrl.directionbg.w = al_get_bitmap_width(Ctrl.directionbg.bmp);
+	//Ctrl.directionbg.h = al_get_bitmap_width(Ctrl.directionbg.bmp);
+	//Ctrl.directionbg.x = 0.98*dw-Ctrl.directionbg.w;
+	//Ctrl.directionbg.y = 0.98*dh-Ctrl.directionbg.h;
+
+	Ctrl.thrust.w = al_get_bitmap_width(Ctrl.thrust.bmp);
+	Ctrl.thrust.h = al_get_bitmap_width(Ctrl.thrust.bmp);
+	Ctrl.thrust.x = 0.02*dw;
+	Ctrl.thrust.y = 0.98*dh-Ctrl.thrust.h;
+
+	Ctrl.escape.w = al_get_bitmap_width(Ctrl.escape.bmp);
+	Ctrl.escape.h = al_get_bitmap_width(Ctrl.escape.bmp);
+	Ctrl.escape.x = 0.02*dw;
+	Ctrl.escape.y = 0.02*dh;
+/*
+	Ctrl.select.w = al_get_bitmap_width(Ctrl.select.bmp);
+	Ctrl.select.h = al_get_bitmap_width(Ctrl.select.bmp);
+	Ctrl.select.x = 0.02*dw;
+	Ctrl.select.y = 0.02*dh;
+
+	Ctrl.start.w = al_get_bitmap_width(Ctrl.start.bmp);
+	Ctrl.start.h = al_get_bitmap_width(Ctrl.start.bmp);
+	Ctrl.start.x = 0.02*dw;
+	Ctrl.start.y = 0.02*dh;
+*/
+#endif // ANDROID
+
+	//Colours - redundant??
 	StatusColour[0] = al_map_rgba(0, 32, 0, 20);  //used for background to status (ammo, fuel, lives etc)
     StatusColour[1] = al_map_rgba(32, 0, 0, 20);
     StatusColour[2] = al_map_rgba(0, 0, 32, 20);

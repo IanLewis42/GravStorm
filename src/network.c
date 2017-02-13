@@ -225,12 +225,98 @@ void NetSendReady(void)
     char temp_pkt[100];
 
     temp_pkt[0] = CLIENT_READY;
-    temp_pkt[1]  = Net.id;
+    temp_pkt[1] = Net.id;
     temp_pkt[2] = Ship[0].image;
+
+    Ship[Net.id].image = Ship[0].image;
+    Ship[Net.id].colour = Ship[0].colour;
 
     ENetPacket * packet = enet_packet_create (&temp_pkt,3,ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (Net.peer, 0, packet);
     fprintf(clientfile,"Sent Ready. ID:%d Image:%d\n",Net.id,Ship[0].image);
+    Net.quality = 100;
+}
+
+void NetSendShipState(void)
+{
+    char temp_pkt[100];
+    int i=0;
+    int j = Net.id;
+
+    temp_pkt[i++] = CLIENT_SHIPSTATE;
+    temp_pkt[i++] = Net.id;
+
+    temp_pkt[i++] = ((unsigned short int)Ship[j].xpos)>>8;
+    temp_pkt[i++] = ((unsigned short int)Ship[j].xpos)&0xff;
+    temp_pkt[i++] = ((unsigned short int)Ship[j].ypos)>>8;
+    temp_pkt[i++] = ((unsigned short int)Ship[j].ypos)&0xff;
+    temp_pkt[i++] = (signed char)Ship[j].xv;
+    temp_pkt[i++] = (signed char)Ship[j].yv;
+    temp_pkt[i++] = (char)Ship[j].angle;
+    temp_pkt[i++] = (char)Ship[j].thrust;
+    //temp_pkt[i++] = (char)Ship[j].landed;
+
+    temp_pkt[i++] = (char)Ship[j].lives;
+    //temp_pkt[i++] = (char)Ship[j].shield;
+    //temp_pkt[i++] = (char)(Ship[j].fuel>>8);
+    //temp_pkt[i++] = (char)(Ship[j].fuel&0xff);
+    //temp_pkt[i++] = (char)Ship[j].ammo1;
+    //temp_pkt[i++] = (char)Ship[j].ammo2;
+    temp_pkt[i++] = (char)Ship[j].image;
+    temp_pkt[i++] = (char)Ship[j].reincarnate_timer;
+    //temp_pkt[i++] = (char)Ship[j].menu;
+    //if (Ship[j].menu)
+    {
+        //temp_pkt[i++] = (char)Ship[j].menu_state;
+        temp_pkt[i++] = (char)Ship[j].ammo1_type;
+        temp_pkt[i++] = (char)Ship[j].ammo2_type;
+        //temp_pkt[i++] = (char)Ship[j].user_ammo1;
+        //temp_pkt[i++] = (char)Ship[j].user_ammo2;
+        //temp_pkt[i++] = (char)Ship[j].user_fuel;
+    }
+    temp_pkt[i++] = (char)Ship[j].actions;
+    Ship[j].actions = 0;
+    temp_pkt[i++] = (char)Net.sounds;
+    Net.sounds = 0;
+
+    ENetPacket * packet = enet_packet_create (&temp_pkt,i,ENET_PACKET_FLAG_RELIABLE);
+    enet_peer_send (Net.peer, 0, packet);
+
+    /*
+    Ship[0].fire1_down = false;
+    Ship[0].fire2_down = false;
+    Ship[0].left_down = false;
+    Ship[0].right_down = false;
+    Ship[0].thrust_down = false;
+    */
+}
+
+void NetSendKilled(int killer)
+{
+    char temp_pkt[100];
+
+    temp_pkt[0] = CLIENT_KILLED;
+    temp_pkt[1] = killer;
+    temp_pkt[2] = Net.id;
+
+    ENetPacket * packet = enet_packet_create (&temp_pkt,4,ENET_PACKET_FLAG_RELIABLE);
+    enet_peer_send (Net.peer, 0, packet);
+
+    fprintf(clientfile,"Sent CLIENT KILLED\n");
+
+}
+
+void NetSendOutOfLives(void)
+{
+    char temp_pkt[100];
+
+    temp_pkt[0] = CLIENT_OUTOFLIVES;
+    temp_pkt[1] = Net.id;
+
+    ENetPacket * packet = enet_packet_create (&temp_pkt,3,ENET_PACKET_FLAG_RELIABLE);
+    enet_peer_send (Net.peer, 0, packet);
+
+    fprintf(clientfile,"Sent CLIENT OUTOFLIVES\n");
 }
 
 void NetSendKeys(void)
@@ -293,26 +379,44 @@ void NetSendGameState()
         temp_pkt[i++] = (signed char)Ship[j].yv;
         temp_pkt[i++] = (char)Ship[j].angle;
         temp_pkt[i++] = (char)Ship[j].thrust;
-        temp_pkt[i++] = (char)Ship[j].landed;
+        temp_pkt[i++] = (char)Ship[j].left_held;
+        temp_pkt[i++] = (char)Ship[j].right_held;
+        temp_pkt[i++] = (char)Ship[j].mass;
+
+
+        //temp_pkt[i++] = (char)Ship[j].landed;
 
         temp_pkt[i++] = (char)Ship[j].lives;
-        temp_pkt[i++] = (char)Ship[j].shield;
-        temp_pkt[i++] = (char)(Ship[j].fuel>>8);
-        temp_pkt[i++] = (char)(Ship[j].fuel&0xff);
-        temp_pkt[i++] = (char)Ship[j].ammo1;
-        temp_pkt[i++] = (char)Ship[j].ammo2;
+        //temp_pkt[i++] = (char)Ship[j].shield;
+        //temp_pkt[i++] = (char)(Ship[j].fuel>>8);
+        //temp_pkt[i++] = (char)(Ship[j].fuel&0xff);
+        //temp_pkt[i++] = (char)Ship[j].ammo1;
+        //temp_pkt[i++] = (char)Ship[j].ammo2;
         temp_pkt[i++] = (char)Ship[j].image;
         temp_pkt[i++] = (char)Ship[j].reincarnate_timer;
-        temp_pkt[i++] = (char)Ship[j].menu;
-        if (Ship[j].menu)
+        //temp_pkt[i++] = (char)Ship[j].shield;
+        //temp_pkt[i++] = (char)Ship[j].landed;
+
+        //temp_pkt[i++] = (char)Ship[j].menu;
+        //if (Ship[j].menu)
         {
-            temp_pkt[i++] = (char)Ship[j].menu_state;
-            temp_pkt[i++] = (char)Ship[j].ammo1_type;
-            temp_pkt[i++] = (char)Ship[j].ammo2_type;
-            temp_pkt[i++] = (char)Ship[j].user_ammo1;
-            temp_pkt[i++] = (char)Ship[j].user_ammo2;
-            temp_pkt[i++] = (char)Ship[j].user_fuel;
+        //    temp_pkt[i++] = (char)Ship[j].menu_state;
+        //    temp_pkt[i++] = (char)Ship[j].ammo1_type;
+        //    temp_pkt[i++] = (char)Ship[j].ammo2_type;
+        //    temp_pkt[i++] = (char)Ship[j].user_ammo1;
+        //    temp_pkt[i++] = (char)Ship[j].user_ammo2;
+        //    temp_pkt[i++] = (char)Ship[j].user_fuel;
         }
+        temp_pkt[i++] = (char)Ship[j].bullet.damage;
+        temp_pkt[i++] = (char)Ship[j].bullet.owner;
+        temp_pkt[i++] = (char)Ship[j].bullet.type;
+        temp_pkt[i++] = (signed char)Ship[j].bullet.xv;
+        temp_pkt[i++] = (signed char)Ship[j].bullet.yv;
+
+        Ship[j].bullet.damage = 0;
+        Ship[j].bullet.owner = NO_OWNER;
+        Ship[j].bullet.xv = 0;
+        Ship[j].bullet.yv = 0;
     }
 
     //bullets
@@ -421,6 +525,7 @@ NetMessageType ServiceNetwork(void)
         else
         {
             Net.updated = false;
+            Net.quality *= 0.99;
 
             while (enet_host_service(Net.host, &Net.event, 0))
             {
@@ -434,9 +539,12 @@ NetMessageType ServiceNetwork(void)
                         {
                         case HOST_ID:
                             Net.id = Net.event.packet->data[1];
-                            Ship[0].image = Net.id;
+                            Ship[0].image = Net.id;                         //for menu display
+                            Ship[0].colour = ShipColour[Net.id];                         //for menu display
                             fprintf(clientfile,"Received ID:%d\n",Net.id);
                             enet_packet_destroy (Net.event.packet);
+
+                            reinit_ship(Net.id);
 
                             strcpy(buf,NAME);                                    //display in title bar
                             sprintf(buf+strlen(NAME)," (Client: P%d)",Net.id+1);
@@ -465,47 +573,85 @@ NetMessageType ServiceNetwork(void)
                         case HOST_GO:
                             fprintf(clientfile,"Received GO message\n");
                             Net.started = true;
+                            Net.quality = 100;
                             enet_packet_destroy (Net.event.packet);
                         break;
                         case HOST_GAMESTATE:
+                            //break;
                             if (Net.client_state != RUNNING) break;
                             fpsnet_acc++;
                             i=1;
                             num_ships = Net.event.packet->data[i++];
                             for (j=0 ; j<num_ships ; j++)
                             {
-                                Ship[j].xpos   = Net.event.packet->data[i++] << 8;
-                                Ship[j].xpos  += Net.event.packet->data[i++];
-                                Ship[j].ypos   = Net.event.packet->data[i++] << 8;
-                                Ship[j].ypos  += Net.event.packet->data[i++];
-                                Ship[j].xv     = (signed char)Net.event.packet->data[i++];
-                                Ship[j].yv     = (signed char)Net.event.packet->data[i++];
-                                Ship[j].angle  = Net.event.packet->data[i++];
-                                Ship[j].thrust = Net.event.packet->data[i++];
-                                Ship[j].landed = Net.event.packet->data[i++];
-
-                                Ship[j].lives  = Net.event.packet->data[i++];
-                                Ship[j].shield = Net.event.packet->data[i++];
-                                Ship[j].fuel   = Net.event.packet->data[i++] << 8;
-                                Ship[j].fuel  += Net.event.packet->data[i++];
-                                Ship[j].ammo1  = Net.event.packet->data[i++];
-                                Ship[j].ammo2  = Net.event.packet->data[i++];
-
-                                Ship[j].image  = Net.event.packet->data[i++];
-                                Ship[j].colour = ShipColour[Ship[j].image];
-                                Ship[j].statuscolour = StatusColour[Ship[j].image];
-
-                                Ship[j].reincarnate_timer  = Net.event.packet->data[i++];
-
-                                Ship[j].menu = Net.event.packet->data[i++];
-                                if (Ship[j].menu)
+                                if (j==Net.id)
                                 {
-                                    Ship[j].menu_state = Net.event.packet->data[i++];
-                                    Ship[j].ammo1_type = Net.event.packet->data[i++];
-                                    Ship[j].ammo2_type = Net.event.packet->data[i++];
-                                    Ship[j].user_ammo1 = Net.event.packet->data[i++];
-                                    Ship[j].user_ammo2 = Net.event.packet->data[i++];
-                                    Ship[j].user_fuel  = Net.event.packet->data[i++];
+                                    i+=14;                              //skip a few...
+
+                                    Ship[j].bullet.damage = Net.event.packet->data[i++];    //read damage
+                                    if (Ship[j].bullet.damage)
+                                    {
+                                        Ship[j].shield -=  Ship[j].bullet.damage; //subtract damage
+                                        Ship[j].bullet.owner = Net.event.packet->data[i++];
+                                        if (Ship[j].shield <= 0)
+                                        {
+                                            Ship[j].killed++;
+                                            if (Ship[j].bullet.owner != NO_OWNER)
+                                                NetSendKilled(Ship[j].bullet.owner);
+                                        }
+                                        //if (Ship[j].bullet.owner != NO_OWNER)
+                                        {
+                                            Ship[j].bullet.type = Net.event.packet->data[i++];                                      //read type so we can look up mass
+                                            Ship[j].xv     += Mass[Ship[j].bullet.type]*(signed char)Net.event.packet->data[i++];	//momentum from bullet to ship
+                                            Ship[j].yv     += Mass[Ship[j].bullet.type]*(signed char)Net.event.packet->data[i++];
+                                        }
+                                    }
+                                    else
+                                        i+=4;
+                                }
+                                else
+                                {
+                                    Ship[j].xpos   = Net.event.packet->data[i++] << 8;
+                                    Ship[j].xpos  += Net.event.packet->data[i++];
+                                    Ship[j].ypos   = Net.event.packet->data[i++] << 8;
+                                    Ship[j].ypos  += Net.event.packet->data[i++];
+                                    Ship[j].xv     = (signed char)Net.event.packet->data[i++];
+                                    Ship[j].yv     = (signed char)Net.event.packet->data[i++];
+                                    Ship[j].angle  = Net.event.packet->data[i++];
+                                    Ship[j].thrust = Net.event.packet->data[i++];
+
+                                    Ship[j].left_held  = Net.event.packet->data[i++];
+                                    Ship[j].right_held = Net.event.packet->data[i++];
+                                    Ship[j].mass       = Net.event.packet->data[i++];
+
+                                    //Ship[j].landed = Net.event.packet->data[i++];
+
+                                    Ship[j].lives  = Net.event.packet->data[i++];
+                                    //Ship[j].shield = Net.event.packet->data[i++];
+                                    //Ship[j].fuel   = Net.event.packet->data[i++] << 8;
+                                    //Ship[j].fuel  += Net.event.packet->data[i++];
+                                    //Ship[j].ammo1  = Net.event.packet->data[i++];
+                                    //Ship[j].ammo2  = Net.event.packet->data[i++];
+
+                                    Ship[j].image  = Net.event.packet->data[i++];
+                                    Ship[j].colour = ShipColour[Ship[j].image];
+                                    Ship[j].statuscolour = StatusColour[Ship[j].image];
+
+                                    Ship[j].reincarnate_timer  = Net.event.packet->data[i++];
+                                    //Ship[j].shield = Net.event.packet->data[i++];
+                                    //Ship[j].landed = Net.event.packet->data[i++];
+
+                                    //Ship[j].menu = Net.event.packet->data[i++];
+                                    //if (Ship[j].menu)
+                                    //{
+                                    //    Ship[j].menu_state = Net.event.packet->data[i++];
+                                    //    Ship[j].ammo1_type = Net.event.packet->data[i++];
+                                    //    Ship[j].ammo2_type = Net.event.packet->data[i++];
+                                    //    Ship[j].user_ammo1 = Net.event.packet->data[i++];
+                                    //    Ship[j].user_ammo2 = Net.event.packet->data[i++];
+                                    //    Ship[j].user_fuel  = Net.event.packet->data[i++];
+                                   // }
+                                   i+=5; //skip bullet params
                                 }
                             }
                             //create linked list.
@@ -620,12 +766,14 @@ NetMessageType ServiceNetwork(void)
                     break;
                 }
             }
+            if (Net.updated)
+                Net.quality++;
         }
     }
 
     else if (Net.server)
     {
-        int i;
+        int i,j;
 
         if (num_ships < 2)
             PingReply();    //check if we've been pinged by a client. If so, reply.
@@ -701,6 +849,57 @@ NetMessageType ServiceNetwork(void)
                             Ship[i].right_held  = Net.event.packet->data[9];
                             Ship[i].thrust_down = Net.event.packet->data[10];
                             Ship[i].thrust_held = Net.event.packet->data[11];
+                        break;
+                        case CLIENT_SHIPSTATE:
+                            i=1;
+                            j = Net.event.packet->data[i++];
+                            Ship[j].xpos   = Net.event.packet->data[i++] << 8;
+                            Ship[j].xpos  += Net.event.packet->data[i++];
+                            Ship[j].ypos   = Net.event.packet->data[i++] << 8;
+                            Ship[j].ypos  += Net.event.packet->data[i++];
+                            Ship[j].xv     = (signed char)Net.event.packet->data[i++];
+                            Ship[j].yv     = (signed char)Net.event.packet->data[i++];
+                            Ship[j].angle  = Net.event.packet->data[i++];
+                            Ship[j].thrust = Net.event.packet->data[i++];
+                            //Ship[j].landed = Net.event.packet->data[i++];
+
+                            Ship[j].lives  = Net.event.packet->data[i++];
+                            //Ship[j].shield = Net.event.packet->data[i++];
+                            //Ship[j].fuel   = Net.event.packet->data[i++] << 8;
+                            //Ship[j].fuel  += Net.event.packet->data[i++];
+                            //Ship[j].ammo1  = Net.event.packet->data[i++];
+                            //Ship[j].ammo2  = Net.event.packet->data[i++];
+
+                            Ship[j].image  = Net.event.packet->data[i++];
+                            Ship[j].colour = ShipColour[Ship[j].image];
+                            Ship[j].statuscolour = StatusColour[Ship[j].image];
+
+                            Ship[j].reincarnate_timer  = Net.event.packet->data[i++];
+
+                            //Ship[j].menu = Net.event.packet->data[i++];
+                            //if (Ship[j].menu)
+                            {
+                                //Ship[j].menu_state = Net.event.packet->data[i++];
+                                Ship[j].ammo1_type = Net.event.packet->data[i++];
+                                Ship[j].ammo2_type = Net.event.packet->data[i++];
+                                //Ship[j].user_ammo1 = Net.event.packet->data[i++];
+                                //Ship[j].user_ammo2 = Net.event.packet->data[i++];
+                                //Ship[j].user_fuel  = Net.event.packet->data[i++];
+                            }
+                            if (Net.event.packet->data[i]   & FIRE_NORMAL)  FireNormal(j);
+                            if (Net.event.packet->data[i]   & FIRE_SPECIAL) FireSpecial(j);
+                            if (Net.event.packet->data[i++] & EXPLODE)
+                                CreateExplosion(Ship[j].xpos, Ship[j].ypos, 2, 8, Ship[j].xv, Ship[j].yv);//float outward_v);
+                            Net.sounds |= Net.event.packet->data[i++];    //take sounds from client
+                        break;
+                        case CLIENT_KILLED:
+                            fprintf(hostfile,"Received CLIENT KILLED\n");
+                            Ship[Net.event.packet->data[1]].kills++;
+                            Ship[Net.event.packet->data[2]].killed++;
+                        break;
+                        case CLIENT_OUTOFLIVES:
+                            fprintf(hostfile,"Received CLIENT OUTOFLIVES\n");
+                            game_over = GO_TIMER;
                         break;
                     }
                 break;

@@ -41,7 +41,12 @@
 #define BLT_SPREADER	7
 #define BLT_LAVA		8
 #define BLT_SENTRY		9
-#define BULLET_TYPES 	10
+#define BLT_SHRAPNEL    10
+#define BULLET_TYPES 	11
+
+#define FIRE_NORMAL     1
+#define FIRE_SPECIAL    2
+#define EXPLODE         4
 
 #define DEFAULT_FUEL		75
 #define DEFAULT_AMMO1		50
@@ -85,7 +90,23 @@
 
 typedef struct
 {
+	int type;	//0 for 'normal', 1,2,3,4 for specials....
+	float xpos;
+	float ypos;
+	float xv;
+	float yv;
+	int ttl;	//time-to-live. in frames. Puts a limit on how many we can have
+	int damage;
+	float mass;
+	ALLEGRO_COLOR colour;
+	int next_bullet;
+	int owner;
+} BulletType;
+
+typedef struct
+{
 	int image;      //what does it look like?
+	int offset;     //for scrolling in menu
 	//key mapping
 	int controller;	//keys or joystick - live
 	int selected_controller; //remember what we chose to replace N/As in menu
@@ -142,6 +163,9 @@ typedef struct
 	int crashed;
 	int killed;
 	int shield;
+	//int damage;     //used in network - server works out damage, sends to client. client manages shield.
+	//int damaged_by;
+	int actions;    //tell server to make bullets/explode.
 	int fuel;
 	int ammo1;		//normal - only 1 type for now
 	int ammo1_type;
@@ -184,32 +208,20 @@ typedef struct
 	float best_lap_time;
 	int lap_table_pos;
 
+	BulletType bullet;       //used in network - server works out damage, sends to client. client manages shield.
+
 	ALLEGRO_COLOR colour;
 	ALLEGRO_COLOR statuscolour; //background colour for status display
 	ALLEGRO_BITMAP* status_bg;
 
 } ShipType;
 
-typedef struct
-{
-	int type;	//0 for 'normal', 1,2,3,4 for specials....
-	float xpos;
-	float ypos;
-	float xv;
-	float yv;
-	int ttl;	//time-to-live. in frames. Puts a limit on how many we can have
-	int damage;
-	float mass;
-	ALLEGRO_COLOR colour;
-	int next_bullet;
-	int owner;
-} BulletType;
-
 extern ShipType Ship[MAX_SHIPS];
 extern int num_ships;
 extern BulletType Bullet[MAX_BULLETS];
 extern int first_bullet;
 extern int mapx, mapy;
+extern float Mass[BULLET_TYPES];
 //extern int random, random100, count, shots;
 //Trig LUTs
 extern float sinlut[NUM_ANGLES];
@@ -222,7 +234,12 @@ extern ALLEGRO_SAMPLE *dead;
 extern ALLEGRO_SAMPLE *yippee;
 
 int  UpdateShips(int num_ships);
+void UpdateRemoteShips(void);
 void UpdateBullets(void);
 void UpdateForcefields(void);
 void UpdateSentries(void);
 void UpdateSwitches(void);
+
+void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv);//float outward_v);
+void FireNormal(int i);	//int
+void FireSpecial(int i);	//int

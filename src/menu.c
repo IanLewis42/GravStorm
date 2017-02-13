@@ -55,16 +55,29 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	int sound_latency;
 
 	char fade_in[200],fade_out[200],visible[200];
+	//int fade_in_y = 600, visible_y = 570, fade_out_y = 540;
 	int fade_in_y = 600, visible_y = 570, fade_out_y = 540;
 	int fade_count=0;
 	float alpha;
+
+	int w,h,bgw,bgh,bgx,bgy;
 
 	FILE* credits;
 
 	if ((menu_bg_bmp = al_load_bitmap("menu_bg.png")) == NULL) fprintf(logfile,"menu_bg.png load fail\n");
 	if ((logo = al_load_bitmap("gs.png")) == NULL) fprintf(logfile,"gs.png load fail\n");
+
 	if ((credits = fopen ("credits.txt","r")) == NULL)  fprintf(logfile,"credits.txt load fail\n");
 	fflush(logfile);
+
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+    bgw = al_get_bitmap_width(menu_bg_bmp);
+    bgh = al_get_bitmap_height(menu_bg_bmp);
+
+    fade_in_y  = font_scale*600;
+    visible_y  = font_scale*570;
+    fade_out_y = font_scale*540;
 
 	fprintf(logfile,"Title Screen\n");
 
@@ -113,30 +126,40 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 			text_scale = a/(y-(ht-hc)); //ditto
 
 			al_clear_to_color(al_map_rgb(0, 0, 0));
-			al_draw_bitmap(menu_bg_bmp,0,0,0);
+			//al_draw_bitmap(menu_bg_bmp,0,0,0);
+
+            for(bgy=0 ; bgy<h ; bgy+=bgh)
+            {
+                for(bgx=0 ; bgx<w ; bgx+=bgw)
+                {
+                    al_draw_bitmap(menu_bg_bmp,bgx,bgy,0);
+                }
+            }
 
 			//al_draw_textf(font, al_map_rgb(255, 255, 0),200, 200,  ALLEGRO_ALIGN_LEFT, "Count:%d",count);
 
 			al_identity_transform(&transform);			/* Initialize transformation. */
 			al_scale_transform(&transform, shadow_scale, shadow_scale);	/* Rotate and scale around the center first. */
-			al_translate_transform(&transform,SCREENX/2,SCREENY/2);
+			al_translate_transform(&transform,w/2,h/2);
 			al_use_transform(&transform);
 
 			//try (y/ht) squared
-			al_draw_textf(title_font, al_map_rgba(0, 0, 0,128*(y/ht)*(y/ht)),0, -1*al_get_font_ascent(title_font)/2,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
+			al_draw_textf(title_font, al_map_rgba(0, 0, 0,160*(y/ht)*(y/ht)),0, -1*al_get_font_ascent(title_font)/2,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
 
     		if (y > (ht-hc))
     		{
 				al_identity_transform(&transform);
-				al_scale_transform(&transform, text_scale, text_scale);	/* Rotate and scale around the center first. */
-				al_translate_transform(&transform,SCREENX/2-10,SCREENY/2-10);
+				al_scale_transform(&transform, text_scale*font_scale, text_scale*font_scale);	/* Rotate and scale around the center first. */
+				al_translate_transform(&transform,w/2,(h/2)-(int)(26*font_scale));
 				al_use_transform(&transform);
 				//al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, -1*al_get_font_ascent(title_font)/2,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
-				al_draw_bitmap(logo,-SCREENX/2+15,-12,0);
+				al_draw_bitmap(logo,-w/(2*font_scale),0,0);
 			}
 
 			al_identity_transform(&transform);
     		al_use_transform(&transform);
+
+    		int line_space = 30*font_scale;
 
     		if (y==ht)	//start credits
     		{
@@ -145,13 +168,13 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 					strcpy(fade_out,visible);
 					strcpy(visible,fade_in);
 					if (fgets(fade_in,200,credits) == NULL) break;
-					fade_count = 30;
+					fade_count = line_space;
 				}
-				alpha = (1.0/30)*(30-fade_count);
-				al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*(30-fade_count))*/,SCREENX/2, fade_in_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_in);
-				al_draw_textf(small_font, al_map_rgba_f(0.35, 0, 0, 1),SCREENX/2, visible_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",visible);
-				alpha = (1.0/30)*fade_count;
-				al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*fade_count)*/,SCREENX/2, fade_out_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_out);
+				alpha = (1.0/line_space)*(line_space-fade_count);
+				al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*(30-fade_count))*/,w/2, fade_in_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_in);
+				al_draw_textf(small_font, al_map_rgba_f(0.35, 0, 0, 1),w/2, visible_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",visible);
+				alpha = (1.0/line_space)*fade_count;
+				al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*fade_count)*/,w/2, fade_out_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_out);
 
 				fade_count--;
 			}
@@ -175,7 +198,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
 	int i;
-	int w,h,xoffset,yoffset;
+	int w,h;//,xoffset,yoffset;
 	ShipType AnyShip;
 	ALLEGRO_SAMPLE_INSTANCE *loop_inst;
 
@@ -210,15 +233,6 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
     al_set_clipping_rectangle(0, 0, w, h);
 
-    yoffset = (h-SCREENY)/2;
-    if (yoffset < 0) yoffset = 0;
-
-    xoffset = (w-SCREENX)/2;
-    if (xoffset < 0) xoffset = 0;
-
-    Menu.x_origin = xoffset;
-    Menu.y_origin = yoffset;
-
 	//Menu.map = 0;
 	Menu.col = 0;
 	Menu.offset = 0;
@@ -226,6 +240,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	menu_bg_bmp = al_load_bitmap("menu_bg.png");
     logo = al_load_bitmap("gs.png");
     if ((ships = al_load_bitmap("ships.png")) == NULL)  fprintf(logfile,"ships.png load fail");
+    if ((grey_ships = al_load_bitmap("grey_ships.png")) == NULL)  fprintf(logfile,"grey_ships.png load fail");
 
 	fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 
@@ -268,7 +283,7 @@ FILE *hostfile,*clientfile;
 int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 {
 	int i;
-	int w,h,xoffset,yoffset;
+	int w,h;//,xoffset,yoffset;
 
     Ship[0].angle = 0;
     Ship[1].angle = 10;
@@ -294,20 +309,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             h = al_get_display_height(display);
 
             al_set_clipping_rectangle(0, 0, w, h);
-
-            yoffset = (h-SCREENY)/2;
-            if (yoffset < 0) yoffset = 0;
-
-            xoffset = (w-SCREENX)/2;
-            if (xoffset < 0) xoffset = 0;
-
-            Menu.x_origin = xoffset;
-            Menu.y_origin = yoffset;
-
-            if (Menu.col >= 2)
-                Menu.offset = Menu.x_origin-460;
-            else
-                Menu.offset = Menu.x_origin;
         }
 
 		else if (event.type == ALLEGRO_EVENT_TIMER && al_is_event_queue_empty(queue))
@@ -315,8 +316,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 			display_new_menu();
 
 			//expanding maps
-			if (Menu.expand < 35)
-				Menu.expand += 5;
+			if (Menu.expand < 35*font_scale)
+				Menu.expand += 5*font_scale;
 
             if (gpio_active) ReadGPIOJoystick();
 
@@ -353,8 +354,9 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                             {
                                 ServiceNetwork();
                             }
-                            NetStopClient();
                         }
+                        NetStopClient();
+                        //}
                         //Net.client_state = IDLE;        //stop client ping
                         //Net.client = false;
                     }
@@ -498,6 +500,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Menu.state = LEVEL;               //go to next menu
                         //Menu.col_pos = 0;
                         Menu.group = 1;
+                        Menu.map = 0;
                         init_map(Menu.group, Menu.map);
                     }
                     if (Menu.netmode == CLIENT)
@@ -715,6 +718,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Ship[Menu.player].image&=0x07;
                         Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
                         Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
+                        Ship[Menu.player].offset = -60;
+                        //Menu.ship_offset = -60;
                     }
                     else if (Menu.item == 1)        //controls
                     {
@@ -750,6 +755,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Ship[Menu.player].image&=0x07;
                         Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
                         Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
+                        Ship[Menu.player].offset = 60;
+                        //Menu.ship_offset = 60;
                     }
                     else if (Menu.item == 1)    //controls
                     {

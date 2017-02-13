@@ -37,6 +37,8 @@ int GameOver()
 {
 	int i,j,temp;
 	static int score = 0,time_left = 0, timer = 0,position,ship,show_times=false;
+	int line_space,y;
+	int col1,col2,col3,col4;
 	char cursor,display_name[50];
 	int w,h;
 	static int num_ships_latched = 0;
@@ -59,12 +61,9 @@ int GameOver()
             {
                 //calculate nominal score - used to sort
                 for (i=0 ; i<num_ships ; i++)
-                    Ship[i].score = Ship[i].lives + 10*Ship[i].kills;   //score just used to rank - this makes rank based on kilss, with lives as 'tie breaker'
-                    //Ship[i].score = 4-i;
+                    Ship[i].score = Ship[i].lives + 10*Ship[i].kills;   //score just used to rank - this makes rank based on kills, with lives as 'tie breaker'
 
-                int max_score = -99999;
-                //int scores[MAX_SHIPS];
-                //int sorted_ships[MAX_SHIPS];
+                int max_score = -1;
 
                 //sort
                 for (i=0 ; i<num_ships ; i++)
@@ -73,8 +72,6 @@ int GameOver()
 
                     for (j=0 ; j<num_ships ; j++)
                     {
-                        //problem: if (say) ship[2] has a worse score than ship[3]
-                        //then
                         if (Ship[j].score > max_score)
                         {
                             max_score = Ship[j].score;
@@ -82,7 +79,6 @@ int GameOver()
                             Map.score[i].player = j;
                             Map.score[i].kills = Ship[j].kills;
                             Map.score[i].lives = Ship[j].lives;
-                            //Ship[j].score = -1;
                         }
                     }
                     Ship[Map.score[i].player].score = -1;
@@ -92,12 +88,11 @@ int GameOver()
                     int ship = Map.score[i].player;
                     Ship[ship].score = Map.score[i].score;
                 }
-
             }
 
             if (Map.mission)
             {
-                score = 0;                          //calculate score (only applicabe for mission levels, but doesn't hurt.
+                score = 0;                          //calculate score (only applicable for mission levels, but doesn't hurt.
                 score += Ship[0].miners*500;
                 score += Ship[0].jewels*200;
                 score += Ship[0].sentries*100;
@@ -180,73 +175,93 @@ int GameOver()
     case 2: //game_over = 2 i.e. nearly finished. display score for mission levels
 		if (Map.mission)
 		{
+			line_space = 50*font_scale;
+
+			y = 2*line_space;
+			col1 = 100*font_scale;
+			col2 = 400*font_scale;
+			col3 = 800*font_scale;
+
 			if (Ship[0].lives && Ship[0].miners == Map.total_miners)
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  100,  ALLEGRO_ALIGN_LEFT, "MISSION COMPLETE");
+				al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "MISSION COMPLETE");
 			else
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  100,  ALLEGRO_ALIGN_LEFT, "MISSION FAILED");
+				al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "MISSION FAILED");
+			y+=line_space;
 
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  200,  ALLEGRO_ALIGN_LEFT, "RESCUED");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),400,  200,  ALLEGRO_ALIGN_LEFT, "%02d x %d= ",Ship[0].miners,PPMINER);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  200,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].miners*PPMINER);
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "RESCUED");
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d= ",Ship[0].miners,PPMINER);
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].miners*PPMINER);
+            y+=line_space;
 
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "JEWELS");
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d= ",Ship[0].jewels,PPJEWEL);
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].jewels*PPJEWEL);
+            y+=line_space;
 
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  250,  ALLEGRO_ALIGN_LEFT, "JEWELS");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),400,  250,  ALLEGRO_ALIGN_LEFT, "%02d x %d= ",Ship[0].jewels,PPJEWEL);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  250,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].jewels*PPJEWEL);
-
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  300,  ALLEGRO_ALIGN_LEFT, "SENTRIES");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),400,  300,  ALLEGRO_ALIGN_LEFT, "%02d x %d = ",Ship[0].sentries,PPSENTRY);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  300,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].sentries*PPSENTRY);
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "SENTRIES");
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d = ",Ship[0].sentries,PPSENTRY);
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].sentries*PPSENTRY);
+            y+=line_space;
 
             if (Ship[0].lives && Ship[0].miners == Map.total_miners)
 			{
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  350,  ALLEGRO_ALIGN_LEFT, "TIME BONUS");
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),400,  350,  ALLEGRO_ALIGN_LEFT, "%02d x  %d = ",time_left,PPSECOND);
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  350,  ALLEGRO_ALIGN_RIGHT, "%d",time_left*PPSECOND);
+				al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "TIME BONUS");
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x  %d = ",time_left,PPSECOND);
+				al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",time_left*PPSECOND);
+                y+=line_space;
 			}
 
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  400,  ALLEGRO_ALIGN_LEFT, "SCORE:");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),800,  400,  ALLEGRO_ALIGN_RIGHT, "%d",score);
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "SCORE:");
+			al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",score);
 		}
 		else    //not mission, so display 'game over'
 		{
-			al_draw_textf(title_font, al_map_rgb(0,0,0),SCREENX/2,  30,  ALLEGRO_ALIGN_CENTER, "gAme over");    //capital A looks cooler....
-			//al_draw_textf(big_font, al_map_rgb(0,0,0),SCREENX/2, 5*SCREENY/8,  ALLEGRO_ALIGN_CENTER, "over");
+			line_space = 60*font_scale;
 
-            //al_draw_textf(menu_font, colour, 120,   200+60,  ALLEGRO_ALIGN_LEFT, "Player:%d",Map.score[i].player);
-            al_draw_textf(menu_font, al_map_rgb(0,0,0), 120,   200,  ALLEGRO_ALIGN_LEFT, "Rank");
-            al_draw_textf(menu_font, al_map_rgb(0,0,0), 260,   200,  ALLEGRO_ALIGN_LEFT, "Player");
-            al_draw_textf(menu_font, al_map_rgb(0,0,0), 430,   200,  ALLEGRO_ALIGN_LEFT, "Kills");
-            al_draw_textf(menu_font, al_map_rgb(0,0,0), 570,   200,  ALLEGRO_ALIGN_LEFT, "Lives");
+			y = line_space/2;
+			col1 = 120*font_scale;
+			col2 = 260*font_scale;
+			col3 = 460*font_scale;
+			col4 = 600*font_scale;
 
+			al_draw_textf(title_font, al_map_rgb(0,0,0),w/2,  y,  ALLEGRO_ALIGN_CENTER, "gAme over");    //capital A looks cooler....
+
+            y = 200*font_scale;
+
+            //column headings
+            al_draw_textf(menu_font, al_map_rgb(0,0,0), col1,   y,  ALLEGRO_ALIGN_LEFT, "Rank");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0), col2,   y,  ALLEGRO_ALIGN_LEFT, "Player");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0), col3,   y,  ALLEGRO_ALIGN_LEFT, "Kills");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0), col4,   y,  ALLEGRO_ALIGN_LEFT, "Lives");
+            y+=line_space;
 
             for (i=0 ; i<num_ships_latched ; i++)
             {
                 ALLEGRO_COLOR colour;
 
-                if (Map.score[i].player == Net.id)
-                    colour = al_map_rgb(128,0,0);
-                else
-                    colour = al_map_rgb(0,0,0);
+                colour = al_map_rgb(0,0,0);
 
+                if (Net.server || Net.client)
+                {
+                    if (Map.score[i].player == Net.id)  //highlight yourself
+                        colour = al_map_rgb(128,0,0);
+                }
+
+                //equals sign if 2 players are equal
                 if (Map.score[i].kills == Map.score[i-1].kills &&
                     Map.score[i].lives == Map.score[i-1].lives)
-                    al_draw_textf(menu_font, colour, 120,   260+60*i,  ALLEGRO_ALIGN_LEFT, "=");
-                else
-                    al_draw_textf(menu_font, colour, 120,   260+60*i,  ALLEGRO_ALIGN_LEFT, "%d",i+1);
+                    al_draw_textf(menu_font, colour, col1,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "=");
+                else    //otherwise rank
+                    al_draw_textf(menu_font, colour, col1,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "%d",i+1);
 
-                al_draw_textf(menu_font, colour, 260,   260+60*i,  ALLEGRO_ALIGN_LEFT, "P%d",Map.score[i].player+1);
-                al_draw_textf(menu_font, colour, 430,   260+60*i,  ALLEGRO_ALIGN_LEFT, "%d",Map.score[i].kills);
-                al_draw_textf(menu_font, colour, 570,   260+60*i,  ALLEGRO_ALIGN_LEFT, "%d",Map.score[i].lives);
+                //draw ship and player number
+                al_draw_bitmap_region(ships,Ship[Map.score[i].player].angle*SHIP_SIZE_X,Ship[Map.score[i].player].image*SHIP_SIZE_Y*2,SHIP_SIZE_X,SHIP_SIZE_Y,col2, y+line_space*i,0);
+                al_draw_textf(menu_font, colour, col2+SHIP_SIZE_X,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "(P%d)",Map.score[i].player+1);
 
-                /*
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),60,   200+60*i,  ALLEGRO_ALIGN_LEFT, "P:%d",i+1);
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),150,  200+60*i,  ALLEGRO_ALIGN_LEFT, "Ships left:%d",Ship[i].lives);
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),450,  200+60*i,  ALLEGRO_ALIGN_LEFT, "Kills:%d",Ship[i].kills);
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),650,  200+60*i,  ALLEGRO_ALIGN_LEFT, "Killed:%d",Ship[i].killed);
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),850,  200+60*i,  ALLEGRO_ALIGN_LEFT, "Crashes:%d",Ship[i].crashed);
-                */
+                //kills and lives
+                al_draw_textf(menu_font, colour, col3,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "%d",Map.score[i].kills);
+                al_draw_textf(menu_font, colour, col4,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "%d",Map.score[i].lives);
+
             }
 		}
 		for(i=0 ; i<num_ships ; i++)	//check for each ships fire/thrust button to go to next state
@@ -261,6 +276,12 @@ int GameOver()
 	case 1: //game_over = 1, final state, hi score table for missions, times table for race, straight out otherwise.
         if (Map.mission)
         {
+            line_space = 50*font_scale;
+
+			y = line_space;
+			col1 = 100*font_scale;
+			col2 = 300*font_scale;
+
             timer++;            //blinking cursor
             if (timer & 0x10)
                 cursor = ' ';
@@ -288,14 +309,16 @@ int GameOver()
             strncpy(display_name,Map.newscore[position].name,50);
             strcat(display_name,&cursor);
 
-            al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  50,  ALLEGRO_ALIGN_LEFT, "HIGH SCORES");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "HIGH SCORES");
+            y+=line_space;
+
             for (i=0 ; i<MAX_SCORES ; i++)
             {
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  100+i*50,  ALLEGRO_ALIGN_LEFT, "%d",Map.newscore[i].score);
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%d",Map.newscore[i].score);
                 if (i==position)
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),300,  100+i*50,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
+                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
                 else
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),300,  100+i*50,  ALLEGRO_ALIGN_LEFT, "%s",Map.newscore[i].name);
+                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%s",Map.newscore[i].name);
             }
             //if we are not in the high score table allow thrust to exit
             //don't otherwise, as thrust key might be a character that is typed in to high score table!
@@ -314,6 +337,13 @@ int GameOver()
         }
         else if (Map.race && show_times)    //race, and someone completed a lap.
         {
+            line_space = 50*font_scale;
+
+			y = line_space;
+			col1 = 100*font_scale;
+			col2 = 300*font_scale;
+			col3 = 500*font_scale;
+
             while (Ship[ship].lap_table_pos > MAX_SCORES)  //skip to next ship with a lap table entry
             {
                 if (ship >= num_ships)
@@ -357,17 +387,19 @@ int GameOver()
             strncpy(display_name,Map.newtime[Ship[ship].lap_table_pos].name,50);
             strcat(display_name,&cursor);
 
-            al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  50,  ALLEGRO_ALIGN_LEFT, "BEST TIMES");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "BEST TIMES");
+            y+=line_space;
+
             for (i=0 ; i<MAX_SCORES ; i++)
             {
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),100,  100+i*50,  ALLEGRO_ALIGN_LEFT, "%.3f",Map.newtime[i].time);
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%.3f",Map.newtime[i].time);
                 if (i==Ship[ship].lap_table_pos)
                 {
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),300,  100+i*50,  ALLEGRO_ALIGN_LEFT, "(P%d)",ship+1);
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),500,  100+i*50,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
+                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "(P%d)",ship+1);
+                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
                 }
                 else
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),500,  100+i*50,  ALLEGRO_ALIGN_LEFT, "%s",Map.newtime[i].name);
+                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%s",Map.newtime[i].name);
             }
 
             //if we are not in the high score table allow thrust to exit

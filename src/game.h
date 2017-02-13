@@ -267,6 +267,7 @@ typedef struct
 	int controls;	//0,1 keys, 2 GPIO joystick? 3 onwards USB joysticks.
 	char current_key;
 	int offset;		//to make columns slide
+	int ship_offset;//to make ships slide
 	int x_origin;
 	int y_origin;
 	int expand;
@@ -294,10 +295,14 @@ extern ALLEGRO_FONT *font;
 extern ALLEGRO_FONT *title_font;
 extern ALLEGRO_FONT *big_font;
 
+extern float font_scale;//, font_scale_y;
+
 //extern int num_ships;
 extern ALLEGRO_BITMAP *logo;
 extern ALLEGRO_BITMAP *ships;
+extern ALLEGRO_BITMAP *grey_ships;
 extern ALLEGRO_BITMAP *sentries;
+extern ALLEGRO_BITMAP *ui;
 extern ALLEGRO_BITMAP *pickups;
 extern ALLEGRO_BITMAP *miner;
 extern ALLEGRO_BITMAP *jewel;
@@ -308,6 +313,9 @@ extern ALLEGRO_BITMAP *menu_bg_bmp;
 extern ALLEGRO_BITMAP *bullets_bmp;
 extern ALLEGRO_BITMAP *tr_map;
 extern ALLEGRO_BITMAP *background;
+extern ALLEGRO_BITMAP *ctrl_direction;
+extern ALLEGRO_BITMAP *ctrl_thrust;
+extern ALLEGRO_BITMAP *ctrl_escape;
 
 #define MAP_NAME_LENGTH 50
 #define MAX_MAPS 20	//per group
@@ -333,6 +341,29 @@ extern MapType Map;
 extern MenuType Menu;
 
 //extern int tile_width, tile_height;
+
+//On-screen controls for Android version.
+typedef struct
+{
+    ALLEGRO_BITMAP *bmp;
+    int x;
+    int y;
+    int w;
+    int h;
+} CtrlType;
+
+typedef struct
+{
+    int reversed;       //left handed
+    CtrlType direction;
+    CtrlType directionbg;
+    CtrlType thrust;
+    CtrlType escape;
+    CtrlType select;
+    CtrlType start;
+}CtrlsType;
+
+extern CtrlsType Ctrl;
 
 extern FILE* logfile;
 

@@ -43,7 +43,7 @@ void draw_menu(int ship_num, int x, int y, int w, int h);
 
 //#define LINE_SPACE 55
 #define LINE_SPACE 35
-#define SMALL_LINE_SPACE 35
+//#define line_space 35
 
 int grid = 0;
 
@@ -120,10 +120,10 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
         if (i == Menu.group)
         {
             //colour = GroupActive;
-            al_draw_textf(menu_font, GroupActive ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
+            al_draw_textf(menu_font, GroupActive ,col0, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
 
             //colour = GroupInactive;
-            al_draw_textf(glow_font, GroupGlow ,Menu.offset+20, y/*+=LINE_SPACE*/,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
+            al_draw_textf(glow_font, GroupGlow ,col0, y/*+=LINE_SPACE*/,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
 
             for (j=0 ; j<MapNames[Menu.group].Count ; j++)
             {
@@ -141,14 +141,14 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
                 else
                     colour = ItemUnselected;
 
-                al_draw_textf(menu_font, colour ,Menu.offset+30, y+=Menu.expand,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
-                if (glow) al_draw_textf(glow_font, ItemCurrentGlow ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
+                al_draw_textf(menu_font, colour ,col1, y+=Menu.expand,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
+                if (glow) al_draw_textf(glow_font, ItemCurrentGlow ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
             }
         }
         else
         {
             colour = GroupInactive;
-            al_draw_textf(menu_font, colour ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
+            al_draw_textf(menu_font, colour ,col0, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
         }
     }
 
@@ -175,8 +175,8 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
         else
             colour = ItemUnselected;
 
-        al_draw_textf(menu_font, colour,Menu.offset+470, y+i*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
-        if (glow) al_draw_textf(glow_font, ItemCurrentGlow,Menu.offset+470, y+i*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+        al_draw_textf(menu_font, colour,col2, y+i*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+        if (glow) al_draw_textf(glow_font, ItemCurrentGlow,col2, y+i*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
     }
 
 
@@ -219,35 +219,35 @@ void display_menu(void)//int num_maps, int selected)	//show list of maps
 
     if (Ship[Menu.player].controller == KEYS)
     {
-        al_draw_textf(small_font, ItemUnselected ,Menu.offset+1400, y+SMALL_LINE_SPACE*0,  ALLEGRO_ALIGN_LEFT, "Rotate Left :");
+        al_draw_textf(small_font, ItemUnselected ,Menu.offset+1400, y+line_space*0,  ALLEGRO_ALIGN_LEFT, "Rotate Left :");
         if (Menu.col == 3 && Menu.current_key == 0){colour = ItemCurrent; glow = true;}
         else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
-        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+SMALL_LINE_SPACE*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
+        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
+        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
 
-        al_draw_textf(small_font, ItemUnselected, Menu.offset+1400, y+SMALL_LINE_SPACE*2,  ALLEGRO_ALIGN_LEFT, "Rotate Right :");
+        al_draw_textf(small_font, ItemUnselected, Menu.offset+1400, y+line_space*2,  ALLEGRO_ALIGN_LEFT, "Rotate Right :");
         if (Menu.col == 3 && Menu.current_key == 1){colour = ItemCurrent; glow = true;}
         else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
-        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+SMALL_LINE_SPACE*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
+        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
+        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
 
-        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+SMALL_LINE_SPACE*4,  ALLEGRO_ALIGN_LEFT, "Fire1 :");
+        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*4,  ALLEGRO_ALIGN_LEFT, "Fire1 :");
         if (Menu.col == 3 && Menu.current_key == 2){colour = ItemCurrent; glow = true;}
         else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
-        if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,Menu.offset+1400, y+SMALL_LINE_SPACE*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
+        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
+        if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,Menu.offset+1400, y+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
 
-        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+SMALL_LINE_SPACE*6,  ALLEGRO_ALIGN_LEFT, "Fire2 :");
+        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*6,  ALLEGRO_ALIGN_LEFT, "Fire2 :");
         if (Menu.col == 3 && Menu.current_key == 3){colour = ItemCurrent; glow = true;}
         else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
-        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+SMALL_LINE_SPACE*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
+        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
+        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
 
-        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+SMALL_LINE_SPACE*8,  ALLEGRO_ALIGN_LEFT, "Thrust :");
+        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*8,  ALLEGRO_ALIGN_LEFT, "Thrust :");
         if (Menu.col == 3 && Menu.current_key == 4){colour = ItemCurrent; glow = true;}
         else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
-        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+SMALL_LINE_SPACE*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
+        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
+        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
     }
 
 	al_flip_display();
@@ -260,25 +260,20 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 {
 	ALLEGRO_TRANSFORM transform;
 	int i,j,y=-10;
-	int w,h,xoffset,yoffset;
+	int w,h;
+	int line_space,col0,col1,col1in,col2,col3;
+	int bgx,bgy,bgw,bgh;    //background
 	int glow;
+
 	float scale;
 	char keys[]  = "Keys";
 	char gpio[]  = "GPIO Joy";
 	char usb0[]  = "USB Joy 1";
 	char usb1[]  = "USB Joy 2";
-	//char na[]    = "N/A";
 	char* control_string;
 	char local[]  = "Local Game";
 	char host[]  = "Host Network Game";
 	char client[]    = "Join Network Game";
-	//char* netmodestr;
-	//static int timer = 0;
-	//char cursor;
-	//char display_address[17];
-
-
-	//static int temp = 0,temp2=0;
 
 	ALLEGRO_COLOR colour;
 	//use pre-multiplied alpha, i.e. rgb components must be multiplied by a.
@@ -296,39 +291,60 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
 	al_set_clipping_rectangle(0, 0, w, h);
 
-	yoffset = (h-SCREENY)/2;
-	if (yoffset < 0) yoffset = 0;
+    Menu.offset = 0;
 
-	xoffset = (w-SCREENX)/2;
-    if (xoffset < 0) xoffset = 0;
+    line_space = 35*font_scale;
 
-    //Menu.offset += xoffset;
+    //Change for Android.
+    col0 = 20*font_scale;
+    col1 = 30*font_scale;
+    col1in = 40*font_scale; //indented
+    col2 = 470*font_scale;  //network text
+    col3 = 320*font_scale;  //number of players, keys.
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 
-	al_draw_bitmap(menu_bg_bmp,xoffset,yoffset,0);
+	//al_draw_bitmap(menu_bg_bmp,xoffset,yoffset,0);
+
+	bgw = al_get_bitmap_width(menu_bg_bmp);
+	bgh = al_get_bitmap_height(menu_bg_bmp);
+
+	for(bgy=0 ; bgy<h ; bgy+=bgh)
+    {
+        for(bgx=0 ; bgx<w ; bgx+=bgw)
+        {
+            al_draw_bitmap(menu_bg_bmp,bgx,bgy,0);
+        }
+    }
 
     //Gravstorm logo
     //shadow
 	scale = 0.4;
 	al_identity_transform(&transform);			/* Initialize transformation. */
 	al_scale_transform(&transform, scale, scale);	/* Rotate and scale around the center first. */
-	al_translate_transform(&transform,SCREENX/2,y+yoffset);
+	al_translate_transform(&transform,w/2,y);
 	al_use_transform(&transform);
-	al_draw_textf(title_font, al_map_rgba(0, 0, 0,64),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
+	al_draw_textf(title_font, al_map_rgba(0, 0, 0,160),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
     //image
+	bgw = al_get_bitmap_width(logo);
 	al_identity_transform(&transform);
-	al_scale_transform(&transform, scale, scale);	/* Rotate and scale around the center first. */
-	al_translate_transform(&transform,SCREENX/2-7,y+yoffset+7);
+	al_scale_transform(&transform, scale*font_scale, scale*font_scale);	/* Rotate and scale around the center first. */
+	al_translate_transform(&transform,0,0);//w/2+xoffset-7,y+yoffset+7);
 	al_use_transform(&transform);
 	//al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
-	al_draw_bitmap(logo,-SCREENX/2+17,47,0);
+	int x = (bgw+40)*scale*font_scale;
+	//al_draw_bitmap(logo,(w/2+x),0,0);//-w/2+17,47,0); //NUMBERS!!!
+
+	al_draw_bitmap(logo,((w-x)/(2*scale*font_scale)),(int)(40*font_scale),0);//-w/2+17,47,0); //NUMBERS!!!
+
 
 	//reset transform
 	al_identity_transform(&transform);
 	al_use_transform(&transform);
-	y+= 40;
-    y+= yoffset;
+	//y+= 40;
+    //y+= yoffset;
+
+    y=line_space;
 
     //timer++;            //blinking cursor
     //if (timer & 0x10)
@@ -338,52 +354,53 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
     if (Menu.state == NETWORK)
     {
-        al_draw_textf(small_font,      GroupActive,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Mode");
-        al_draw_textf(small_glow_font, GroupGlow,  Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Mode");
+        al_draw_textf(small_font,      GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Mode");
+        al_draw_textf(small_glow_font, GroupGlow,  col0, y,  ALLEGRO_ALIGN_LEFT, "Mode");
         /*
              if (Menu.netmode == LOCAL)  netmodestr = local;
         else if (Menu.netmode == HOST)   netmodestr = host;
         else                             netmodestr = client;
         */
-        y+=35;
+        y+=line_space;
 
         if (Menu.netmode == LOCAL)
         {
-           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
-           al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
-           al_draw_textf(small_font, ItemUnselected,Menu.offset+470, y,  ALLEGRO_ALIGN_LEFT, "Single player, or all players on one device.");
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
+           al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Single player, or all players on one device.");
         }
         else
-            al_draw_textf(small_font, ItemUnselected,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
 
-        y+=35;
+        y+=line_space;
 
         if (Menu.netmode == HOST)
         {
-           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
-           al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
-           al_draw_textf(small_font, ItemUnselected,Menu.offset+470, y,  ALLEGRO_ALIGN_LEFT, "Host chooses level to play on.");
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+           al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Host chooses level to play on.");
         }
         else
-            al_draw_textf(small_font, ItemUnselected,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
 
-        y+=35;
+        y+=line_space;
 
         if (Menu.netmode == CLIENT)
         {
-           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
-           al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
-           al_draw_textf(small_font, ItemUnselected,Menu.offset+470, y,  ALLEGRO_ALIGN_LEFT, "Join a game someone else is hosting.");
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
+           al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Join a game someone else is hosting.");
         }
         else
-            al_draw_textf(small_font, ItemUnselected,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
 
-        y+=135;
+        y+=line_space*3;
+
         if (Net.client_state == ABORTED)
-            al_draw_textf(small_font, ItemUnselected, Menu.offset+SCREENX/2, y,  ALLEGRO_ALIGN_CENTRE, "Previous game aborted by host.");
+            al_draw_textf(small_font, ItemUnselected, w/2, y,  ALLEGRO_ALIGN_CENTRE, "Previous game aborted by host.");
 
         //else
-        //    al_draw_textf(small_font, ItemUnselected,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",netmodestr);
+        //    al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",netmodestr);
         /*
         y+=35;
 
@@ -391,7 +408,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             colour = ItemUnselected;
         else colour = ItemExcluded;
 
-        al_draw_textf(small_font, colour,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "Address:");
+        al_draw_textf(small_font, colour,col1, y,  ALLEGRO_ALIGN_LEFT, "Address:");
 
         y+=35;
 
@@ -400,30 +417,30 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
         if (Menu.col_pos == 1)
         {
-           al_draw_textf(small_font, ItemCurrent    ,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",display_address);
-           //al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",Net.temp_address);
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",display_address);
+           //al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",Net.temp_address);
         }
         else
-            al_draw_textf(small_font, colour,Menu.offset+30, y,  ALLEGRO_ALIGN_LEFT, "%s",Net.menuaddress);
+            al_draw_textf(small_font, colour,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",Net.menuaddress);
 
-        //al_draw_textf(small_font, colour,Menu.offset+30, y+35,  ALLEGRO_ALIGN_LEFT, "%08X",timer);
+        //al_draw_textf(small_font, colour,col1, y+35,  ALLEGRO_ALIGN_LEFT, "%08X",timer);
         */
     }
 	else if (Menu.state == LEVEL)
     {
 	//Display maps; display all group names, and maps in current group
-        al_draw_textf(small_font, GroupActive, Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Level");
-        al_draw_textf(small_glow_font, GroupGlow,   Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Level");
+        al_draw_textf(small_font, GroupActive, col0, y,  ALLEGRO_ALIGN_LEFT, "Level");
+        al_draw_textf(small_glow_font, GroupGlow,   col0, y,  ALLEGRO_ALIGN_LEFT, "Level");
 
         for (i=0 ; i<Menu.num_groups ; i++)
         {
             if (i == Menu.group)
             {
                 //colour = GroupActive;
-                al_draw_textf(small_font, GroupActive ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
+                al_draw_textf(small_font, GroupActive ,col0, y+=line_space,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
 
                 //colour = GroupInactive;
-                al_draw_textf(small_glow_font, GroupGlow ,Menu.offset+20, y/*+=LINE_SPACE*/,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
+                al_draw_textf(small_glow_font, GroupGlow ,col0, y/*+=LINE_SPACE*/,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
 
                 for (j=0 ; j<MapNames[Menu.group].Count ; j++)
                 {
@@ -441,23 +458,23 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                     else
                         colour = ItemUnselected;
 
-                    al_draw_textf(small_font, colour ,Menu.offset+30, y+=Menu.expand,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
+                    al_draw_textf(small_font, colour ,col1, y+=Menu.expand,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
                     if (glow)
                     {
-                        al_draw_textf(small_glow_font, ItemCurrentGlow, Menu.offset+30,  y,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
-                        al_draw_textf(small_font, ItemUnselected,  Menu.offset+470, y,  ALLEGRO_ALIGN_LEFT, "Max players:%d", Map.max_players);
+                        al_draw_textf(small_glow_font, ItemCurrentGlow, col1,  y,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
+                        al_draw_textf(small_font, ItemUnselected,  col3, y,  ALLEGRO_ALIGN_LEFT, "Max players: %d", Map.max_players);
                     }
                 }
             }
             else
             {
                 colour = GroupInactive;
-                al_draw_textf(small_font, colour ,Menu.offset+20, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
+                al_draw_textf(small_font, colour ,col0, y+=line_space,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
             }
         }
         if (Menu.netmode == HOST)
         {
-            al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Select level to start network game.");
+            al_draw_textf(small_font, ItemUnselected,  Menu.offset+w/2, h*0.9,  ALLEGRO_ALIGN_CENTRE, "Select level to start network game.");
             //al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "%d players connected", Net.clients);
         }
  /*
@@ -473,30 +490,30 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
     else if (Menu.state == PLAYERS)
     {
-        y=40;
-        y+= yoffset;
+        y=line_space;
+        //y+= yoffset;
 
         //if (!Net.net || Net.server)
         if (!Net.client)
         {
             if (Menu.col_pos == 0)
             {
-                al_draw_textf(small_font, GroupActive,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
-                al_draw_textf(small_glow_font, GroupGlow,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
-                al_draw_textf(small_font, ItemCurrent    ,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
-                al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Players:");
+                al_draw_textf(small_glow_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "Players:");
+                al_draw_textf(small_font, ItemCurrent    ,(int)(180*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                al_draw_textf(small_glow_font, ItemCurrentGlow,(int)(180*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
             }
             else
             {
-                al_draw_textf(small_font, ItemUnselected,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Players:");
-                al_draw_textf(small_font, ItemUnselected,Menu.offset+180, y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                al_draw_textf(small_font, ItemUnselected,col0, y,  ALLEGRO_ALIGN_LEFT, "Players:");
+                al_draw_textf(small_font, ItemUnselected,(int)(180*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
             }
         }
 
-        y+=35;
+        y+=line_space*1.2;
 
         //debug
-        //al_draw_textf(small_font, ItemUnselected,Menu.offset+300, y,  ALLEGRO_ALIGN_LEFT, "player:%d item:%d",Menu.player,Menu.item);
+        //al_draw_textf(small_font, ItemUnselected,col10, y,  ALLEGRO_ALIGN_LEFT, "player:%d item:%d",Menu.player,Menu.item);
         //end debug
 
         for (i=0 ; i<Menu.ships ; i++)			//List players
@@ -504,29 +521,45 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             if (i>num_ships-1) colour = ItemExcluded;
             else colour = ItemUnselected;
 
-            //if (!Net.net)
             if (!Net.client && !Net.server)
             {
                 if (Menu.player == i && Menu.col_pos != 0)
                 {
-                    al_draw_textf(small_font, GroupActive,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
-                    al_draw_textf(small_glow_font, GroupGlow,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+                    al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+                    al_draw_textf(small_glow_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
                 }
                 else
-                    al_draw_textf(small_font, colour,Menu.offset+20, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
+                    al_draw_textf(small_font, GroupInactive,col0, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
             }
 
-            y+=40;
+            y+=line_space;
 
             //draw spinny ship & highlight
             if (Menu.item == 0 && Menu.player == i)
-                al_draw_filled_rounded_rectangle(Menu.offset+63,y,Menu.offset+115,y+52,10,10,al_map_rgba(64,64,0,64));
+            {
+                //yellow highlight
+                al_draw_filled_rounded_rectangle(Menu.offset+83,y,Menu.offset+135,y+52,10,10,al_map_rgba(64,64,0,64));
+
+                int temp = Ship[i].image-1;
+                if (temp < 0) temp += 8;
+
+                //greyed-out ship before
+                al_draw_tinted_bitmap_region(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+25+Ship[i].offset,y+2, 0);
+                temp+=2;
+                if (temp > 7) temp -=8;
+                //and after
+                al_draw_tinted_bitmap_region(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+145+Ship[i].offset,y+2, 0);
+            }
 
             y+=2;
+            //selected ship
+            al_draw_bitmap_region(ships,Ship[i].angle*SHIP_SIZE_X,2*Ship[i].image*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+85+Ship[i].offset,y, 0);
 
-            al_draw_bitmap_region(ships,Ship[i].angle*SHIP_SIZE_X,(2*Ship[i].image)*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+65,y, 0);
             Ship[i].angle++;
             if (Ship[i].angle == 40) Ship[i].angle = 0;
+
+            if (Ship[i].offset > 0) Ship[i].offset-=6;
+            if (Ship[i].offset < 0) Ship[i].offset+=6;
 
             y+=45;
 
@@ -544,90 +577,104 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
             if (Menu.item == 1 && Menu.player == i)
             {
-                al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+40, y,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
-                al_draw_textf(small_font, ItemCurrent,Menu.offset+40, y,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
+                al_draw_textf(small_glow_font, ItemCurrentGlow,col1in, y,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
+                al_draw_textf(small_font, ItemCurrent,col1in, y,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
             }
             else
-                al_draw_textf(small_font, colour,Menu.offset+40, y,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
+                al_draw_textf(small_font, colour,col1in, y,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
 
-            y+=35;
+            y+=line_space;
 
            if (Menu.item == 2 && Menu.player == i)
             {
-                al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+40, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
-                al_draw_textf(small_font, ItemCurrent,Menu.offset+40, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
+                al_draw_textf(small_glow_font, ItemCurrentGlow,col1in, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
+                al_draw_textf(small_font, ItemCurrent,col1in, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
             }
             else
             {
                 if (Ship[i].controller != KEYS) colour = ItemExcluded;
-                al_draw_textf(small_font, colour,Menu.offset+40, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
+                al_draw_textf(small_font, colour,col1in, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
             }
+
+            int key_start = 80*font_scale;
 
             if (Menu.item == 2 && Menu.player == i && Ship[i].controller == KEYS)
             {
-                al_draw_textf(small_font, ItemUnselected ,Menu.offset+470, 80+SMALL_LINE_SPACE*0,  ALLEGRO_ALIGN_LEFT, "Rotate Left :");
+                al_draw_textf(small_font, ItemUnselected ,col3, key_start+line_space*0,  ALLEGRO_ALIGN_LEFT, "Rotate Left :");
                 if (Menu.define_keys && Menu.current_key == 0){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,Menu.offset+470, 80+SMALL_LINE_SPACE*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
-                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+470, 80+SMALL_LINE_SPACE*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
+                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
 
-                al_draw_textf(small_font, ItemUnselected, Menu.offset+470, 80+SMALL_LINE_SPACE*2,  ALLEGRO_ALIGN_LEFT, "Rotate Right :");
+                al_draw_textf(small_font, ItemUnselected, col3, key_start+line_space*2,  ALLEGRO_ALIGN_LEFT, "Rotate Right :");
                 if (Menu.define_keys && Menu.current_key == 1){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,Menu.offset+470, 80+SMALL_LINE_SPACE*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
-                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+470, 80+SMALL_LINE_SPACE*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
+                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
 
-                al_draw_textf(small_font, ItemUnselected,Menu.offset+470, 80+SMALL_LINE_SPACE*4,  ALLEGRO_ALIGN_LEFT, "Fire1 :");
+                al_draw_textf(small_font, ItemUnselected,col3, key_start+line_space*4,  ALLEGRO_ALIGN_LEFT, "Fire1 :");
                 if (Menu.define_keys && Menu.current_key == 2){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,Menu.offset+470, 80+SMALL_LINE_SPACE*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
-                if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,Menu.offset+470, 80+SMALL_LINE_SPACE*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
+                if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,col3, key_start+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
 
-                al_draw_textf(small_font, ItemUnselected,Menu.offset+470, 80+SMALL_LINE_SPACE*6,  ALLEGRO_ALIGN_LEFT, "Fire2 :");
+                al_draw_textf(small_font, ItemUnselected,col3, key_start+line_space*6,  ALLEGRO_ALIGN_LEFT, "Fire2 :");
                 if (Menu.define_keys && Menu.current_key == 3){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,Menu.offset+470, 80+SMALL_LINE_SPACE*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
-                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+470, 80+SMALL_LINE_SPACE*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
+                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
 
-                al_draw_textf(small_font, ItemUnselected,Menu.offset+470, 80+SMALL_LINE_SPACE*8,  ALLEGRO_ALIGN_LEFT, "Thrust :");
+                al_draw_textf(small_font, ItemUnselected,col3, key_start+line_space*8,  ALLEGRO_ALIGN_LEFT, "Thrust :");
                 if (Menu.define_keys && Menu.current_key == 4){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,Menu.offset+470, 80+SMALL_LINE_SPACE*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
-                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+470, 80+SMALL_LINE_SPACE*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
+                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
             }
 
-            y+=35;
+            y+=line_space;
         }
         if (Menu.netmode == HOST)
         {
             if (Net.address.host == 0)
-                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Network host started");
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Network host started");
             else
-                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Network host started on %s", Net.myaddress);
-            al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "%d players", num_ships);//Net.clients);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Network host started on %s", Net.myaddress);
+            al_draw_textf(small_font, ItemUnselected,  w/2, 0.95*h,  ALLEGRO_ALIGN_CENTRE, "%d players", num_ships);//Net.clients);
         }
 
         else if (Menu.netmode == CLIENT)
         {
             if (Net.client_state == SEARCHING)
-                al_draw_textf(small_font, ItemUnselected,   Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Searching for host...");
+                al_draw_textf(small_font, ItemUnselected,   w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Searching for host...");
             else if (Net.client_state == FOUND)
-                al_draw_textf(small_font, ItemUnselected,   Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Found host at %s", Net.menuaddress);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Found host at %s", Net.menuaddress);
 
             else if (Net.client_state == CONNECTED)
             {
-                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Connected to host at %s", Net.menuaddress);
-                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "Host selected level '%s'", Net.mapfile);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Connected to host at %s", Net.menuaddress);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.95*h,  ALLEGRO_ALIGN_CENTRE, "Host selected level '%s'", Net.mapfile);
             }
 
             else if (Net.client_state == NO_SPACE)
-                al_draw_textf(small_font, ItemUnselected,   Menu.offset+SCREENX/2, SCREENY-85,  ALLEGRO_ALIGN_CENTRE, "Host at %s has no space", Net.menuaddress);
+                al_draw_textf(small_font, ItemUnselected,   w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Host at %s has no space", Net.menuaddress);
 
             else if (Net.client_state == NO_MAP)
-                al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "Failed to open host selected level '%s'", Net.mapfile);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.95*h,  ALLEGRO_ALIGN_CENTRE, "Failed to open host selected level '%s'", Net.mapfile);
         }
 
     }
+
+    //#define ANDROID
+    #ifdef ANDROID
+
+    //al_draw_bitmap(Ctrl.directionbg.bmp, Ctrl.directionbg.x, Ctrl.directionbg.y,0);
+    al_draw_bitmap(Ctrl.direction.bmp, Ctrl.direction.x, Ctrl.direction.y,0);
+
+    //al_draw_bitmap(Ctrl.thrust.bmp, Ctrl.thrust.x, Ctrl.thrust.y,0);
+    //do start/select here
+    al_draw_bitmap(Ctrl.escape.bmp, Ctrl.escape.x, Ctrl.escape.y,0);
+    #endif
+
 /*
         for (i=0 ; i<4 ; i++)			//List controls
         {
@@ -668,35 +715,35 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
         if (Ship[Menu.player].controller == KEYS)
         {
-            al_draw_textf(small_font, ItemUnselected ,Menu.offset+1400, y+SMALL_LINE_SPACE*0,  ALLEGRO_ALIGN_LEFT, "Rotate Left :");
+            al_draw_textf(small_font, ItemUnselected ,Menu.offset+1400, y+line_space*0,  ALLEGRO_ALIGN_LEFT, "Rotate Left :");
             if (Menu.col == 3 && Menu.current_key == 0){colour = ItemCurrent; glow = true;}
             else {colour = ItemSelected; glow = false;}
-            al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
-            if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+SMALL_LINE_SPACE*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
+            al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
+            if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
 
-            al_draw_textf(small_font, ItemUnselected, Menu.offset+1400, y+SMALL_LINE_SPACE*2,  ALLEGRO_ALIGN_LEFT, "Rotate Right :");
+            al_draw_textf(small_font, ItemUnselected, Menu.offset+1400, y+line_space*2,  ALLEGRO_ALIGN_LEFT, "Rotate Right :");
             if (Menu.col == 3 && Menu.current_key == 1){colour = ItemCurrent; glow = true;}
             else {colour = ItemSelected; glow = false;}
-            al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
-            if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+SMALL_LINE_SPACE*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
+            al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
+            if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
 
-            al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+SMALL_LINE_SPACE*4,  ALLEGRO_ALIGN_LEFT, "Fire1 :");
+            al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*4,  ALLEGRO_ALIGN_LEFT, "Fire1 :");
             if (Menu.col == 3 && Menu.current_key == 2){colour = ItemCurrent; glow = true;}
             else {colour = ItemSelected; glow = false;}
-            al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
-            if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,Menu.offset+1400, y+SMALL_LINE_SPACE*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
+            al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
+            if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,Menu.offset+1400, y+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
 
-            al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+SMALL_LINE_SPACE*6,  ALLEGRO_ALIGN_LEFT, "Fire2 :");
+            al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*6,  ALLEGRO_ALIGN_LEFT, "Fire2 :");
             if (Menu.col == 3 && Menu.current_key == 3){colour = ItemCurrent; glow = true;}
             else {colour = ItemSelected; glow = false;}
-            al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
-            if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+SMALL_LINE_SPACE*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
+            al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
+            if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
 
-            al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+SMALL_LINE_SPACE*8,  ALLEGRO_ALIGN_LEFT, "Thrust :");
+            al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*8,  ALLEGRO_ALIGN_LEFT, "Thrust :");
             if (Menu.col == 3 && Menu.current_key == 4){colour = ItemCurrent; glow = true;}
             else {colour = ItemSelected; glow = false;}
-            al_draw_textf(small_font, colour,Menu.offset+1400, y+SMALL_LINE_SPACE*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
-            if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+SMALL_LINE_SPACE*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
+            al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
+            if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
         }
     }
     */
@@ -710,13 +757,30 @@ void display_map_text(int done, int timer)
     FILE * description_file;
     char line[200];
     int i=20;
+    int w,h,bgw,bgh,bgx,bgy;
+    int line_space;
     ALLEGRO_USTR *ustr = NULL;
+
+    line_space = 35*font_scale;
 
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
-    al_draw_bitmap(menu_bg_bmp,0,0,0);
+    //al_draw_bitmap(menu_bg_bmp,0,0,0);
 
-	al_draw_filled_rectangle(0,0,SCREENX,SCREENY,al_map_rgba(0,0,0,timer*6));	//black filter to darken?
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+    bgw = al_get_bitmap_width(menu_bg_bmp);
+    bgh = al_get_bitmap_height(menu_bg_bmp);
+
+    for(bgy=0 ; bgy<h ; bgy+=bgh)
+    {
+        for(bgx=0 ; bgx<w ; bgx+=bgw)
+        {
+            al_draw_bitmap(menu_bg_bmp,bgx,bgy,0);
+        }
+    }
+
+	al_draw_filled_rectangle(0,0,w,h,al_map_rgba(0,0,0,timer*6));	//black filter to darken?
 
 	if ((description_file = fopen(Map.description_file_name,"r")))
 	{
@@ -725,8 +789,8 @@ void display_map_text(int done, int timer)
 			 ustr = al_ustr_new(line);
 
 			//al_draw_textf(small_font, al_map_rgb(timer*8, timer*8, timer*8),0, i,  ALLEGRO_ALIGN_LEFT, "%s",line);
-			al_draw_ustr(small_font, al_map_rgb(timer*8, timer*8, timer*8),0, i,  ALLEGRO_ALIGN_LEFT, ustr);
-			i+=35;
+			al_draw_ustr(small_font, al_map_rgb(timer*8, timer*8, timer*8),(int)(20*font_scale), i,  ALLEGRO_ALIGN_LEFT, ustr);
+			i+=line_space;
 		}
 
 		if (ustr) al_ustr_free(ustr);
@@ -734,13 +798,13 @@ void display_map_text(int done, int timer)
 	}
 	else
 	{
-		al_draw_textf(small_font, al_map_rgb(timer*8, timer*8, timer*8),0, i,  ALLEGRO_ALIGN_LEFT, "%s",(char*)&MapNames[Menu.group].Map[Menu.map]);
-		i+=35;
-		al_draw_textf(small_font, al_map_rgb(timer*8, timer*8, timer*8),0, i,  ALLEGRO_ALIGN_LEFT, "Couldn't open description file: %s",Map.description_file_name);
+		al_draw_textf(small_font, al_map_rgb(timer*8, timer*8, timer*8),(int)(20*font_scale), i,  ALLEGRO_ALIGN_LEFT, "%s",(char*)&MapNames[Menu.group].Map[Menu.map]);
+		i+=line_space;
+		al_draw_textf(small_font, al_map_rgb(timer*8, timer*8, timer*8),(int)(20*font_scale), i,  ALLEGRO_ALIGN_LEFT, "Couldn't open description file: %s",Map.description_file_name);
 	}
 
     if (done)
-        al_draw_textf(small_font, al_map_rgb(128, 0, 0),0, i+35,  ALLEGRO_ALIGN_LEFT, "Painna Nappa / Press Button");
+        al_draw_textf(small_font, al_map_rgb(128, 0, 0),(int)(20*font_scale), i+line_space,  ALLEGRO_ALIGN_LEFT, "Painna Nappa / Press Button");
 
     al_flip_display();
 
@@ -749,10 +813,25 @@ void display_map_text(int done, int timer)
 
 void display_wait_text(void)
 {
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    al_draw_bitmap(menu_bg_bmp,0,0,0);
+    int w,h,bgw,bgh;
+    int bgx,bgy;
 
-    al_draw_textf(small_font, al_map_rgb_f(1, 1, 0.8), SCREENX/2, SCREENY/2,  ALLEGRO_ALIGN_CENTRE, "Waiting for host...");
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+    bgw = al_get_bitmap_width(menu_bg_bmp);
+    bgh = al_get_bitmap_height(menu_bg_bmp);
+
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+
+    for(bgy=0 ; bgy<h ; bgy+=bgh)
+    {
+        for(bgx=0 ; bgx<w ; bgx+=bgw)
+        {
+            al_draw_bitmap(menu_bg_bmp,bgx,bgy,0);
+        }
+    }
+
+    al_draw_textf(small_font, al_map_rgb_f(1, 1, 0.8), w/2, h/2,  ALLEGRO_ALIGN_CENTRE, "Waiting for host...");
 
     al_flip_display();
 }
@@ -771,10 +850,10 @@ int component;
 void draw_split_screen(ViewportType viewport, int ship_num)
 {
     int i;
-    int x, y;
+    int x=0, y=0, sbx=0, sby=0;
     int w, h;
 	int scrollx, scrolly;	//These are the centre of the 'viewport' - normally the ship position, except when you get near an edge.
-
+    //int ctrl_size;
 	//replace with split screen window size.
     w = al_get_display_width(display);
     h = al_get_display_height(display);
@@ -783,59 +862,70 @@ void draw_split_screen(ViewportType viewport, int ship_num)
     switch (viewport)
     {
     	case FULL:
-    		x=STATUS_BAR_WIDTH;
-    		y=0;
-    		w=w-STATUS_BAR_WIDTH ;
-    		h=h;
+    		//x=STATUS_BAR_WIDTH;
+    		//y=0;
+    		//w=w-STATUS_BAR_WIDTH ;
+    		//h=h;
     		break;
     	case TOP:
-    		x=STATUS_BAR_WIDTH;
-    		y=0;
-    		w=w-STATUS_BAR_WIDTH ;
+    		//x=STATUS_BAR_WIDTH;
+    		//y=0;
+    		//w=w-STATUS_BAR_WIDTH ;
     		h=h/2;
     		break;
     	case BOTTOM:
-    		x=STATUS_BAR_WIDTH;
+    		//x=STATUS_BAR_WIDTH;
     		y=h/2;
-    		w=w-STATUS_BAR_WIDTH ;
+    		sby = y+2;
+    		//w=w-STATUS_BAR_WIDTH ;
     		h=h/2 ;
     		break;
     	case TOPLEFT:
-    		x=STATUS_BAR_WIDTH;
-    		y=0;
-    		w=(w-STATUS_BAR_WIDTH)/2;
+    		//x=STATUS_BAR_WIDTH;
+    		//y=0;
+    		//w=(w-STATUS_BAR_WIDTH)/2;
+    		w=w/2;
     		h=h/2;
     		break;
     	case TOPRIGHT:
-    		x=STATUS_BAR_WIDTH + (w-STATUS_BAR_WIDTH)/2;
-    		y=0;
-    		w=(w-STATUS_BAR_WIDTH)/2;
+    		//x=STATUS_BAR_WIDTH + (w-STATUS_BAR_WIDTH)/2;
+    		x=w/2;
+    		sbx = x+2;
+    		//y=0;
+    		//w=(w-STATUS_BAR_WIDTH)/2;
+    		w=w/2;
     		h=h/2;
     		break;
     	case BOTTOMLEFT:
-    		x=STATUS_BAR_WIDTH;
+    		//x=STATUS_BAR_WIDTH;
     		y=h/2;
-    		w=(w-STATUS_BAR_WIDTH)/2;
+    		sby=y+2;
+    		//w=(w-STATUS_BAR_WIDTH)/2;
+    		w=w/2;
     		h=h/2;
     		break;
     	case BOTTOMRIGHT:
-    		x=STATUS_BAR_WIDTH + (w-STATUS_BAR_WIDTH)/2;
+    		//x=STATUS_BAR_WIDTH + (w-STATUS_BAR_WIDTH)/2;
+    		x=w/2;
+    		sbx = x+2;
     		y=h/2;
-    		w=(w-STATUS_BAR_WIDTH)/2;
+    		sby = y+2;
+    		//w=(w-STATUS_BAR_WIDTH)/2;
+    		w=w/2;
     		h=h/2;
     		break;
         default:
-    		x=STATUS_BAR_WIDTH;
-    		y=0;
-    		w=w-STATUS_BAR_WIDTH ;
-    		h=h;
+    		//x=STATUS_BAR_WIDTH;
+    		//y=0;
+    		//w=w-STATUS_BAR_WIDTH ;
+    		//h=h;
     		break;
 	}
 	al_set_clipping_rectangle(x, y, w, h);
 
 	//stop scrolling when you get near to the edge.
 	//scrollx is ship xpos, except saturated at half screen width
-	if (mapx < (SCREENX-STATUS_BAR_WIDTH))	//for small maps....
+	if (mapx < (w))	//for small maps....
 		scrollx = 0.5*w;
 	else if (Ship[ship_num].xpos < 0.5*w) 						//if the ship is <0.5 viewport width from edge, stop following it.
 		scrollx = 0.5*w;
@@ -872,15 +962,17 @@ void draw_split_screen(ViewportType viewport, int ship_num)
 		draw_ships(scrollx, scrolly,x,y,w,h);
 	}
 
+	draw_status_bar(ship_num,sbx,sby);
+
 	if (Radar.on)
     {
         //al_draw_bitmap(Radar.display,SCREENX-Radar.width,-1*((MAX_MAP_HEIGHT * RADAR_PPT)-Radar.height),0);   //tinted? alpha?
         //al_draw_bitmap(Radar.display,SCREENX-Radar.width,-320,0);   //tinted? alpha?
-        al_draw_bitmap(Radar.display,SCREENX-Radar.width,0,0);   //tinted? alpha?
+        al_draw_bitmap(Radar.display,w-Radar.width,0,0);   //tinted? alpha?
         //draw ships. flashing? coloured?
         for (i=0 ; i<num_ships ; i++)
         {
-            al_draw_tinted_bitmap(bullets_bmp, Ship[i].colour,(SCREENX-Radar.width + Ship[i].xpos/16)-2, (Ship[i].ypos/16)-2,0);
+            al_draw_tinted_bitmap(bullets_bmp, Ship[i].colour,(w-Radar.width + Ship[i].xpos/16)-2, (Ship[i].ypos/16)-2,0);
         }
     }
 
@@ -912,7 +1004,7 @@ void draw_background(int scrollx, int scrolly, int win_x, int win_y, int w, int 
 
 	//stop scrolling when you get near to the edge.
 	//scrollx is ship xpos, except saturated at half screen width
-	if (mapx < (SCREENX-STATUS_BAR_WIDTH))	//for small maps....
+	if (mapx < (w))	//for small maps....
 		scrollx = 0.5*w;
 	else if (scrollx < 0.5*w) 						//if the ship is <0.5 viewport width from edge, stop following it.
 		scrollx = 0.5*w;
@@ -1247,62 +1339,82 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 void draw_menu(int ship_num, int x, int y, int w, int h)
 {
 	int j;
+	int bmw,bmh;
+
+	bmw = al_get_bitmap_width(panel_bmp);
+	bmh = al_get_bitmap_height(panel_bmp);
 
 	if (num_ships == 1)
 		{
-			x+=w/4;
-			y+=h/4;
+			//x+=w/4; //w-(w/2)/2
+			x+=(w-bmw)/2;
+			//y+=h/4;
+			y+=(h-bmh)/2;
 		}
 		if (num_ships == 2)
 			x+=w/4;
 
 		al_draw_bitmap(panel_bmp,x, y,0);
 
+		//selection bar
 		al_draw_filled_rectangle(x+430,y+45+60*Ship[ship_num].menu_state,x+550,y+75+60*Ship[ship_num].menu_state,al_map_rgba(32, 0, 0, 20));
 
+		//currently pressed buttons
 		al_draw_bitmap_region(panel_pressed_bmp,20+Ship[ship_num].ammo1_type*110,70,80,80,x+20+Ship[ship_num].ammo1_type*110,y+70,0); //src x,y,w,h dst x,y,flags
 		al_draw_bitmap_region(panel_pressed_bmp,20+(Ship[ship_num].ammo2_type-4)*110,200,80,80,x+20+(Ship[ship_num].ammo2_type-4)*110,y+200,0); //src x,y,w,h dst x,y,flags
 
+		//ammo1 bar
 		al_draw_filled_rectangle(x+35,y+55,x+35+Ship[ship_num].user_ammo1*3.8,y+65,al_map_rgb(128, 0, 0));				//ammo1
 		al_draw_filled_rectangle(x+35,y+57,x+35+Ship[ship_num].user_ammo1*3.8,y+59,al_map_rgba(255, 255, 255, 20));
 
+		//ammo2 blobs
 		for (j=0 ; j<Ship[ship_num].user_ammo2 ; j++)
 		{
 			al_draw_filled_rounded_rectangle(x+35+j*47,y+175,x+35+j*47+37,y+185,4,4,al_map_rgb(0, 128, 128));
 			al_draw_filled_rectangle        (x+37+j*47,y+177,x+35+j*47+35,y+179,al_map_rgba(255, 255, 255, 20));
 		}
 
+		//fuel bar
 		al_draw_filled_rectangle(x+35,y+295,x+35+Ship[ship_num].user_fuel*3.8,y+305,al_map_rgb(128, 128, 0));				//fuel
 		al_draw_filled_rectangle(x+35,y+297,x+35+Ship[ship_num].user_fuel*3.8,y+299,al_map_rgba(255, 255, 255, 20));
 
 		return;
 }
 
-void draw_status_bar(int num_ships)
+//void draw_status_bar(int num_ships)
+void draw_status_bar(int ship, int x, int y)
 {
 	int i,j;
-	int w,h,yoffset;
+	//int w,h,yoffset;
 	int bs;	//size of coloured block;
-	int first_ship;
+	//int bmh;//height of background bitmap
+	//int first_ship;
 
-    w = al_get_display_width(display);
-    h = al_get_display_height(display);
+
 
 	//al_set_clipping_rectangle(0, 0, SCREENX, SCREENY);
-	al_set_clipping_rectangle(0, 0, w, h);
+	//al_set_clipping_rectangle(0, 0, w, h);
 
-	yoffset = (h-STATUS_BAR_HEIGHT)/2;
+	//bmh = al_get_bitmap_height(status_bg);
+
+	//yoffset = (h-STATUS_BAR_HEIGHT)/2;
+	//yoffset = 0;
 
 	//Status info
-	al_draw_bitmap(status_bg,0,yoffset,0);
+	//for (i=0 ; i<h ; i+= bmh)
+    //    al_draw_bitmap(status_bg,0,i,0);
 
 	if (Map.mission)
-		bs = 160;
+		bs = 122;
+	else if (Ship[ship].lap_complete)
+        bs = 108;
+	else if (Map.race)
+	    bs = 90;
 	else
-		bs = 140;
+		bs=72;
 
-	yoffset += 5;
-
+	//yoffset += 0;//5;
+/*
 	//if (Net.net)
 	if (Net.client || Net.server)
     {
@@ -1314,13 +1426,24 @@ void draw_status_bar(int num_ships)
     {
         first_ship=0;
     }
+*/
+    i = ship;
 
-	for (i=first_ship ; i<num_ships ; i++)
+	//for (i=first_ship ; i<num_ships ; i++)
 	{
 		//al_draw_filled_rectangle(0,i*100,120,i*100+90,Ship[i].colour);	//120*90 - make a nice bitmap background.
-		al_draw_filled_rectangle(15,yoffset+i*bs,135,yoffset+i*bs+(bs-10),Ship[i].statuscolour);
+		//al_draw_filled_rectangle(0,yoffset+i*bs,135,yoffset+i*bs+(bs-10),Ship[i].statuscolour);
+		al_draw_filled_rectangle(x,y,x+102,y+bs,al_map_rgba(0, 0, 0, 128));//Ship[i].statuscolour);
 		//al_draw_bitmap(Ship[i].status_bg,0,i*100,0);
 
+		al_draw_bitmap_region(ui,100-Ship[i].shield,    0,  Ship[i].shield,       14, x+0, y+0, 0);
+        al_draw_bitmap_region(ui,100-Ship[i].ammo1 ,    14, Ship[i].ammo1,        14, x+0, y+14, 0);
+        al_draw_bitmap_region(ui,0                 ,    28, (Ship[i].ammo2*25)/2, 14, x+0, y+28, 0);
+        al_draw_bitmap_region(ui,100-(Ship[i].fuel>>4), 42, (Ship[i].fuel>>4),    14, x+0, y+42, 0);
+
+        al_draw_bitmap_region(ui,0, 56, Ship[i].lives*17, 14, x+0,y+56,0);
+
+		/*
 		al_draw_filled_rectangle(15,yoffset+i*bs+10,15+Ship[i].shield,yoffset+i*bs+20,al_map_rgb(0, 128, 0));
 		al_draw_filled_rectangle(15,yoffset+i*bs+12,15+Ship[i].shield-2,yoffset+i*bs+14,al_map_rgba(255, 255, 255, 64));
 
@@ -1340,24 +1463,58 @@ void draw_status_bar(int num_ships)
 		for (j=0 ; j<Ship[i].lives ; j++)
 			//al_draw_filled_circle(110, i*100+j*12+10, 5, al_map_rgb(255, 255, 255));
 			al_draw_filled_triangle(15+106, yoffset+i*bs+j*12+15, 15+114, yoffset+i*bs+j*12+15,  15+110, yoffset+i*bs+j*12+5, al_map_rgb(255, 255, 255));
+        */
 
 		if (Map.mission)
 		{
 			for (j=0 ; j<Ship[i].miners ; j++)
-				al_draw_bitmap_region(pickups,16,0,16,16,15+j*12+1,yoffset+i*bs+90,0);
+				al_draw_bitmap_region(pickups,16,0,16,16,0+j*12+1,70,0);
 			for (j=0 ; j<Ship[i].jewels ; j++)
-				al_draw_bitmap_region(pickups,0,0,16,16,15+j*12+1,yoffset+i*bs+110,0);
+				al_draw_bitmap_region(pickups,0,0,16,16,0+j*12+1,86,0);
 		}
 
 		if (Ship[i].racing)
-			al_draw_textf(race_font, al_map_rgb(255, 255, 255),15, yoffset+i*bs+(bs-35), ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].current_lap_time);
+			al_draw_textf(race_font, al_map_rgb(255, 255, 255),5, y+bs-20, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].current_lap_time);
 		if (Ship[i].lap_complete)
         {
-			al_draw_textf(race_font, al_map_rgb(255, 255,   0),15, yoffset+i*bs+(bs-55), ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].last_lap_time);
-			al_draw_textf(race_font, al_map_rgb(255, 128,   0),70, yoffset+i*bs+(bs-55), ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].best_lap_time);
+			al_draw_textf(race_font, al_map_rgb(255, 255,   0),5,  y+bs-38, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].last_lap_time);
+			al_draw_textf(race_font, al_map_rgb(255, 128,   0),50, y+bs-38, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].best_lap_time);
         }
-
 	}
+//#define ANDROID
+#ifdef ANDROID
+    //int w,h,ctrl_size;
+    //w=al_get_display_width(display);
+    int h=al_get_display_height(display);
+    /*
+    ctrl_size = al_get_bitmap_height(Ctrl.direction.bmp);
+    al_draw_bitmap(Ctrl.direction.bmp, 0.98*w-ctrl_size, 0.98*h-ctrl_size,0);
+
+    ctrl_size = al_get_bitmap_height(Ctrl.thrust.bmp);
+    al_draw_bitmap(Ctrl.thrust.bmp, 0.02*w, 0.98*h-ctrl_size,0);
+
+    ctrl_size = al_get_bitmap_height(Ctrl.escape.bmp);
+    al_draw_bitmap(Ctrl.escape.bmp, 0.02*w, bs+0.02*h,0);
+    */
+
+    Ctrl.escape.y = bs+0.02*h;
+
+    //al_draw_bitmap(Ctrl.directionbg.bmp, Ctrl.directionbg.x, Ctrl.directionbg.y,0);
+    al_draw_bitmap(Ctrl.direction.bmp, Ctrl.direction.x, Ctrl.direction.y,0);
+    al_draw_bitmap(Ctrl.thrust.bmp, Ctrl.thrust.x, Ctrl.thrust.y,0);
+    al_draw_bitmap(Ctrl.escape.bmp, Ctrl.escape.x, Ctrl.escape.y,0);
+
+#endif // ANDROID
+}
+
+void draw_dividers(void)
+{
+    int w,h;
+
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+
+    al_set_clipping_rectangle(0, 0, w, h);
 
 	//dividers
 	//if (!Net.net)
@@ -1365,9 +1522,11 @@ void draw_status_bar(int num_ships)
     {
         if (num_ships > 1)
             //al_draw_filled_rectangle(STATUS_BAR_WIDTH,SCREENY/2-5,SCREENX,SCREENY/2+5,al_map_rgb(128, 128, 128));
-            al_draw_filled_rectangle(STATUS_BAR_WIDTH,h/2-5,w,h/2+5,al_map_rgb(128, 128, 128));
+            //al_draw_filled_rectangle(STATUS_BAR_WIDTH,h/2-2,w,h/2+2,al_map_rgb(128, 128, 128));
+            al_draw_filled_rectangle(0,(h/2)-2,w,(h/2)+2,al_map_rgb(128, 128, 128));
         if (num_ships > 2)
-            al_draw_filled_rectangle(((w-STATUS_BAR_WIDTH)/2)+STATUS_BAR_WIDTH-5,0,(w-STATUS_BAR_WIDTH)/2+STATUS_BAR_WIDTH+5,h,al_map_rgb(128, 128, 128));
+            //al_draw_filled_rectangle(((w-STATUS_BAR_WIDTH)/2)+STATUS_BAR_WIDTH-2,0,(w-STATUS_BAR_WIDTH)/2+STATUS_BAR_WIDTH+2,h,al_map_rgb(128, 128, 128));
+            al_draw_filled_rectangle((w/2)-2,0,(w/2)+2,h,al_map_rgb(128, 128, 128));
     }
 
 	return;
