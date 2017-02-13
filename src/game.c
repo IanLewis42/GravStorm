@@ -223,13 +223,13 @@ int main (int argc, char *argv[]){
     #endif // _WIN32
 
     fprintf(logfile,"Creating display\n");
-    //display = al_create_display(SCREENX, SCREENY);
-    display = al_create_display(960, 540);  //Moto E resolution
+    display = al_create_display(SCREENX, SCREENY);
+    //display = al_create_display(960, 540);  //Moto E resolution
     //display = al_create_display(800, 480);  //Cheap android phone resolution
 
     //ANDROID - SCREEN ROTATION!!!!!
 
-    font_scale = (float)al_get_display_width(display)/(SCREENX);
+    font_scale = (float)al_get_display_width(display)/(SCREENX);    //font sizes chosen to suit SCREENX, so scale according to what we actually have!
 
 	//change directory to data, where all resources live (images, fonts, sounds and text files)
 	al_append_path_component(path, "data");
