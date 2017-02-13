@@ -15,7 +15,7 @@ REQUIREMENTS
 ------------
 o Raspberry Pi
   I built/ran it under Raspbian. If you just want to run it, you'll need Raspbian too. I've tested it under both Wheezy and Jessie versions of Raspbian and it seems OK. If you want to build it yourself, feel free to try under any OS you want ;-)
-  ~20MB free disk/SD card space.
+  ~30MB free disk/SD card space.
   TV / Monitor plugged into the Pi. It only runs full-screen (not in a window) and VNC doesn't display anything. I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your display isn't big enough. Feedback welcome :-)
   There don't seem to be any dependencies that aren't in the standard Raspbian Jessie image (as of 23/02/16).
     
@@ -137,8 +137,8 @@ o Single player 'Mission' levels
   
 STATUS PANEL
 ------------
-The bar on the left hand side of the screen has a status panel for each ship. 
-The background is the same colour as the ship. The layout is as follows:
+At the top-left of each player's window there is a status panel for the ship. 
+The layout is as follows:
 
 Green  - Shield 
 Red    - Normal Ammo
@@ -361,7 +361,7 @@ Alternatively, you can edit the ascii map file in a text editor, and reload it u
 
 LEGAL STUFF
 -----------
-GravStorm Copyright (C) 2015-2016  Ian Lewis
+GravStorm Copyright (C) 2015-2017  Ian Lewis
 This program and its source code are released under the GPL.
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
@@ -370,5 +370,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 11/09/16
+IPL 10/02/17
 gravstorm9@gmail.com
