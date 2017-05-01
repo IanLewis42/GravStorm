@@ -2,24 +2,44 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Release" />
+	<File name="src\network.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2127" topLine="59" />
+		</Cursor>
+	</File>
+	<File name="src\objects.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="230" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="22854" topLine="744" />
+		</Cursor>
+	</File>
+	<File name="src\objects.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4360" topLine="157" />
+		</Cursor>
+	</File>
+	<File name="src\drawing.c" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="60380" topLine="1460" />
+		</Cursor>
+	</File>
 	<File name="src\drawing.h" open="1" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="834" topLine="16" />
+			<Cursor1 position="834" topLine="10" />
 		</Cursor>
 	</File>
 	<File name="src\game.c" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="10301" topLine="315" />
+			<Cursor1 position="4029" topLine="149" />
 		</Cursor>
 	</File>
 	<File name="src\game.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="8216" topLine="348" />
+			<Cursor1 position="9180" topLine="377" />
 		</Cursor>
 	</File>
 	<File name="src\gameover.c" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1102" topLine="31" />
+			<Cursor1 position="7053" topLine="170" />
 		</Cursor>
 	</File>
 	<File name="src\init.c" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -34,7 +54,7 @@
 	</File>
 	<File name="src\inputs.c" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="4636" topLine="159" />
+			<Cursor1 position="7091" topLine="250" />
 		</Cursor>
 	</File>
 	<File name="src\inputs.h" open="0" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -42,39 +62,14 @@
 			<Cursor1 position="765" topLine="41" />
 		</Cursor>
 	</File>
-	<File name="src\mapmaker.c" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="16773" topLine="461" />
-		</Cursor>
-	</File>
-	<File name="src\menu.c" open="1" top="1" tabpos="10" split="0" active="1" splitpos="380" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2229" topLine="61" />
-		</Cursor>
-	</File>
-	<File name="src\network.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="527" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="16429" topLine="531" />
-		</Cursor>
-	</File>
-	<File name="src\network.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2127" topLine="59" />
-		</Cursor>
-	</File>
-	<File name="src\objects.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="230" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1319" topLine="44" />
-		</Cursor>
-	</File>
-	<File name="src\objects.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="5601" topLine="202" />
-		</Cursor>
-	</File>
 	<File name="src\collisions.c" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="7964" topLine="297" />
+		</Cursor>
+	</File>
+	<File name="src\mapmaker.c" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="12065" topLine="354" />
 		</Cursor>
 	</File>
 	<File name="src\collisions.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -82,9 +77,14 @@
 			<Cursor1 position="1018" topLine="10" />
 		</Cursor>
 	</File>
-	<File name="src\drawing.c" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src\menu.c" open="1" top="1" tabpos="10" split="0" active="1" splitpos="380" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="10632" topLine="292" />
+			<Cursor1 position="3711" topLine="108" />
+		</Cursor>
+	</File>
+	<File name="src\network.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="527" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="8003" topLine="267" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

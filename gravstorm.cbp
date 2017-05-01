@@ -69,6 +69,7 @@
 			<Add option="-static-libstdc++" />
 			<Add option="-static" />
 			<Add option="-lpthread" />
+			<Add option="-Wl,-Map=gs.map" />
 			<Add library="../TurboRaketti/AllegroDLLs/a5113_new/liballegro_monolith-static.a" />
 			<Add library="../TurboRaketti/AllegroDLLs/a5113_new/libvorbisfile.a" />
 			<Add library="../TurboRaketti/AllegroDLLs/a5113_new/libvorbis.a" />
