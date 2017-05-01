@@ -229,8 +229,6 @@ int main (int argc, char *argv[]){
 
     //ANDROID - SCREEN ROTATION!!!!!
 
-    font_scale = (float)al_get_display_width(display)/(SCREENX);    //font sizes chosen to suit SCREENX, so scale according to what we actually have!
-
 	//change directory to data, where all resources live (images, fonts, sounds and text files)
 	al_append_path_component(path, "data");
 	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
@@ -243,18 +241,8 @@ int main (int argc, char *argv[]){
 
     if (icon) al_set_display_icon(display, icon);
 
-    if ((font       = al_load_font("miriam.ttf", 20*font_scale, 0))          == NULL)  fprintf(logfile,"miriam.ttf load fail\n"); //debug font
-    if ((menu_font  = al_load_font("Audiowide-Regular.ttf", 40*font_scale,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
-    if ((glow_font  = al_load_font("Audiowide-500.ttf", 40*font_scale,0))== NULL)      fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
-    if ((small_font = al_load_font("Audiowide-Regular.ttf", 30*font_scale,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
-    if ((small_glow_font = al_load_font("Audiowide-500.ttf", 30*font_scale,0))== NULL) fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
-    if ((big_font   = al_load_font("Zebulon.otf", 200*font_scale, 0))      == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
-    if ((title_font = al_load_font("Zebulon.otf", 131*font_scale, 0))    == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
-    //don't scale this one....
-    if ((race_font  = al_load_font("7seg.ttf", 18, 0))            == NULL)  fprintf(logfile,"7seg.ttf load fail\n");
+    LoadFonts();
 
-	fprintf(logfile,"Loaded fonts (scaled by %.2f)\n",font_scale);
-	fflush(logfile);
 
     voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
     mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
@@ -328,6 +316,8 @@ int main (int argc, char *argv[]){
     //back to here when exiting game
 	while(1)
 	{
+		//LoadFonts();
+
 		exit = DoMenu(queue, event);
 
 		if (exit) break;
@@ -558,6 +548,7 @@ int main (int argc, char *argv[]){
                     redraw = true;
 			if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 				al_acknowledge_resize(display);
+				LoadFonts();
 				redraw = true;
 			}
 
@@ -788,7 +779,10 @@ int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     al_wait_for_event(queue, &event);
 
     if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+    {
         al_acknowledge_resize(display);
+        LoadFonts();
+    }
 
     else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
         Exit();
@@ -826,6 +820,26 @@ int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     if (i<num_ships) return FIRE;//break;	//if we came out of for() loop early, must have had a button, so exit while() loop.
 
     return 0;
+}
+
+void LoadFonts(void)
+{
+    FreeFonts();
+
+    font_scale = (float)al_get_display_width(display)/(SCREENX);    //font sizes chosen to suit SCREENX, so scale according to what we actually have!
+
+    if ((font       = al_load_font("miriam.ttf", 20*font_scale, 0))          == NULL)  fprintf(logfile,"miriam.ttf load fail\n"); //debug font
+    if ((menu_font  = al_load_font("Audiowide-Regular.ttf", 40*font_scale,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
+    if ((glow_font  = al_load_font("Audiowide-500.ttf", 40*font_scale,0))== NULL)      fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
+    if ((small_font = al_load_font("Audiowide-Regular.ttf", 30*font_scale,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
+    if ((small_glow_font = al_load_font("Audiowide-500.ttf", 30*font_scale,0))== NULL) fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
+    if ((big_font   = al_load_font("Zebulon.otf", 200*font_scale, 0))      == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
+    if ((title_font = al_load_font("Zebulon.otf", 131*font_scale, 0))    == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
+    //don't scale this one....
+    if ((race_font  = al_load_font("7seg.ttf", 18, 0))            == NULL)  fprintf(logfile,"7seg.ttf load fail\n");
+
+	fprintf(logfile,"Loaded fonts (scaled by %.2f)\n",font_scale);
+	fflush(logfile);
 }
 
 
