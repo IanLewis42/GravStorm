@@ -25,7 +25,7 @@ o Windows
   If you run it on any other version, please let me know how you get on.
   
 o Android  
-  Development is under consideration (If you've ever made anything for Android, and want to help, please get in touch)
+  Development is awaiting my acquisition of a 64-bit Windows PC. Android studio doesn't like 32-bit Windows.....
 
 o iOS
   No chance. Unless you want to do it :-)
@@ -189,11 +189,11 @@ The game has been designed to make creating your own levels as easy as possible.
 
 I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusion this causes :-)
 
-- The file 'data/maps.txt' lists all the maps(/levels) that can be played. A : at the start of an entry indicates a group. Each entry in maps.txt (apart from the groups) must have a corresponding .txt file in the /data directory. So if the entry in maps.txt is my_level, you must have a file called data/my_level.txt
+- The file 'data/maps.txt' lists all the maps(/levels) that can be played. A colon ':' at the start of an entry indicates a group. Each entry in maps.txt (apart from the groups) must have a corresponding .txt file in the /data directory. So if the entry in maps.txt is my_level, you must have a file called data/my_level.txt
   
 - This .txt file contains all the information about the level. Each parameter should be typed on its own line. 
   Pretty much anything (other than whitespace) can be used as a single-line comment, but I tend to use a semicolon ;
-  The easiest thing to do is take a look at some of the existing  files, but for reference, I'll describe all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly. The file should be edited in a plain ASCII text editor (e.g. nano or leafpad on Raspberry Pi, notepad on windows.)
+  The easiest thing to do is take a look at some of the existing files, but for reference, I'll describe all the parameters here. Most are optional, or have default values. Those that are always required are marked accordingly. The file should be edited in a plain ASCII text editor (e.g. nano or leafpad on Raspberry Pi, notepad on windows.)
   
 o map_type <0|1|2>
   0 - Single image file for map, displayed double size (default)
@@ -202,13 +202,12 @@ o map_type <0|1|2>
     
 o display_map <filename> only png format supported. REQUIRED
   Image to display, or images of all the tiles, arranged with eight tiles per row. 
-  If this is a single image, it must be an exact multiple of 32 pixels wide (e.g. 32*20 = 640. 32*25=800). 
-  Maximum size is 1440x512 pixels.
-  If tiles, each tile must be 64x64 pixels, so the whole image must be (8*64) x (n*64) pixels, where n=number of tiles/8. The first (i.e. top-left) tile must be entirely empty space, i.e. contain no objects that the ship could collide with.
+  If this is a single image, it must be an exact multiple of 32 pixels wide (e.g. 32*20 = 640, 32*25=800). 
+  Maximum size is 1920x1920 pixels.
+  If tiles, each tile must be 64x64 pixels, and arranged in rows of 8 tiles, so the whole image must be (8*64) x (n*64) pixels, where n=number of tiles/8. The first (i.e. top-left) tile must be entirely empty space, i.e. contain no objects that the ship could collide with.
 
 o background <filename> png or jpg format supported.
-  For a type 1 (tiled) map, this should specify a 128x128 image which will be tiled and used as a scrolling 'parallax' background.
-  For a type 2 map, the background can be any size.
+  This should specify an image which will be tiled and used as a scrolling 'parallax' background.
   
 o bg_fade <value>
   Specifying this enables background fading. This means that the background will be invisible at the top of the map, and become more visible as you go down. The value is the distance from the top (in pixels) where the background starts to appear.
@@ -220,7 +219,7 @@ o collision_map <filename> only png format supported. REQUIRED
   For map type 2, this should be HALF-SIZE (i.e. half the size of the display map)
   
 o ascii_map <filename> 
-  Shows the arrangement of tiles to make the map. ASCII format, 0-9 for first 10 tiles, A-Z for next 26. ' ' (space) doubles as 0. Only applies if map_type = 1.
+  Shows the arrangement of tiles to make the map. ASCII format, 0-9 for first 10 tiles, A-Z for next 26. ' ' (space) doubles as 0. REQUIRED if map_type = 1. Not applicable for other map types.
   
 o sentry_display <filename> only png format supported.
   Images of all the sentries and forcefields, arranged in a single horizontal line. Each image must be 64x64 pixels, so the whole image must be (n*64) x 64 pixels.
@@ -370,5 +369,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 10/02/17
+IPL 02/03/17
 gravstorm9@gmail.com
