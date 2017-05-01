@@ -53,6 +53,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	float a = 10;	//width of text
 	float shadow_scale, text_scale;
 	int sound_latency;
+	int line_space;
 
 	char fade_in[200],fade_out[200],visible[200];
 	//int fade_in_y = 600, visible_y = 570, fade_out_y = 540;
@@ -75,9 +76,9 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     bgw = al_get_bitmap_width(menu_bg_bmp);
     bgh = al_get_bitmap_height(menu_bg_bmp);
 
-    fade_in_y  = font_scale*600;
-    visible_y  = font_scale*570;
-    fade_out_y = font_scale*540;
+    fade_in_y  = 0.75*h +30*font_scale;
+    visible_y  = 0.75*h;
+    fade_out_y = 0.75*h-30*font_scale;
 
 	fprintf(logfile,"Title Screen\n");
 
@@ -111,7 +112,15 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
             return 1;
 
         if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+        {
             al_acknowledge_resize(display);
+            w = al_get_display_width(display);
+            h = al_get_display_height(display);
+            LoadFonts();
+            fade_in_y  = 0.75*h +30*font_scale;
+            visible_y  = 0.75*h;
+            fade_out_y = 0.75*h-30*font_scale;
+        }
 
 		if (event.type == ALLEGRO_EVENT_TIMER)
 		{
@@ -159,7 +168,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 			al_identity_transform(&transform);
     		al_use_transform(&transform);
 
-    		int line_space = 30*font_scale;
+    		line_space = 30*font_scale;
 
     		if (y==ht)	//start credits
     		{
@@ -291,8 +300,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
     Ship[3].angle = 30;
 
     event.keyboard.keycode = 0;
-
     Net.pingtimer = 0;
+    Menu.expand = 0;
 
     while(1)
 	{
@@ -309,6 +318,10 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             h = al_get_display_height(display);
 
             al_set_clipping_rectangle(0, 0, w, h);
+
+            LoadFonts();
+			if (Menu.expand > 35*font_scale)
+				Menu.expand = 35*font_scale;
         }
 
 		else if (event.type == ALLEGRO_EVENT_TIMER && al_is_event_queue_empty(queue))

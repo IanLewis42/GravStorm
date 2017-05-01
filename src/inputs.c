@@ -244,6 +244,10 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event)
 
 }
 
+//ANdroid controls
+//Read touches. Map into touch_left_up (i.e. touch starts / moves into zone) _down (touch ends/leaves zone) etc.
+//Add into ScanInputs. Or replace fn, as touch will be only i/p....
+
 /****************************************************
 ** void ScanInputs(int num_ships)
 ** Check event logs for keys and joysticks,

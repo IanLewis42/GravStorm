@@ -391,5 +391,6 @@ extern bool redraw;
 
 int  ShipMass(int ship_num);
 void FreeMenuBitmaps(void);
+void LoadFonts(void);
 int read_maps(void);
 void Exit(void);

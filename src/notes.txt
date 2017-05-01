@@ -598,6 +598,20 @@ drawing.c - make menu fit display dimensions
 game.c - all of above!
 objects.c - add shrapnel bullet type
 
+- *tile background on type 2 and fix scrolling :-)
+- 8-way level; use red canyon 
+- radar, mute buttons?
+- android controls: 
+  012
+  345
+  678
+  - 'default' to '4'
+  - if 'left' sub 1, if right add 1
+  - if up sub 3, if down add 3
+  - use as index for displaying control pad
+  - use touch start or touch move => key pressed
+  - touch end or touch cancel => key not pressed
+
 so.....
 array [struct {string, fn_ptr}]
 string is mode,map, etc
