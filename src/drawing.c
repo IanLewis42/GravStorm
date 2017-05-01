@@ -981,11 +981,15 @@ void draw_split_screen(ViewportType viewport, int ship_num)
 
 float soverm;
 
+//scrollx, scrolly are saturated (clipped?) ship position
+//win_x, win_y are top-left of viewport
+//w,h are size of viewport
 void draw_background(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 {
 	ALLEGRO_TRANSFORM transform;
 	int x,y;
 	int min_x, min_y, max_x, max_y;
+    int bw,bh;
 	ALLEGRO_COLOR fade;
 
 	if (Map.background_fade)
@@ -994,78 +998,43 @@ void draw_background(int scrollx, int scrolly, int win_x, int win_y, int w, int 
 
         if (soverm < 0) soverm = 0;
 
-        fade = al_map_rgba_f(soverm,soverm,soverm,1.0);//(scrolly/mapy,scrolly/mapy,scrolly/mapy,scrolly/mapy);
+        fade = al_map_rgba_f(soverm,soverm,soverm,1.0);
     }
     else
         fade = al_map_rgba_f(1.0,1.0,1.0,1.0);
 
-	scrollx >>= 1;
+	scrollx >>= 1;  //to make the background move half as much
 	scrolly >>= 1;
 
-	//stop scrolling when you get near to the edge.
-	//scrollx is ship xpos, except saturated at half screen width
-	if (mapx < (w))	//for small maps....
-		scrollx = 0.5*w;
-	else if (scrollx < 0.5*w) 						//if the ship is <0.5 viewport width from edge, stop following it.
-		scrollx = 0.5*w;
-	else if (scrollx > mapx-0.5*w) //likewise from far edge
-		scrollx = mapx-0.5*w;
-	else
-		scrollx = scrollx;
+    bw = al_get_bitmap_width(background);
+    bh = al_get_bitmap_height(background);
 
-	if (scrolly < 0.5*h) 						//...and for y
-		scrolly = 0.5*h;
-	else if (scrolly > mapy-0.5*h)
-		scrolly = mapy-0.5*h;
-	else
-		scrolly = scrolly;
 
-	if (Map.type==1)	//1 for tiled
-	{
-		al_identity_transform(&transform);  		            /* Initialize transformation. */
-		al_translate_transform(&transform, -scrollx, -scrolly); /* Move to scroll position. */
-		al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
-		al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
+    al_identity_transform(&transform);  		            /* Initialize transformation. */
+    al_translate_transform(&transform, -scrollx, -scrolly); /* Move to scroll position. */
+    al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
+    al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
 
-		min_x = (scrollx - (w>>1) ) >> (TILE_SHIFTS+1);// /(tile_width);	//optimise by using shifts, rather than divides....
-		min_y = (scrolly - (h>>1) ) >> (TILE_SHIFTS+1);// /(tile_height);
+    min_x = ((scrollx - (w>>1) )/bw)-1;
+    min_y = ((scrolly - (h>>1) )/bh)-1;
 
-		max_x = ((scrollx + (w>>1) ) >> (TILE_SHIFTS+1) )+1;// /(tile_width)) +1;   T_S+1 because bg tile 128, not 64
-		max_y = ((scrolly + (h>>1) ) >> (TILE_SHIFTS+1) )+1;// /(tile_height)) +1;
+    max_x = ((scrollx + (w>>1) )/bw)+1;
+    max_y = ((scrolly + (h>>1) )/bh)+1;
 
-        //if (min_y < 0.5) min_y = 0.5;
+    al_hold_bitmap_drawing(1);
 
-		al_hold_bitmap_drawing(1);
-		for (y = min_y; y < max_y; y++)
-		{
-			for (x = min_x; x < max_x; x++)
-			{
-				//int i = tile_map[x + y * MAX_MAP_WIDTH];    //pull tile index rom array
-				//int u = i << 6;                             //multiply by 64 to get pixel index
-				//int v=0;
+    for (y = min_y; y < max_y; y++)
+    {
+        for (x = min_x; x < max_x; x++)
+        {
+            al_draw_tinted_bitmap(background, fade , win_x + x*bw,  win_y + y*bh, 0 );
+        }
+    }
 
-				//int u = (i & 0x0007)<<6;    //bottom 3 bits * 64
-				//int v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+    al_hold_bitmap_drawing(0);
 
-                                            //sx sy sw         sh         dx                        dy
-				//al_draw_bitmap_region(tr_map, u, v, TILE_WIDTH, TILE_HEIGHT, win_x + (x<<TILE_SHIFTS), win_y + (y<<TILE_SHIFTS), 0);
-				//al_draw_bitmap(background, win_x + (x<<(TILE_SHIFTS+1)),  win_y + (y<<(TILE_SHIFTS+1)), 0 );
-				al_draw_tinted_bitmap(background, fade , win_x + (x<<(TILE_SHIFTS+1)),  win_y + (y<<(TILE_SHIFTS+1)), 0 );
-			}
-		}
-		al_hold_bitmap_drawing(0);
-
-		al_identity_transform(&transform);
-    	al_use_transform(&transform);
-	}
-	else if (Map.type == 0)	//tr-style single image map
-	{
-    	al_draw_scaled_bitmap(background, (scrollx-w*0.5)/2,(scrolly-h*0.5)/2, w/2, h/2, win_x, win_y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
-	}
-	else if (Map.type == 2)
-	{
-    	al_draw_scaled_bitmap(background, (scrollx-w*0.5),(scrolly-h*0.5), w, h, win_x, win_y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
-	}
+    al_identity_transform(&transform);
+    al_use_transform(&transform);
 
 }
 
@@ -1405,13 +1374,13 @@ void draw_status_bar(int ship, int x, int y)
     //    al_draw_bitmap(status_bg,0,i,0);
 
 	if (Map.mission)
-		bs = 122;
+		bs = 122;                       //extra space for time, miners, jewels
 	else if (Ship[ship].lap_complete)
-        bs = 108;
+        bs = 108;                       //extra space for current + finished times
 	else if (Map.race)
-	    bs = 90;
+	    bs = 90;                        //extra space for current time only
 	else
-		bs=72;
+		bs=72;                          //minimum space; shield, ammo x2, fuel, lives
 
 	//yoffset += 0;//5;
 /*
@@ -1433,7 +1402,7 @@ void draw_status_bar(int ship, int x, int y)
 	{
 		//al_draw_filled_rectangle(0,i*100,120,i*100+90,Ship[i].colour);	//120*90 - make a nice bitmap background.
 		//al_draw_filled_rectangle(0,yoffset+i*bs,135,yoffset+i*bs+(bs-10),Ship[i].statuscolour);
-		al_draw_filled_rectangle(x,y,x+102,y+bs,al_map_rgba(0, 0, 0, 128));//Ship[i].statuscolour);
+		al_draw_filled_rounded_rectangle(x,y,x+102,y+bs,5,5,al_map_rgba(0, 0, 0, 128));//Ship[i].statuscolour);
 		//al_draw_bitmap(Ship[i].status_bg,0,i*100,0);
 
 		al_draw_bitmap_region(ui,100-Ship[i].shield,    0,  Ship[i].shield,       14, x+0, y+0, 0);
@@ -1481,6 +1450,8 @@ void draw_status_bar(int ship, int x, int y)
 			al_draw_textf(race_font, al_map_rgb(255, 128,   0),50, y+bs-38, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].best_lap_time);
         }
 	}
+
+// draw android onscreen controls
 //#define ANDROID
 #ifdef ANDROID
     //int w,h,ctrl_size;
