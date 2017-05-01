@@ -1,7 +1,7 @@
 map_type      2
 display_map   ns_final.png
 collision_map ns_final_col.png
-background    hyades1280.jpg
+background    blue_stars.jpg
 
 description   ns_desc.txt
 
