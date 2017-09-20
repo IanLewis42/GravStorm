@@ -21,6 +21,7 @@
 #define USB_JOYSTICK0 2
 #define USB_JOYSTICK1 3
 #define NA 4
+#define TOUCH_JOYSTICK 5
 
 //GPIO Pins for joystick
 #define GPIO_LEFT  22/*18*/
@@ -53,6 +54,8 @@ typedef struct
 	int button_up;
 } JoystickType;
 
+
+
 extern ALLEGRO_JOYSTICK *USBJOY[2];
 extern bool key_down_log[ALLEGRO_KEY_MAX];
 extern bool key_up_log[ALLEGRO_KEY_MAX];
@@ -60,4 +63,5 @@ extern bool key_up_log[ALLEGRO_KEY_MAX];
 void ScanInputs(int num_ships);
 void ReadGPIOJoystick();
 void CheckUSBJoyStick(ALLEGRO_EVENT event);
+void CheckTouchControls(ALLEGRO_EVENT event);
 

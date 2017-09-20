@@ -543,14 +543,15 @@ void init_controls(void)
 	Ship[3].right_key  = ALLEGRO_KEY_RIGHT;
 	Ship[3].thrust_key = ALLEGRO_KEY_RCTRL;
 
+  #define ANDROID
   #ifdef ANDROID
+
+    //Ship[0].controller = TOUCH_JOYSTICK;
+
 	//On-screen controls
-    if ((Ctrl.direction.bmp = al_load_bitmap("ctrl_direction.png")) == NULL)  fprintf(logfile,"ctrl_direction.png load fail");
-    //if ((Ctrl.directionbg.bmp = al_load_bitmap("ctrl_directionbg.png")) == NULL)  fprintf(logfile,"ctrl_directionbg.png load fail");
-    if ((Ctrl.thrust.bmp = al_load_bitmap("ctrl_thrust.png")) == NULL)  fprintf(logfile,"ctrl_thrust.png load fail");
-    if ((Ctrl.escape.bmp = al_load_bitmap("ctrl_escape.png")) == NULL)  fprintf(logfile,"ctrl_escape.png load fail");
-    //if ((Ctrl.start.bmp = al_load_bitmap("ctrl_start.png")) == NULL)  fprintf(logfile,"ctrl_start.png load fail");
-    //if ((Ctrl.select.bmp = al_load_bitmap("ctrl_select.png")) == NULL)  fprintf(logfile,"ctrl_select.png load fail");
+    //if ((Ctrl.dpad = al_load_bitmap("dpad.png")) == NULL)  fprintf(logfile,"dpad.png load fail");
+    //if ((Ctrl.buttons = al_load_bitmap("buttons.png")) == NULL)  fprintf(logfile,"buttons.png load fail");
+    if ((Ctrl.controls = al_load_bitmap("controls.png")) == NULL)  fprintf(logfile,"controls.png load fail");
 
 	int dw,dh;//,bw,bh;
 	dw = al_get_display_width(display);
@@ -558,36 +559,46 @@ void init_controls(void)
 
 	Ctrl.reversed = false;
 
-	Ctrl.direction.w = al_get_bitmap_width(Ctrl.direction.bmp);
-	Ctrl.direction.h = al_get_bitmap_width(Ctrl.direction.bmp);
-	Ctrl.direction.x = 0.98*dw-Ctrl.direction.w;
-	Ctrl.direction.y = 0.98*dh-Ctrl.direction.h;
+	//init size/position of buttons
+	//could read/store this in file, but I guess still need this for defaults....
+	Ctrl.ctrl[DPAD].active = TRUE;
+	Ctrl.ctrl[DPAD].w = 200;//al_get_bitmap_width(Ctrl.direction.bmp);
+	Ctrl.ctrl[DPAD].h = 200;//al_get_bitmap_width(Ctrl.direction.bmp);
+	Ctrl.ctrl[DPAD].x = 0.98*dw-Ctrl.ctrl[DPAD].w;
+	Ctrl.ctrl[DPAD].y = 0.98*dh-Ctrl.ctrl[DPAD].h;
 
-	//Ctrl.directionbg.w = al_get_bitmap_width(Ctrl.directionbg.bmp);
-	//Ctrl.directionbg.h = al_get_bitmap_width(Ctrl.directionbg.bmp);
-	//Ctrl.directionbg.x = 0.98*dw-Ctrl.directionbg.w;
-	//Ctrl.directionbg.y = 0.98*dh-Ctrl.directionbg.h;
+	Ctrl.ctrl[THRUST_BUTTON].active = TRUE;
+	Ctrl.ctrl[THRUST_BUTTON].w = 100;//al_get_bitmap_width(Ctrl.thrust.bmp);
+	Ctrl.ctrl[THRUST_BUTTON].h = 100;//al_get_bitmap_width(Ctrl.thrust.bmp);
+	Ctrl.ctrl[THRUST_BUTTON].x = 0.02*dw;
+	Ctrl.ctrl[THRUST_BUTTON].y = 0.98*dh-Ctrl.ctrl[THRUST_BUTTON].h;
 
-	Ctrl.thrust.w = al_get_bitmap_width(Ctrl.thrust.bmp);
-	Ctrl.thrust.h = al_get_bitmap_width(Ctrl.thrust.bmp);
-	Ctrl.thrust.x = 0.02*dw;
-	Ctrl.thrust.y = 0.98*dh-Ctrl.thrust.h;
+	Ctrl.ctrl[BACK].active = TRUE;
+	Ctrl.ctrl[BACK].w = 100;//al_get_bitmap_width(Ctrl.escape.bmp);
+	Ctrl.ctrl[BACK].h = 100;//al_get_bitmap_width(Ctrl.escape.bmp);
+	Ctrl.ctrl[BACK].x = 200;//0.02*dw;
+	Ctrl.ctrl[BACK].y = 0.02*dh;
 
-	Ctrl.escape.w = al_get_bitmap_width(Ctrl.escape.bmp);
-	Ctrl.escape.h = al_get_bitmap_width(Ctrl.escape.bmp);
-	Ctrl.escape.x = 0.02*dw;
-	Ctrl.escape.y = 0.02*dh;
-/*
-	Ctrl.select.w = al_get_bitmap_width(Ctrl.select.bmp);
-	Ctrl.select.h = al_get_bitmap_width(Ctrl.select.bmp);
+	/*
+	//same as thrust??
+	Ctrl.ctrl[].w = 200;//al_get_bitmap_width(Ctrl.select.bmp);
+	Ctrl.select.h = 200;//al_get_bitmap_width(Ctrl.select.bmp);
 	Ctrl.select.x = 0.02*dw;
 	Ctrl.select.y = 0.02*dh;
 
-	Ctrl.start.w = al_get_bitmap_width(Ctrl.start.bmp);
-	Ctrl.start.h = al_get_bitmap_width(Ctrl.start.bmp);
+	Ctrl.start.w = 200;//al_get_bitmap_width(Ctrl.start.bmp);
+	Ctrl.start.h = 200;//al_get_bitmap_width(Ctrl.start.bmp);
 	Ctrl.start.x = 0.02*dw;
 	Ctrl.start.y = 0.02*dh;
-*/
+    */
+
+    //init touch array
+    for (i=0 ; i<NUM_TOUCHES ; i++)
+    {
+        Touch[i].id = NO_TOUCH;
+        Touch[i].button = NO_BUTTON;
+    }
+
 #endif // ANDROID
 
 	//Colours - redundant??

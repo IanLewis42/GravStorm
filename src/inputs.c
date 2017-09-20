@@ -37,12 +37,17 @@ ALLEGRO_JOYSTICK *USBJOY[2];
 JoystickType GPIOJoystick;
 JoystickType USBJoystick[2];
 
+JoystickType TouchJoystick; //for android
+
 bool key_down_log[ALLEGRO_KEY_MAX];
 bool key_up_log[ALLEGRO_KEY_MAX];
 
 void ScanInputs(int num_ships);
 void ReadGPIOJoystick();
 void CheckUSBJoyStick(ALLEGRO_EVENT event);
+void NewTouch(ALLEGRO_EVENT event, int i);
+void DoDPAD(ALLEGRO_EVENT event);
+ButtonType FindButton(float x, float y);
 
 
 /****************************************************
@@ -154,6 +159,7 @@ void ReadGPIOJoystick()
 #endif
 }
 
+//maps allegro events into JoystickType struct.
 void CheckUSBJoyStick(ALLEGRO_EVENT event)
 {
 	int JoyIdx = 0;
@@ -244,9 +250,188 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event)
 
 }
 
-//ANdroid controls
-//Read touches. Map into touch_left_up (i.e. touch starts / moves into zone) _down (touch ends/leaves zone) etc.
-//Add into ScanInputs. Or replace fn, as touch will be only i/p....
+//Android controls
+//Read touches. Map into TouchJoystick, plus 'Command' struct
+//drag dpad and thrust.
+
+//
+void CheckTouchControls(ALLEGRO_EVENT event)
+{
+	int i;
+
+	if (event.type == ALLEGRO_EVENT_TOUCH_BEGIN)
+	{
+		//find free entry in touch array
+		i = 0;
+		while (Touch[i].id != NO_TOUCH) i++;
+
+		if (i >= NUM_TOUCHES)   //protection for running out of array.....
+            return;
+
+		Touch[i].id = event.touch.id;
+		Touch[i].button = FindButton(event.touch.x, event.touch.y);
+
+		NewTouch(event,i);  //check x,y for dpad, poke structures
+	}
+	else if (event.type == ALLEGRO_EVENT_TOUCH_END)
+    {
+		for (i=0 ; Touch[i].id != event.touch.id ; i++) //find touch
+        {}
+
+        Touch[i].id = NO_TOUCH;             //reset array entry
+
+        if (Touch[i].button == DPAD)        //release joystick
+        {
+            TouchJoystick.right_up = true;
+            TouchJoystick.left_up = true;
+            TouchJoystick.down_up = true;
+            TouchJoystick.up_up = true;
+        }
+        else if (Touch[i].button == THRUST_BUTTON)
+            TouchJoystick.button_up = true;
+        //don't care about release of these?
+        //else if (Touch[i].button == BACK)
+        //    Command.goback = true;
+        //else if (Touch[i].button == RADAR)
+        //    Command.toggleradar = true;
+        //else if (Touch[i].button == START || Touch[i].button == SELECT)
+        //    Command.goforward = true;
+
+        Touch[i].button = NO_BUTTON;        //probably not really needed....
+    }
+    else if (event.type == ALLEGRO_EVENT_TOUCH_MOVE)
+    {
+        for (i=0 ; Touch[i].id != event.touch.id ; i++) //find touch
+        {}
+
+        if (i >= NUM_TOUCHES)   //protection for running out of array.....
+            return;
+
+        ButtonType oldbutton = Touch[i].button;
+        Touch[i].button = FindButton(event.touch.x, event.touch.y);
+
+        if (oldbutton == DPAD)        //touch WAS on DPAD
+        {
+            if (Touch[i].button == DPAD)             //touch STILL on DPAD
+            {
+                DoDPAD(event);  //map touch event x/y to TouchJoystick struct.
+            }
+            else    //drag DPAD - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
+            {
+                if (event.touch.x < Ctrl.ctrl[DPAD].x)
+                    Ctrl.ctrl[DPAD].x = event.touch.x;
+                else if (event.touch.x > Ctrl.ctrl[DPAD].x + Ctrl.ctrl[DPAD].w)
+                    Ctrl.ctrl[DPAD].x = event.touch.x - Ctrl.ctrl[DPAD].w;
+                if (event.touch.y < Ctrl.ctrl[DPAD].y)
+                    Ctrl.ctrl[DPAD].y = event.touch.y;
+                else if (event.touch.y > Ctrl.ctrl[DPAD].y + Ctrl.ctrl[DPAD].h)
+                    Ctrl.ctrl[DPAD].y = event.touch.y - Ctrl.ctrl[DPAD].h;
+            }
+        }
+        else if (oldbutton == THRUST_BUTTON)        //touch was on thrust
+        {
+            if (Touch[i].button == THRUST_BUTTON)  //touch still on thrust
+            {}                                  //nothing to do
+            else //drag thrust button
+            {
+                if (event.touch.x < Ctrl.ctrl[THRUST_BUTTON].x)
+                    Ctrl.ctrl[THRUST_BUTTON].x = event.touch.x;
+                else if (event.touch.x > Ctrl.ctrl[THRUST_BUTTON].x + Ctrl.ctrl[THRUST_BUTTON].w)
+                    Ctrl.ctrl[THRUST_BUTTON].x = event.touch.x - Ctrl.ctrl[THRUST_BUTTON].w;
+                if (event.touch.y < Ctrl.ctrl[THRUST_BUTTON].y)
+                    Ctrl.ctrl[THRUST_BUTTON].y = event.touch.y;
+                else if (event.touch.y > Ctrl.ctrl[THRUST_BUTTON].y + Ctrl.ctrl[THRUST_BUTTON].h)
+                    Ctrl.ctrl[THRUST_BUTTON].y = event.touch.y - Ctrl.ctrl[THRUST_BUTTON].h;
+            }
+        }
+
+        else if (oldbutton == NO_BUTTON)            //were on no button
+        {
+            if (Touch[i].button != NO_BUTTON)       //now touching button
+            {
+                NewTouch(event,i);                  //treat as new touch
+            }
+        }
+        //don't need any other cases, don't care about holding or release of other buttons.???
+        return;
+    }
+}
+
+void NewTouch(ALLEGRO_EVENT event, int i)
+{
+    if (Touch[i].button == DPAD)
+    {
+        DoDPAD(event);  //map touch event x/y to TouchJoystick struct.
+    }
+    else if (Touch[i].button == THRUST_BUTTON)
+        TouchJoystick.button_down = true;
+    else if (Touch[i].button == BACK)
+        Command.goback = true;
+    else if (Touch[i].button == RADAR)
+        Command.toggleradar = true;
+    else if (Touch[i].button == START || Touch[i].button == SELECT)
+        Command.goforward = true;
+    //bigger/smaller buttons here
+
+    return;
+}
+
+void DoDPAD(ALLEGRO_EVENT event)
+{
+    int relx = event.touch.x - Ctrl.ctrl[DPAD].x;    //relative x
+    int rely = event.touch.y - Ctrl.ctrl[DPAD].y;    //relative y
+
+    //check left/right
+    if (relx < Ctrl.ctrl[DPAD].w * (1/3))   //left hand side
+    {
+        TouchJoystick.left_down = true;
+        TouchJoystick.right_up = true;
+    }
+    else if (relx > Ctrl.ctrl[DPAD].w * (2/3))   //right hand side
+    {
+        TouchJoystick.right_down = true;
+        TouchJoystick.left_up = true;
+    }
+    else   //middle
+    {
+        TouchJoystick.right_up = true;
+        TouchJoystick.left_up = true;
+    }
+
+    //check up/down
+    if (rely < Ctrl.ctrl[DPAD].h * (1/3))   //top
+    {
+        TouchJoystick.up_down = true;
+        TouchJoystick.down_up = true;
+    }
+    else if (rely > Ctrl.ctrl[DPAD].h * (2/3))   //bottom
+    {
+        TouchJoystick.down_down = true;
+        TouchJoystick.up_up = true;
+    }
+    else                                    //middle
+    {
+        TouchJoystick.down_up = true;
+        TouchJoystick.up_up = true;
+    }
+    return;
+}
+
+//better check this works.....
+ButtonType FindButton(float x, float y)
+{
+    ButtonType i;
+
+    for (i=0 ; i<NO_BUTTON ; i++)
+    {
+        if (Ctrl.ctrl[i].active)
+            if ((x > Ctrl.ctrl[i].x) && (x < (Ctrl.ctrl[i].x + Ctrl.ctrl[i].w)))
+                if ((y > Ctrl.ctrl[i].y) && (y < (Ctrl.ctrl[i].y + Ctrl.ctrl[i].h)))
+                    break;
+    }
+
+    return i;
+}
 
 /****************************************************
 ** void ScanInputs(int num_ships)
@@ -477,7 +662,91 @@ void ScanInputs(int num_ships)
 			}
 			//Ship[i].thrust_held = USBJoystick[0].button;
 		}
+
+		else if (Ship[j].controller == TOUCH_JOYSTICK)
+		{
+			if (TouchJoystick.left_down)
+			{
+				Ship[i].left_down   = true;
+				Ship[i].left_held   = true;
+				TouchJoystick.left_down = false;
+			}
+			if (TouchJoystick.left_up)
+			{
+				Ship[i].left_held   = false;
+				TouchJoystick.left_up = false;
+			}
+
+			if (TouchJoystick.right_down)
+			{
+				Ship[i].right_down   = true;
+				Ship[i].right_held   = true;
+				TouchJoystick.right_down = false;
+			}
+			if (TouchJoystick.right_up)
+			{
+				Ship[i].right_held   = false;
+				TouchJoystick.right_up = false;
+			}
+
+			if (TouchJoystick.up_down)
+			{
+				Ship[i].fire1_down   = true;
+				Ship[i].fire1_held   = true;
+				TouchJoystick.up_down = false;
+			}
+			if (TouchJoystick.up_up)
+			{
+				Ship[i].fire1_held   = false;
+				TouchJoystick.up_up = false;
+			}
+
+			if (TouchJoystick.down_down)
+			{
+				Ship[i].fire2_down   = true;
+				Ship[i].fire2_held   = true;
+				TouchJoystick.down_down = false;
+			}
+			if (TouchJoystick.down_up)
+			{
+				Ship[i].fire2_held   = false;
+				TouchJoystick.down_up = false;
+			}
+
+			if (TouchJoystick.button_down)
+			{
+				Ship[i].thrust_down   = true;
+				Ship[i].thrust_held   = true;
+				TouchJoystick.button_down = false;
+			}
+			if (TouchJoystick.button_up)
+			{
+				Ship[i].thrust_down   = false;
+				Ship[i].thrust_held   = false;
+				TouchJoystick.button_up = false;
+			}
+			//Ship[i].thrust_held = USBJoystick[0].button;
+		}
+
+		if (Ship[i].thrust_down)
+        {
+            Ship[i].thrust_down = false;
+            Command.goforward = true;
+        }
 	}
+
+	//Android - set display indexes.
+	Ctrl.ctrl[DPAD].idx = 4;
+	if (Ship[first_ship].left_held)  Ctrl.ctrl[DPAD].idx-=1;
+	if (Ship[first_ship].right_held) Ctrl.ctrl[DPAD].idx+=1;
+	if (Ship[first_ship].fire1_held) Ctrl.ctrl[DPAD].idx-=3;
+	if (Ship[first_ship].fire2_held) Ctrl.ctrl[DPAD].idx+=3;
+
+	if (Ship[first_ship].thrust_held) Ctrl.ctrl[THRUST_BUTTON].idx = 1;
+	else Ctrl.ctrl[THRUST_BUTTON].idx = 0;
+
+	//Ctrl.select.idx = Ctrl.thrust.idx;
+	//Ctrl.start.idx  = Ctrl.thrust.idx;
 
 	/*
 	if (Net.client) //copy inputs from Ship[0] to Ship[Net.id]

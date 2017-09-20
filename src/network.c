@@ -584,7 +584,7 @@ NetMessageType ServiceNetwork(void)
                             num_ships = Net.event.packet->data[i++];
                             for (j=0 ; j<num_ships ; j++)
                             {
-                                if (j==Net.id)
+                                if (j==Net.id)  //this packet is 'our' ship - so we only want info on collision - damage etc.
                                 {
                                     i+=14;                              //skip a few...
 
@@ -609,7 +609,7 @@ NetMessageType ServiceNetwork(void)
                                     else
                                         i+=4;
                                 }
-                                else
+                                else //a different ship, so we need all info - position, speed etc.
                                 {
                                     Ship[j].xpos   = Net.event.packet->data[i++] << 8;
                                     Ship[j].xpos  += Net.event.packet->data[i++];

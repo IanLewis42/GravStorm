@@ -539,17 +539,17 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             {
                 //yellow highlight
                 al_draw_filled_rounded_rectangle(Menu.offset+83,y,Menu.offset+135,y+52,10,10,al_map_rgba(64,64,0,64));
-
-                int temp = Ship[i].image-1;
-                if (temp < 0) temp += 8;
-
-                //greyed-out ship before
-                al_draw_tinted_bitmap_region(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+25+Ship[i].offset,y+2, 0);
-                temp+=2;
-                if (temp > 7) temp -=8;
-                //and after
-                al_draw_tinted_bitmap_region(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+145+Ship[i].offset,y+2, 0);
             }
+
+            int temp = Ship[i].image-1;
+            if (temp < 0) temp += 8;
+
+            //greyed-out ship before
+            al_draw_tinted_bitmap_region(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+25+Ship[i].offset,y+2, 0);
+            temp+=2;
+            if (temp > 7) temp -=8;
+            //and after
+            al_draw_tinted_bitmap_region(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+145+Ship[i].offset,y+2, 0);
 
             y+=2;
             //selected ship
@@ -668,11 +668,17 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
     #ifdef ANDROID
 
     //al_draw_bitmap(Ctrl.directionbg.bmp, Ctrl.directionbg.x, Ctrl.directionbg.y,0);
-    al_draw_bitmap(Ctrl.direction.bmp, Ctrl.direction.x, Ctrl.direction.y,0);
+    //al_draw_bitmap(Ctrl.direction.bmp, Ctrl.direction.x, Ctrl.direction.y,0);
 
     //al_draw_bitmap(Ctrl.thrust.bmp, Ctrl.thrust.x, Ctrl.thrust.y,0);
     //do start/select here
-    al_draw_bitmap(Ctrl.escape.bmp, Ctrl.escape.x, Ctrl.escape.y,0);
+    //al_draw_bitmap(Ctrl.escape.bmp, Ctrl.escape.x, Ctrl.escape.y,0);
+
+    for (i=0 ; i<NO_BUTTON ; i++)
+        if (Ctrl.ctrl[i].active)
+            al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].w, Ctrl.ctrl[i].h, 0);
+
+
     #endif
 
 /*
@@ -1455,25 +1461,22 @@ void draw_status_bar(int ship, int x, int y)
 //#define ANDROID
 #ifdef ANDROID
     //int w,h,ctrl_size;
-    //w=al_get_display_width(display);
+    //fudge - android screen size shouldn't change.....
+    int w=al_get_display_width(display);
     int h=al_get_display_height(display);
-    /*
-    ctrl_size = al_get_bitmap_height(Ctrl.direction.bmp);
-    al_draw_bitmap(Ctrl.direction.bmp, 0.98*w-ctrl_size, 0.98*h-ctrl_size,0);
 
-    ctrl_size = al_get_bitmap_height(Ctrl.thrust.bmp);
-    al_draw_bitmap(Ctrl.thrust.bmp, 0.02*w, 0.98*h-ctrl_size,0);
+    Ctrl.ctrl[DPAD].x = 0.98*w-Ctrl.ctrl[DPAD].w;
+	Ctrl.ctrl[DPAD].y = 0.98*h-Ctrl.ctrl[DPAD].h;
 
-    ctrl_size = al_get_bitmap_height(Ctrl.escape.bmp);
-    al_draw_bitmap(Ctrl.escape.bmp, 0.02*w, bs+0.02*h,0);
-    */
+    //Ctrl.ctrl[BACK].y = bs+0.02*h;
 
-    Ctrl.escape.y = bs+0.02*h;
+    for (i=0 ; i<NO_BUTTON ; i++)
+        if (Ctrl.ctrl[i].active)
+            al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].w, Ctrl.ctrl[i].h, 0);
 
-    //al_draw_bitmap(Ctrl.directionbg.bmp, Ctrl.directionbg.x, Ctrl.directionbg.y,0);
-    al_draw_bitmap(Ctrl.direction.bmp, Ctrl.direction.x, Ctrl.direction.y,0);
-    al_draw_bitmap(Ctrl.thrust.bmp, Ctrl.thrust.x, Ctrl.thrust.y,0);
-    al_draw_bitmap(Ctrl.escape.bmp, Ctrl.escape.x, Ctrl.escape.y,0);
+    //al_draw_bitmap_region(Ctrl.dpad,    Ctrl.ctrl[DPAD].idx*200,       0,     200,200, Ctrl.ctrl[DPAD].x,       Ctrl.ctrl[DPAD].y, 0);
+    //al_draw_scaled_bitmap(Ctrl.buttons, Ctrl.ctrl[JOY_BUTTON].idx*200, 2*200, 200,200, Ctrl.ctrl[JOY_BUTTON].x, Ctrl.ctrl[JOY_BUTTON].y,    Ctrl.ctrl[JOY_BUTTON].w, Ctrl.ctrl[JOY_BUTTON].h, 0);
+    //al_draw_scaled_bitmap(Ctrl.buttons, Ctrl.ctrl[BACK].idx*200,       3*200, 200,200, Ctrl.ctrl[BACK].x,       Ctrl.ctrl[BACK].y,    Ctrl.ctrl[BACK].w, Ctrl.ctrl[BACK].h, 0);
 
 #endif // ANDROID
 }

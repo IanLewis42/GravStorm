@@ -192,6 +192,16 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 		}
 		else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
 			break;
+        else if (event.type == ALLEGRO_EVENT_TOUCH_BEGIN)
+        {
+            int i = 0;                              //log touch for consistency with later code
+            while (Touch[i].id != NO_TOUCH) i++;    //need protection for running out of array.....
+
+            Touch[i].id = event.touch.id;
+            //Touch[i].button = FindButton(event.touch.x, event.touch.y);   //no buttons displayed.....
+
+            break;
+        }
 	}
 	fclose(credits);
 	al_stop_sample_instance(wind_inst);
@@ -262,6 +272,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     loop_inst = al_create_sample_instance(loop);
     al_attach_sample_instance_to_mixer(loop_inst, mixer);
     al_set_sample_instance_playmode(loop_inst, ALLEGRO_PLAYMODE_LOOP);
+    al_set_sample_instance_gain(loop_inst, 2);  //match music vol to fx vol
     al_play_sample_instance(loop_inst);
 
 	//if (DoOldMenu(queue, event, AnyShip)) return 1;
@@ -346,53 +357,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             //non-joystick things
             if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
             {
-                switch (Menu.state)
-                {
-                case NETWORK:
-                    Exit();   //escape to exit
-                break;
-                case LEVEL:
-                    Menu.state = NETWORK;            //or back to previous menu
-                break;
-                case PLAYERS:
-                    if (Menu.netmode == CLIENT)
-                    {
-                        Menu.state = NETWORK;            //or back to previous menu
-
-                        if (Net.client_state == CONNECTED || Net.client_state == RUNNING)
-                        {
-                            NetDisconnectClient();
-
-                            while (Net.client_state != IDLE)
-                            {
-                                ServiceNetwork();
-                            }
-                        }
-                        NetStopClient();
-                        //}
-                        //Net.client_state = IDLE;        //stop client ping
-                        //Net.client = false;
-                    }
-                    else if (Menu.netmode == HOST)
-                    {
-                        Menu.state = LEVEL;
-                        //disconnect clients
-                        NetStopListen();    //stop new connections
-
-                        NetSendAbort();         //tell clients to disconnect
-                        while (num_ships > 1)   //wait until they do
-                            ServiceNetwork();
-
-                        NetStopServer();        //kill server
-                        Net.server = false;
-                    }
-                    else
-                        Menu.state = LEVEL;
-
-                break;
-                }
-                //Menu.col_pos = 0;
-                //Menu.netmode = LOCAL;
+                Command.goback = true;
             }
 
 			else if (Menu.define_keys)// && event.type == ALLEGRO_EVENT_KEY_DOWN)
@@ -431,6 +396,12 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             else
             key_down_log[event.keyboard.keycode]=true;  //log it
 		}
+        else if (event.type == ALLEGRO_EVENT_KEY_UP)
+        {
+            pressed_keys[event.keyboard.keycode]=false;
+            key_up_log[event.keyboard.keycode]=true;
+        }
+
 		//_CHAR event for typing in IP address
 		/*
 		else if (event.type == ALLEGRO_EVENT_KEY_CHAR)
@@ -449,8 +420,18 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
         }
         */
 
-		//See if it's a USB joystick event. If it is, log it.
- 		else CheckUSBJoyStick(event);
+		//See if it's a USB joystick or touch event. If it is, log it.
+ 		else
+        {
+            CheckUSBJoyStick(event);
+            if (al_is_touch_input_installed())
+            {
+                if (event.any.source == al_get_touch_input_event_source())
+                {
+                    CheckTouchControls(event);
+                }
+            }
+        }
 
 		//finished checking events
 
@@ -486,21 +467,76 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 			}
 			if (Ship[i].thrust_down || key_down_log[ALLEGRO_KEY_ENTER])
 			{
-				AnyShip.thrust_down = true;
+				//AnyShip.thrust_down = true;
+				Command.goforward = true;
 				Ship[i].thrust_down = false;
 				key_down_log[ALLEGRO_KEY_ENTER] = false;
 			}
 		}
-
-		//now have all inputs recorded as AnyShip elements (non-ship keypresses will be in key_down_log)
+		//now have all inputs recorded as AnyShip elements (non-ship keypresses will be in key_down_log / Command struct)
 		//actions are dependent on state....
+/*
+        if (Command.goback)
+        {
+            Command.goback = false;
+
+            switch (Menu.state)
+            {
+            case NETWORK:
+                Exit();   //escape to exit
+            break;
+            case LEVEL:
+                Menu.state = NETWORK;            //or back to previous menu
+            break;
+            case PLAYERS:
+                if (Menu.netmode == CLIENT)
+                {
+                    Menu.state = NETWORK;            //back to previous menu
+
+                    if (Net.client_state == CONNECTED || Net.client_state == RUNNING)
+                    {
+                        NetDisconnectClient();
+                        while (Net.client_state != IDLE)
+                        {
+                            ServiceNetwork();
+                        }
+                    }
+                    NetStopClient();
+                }
+                else if (Menu.netmode == HOST)
+                {
+                    Menu.state = LEVEL;
+                    //disconnect clients
+                    NetStopListen();    //stop new connections
+
+                    NetSendAbort();         //tell clients to disconnect
+                    while (num_ships > 1)   //wait until they do
+                        ServiceNetwork();
+
+                    NetStopServer();        //kill server
+                    Net.server = false;
+                }
+                else
+                    Menu.state = LEVEL;
+
+            break;
+            }
+            //Menu.col_pos = 0;
+            //Menu.netmode = LOCAL;
+        }
+*/
 		switch (Menu.state)
         {
             case NETWORK:
-                //Menu.state = LEVEL; //no network yet....
-                if (AnyShip.thrust_down)
+                if (Command.goback)
                 {
-                    AnyShip.thrust_down = false;
+                    Command.goback = false;
+                    Exit();   //escape to exit
+                    break;
+                }
+                if (Command.goforward)
+                {
+                    Command.goforward = false;
                     /*
                     if (Menu.col_pos == 1)  //editing address
                     {
@@ -588,9 +624,15 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 */
             break;
             case LEVEL: //map selection
-                if (AnyShip.thrust_down)
+                if (Command.goback)
                 {
-                    AnyShip.thrust_down = false;
+                    Command.goback = false;
+                    Menu.state = NETWORK;            //back to previous menu
+                    break;
+                }
+                if (Command.goforward)
+                {
+                    Command.goforward = false;
                     Menu.state = PLAYERS;               //thrust to go to next menu
 
                     if (Map.max_players == 1) num_ships = 1;    //default 2 players, unless max is 1
@@ -651,6 +693,42 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             break;
 
             case PLAYERS: //players/ship/controls
+                if (Command.goback)
+                {
+                    Command.goback = false;
+                    if (Menu.netmode == CLIENT)
+                    {
+                        Menu.state = NETWORK;            //back to previous menu
+
+                        if (Net.client_state == CONNECTED || Net.client_state == RUNNING)
+                        {
+                            NetDisconnectClient();
+                            while (Net.client_state != IDLE)
+                            {
+                                ServiceNetwork();
+                            }
+                        }
+                        NetStopClient();
+                    }
+                    else if (Menu.netmode == HOST)
+                    {
+                        Menu.state = LEVEL;
+                        //disconnect clients
+                        NetStopListen();    //stop new connections
+
+                        NetSendAbort();         //tell clients to disconnect
+                        while (num_ships > 1)   //wait until they do
+                            ServiceNetwork();
+
+                        NetStopServer();        //kill server
+                        Net.server = false;
+                    }
+                    else
+                        Menu.state = LEVEL;
+
+                    break;
+                }
+
                 if (Net.client)
                 {
                     if (Net.client_state == IDLE)
@@ -661,9 +739,9 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     }
                 }
 
-                if (AnyShip.thrust_down)
+                if (Command.goforward)
                 {
-                    AnyShip.thrust_down = false;    //thrust to start game;
+                    Command.goforward = false;    //thrust to start game;
                     if (Menu.netmode == HOST)
                     {
                         Menu.state = LEVEL;           //set state for when we return to menu

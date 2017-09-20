@@ -106,6 +106,7 @@ MapType Map;
 MenuType Menu;
 RadarType Radar;
 CtrlsType Ctrl;
+CommandType Command;
 
 char map_names[MAP_NAME_LENGTH * MAX_MAPS];
 
@@ -153,7 +154,8 @@ FILE* logfile;
 int  DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  GameOver(void);
-int  FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
+//int  FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
+void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 void FreeGameBitmaps(void);
 void FreeFonts(void);
 void StopNetwork(void);
@@ -243,7 +245,6 @@ int main (int argc, char *argv[]){
 
     LoadFonts();
 
-
     voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
     mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
     al_set_default_mixer(mixer);
@@ -277,11 +278,14 @@ int main (int argc, char *argv[]){
 	fprintf(logfile,"%d Joysticks on system\n",al_get_num_joysticks());
 	fflush(logfile);
 
+	if (al_install_touch_input())
+        fprintf(logfile,"Init allegro touch input\n");
+
 	al_register_event_source(queue, al_get_keyboard_event_source());
-	//al_register_event_source(queue, al_get_mouse_event_source());
 	al_register_event_source(queue, al_get_display_event_source(display));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 	al_register_event_source(queue, al_get_joystick_event_source());
+    if (al_is_touch_input_installed()) al_register_event_source(queue, al_get_touch_input_event_source());
 
 	for (i=0 ; i<al_get_num_joysticks() ; i++)
 	{
@@ -361,12 +365,17 @@ int main (int argc, char *argv[]){
 
             display_map_text(true,30);	//this is the description text file, plus 'press fire' message
 
-            int f_or_e = FireOrEscape(queue, event);
+            ForwardOrBack(queue, event);    //check input devices for forward/back keys/buttons/touches
 
-            if (f_or_e == FIRE)
-                break;
-            else if (f_or_e == ESCAPE)
+            if (Command.goforward)
             {
+                Command.goforward = false;
+                break;
+            }
+
+            else if (Command.goback)
+            {
+                Command.goback = false;
                 back_to_menu = true;
                 StopNetwork();          //exit back to menu
                 break;
@@ -389,8 +398,11 @@ int main (int argc, char *argv[]){
                     break;
                 }
 
-                if (FireOrEscape(queue, event) == ESCAPE)
-                {
+                ForwardOrBack(queue, event);
+
+                if (Command.goback)
+                 {
+                    Command.goback = false;
                     back_to_menu = true;
                     StopNetwork();          //exit back to menu
                     break;
@@ -492,17 +504,7 @@ int main (int argc, char *argv[]){
 
 				if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
                 {
-                    game_over = 0;//1;
-
-                    if (Net.server)
-                    {
-                        NetSendAbort();         //tell clients to abort
-
-                        while (num_ships > 1)   //wait for them all to disconnect
-                            ServiceNetwork();
-                    }
-                    StopNetwork();          //exit back to menu
-                    break;
+                    Command.goback = true;
                 }
 
 				else if  (event.keyboard.keycode == ALLEGRO_KEY_PRINTSCREEN ||
@@ -513,10 +515,7 @@ int main (int argc, char *argv[]){
 				}
 				else if (event.keyboard.keycode == ALLEGRO_KEY_F10) //radar
                 {
-                    if (Net.client || Net.server)
-                    {
-                        Radar.on = !Radar.on;
-                    }
+                    Command.toggleradar = true;
                 }
 
 				else
@@ -542,6 +541,34 @@ int main (int argc, char *argv[]){
 
 			//USB Joystick events here
 			CheckUSBJoyStick(event);
+			//and touch events
+			CheckTouchControls(event);
+
+			if (Command.goback)
+            {
+                Command.goback = false;
+
+                game_over = 0;//1;
+
+                if (Net.server)
+                {
+                    NetSendAbort();         //tell clients to abort
+
+                    while (num_ships > 1)   //wait for them all to disconnect
+                        ServiceNetwork();
+                }
+                StopNetwork();          //exit back to menu
+                break;
+            }
+            else if (Command.toggleradar)
+            {
+                Command.toggleradar = false;
+
+                if (Net.client || Net.server)
+                {
+                    Radar.on = !Radar.on;
+                }
+            }
 
 			if (event.type == ALLEGRO_EVENT_TIMER)
 				//if (!Net.client)
@@ -772,7 +799,8 @@ int main (int argc, char *argv[]){
     return 0;
 }
 
-int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
+//int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
+void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
     int i;
 
@@ -793,10 +821,18 @@ int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
             ReadGPIOJoystick();
     }
 
+    else if (al_is_touch_input_installed())
+    {
+        if (event.any.source == al_get_touch_input_event_source())
+        {
+            CheckTouchControls(event);  //will set command.goforward etc.
+        }
+    }
+
     else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
     {
         if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
-            return ESCAPE;
+            Command.goback = true;
         else
             key_down_log[event.keyboard.keycode]=true;
     }
@@ -812,14 +848,31 @@ int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     {
         if (Ship[i].thrust_down || key_down_log[ALLEGRO_KEY_ENTER])
         {
+            Command.goforward = true;
             Ship[i].thrust_down = false;
             key_down_log[ALLEGRO_KEY_ENTER] = false;
             break;			//out of the for loop
         }
     }
-    if (i<num_ships) return FIRE;//break;	//if we came out of for() loop early, must have had a button, so exit while() loop.
+
+    return;
+
+    //skip this, just leave command.x set and return - check in calling fn.
+    /*
+    if (Command.goforward)
+    {
+        Command.goforward = false;
+        return FIRE;
+    }
+
+    if (Command.goback)
+    {
+        Command.goback = false;
+        return ESCAPE;
+    }
 
     return 0;
+    */
 }
 
 void LoadFonts(void)
@@ -1186,12 +1239,19 @@ extern float soverm;
 
 void draw_debug(void)
 {
-	int level;
+	int level,i;
 
 	if (Map.mission) level = num_ships*180;
 	else             level = num_ships*120;
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
+
+	for (i=0 ; Touch[i].id != NO_TOUCH ; i++)
+    {
+        al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Touch:%d, But:%d",Touch[i].id,Touch[i].button);
+    }
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NumTouches:%d",i);
+
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Net: %d", fpsnet);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Missed: %d", missed_packets);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NetQual: %.1f", Net.quality);

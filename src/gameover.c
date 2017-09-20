@@ -53,178 +53,183 @@ int GameOver()
 
     switch (game_over)
     {
-        case GO_TIMER:  //1st time in.
+    case GO_TIMER:  //1st time in.
 
-            num_ships_latched = num_ships;  //use to maintain all ships displayed on network server
+        num_ships_latched = num_ships;  //use to maintain all ships displayed on network server
 
-            if (!Net.client)
+        if (!Net.client)
+        {
+            //calculate nominal score - used to sort
+            for (i=0 ; i<num_ships ; i++)
+                Ship[i].score = Ship[i].lives + 10*Ship[i].kills;   //score just used to rank - this makes rank based on kills, with lives as 'tie breaker'
+
+            int max_score = -1;
+
+            //sort
+            for (i=0 ; i<num_ships ; i++)
             {
-                //calculate nominal score - used to sort
-                for (i=0 ; i<num_ships ; i++)
-                    Ship[i].score = Ship[i].lives + 10*Ship[i].kills;   //score just used to rank - this makes rank based on kills, with lives as 'tie breaker'
-
-                int max_score = -1;
-
-                //sort
-                for (i=0 ; i<num_ships ; i++)
-                {
-                    max_score = -1;
-
-                    for (j=0 ; j<num_ships ; j++)
-                    {
-                        if (Ship[j].score > max_score)
-                        {
-                            max_score = Ship[j].score;
-                            Map.score[i].score = max_score;
-                            Map.score[i].player = j;
-                            Map.score[i].kills = Ship[j].kills;
-                            Map.score[i].lives = Ship[j].lives;
-                        }
-                    }
-                    Ship[Map.score[i].player].score = -1;
-                }
-                for (i=0 ; i<num_ships ; i++)       //restore, but do I need to??
-                {
-                    int ship = Map.score[i].player;
-                    Ship[ship].score = Map.score[i].score;
-                }
-            }
-
-            if (Map.mission)
-            {
-                score = 0;                          //calculate score (only applicable for mission levels, but doesn't hurt.
-                score += Ship[0].miners*500;
-                score += Ship[0].jewels*200;
-                score += Ship[0].sentries*100;
-
-                if (Ship[0].lives && Ship[0].miners == Map.total_miners)    //TIME BONUS ONLY ON SUCCESS.
-                {
-                    time_left = Map.time_limit - Ship[0].current_lap_time;
-                    if (time_left < 0) time_left = 0;
-                    score += time_left*PPSECOND;
-                }
-
-                position = MAX_SCORES+1;            //position in high score table - init to 'off the bottom'
-
-                for (i=0 ; i<MAX_SCORES ; i++)              //copy oldscores -> newscores, inserting 'current score' where it fits.
-                {
-                    if (score > Map.oldscore[i].score)
-                    {
-                        Map.newscore[i].score = score;
-                        strncpy(Map.newscore[i].name,"",50);
-                        position = i;
-                        break;                              //break when you've insetred new score
-                    }
-                    else
-                    {
-                        Map.newscore[i].score = Map.oldscore[i].score;
-                        strncpy(Map.newscore[i].name,Map.oldscore[i].name,50);
-                    }
-                }
-                i++;
-                for ( ; i<MAX_SCORES ; i++)     //finish off the copy
-                {
-                    Map.newscore[i].score = Map.oldscore[i-1].score;
-                    strncpy(Map.newscore[i].name,Map.oldscore[i-1].name,50);
-                }
-            }
-            //Not mission  level, so might have a race.
-            else if (Map.race)
-            {
-                show_times = false;
-                ship = 0;                               //used when entering times
+                max_score = -1;
 
                 for (j=0 ; j<num_ships ; j++)
                 {
-                    if (Ship[j].lap_complete) show_times = true;    //only show times if a lap was completed
-                    Ship[j].lap_table_pos = MAX_SCORES+1;           //init each ship's position to 'off the table'
-
-                    for (i=0 ; i<MAX_SCORES ; i++)                  //now work out each ship's correct position in table
-                    {                                               //and copy into newtime, just like the scores
-                        if (Ship[j].best_lap_time < Map.oldtime[i].time)
-                        {
-                            Map.newtime[i].time = Ship[j].best_lap_time;
-                            strncpy(Map.newtime[i].name,"",50);
-                            Ship[j].lap_table_pos = i;
-                            break;
-                        }
-                        else
-                        {
-                            Map.newtime[i].time = Map.oldtime[i].time;
-                            strncpy(Map.newtime[i].name,Map.oldtime[i].name,50);
-                        }
-                    }
-                    i++;
-                    for ( ; i<MAX_SCORES ; i++)
+                    if (Ship[j].score > max_score)
                     {
-                        Map.newtime[i].time = Map.oldtime[i-1].time;
-                        strncpy(Map.newtime[i].name,Map.oldtime[i-1].name,50);
-                    }
-                    //now copy new back to old for next ship.....
-                    for (i=0 ; i<MAX_SCORES ; i++)
-                    {
-                        Map.oldtime[i].time = Map.newtime[i].time;
-                        strncpy(Map.oldtime[i].name,Map.newtime[i].name,50);
+                        max_score = Ship[j].score;
+                        Map.score[i].score = max_score;
+                        Map.score[i].player = j;
+                        Map.score[i].kills = Ship[j].kills;
+                        Map.score[i].lives = Ship[j].lives;
                     }
                 }
-                Ship[j].lap_table_pos = MAX_SCORES+1;
+                Ship[Map.score[i].player].score = -1;
             }
-            game_over--;    //next state...
-        break;
+            for (i=0 ; i<num_ships ; i++)       //restore, but do I need to??
+            {
+                int ship = Map.score[i].player;
+                Ship[ship].score = Map.score[i].score;
+            }
+        }
+
+        if (Map.mission)
+        {
+            score = 0;                          //calculate score (only applicable for mission levels, but doesn't hurt.
+            score += Ship[0].miners*500;
+            score += Ship[0].jewels*200;
+            score += Ship[0].sentries*100;
+
+            if (Ship[0].lives && Ship[0].miners == Map.total_miners)    //TIME BONUS ONLY ON SUCCESS.
+            {
+                time_left = Map.time_limit - Ship[0].current_lap_time;
+                if (time_left < 0) time_left = 0;
+                score += time_left*PPSECOND;
+            }
+
+            position = MAX_SCORES+1;            //position in high score table - init to 'off the bottom'
+
+            for (i=0 ; i<MAX_SCORES ; i++)              //copy oldscores -> newscores, inserting 'current score' where it fits.
+            {
+                if (score > Map.oldscore[i].score)
+                {
+                    Map.newscore[i].score = score;
+                    strncpy(Map.newscore[i].name,"",50);
+                    position = i;
+                    break;                              //break when you've insetred new score
+                }
+                else
+                {
+                    Map.newscore[i].score = Map.oldscore[i].score;
+                    strncpy(Map.newscore[i].name,Map.oldscore[i].name,50);
+                }
+            }
+            i++;
+            for ( ; i<MAX_SCORES ; i++)     //finish off the copy
+            {
+                Map.newscore[i].score = Map.oldscore[i-1].score;
+                strncpy(Map.newscore[i].name,Map.oldscore[i-1].name,50);
+            }
+        }
+        //Not mission  level, so might have a race.
+        else if (Map.race)
+        {
+            show_times = false;
+            ship = 0;                               //used when entering times
+
+            for (j=0 ; j<num_ships ; j++)
+            {
+                if (Ship[j].lap_complete) show_times = true;    //only show times if a lap was completed
+                Ship[j].lap_table_pos = MAX_SCORES+1;           //init each ship's position to 'off the table'
+
+                for (i=0 ; i<MAX_SCORES ; i++)                  //now work out each ship's correct position in table
+                {                                               //and copy into newtime, just like the scores
+                    if (Ship[j].best_lap_time < Map.oldtime[i].time)
+                    {
+                        Map.newtime[i].time = Ship[j].best_lap_time;
+                        strncpy(Map.newtime[i].name,"",50);
+                        Ship[j].lap_table_pos = i;
+                        break;
+                    }
+                    else
+                    {
+                        Map.newtime[i].time = Map.oldtime[i].time;
+                        strncpy(Map.newtime[i].name,Map.oldtime[i].name,50);
+                    }
+                }
+                i++;
+                for ( ; i<MAX_SCORES ; i++)
+                {
+                    Map.newtime[i].time = Map.oldtime[i-1].time;
+                    strncpy(Map.newtime[i].name,Map.oldtime[i-1].name,50);
+                }
+                //now copy new back to old for next ship.....
+                for (i=0 ; i<MAX_SCORES ; i++)
+                {
+                    Map.oldtime[i].time = Map.newtime[i].time;
+                    strncpy(Map.oldtime[i].name,Map.newtime[i].name,50);
+                }
+            }
+            Ship[j].lap_table_pos = MAX_SCORES+1;
+        }
+        game_over--;    //next state...
+    break;
+
+    case 3:
+        Command.goforward = false;
+        game_over--;    //next state...
+    break;
 
     case 2: //game_over = 2 i.e. nearly finished. display score for mission levels
-		if (Map.mission)
-		{
-			line_space = 50*font_scale;
+        if (Map.mission)
+        {
+            line_space = 50*font_scale;
 
-			y = 2*line_space;
-			col1 = 100*font_scale;
-			col2 = 400*font_scale;
-			col3 = 800*font_scale;
+            y = 2*line_space;
+            col1 = 100*font_scale;
+            col2 = 400*font_scale;
+            col3 = 800*font_scale;
 
-			if (Ship[0].lives && Ship[0].miners == Map.total_miners)
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "MISSION COMPLETE");
-			else
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "MISSION FAILED");
-			y+=line_space;
-
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "RESCUED");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d= ",Ship[0].miners,PPMINER);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].miners*PPMINER);
+            if (Ship[0].lives && Ship[0].miners == Map.total_miners)
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "MISSION COMPLETE");
+            else
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "MISSION FAILED");
             y+=line_space;
 
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "JEWELS");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d= ",Ship[0].jewels,PPJEWEL);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].jewels*PPJEWEL);
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "RESCUED");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d= ",Ship[0].miners,PPMINER);
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].miners*PPMINER);
             y+=line_space;
 
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "SENTRIES");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d = ",Ship[0].sentries,PPSENTRY);
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].sentries*PPSENTRY);
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "JEWELS");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d= ",Ship[0].jewels,PPJEWEL);
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].jewels*PPJEWEL);
+            y+=line_space;
+
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "SENTRIES");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x %d = ",Ship[0].sentries,PPSENTRY);
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Ship[0].sentries*PPSENTRY);
             y+=line_space;
 
             if (Ship[0].lives && Ship[0].miners == Map.total_miners)
-			{
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "TIME BONUS");
+            {
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "TIME BONUS");
                 al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%02d x  %d = ",time_left,PPSECOND);
-				al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",time_left*PPSECOND);
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",time_left*PPSECOND);
                 y+=line_space;
-			}
+            }
 
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "SCORE:");
-			al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",score);
-		}
-		else    //not mission, so display 'game over'
-		{
-			line_space = 60*font_scale;
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "SCORE:");
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_RIGHT, "%d",score);
+        }
+        else    //not mission, so display 'game over'
+        {
+            line_space = 60*font_scale;
 
-			y = line_space/2;
-			col1 = 120*font_scale;
-			col2 = 260*font_scale;
-			col3 = 460*font_scale;
-			col4 = 600*font_scale;
+            y = line_space/2;
+            col1 = 120*font_scale;
+            col2 = 260*font_scale;
+            col3 = 460*font_scale;
+            col4 = 600*font_scale;
 
-			al_draw_textf(title_font, al_map_rgb(0,0,0),w/2,  y,  ALLEGRO_ALIGN_CENTER, "gAme over");    //capital A looks cooler....
+            al_draw_textf(title_font, al_map_rgb(0,0,0),w/2,  y,  ALLEGRO_ALIGN_CENTER, "gAme over");    //capital A looks cooler....
 
             y = 200*font_scale;
 
@@ -263,24 +268,33 @@ int GameOver()
                 al_draw_textf(menu_font, colour, col4,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "%d",Map.score[i].lives);
 
             }
-		}
-		for(i=0 ; i<num_ships ; i++)	//check for each ships fire/thrust button to go to next state
-		{
-			if(Ship[i].thrust_down)
-			{
-				Ship[i].thrust_down = false;
-				game_over --;
-			}
-		}
-	break;
-	case 1: //game_over = 1, final state, hi score table for missions, times table for race, straight out otherwise.
+        }
+
+        if (Command.goforward)      //thrust, or OK(?) button
+        {
+            Command.goforward = false;
+            game_over--;
+        }
+
+        /*
+        for(i=0 ; i<num_ships ; i++)	//check for each ships fire/thrust button to go to next state
+        {
+            if(Ship[i].thrust_down)
+            {
+                Ship[i].thrust_down = false;
+                game_over --;
+            }
+        }
+        */
+    break;
+    case 1: //game_over = 1, final state, hi score table for missions, times table for race, straight out otherwise.
         if (Map.mission)
         {
             line_space = 50*font_scale;
 
-			y = line_space;
-			col1 = 100*font_scale;
-			col2 = 300*font_scale;
+            y = line_space;
+            col1 = 100*font_scale;
+            col2 = 300*font_scale;
 
             timer++;            //blinking cursor
             if (timer & 0x10)
@@ -326,10 +340,18 @@ int GameOver()
             {
                 for(i=0 ; i<num_ships ; i++)	//enable check for each ships fire/thrust button to go back to start (menu)
                 {
+                    /*
                     if(Ship[i].thrust_down)
                     {
                         Ship[i].thrust_down = false;
                         game_over --;
+                        score = 0;
+                    }
+                    */
+                    if (Command.goforward)      //thrust, or OK(?) button
+                    {
+                        Command.goforward = false;
+                        game_over--;
                         score = 0;
                     }
                 }
@@ -339,10 +361,10 @@ int GameOver()
         {
             line_space = 50*font_scale;
 
-			y = line_space;
-			col1 = 100*font_scale;
-			col2 = 300*font_scale;
-			col3 = 500*font_scale;
+            y = line_space;
+            col1 = 100*font_scale;
+            col2 = 300*font_scale;
+            col3 = 500*font_scale;
 
             while (Ship[ship].lap_table_pos > MAX_SCORES)  //skip to next ship with a lap table entry
             {
@@ -407,10 +429,18 @@ int GameOver()
             {
                 for(i=0 ; i<num_ships ; i++)	//and enable check for each ships fire/thrust button to go back to start (menu)
                 {
+                    /*
                     if(Ship[i].thrust_down)
                     {
                         Ship[i].thrust_down = false;
                         game_over --;
+                        score = 0;
+                    }
+                    */
+                    if (Command.goforward)      //thrust, or OK(?) button
+                    {
+                        Command.goforward = false;
+                        game_over--;
                         score = 0;
                     }
                 }
@@ -420,7 +450,7 @@ int GameOver()
             game_over--;
     break;
     default:
-		game_over--;					//decrement timer
+        game_over--;					//decrement timer
     break;
     }
 	return game_over;	//return 0 when we want to restart the game
