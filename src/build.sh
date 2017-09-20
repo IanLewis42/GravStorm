@@ -14,3 +14,4 @@ gcc -DRPI -O2 -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../gravstorm ./game.c 
 #/usr/bin/ld: cannot find -lEGL
 #/usr/bin/ld: cannot find -lbcm_host
  
+ 
