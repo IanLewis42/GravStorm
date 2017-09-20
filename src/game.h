@@ -343,27 +343,70 @@ extern MenuType Menu;
 //extern int tile_width, tile_height;
 
 //On-screen controls for Android version.
+//order of these MUST match order in bmp.
+typedef enum
+{
+	DPAD = 0,
+	//JOY_BUTTON, //thrust/select
+	START,
+	SELECT,
+	THRUST_BUTTON,
+	BACK,
+	BIGGER,
+	SMALLER,
+    RADAR,
+	NO_BUTTON,
+}ButtonType;
+
 typedef struct
 {
-    ALLEGRO_BITMAP *bmp;
-    int x;
+	int id;
+	ButtonType button;
+}TouchType;
+
+//keep track of touches on buttons
+#define NUM_TOUCHES 6
+TouchType Touch[NUM_TOUCHES];
+
+#define NO_TOUCH 0xffff
+
+typedef struct
+{
+    int active; //do we draw this (and therefore check for touches on it)
+    int idx;    //index into sprite sheet for display
+    int x;      //position on screen
     int y;
-    int w;
+    int w;      //size
     int h;
 } CtrlType;
 
 typedef struct
 {
-    int reversed;       //left handed
-    CtrlType direction;
-    CtrlType directionbg;
-    CtrlType thrust;
-    CtrlType escape;
-    CtrlType select;
-    CtrlType start;
+    //ALLEGRO_BITMAP *dpad;
+    ALLEGRO_BITMAP *controls;
+    int reversed;       //left handed   - redundant, if dragging?
+
+    CtrlType ctrl[NO_BUTTON];
+
+    //CtrlType direction;
+    //CtrlType thrust;
+    //CtrlType escape;
+    //CtrlType select;
+    //CtrlType start;
 }CtrlsType;
 
 extern CtrlsType Ctrl;
+
+typedef struct
+{
+    int goback;
+    int goforward;
+    int toggleradar;
+    int bigger;
+    int smaller;
+}CommandType;
+
+extern CommandType Command;
 
 extern FILE* logfile;
 
