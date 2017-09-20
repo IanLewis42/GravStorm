@@ -611,6 +611,97 @@ objects.c - add shrapnel bullet type
   - use as index for displaying control pad
   - use touch start or touch move => key pressed
   - touch end or touch cancel => key not pressed
+  
+  - could put slow reload on heavy weapons - better than repeated press?
+
+Allegro needs at least the API 12 SDK platform == Android 3.1 platform (HONEYCOMB_MR1) 
+Enet was ported in December 2010, so was prob. targeted at Android 2.2. May be broken now......
+'port' seems to be just repackaging so it will build for android. 
+Could maybe just build enet as static lib, then link to it. Think this is what I do now.....
+
+display of dpad and thrust button is good
+need to have adjustable control size? - (so more buttons - up/down for adjusting - remember in file?)
+
+typedef enum
+{
+	DPAD = 0;
+	JOY_BUTTON;
+	BACK;
+	RADAR;
+	BIGGER;
+	SMALLER;
+	NO_BUTTON;
+}ButtonType;
+
+typedef struct
+{
+	int id;
+	ButtonType button;
+}TouchType;
+
+//keep track of touches on buttons
+
+TouchType Touch[NUM_TOUCHES];
+
+#define NO_TOUCH 0xffff
+
+touch controls
+touch begin
+  Find free entry in Touch[]  (i.e. Touch[i].id == NO_TOUCH)
+  if in dpad area, 
+    log touch / button combination
+    check for l/r/u/d areas - poke joystick struct
+  else if in thrust area (button area? - change size/shape location from menu to game???)
+    log touch / button combination
+    poke joystick struct
+  else if in back area
+    log touch / button combination
+    poke key log?? or new var??
+  else if in radar area
+    log touch / button combination
+  else
+    log as NO_BUTTON
+
+need to 'debounce' escape/f10 etc keys??? - maybe OK with key up and key down logs......
+
+touch end / cancel
+  spin through Touch array - if touch end id matches any: (always should, I think....)
+    poke joystick struct / key log to release 
+    set to NO_TOUCH
+
+touch move (COMPLICATED!!!)
+  spin through Touch array - if touch move id matches any (always should, I think....)
+    
+    if was on dpad (do this first!)
+          if still on dpad
+            check dpad areas and poke joystick struct
+            => NEED TO REMEMBER WHICH DPAD AREAS ARE PRESSED!!!!!
+            => MAYBE NOT!!!! see usb joystick code (i.e. if left == true, right = false etc....)
+          else
+            drag dpad. Limit to screen edge.....
+    else if was on button (NOT dpad)
+      if still on same button
+        do nothing
+      else
+        (treat as touch end) - or move (drag) button - only for thrust
+ 
+    else (was on nothing)
+      (treat as touch begin)
+
+
+Hmmmm.... need to track which touch was on which control.
+So could have array of controls and store touch number against relevant control.
+OR array of touches, and store controls. 
+Array of touches maybe easier.....
+..problem is that there's no guarantee on limits of touch.id field
+
+hmmm.....
+
+could have a struct with {touch.id,BUTTON_ENUM}
+and then an array of them, for the number of touches I want to support.
+Then have to run through array......
+but in the absence of guarantees on touch.id values, I guess I have to....
+
 
 so.....
 array [struct {string, fn_ptr}]
@@ -618,6 +709,73 @@ string is mode,map, etc
 fn_ptr points to fn to do remaining enu
 
 long sliding map list? or keep expanding?
+
+For map list scrolling
+in touch handler
+- touch begin: highlight
+- touch move: add dy (dx) to yoffset (xoffset)
+- touch end: if dy > threshold, speed = dy, else select
+- touch cancel: ??
+
+in display
+- multiply speed by damping factor
+- add speed to offfset
+- limit offset. ping if limiting
+- draw with offset
+
+Add field(s) to Command struct for menu selection??
+or have menu code read touch array?
+
+need left/right buttons for ship selection, I think.....
+
+**MUSIC/FX VOLUME
+
+android menu
+------------
+- stick to 3 screens (network / map / player) 
+- add instructions (and controls? or the same?) entry to network screen
+- 
+
+Instructions:
+----------------
+Fly around, shoot your enemy. Don't crash into the walls.
+
+If it's a mission level, pick up stranded miners and bonus jewels by 
+landing on the pads, then fly away from the surface to finish the level
+
+
+controls:
+---------
+graphical? i.e. put buttons on screen, with labels 
+need to scroll ? - (for menu, implies 'click on release' as tap-and-drag scrolls....)
+DPAD
+Rotate anti-clockwise
+Rotate clockwise
+Fire normal weapon
+Fire special weapon / enter config menu
+
+BUTTONS
+thrust
+radar
+back/exit 
+[bigger, smaller]
+
+STATUS PANEL
+shield
+normal ammo
+special ammo
+fuel
+ships left
+
+miners
+jewels
+mission time
+
+last lap / best lap
+current lap
+
+Press down/fire special when on landing pad to access the ship config menu:
+ship config panel
 
 mode     | local | network [on change to local load local map list. on change to network, enable IP address, search]
            address: 192.168.0.1
