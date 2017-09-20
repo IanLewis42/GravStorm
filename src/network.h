@@ -1,5 +1,6 @@
 #include "enet/enet.h"
 
+
 typedef enum
 {
     NO_MESSAGE = 0,
