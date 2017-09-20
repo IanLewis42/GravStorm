@@ -96,8 +96,8 @@
 			<Add library="../../mingw32/i686-w64-mingw32/lib/libws2_32.a" />
 			<Add library="../../mingw32/i686-w64-mingw32/lib/libshlwapi.a" />
 			<Add library="../enet/enet.lib" />
-			<Add library="C:/Program Files/Microsoft SDKs/Windows/v7.0/Lib/ws2_32.lib" />
-			<Add library="C:/Program Files/Microsoft SDKs/Windows/v7.0/Lib/winmm.lib" />
+			<Add library="C:/IPL/mslibs/ws2_32.lib" />
+			<Add library="C:/IPL/mslibs/winmm.lib" />
 		</Linker>
 		<Unit filename="src/collisions.c">
 			<Option compilerVar="CC" />
