@@ -1,0 +1,17 @@
+Map type:2
+Display Map:ns_final.png
+Collision Map:ns_final_col.png
+Map background:blue_stars.jpg
+Description file:ns_desc.txt
+Ship first:1
+Gravity:0.000000
+Drag:2.000000
+Wrap:1
+Radial Gravity On
+blackhole 0: x:960 y:960 g:10.000000
+Pad 0: type:00 y:228 x:180 x:300 miners:0 jewels:0
+Pad 1: type:01 y:1393 x:1547 x:1668 miners:0 jewels:0
+area 0: x:180 x:300 y:50 y:230 g:0.050000 drag:2.000000
+area 1: x:1547 x:1668 y:1200 y:1395 g:0.050000 drag:2.000000
+Max players:2
+--End of mapfile neutron star.txt--

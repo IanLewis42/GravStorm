@@ -1,0 +1,397 @@
+GravStorm V1.0.0.0
+Init Allegro
+Init Allegro done
+Creating display
+Freed fonts
+Loaded fonts (scaled by 1.00)
+Setup audio voice and mixer
+Loaded Audio Samples
+Creating Events
+Init allegro joystick
+0 Joysticks on system
+Skip GPIO joystick
+Title Screen
+Freed 2 menu/title bitmaps
+Exit Title Screen
+
+Start Menu
+Init Keyboard
+4 Map groups
+Group: One Player
+Map: mission 1
+Map: mission 2
+Map: mission 3
+Map: mission 4
+Map: mission 5
+Map: mission 6
+Map: final mission
+Group: Multi Player
+Map: canyon
+Map: forest
+Map: reactor core
+Map: neutron star
+Group: TurboRaketti
+Map: sitimus
+Map: ekolos
+Map: likvidius
+Map: metarola
+Map: tropulus
+Group: TR Beta
+Map: isemania
+Map: mutolos
+Map: keurakea
+Map: ekolos beta
+Map: sinneau
+
+Selected map 0,0
+Opened map file mission 1.txt
+Map type:1
+Display Map:hex_pink.png
+Collision Map:hextiles_col.png
+ASCII map file:m1_map.txt
+ASCII Map: H:17 W:45
+Description file:mission1_desc.txt
+Mission:1
+Time Limit:60
+Sentry Image file:sentries.png
+Sentry Collision file:sentries_col.png
+Ship first:1
+Gravity:0.050000
+Drag:2.000000
+Wrap:0
+Lives:1
+Pad 0: type:00 y:697 x:658 x:814 miners:0 jewels:0
+Pad 1: type:01 y:826 x:1298 x:1455 miners:5 jewels:0
+Pad 2: type:02 y:633 x:1939 x:2092 miners:0 jewels:5
+Sentry 0: x:995, y:798, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite5, Sprite0
+Sentry 1: x:2272, y:605, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:1000, Sprite6, Sprite0
+Max players:1
+3 pads
+0 areas
+0 blackholes
+2 sentries
+0 forcefields
+0 switches
+0 racelines
+--End of mapfile mission 1.txt--
+Opened scores/times file mission 1_s.bin
+Broadcast port:1803
+Opened map file canyon.txt
+Map type:1
+Display Map:canyon.png
+Collision Map:canyon_col.png
+Map background:dirt128.png
+ASCII map file:canyon_map.txt
+ASCII Map: H:36 W:41
+Description file:canyon_desc.txt
+Mission:0
+Ship first:1
+Gravity:0.050000
+Drag:2.000000
+Wrap:1
+Pad 0: type:00 y:2171 x:550 x:660 miners:0 jewels:0
+Pad 1: type:01 y:250 x:2120 x:2273 miners:0 jewels:0
+Pad 2: type:02 y:315 x:295 x:405 miners:0 jewels:0
+Pad 3: type:02 y:1786 x:2125 x:2292 miners:0 jewels:0
+Pad 4: type:34 y:1210 x:779 x:924 miners:0 jewels:0
+Pad 5: type:35 y:1210 x:1508 x:1650 miners:0 jewels:0
+Pad 6: type:f6 y:1019 x:2217 x:2327 miners:0 jewels:0
+Pad 7: type:f7 y:2106 x:1181 x:1311 miners:0 jewels:0
+Max players:4
+area 0: x:2435 x:2563 y:456 y:1424 g:-0.050000 drag:2.000000
+8 pads
+1 areas
+0 blackholes
+0 sentries
+0 forcefields
+0 switches
+0 racelines
+--End of mapfile canyon.txt--
+
+Playing map mission 1 (0,0)
+Number of players 2
+Loading map
+tr_map size 2624 x 2304
+Making collision masks
+ship mask:960,24 
+No sentry mask
+map:256,352 wpr:8 (including padding)
+Radar Mask Height = 44, Width = 32
+Radar Display Height = 144, Width = 164
+Loading game bitmaps
+Creating bullets bitmap
+Init Ships
+Init Bullets
+Init done
+Freed 3 menu/title bitmaps
+Game Start
+Game Over
+Freeing game bitmaps
+Freed 13/14 game bitmaps
+
+Start Menu
+Init Keyboard
+4 Map groups
+Group: One Player
+Map: mission 1
+Map: mission 2
+Map: mission 3
+Map: mission 4
+Map: mission 5
+Map: mission 6
+Map: final mission
+Group: Multi Player
+Map: canyon
+Map: forest
+Map: reactor core
+Map: neutron star
+Group: TurboRaketti
+Map: sitimus
+Map: ekolos
+Map: likvidius
+Map: metarola
+Map: tropulus
+Group: TR Beta
+Map: isemania
+Map: mutolos
+Map: keurakea
+Map: ekolos beta
+Map: sinneau
+
+Selected map 0,0
+Opened map file mission 1.txt
+Map type:1
+Display Map:hex_pink.png
+Collision Map:hextiles_col.png
+ASCII map file:m1_map.txt
+ASCII Map: H:17 W:45
+Description file:mission1_desc.txt
+Mission:1
+Time Limit:60
+Sentry Image file:sentries.png
+Sentry Collision file:sentries_col.png
+Ship first:1
+Gravity:0.050000
+Drag:2.000000
+Wrap:0
+Lives:1
+Pad 0: type:00 y:697 x:658 x:814 miners:0 jewels:0
+Pad 1: type:01 y:826 x:1298 x:1455 miners:5 jewels:0
+Pad 2: type:02 y:633 x:1939 x:2092 miners:0 jewels:5
+Sentry 0: x:995, y:798, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:2000, Sprite5, Sprite0
+Sentry 1: x:2272, y:605, Direction:30, Type:2, Period:15, Prob:50, Random:2, Range:1000, Sprite6, Sprite0
+Max players:1
+3 pads
+0 areas
+0 blackholes
+2 sentries
+0 forcefields
+0 switches
+0 racelines
+--End of mapfile mission 1.txt--
+Opened scores/times file mission 1_s.bin
+Broadcast port:1803
+Opened map file canyon.txt
+Map type:1
+Display Map:canyon.png
+Collision Map:canyon_col.png
+Map background:dirt128.png
+ASCII map file:canyon_map.txt
+ASCII Map: H:36 W:41
+Description file:canyon_desc.txt
+Mission:0
+Ship first:1
+Gravity:0.050000
+Drag:2.000000
+Wrap:1
+Pad 0: type:00 y:2171 x:550 x:660 miners:0 jewels:0
+Pad 1: type:01 y:250 x:2120 x:2273 miners:0 jewels:0
+Pad 2: type:02 y:315 x:295 x:405 miners:0 jewels:0
+Pad 3: type:02 y:1786 x:2125 x:2292 miners:0 jewels:0
+Pad 4: type:34 y:1210 x:779 x:924 miners:0 jewels:0
+Pad 5: type:35 y:1210 x:1508 x:1650 miners:0 jewels:0
+Pad 6: type:f6 y:1019 x:2217 x:2327 miners:0 jewels:0
+Pad 7: type:f7 y:2106 x:1181 x:1311 miners:0 jewels:0
+Max players:4
+area 0: x:2435 x:2563 y:456 y:1424 g:-0.050000 drag:2.000000
+8 pads
+1 areas
+0 blackholes
+0 sentries
+0 forcefields
+0 switches
+0 racelines
+--End of mapfile canyon.txt--
+Broadcast port:1803
+
+Playing map canyon (1,0)
+Number of players 2
+Loading map
+tr_map size 2624 x 2304
+Making collision masks
+ship mask:960,24 
+No sentry mask
+map:256,352 wpr:8 (including padding)
+Radar Mask Height = 44, Width = 32
+Radar Display Height = 144, Width = 164
+Loading game bitmaps
+Creating bullets bitmap
+Init Ships
+Init Bullets
+Init done
+Freed 3 menu/title bitmaps
+Game Start
+Game Over
+Freeing game bitmaps
+Freed 13/14 game bitmaps
+
+Start Menu
+Init Keyboard
+4 Map groups
+Group: One Player
+Map: mission 1
+Map: mission 2
+Map: mission 3
+Map: mission 4
+Map: mission 5
+Map: mission 6
+Map: final mission
+Group: Multi Player
+Map: canyon
+Map: forest
+Map: reactor core
+Map: neutron star
+Group: TurboRaketti
+Map: sitimus
+Map: ekolos
+Map: likvidius
+Map: metarola
+Map: tropulus
+Group: TR Beta
+Map: isemania
+Map: mutolos
+Map: keurakea
+Map: ekolos beta
+Map: sinneau
+
+Selected map 1,0
+Opened map file canyon.txt
+Map type:1
+Display Map:canyon.png
+Collision Map:canyon_col.png
+Map background:dirt128.png
+ASCII map file:canyon_map.txt
+ASCII Map: H:36 W:41
+Description file:canyon_desc.txt
+Mission:0
+Ship first:1
+Gravity:0.050000
+Drag:2.000000
+Wrap:1
+Pad 0: type:00 y:2171 x:550 x:660 miners:0 jewels:0
+Pad 1: type:01 y:250 x:2120 x:2273 miners:0 jewels:0
+Pad 2: type:02 y:315 x:295 x:405 miners:0 jewels:0
+Pad 3: type:02 y:1786 x:2125 x:2292 miners:0 jewels:0
+Pad 4: type:34 y:1210 x:779 x:924 miners:0 jewels:0
+Pad 5: type:35 y:1210 x:1508 x:1650 miners:0 jewels:0
+Pad 6: type:f6 y:1019 x:2217 x:2327 miners:0 jewels:0
+Pad 7: type:f7 y:2106 x:1181 x:1311 miners:0 jewels:0
+Max players:4
+area 0: x:2435 x:2563 y:456 y:1424 g:-0.050000 drag:2.000000
+8 pads
+1 areas
+0 blackholes
+0 sentries
+0 forcefields
+0 switches
+0 racelines
+--End of mapfile canyon.txt--
+Broadcast port:1803
+
+Playing map canyon (1,0)
+Number of players 2
+Loading map
+tr_map size 2624 x 2304
+Making collision masks
+ship mask:960,24 
+No sentry mask
+map:256,352 wpr:8 (including padding)
+Radar Mask Height = 44, Width = 32
+Radar Display Height = 144, Width = 164
+Loading game bitmaps
+Creating bullets bitmap
+Init Ships
+Init Bullets
+Init done
+Freed 3 menu/title bitmaps
+Game Start
+Game Over
+Freeing game bitmaps
+Freed 13/14 game bitmaps
+
+Start Menu
+Init Keyboard
+4 Map groups
+Group: One Player
+Map: mission 1
+Map: mission 2
+Map: mission 3
+Map: mission 4
+Map: mission 5
+Map: mission 6
+Map: final mission
+Group: Multi Player
+Map: canyon
+Map: forest
+Map: reactor core
+Map: neutron star
+Group: TurboRaketti
+Map: sitimus
+Map: ekolos
+Map: likvidius
+Map: metarola
+Map: tropulus
+Group: TR Beta
+Map: isemania
+Map: mutolos
+Map: keurakea
+Map: ekolos beta
+Map: sinneau
+
+Selected map 1,0
+Opened map file canyon.txt
+Map type:1
+Display Map:canyon.png
+Collision Map:canyon_col.png
+Map background:dirt128.png
+ASCII map file:canyon_map.txt
+ASCII Map: H:36 W:41
+Description file:canyon_desc.txt
+Mission:0
+Ship first:1
+Gravity:0.050000
+Drag:2.000000
+Wrap:1
+Pad 0: type:00 y:2171 x:550 x:660 miners:0 jewels:0
+Pad 1: type:01 y:250 x:2120 x:2273 miners:0 jewels:0
+Pad 2: type:02 y:315 x:295 x:405 miners:0 jewels:0
+Pad 3: type:02 y:1786 x:2125 x:2292 miners:0 jewels:0
+Pad 4: type:34 y:1210 x:779 x:924 miners:0 jewels:0
+Pad 5: type:35 y:1210 x:1508 x:1650 miners:0 jewels:0
+Pad 6: type:f6 y:1019 x:2217 x:2327 miners:0 jewels:0
+Pad 7: type:f7 y:2106 x:1181 x:1311 miners:0 jewels:0
+Max players:4
+area 0: x:2435 x:2563 y:456 y:1424 g:-0.050000 drag:2.000000
+8 pads
+1 areas
+0 blackholes
+0 sentries
+0 forcefields
+0 switches
+0 racelines
+--End of mapfile canyon.txt--
+Exiting
+Freeing game bitmaps
+Freed 1/12 game bitmaps
+Freed 3 menu/title bitmaps
+Freed fonts

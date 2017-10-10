@@ -1,0 +1,15 @@
+map_type      0
+display_map   sinneau.png
+collision_map sinneau_col.png
+description   sinneau_desc.txt
+
+ship_first    0
+
+gravity 0.05
+drag    2
+
+;   type y    xmin xmax
+pad 0    1022  140  210  
+pad 1    1031  970  1050 
+
+max_players 2

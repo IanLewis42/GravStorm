@@ -1,0 +1,21 @@
+Initialized ENet.
+Listening for scans on port 1803
+Server address = 0x6502A8C0
+Server address = 192.168.2.101
+Server address(2) = 192.168.2.101
+Listen port: received (42) from 192.168.2.104:51851
+Sent server address to: 192.168.2.104:51851
+Connection from 192.168.2.104
+Issued ID: 1
+Sent Level: canyon
+Received 'Ready'. Client:1 Image:1
+Sent GO (broadcast)
+Max Packet:189 bytes (2 ships, 16 bullets)
+Listen port: received (42) from 192.168.2.104:57224
+Sent server address to: 192.168.2.104:57224
+Connection from 192.168.2.104
+Issued ID: 1
+Sent Level: canyon
+Sent GO (late joiner)
+Sent ABORT (broadcast)
+Stop listening

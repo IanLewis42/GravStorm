@@ -26,6 +26,7 @@ void display_map_text(int done, int timer);
 void display_wait_text(void);
 void make_bullet_bitmap(void);
 void draw_split_screen(ViewportType viewport, int ship_num);
+void draw_controls(ALLEGRO_COLOR tint);
 
 extern ALLEGRO_BITMAP *tiles;
 extern ALLEGRO_BITMAP *bullets_bmp;

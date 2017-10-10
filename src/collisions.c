@@ -169,7 +169,7 @@ void make_map_col_mask(void)
 	mask_height = al_get_bitmap_height(map_mask);
 
 
-	map_file = fopen("mapfile.txt","w");
+	map_file = al_fopen("mapfile.txt","w");
 
 	words_per_row = (mask_width/32);//+2;// +2 for padding.
 
@@ -187,9 +187,9 @@ void make_map_col_mask(void)
 			for(j=0 ; j<words_per_row ; j++)
 			{
 				map_col_mask[i*words_per_row+j] = 0;	//top padding
-				fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+				if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 			}
-			fprintf(map_file,"\n");
+            if (map_file) fprintf(map_file,"\n");
 		}
 		row_start = 12;
 		row_end = mask_height+12;
@@ -209,7 +209,7 @@ void make_map_col_mask(void)
 		if (Map.type == 0 || Map.type == 2)
 		{
 			map_col_mask[i*words_per_row+0] = 0;	//left hand padding column
-			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+            if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		for(j=col_start ; j<col_end ; j++)
@@ -226,17 +226,17 @@ void make_map_col_mask(void)
 				}
 			}
 			//if (i<320)
-			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+            if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		if (Map.type == 0 || Map.type == 2)
 		{
 			map_col_mask[i*words_per_row+j] = 0;	//right hand padding column
-			fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+            if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		//if (i<320)
-		fprintf(map_file,"\n");
+        if (map_file) fprintf(map_file,"\n");
 		//for (k=0 ; k<65535 ; k++)
 		//{
 		//	asm("nop");
@@ -252,16 +252,16 @@ void make_map_col_mask(void)
 			for(j=0 ; j<words_per_row ; j++)
 			{
 				map_col_mask[i*words_per_row+j] = 0;	//top padding
-				fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+                if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 			}
-			fprintf(map_file,"\n");
+            if (map_file) fprintf(map_file,"\n");
 		}
 	}
 
 
 	al_destroy_bitmap(map_mask);
 	map_mask = NULL;
-	fclose(map_file);
+    if (map_file) al_fclose(map_file);
 	//fprintf(logfile,"File done\n");
 
 	//return 0;
@@ -1002,6 +1002,7 @@ void CheckForLanding(int i)
 					{
 						Ship[i].landed = 1;
 						Ship[i].pad = k;
+						Ship[i].fangle = 0;
 						Ship[i].angle = 0;			//position correctly
 						Ship[i].ypos = Map.pad[k].y-2;
 						Ship[i].xv = 0;

@@ -1,0 +1,31 @@
+map_type      1
+display_map   canyon.png
+collision_map canyon_col.png
+background    dirt128.png
+ascii_map     canyon_map.txt
+description   canyon_desc.txt
+mission	      0
+
+ship_first    1
+
+gravity 0.05
+drag 2
+
+wrap 1
+
+; pads
+;   type y    xmin xmax miners jewels
+pad 0    2171  550  660   0      0       
+pad 1    250   2120 2273  0      0       
+pad 2    315   295  405   0      0       
+pad 2    1786  2125 2292  0      0       
+ 
+pad 34    1210 779  924  0     0	;centre left, fuel, ammo1
+pad 35    1210 1508 1650 0     0	;centre right, fuel, ammo1
+pad F6    1019 2217 2327 0     0	;rhs, everything
+pad F7    2106 1181 1311 0     0	;bottom, everything
+
+max_players 4
+
+;    xmin xmax ymin ymax  g    drag
+area 2435 2563 456  1424 -0.05 2

@@ -8,6 +8,9 @@
 #include "allegro5/allegro_primitives.h"
 #include "allegro5/allegro_font.h"
 #include "allegro5/allegro_audio.h"
+#ifdef ANDROID
+#include <allegro5/allegro_android.h>
+#endif
 
 #include "game.h"
 #include "init.h"
@@ -39,17 +42,27 @@ int GameOver()
 	static int score = 0,time_left = 0, timer = 0,position,ship,show_times=false;
 	int line_space,y;
 	int col1,col2,col3,col4;
-	char cursor,display_name[50];
+	char display_name[50];
+    char cursor[2];
+    char underscore[] = "_";
+    char blank[] =  " ";
 	int w,h;
 	static int num_ships_latched = 0;
+
+    if (halted) return game_over;
 
     w = al_get_display_width(display);
     h = al_get_display_height(display);
 
 	//	draw game over screen, gradually getting whiter
-	temp = (192/GO_TIMER)*(GO_TIMER-game_over);
+	temp = 1-((192/GO_TIMER)*(GO_TIMER-game_over));
 	al_set_clipping_rectangle(0, 0, w, h);
 	al_draw_filled_rectangle(0,0,w,h,al_map_rgba(temp,temp,temp,temp));
+
+    //for (i=0 ; i<NO_BUTTON ; i++)
+    //    if (Ctrl.ctrl[i].active)
+    //        al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].size, Ctrl.ctrl[i].size, 0);
+    draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
 
     switch (game_over)
     {
@@ -274,6 +287,8 @@ int GameOver()
         {
             Command.goforward = false;
             game_over--;
+            if (position < MAX_SCORES)
+                _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "OpenKeyBoard", "()V");
         }
 
         /*
@@ -295,12 +310,15 @@ int GameOver()
             y = line_space;
             col1 = 100*font_scale;
             col2 = 300*font_scale;
+            col3 = 350*font_scale;
 
             timer++;            //blinking cursor
             if (timer & 0x10)
-                cursor = ' ';
+                //cursor = ' ';
+                strcpy(cursor,blank);
             else
-                cursor = '_';
+                //cursor = '_';
+                strcpy(cursor,underscore);
 
             if (keypress)
             {
@@ -308,6 +326,7 @@ int GameOver()
                 {
                     SaveScores();
                     game_over --;   //exit back to menu
+                    _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "CloseKeyBoard", "()V");
                 }
                 else if (current_key == 0x08)   //backspace
                 {
@@ -319,20 +338,30 @@ int GameOver()
 
                 keypress = false;
             }
-
-            strncpy(display_name,Map.newscore[position].name,50);
-            strcat(display_name,&cursor);
+            if (position < MAX_SCORES) {
+                strncpy(display_name, Map.newscore[position].name, 50);
+                strcat(display_name, &cursor);
+                }
 
             al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "HIGH SCORES");
             y+=line_space;
-
-            for (i=0 ; i<MAX_SCORES ; i++)
+            temp=0;
+#ifdef ANDROID
+            if (position < MAX_SCORES)
+                temp = position-2;
+            if (temp < 0)
+                temp = 0;
+#endif
+            for (i=temp ; i<MAX_SCORES ; i++)
             {
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%d",Map.newscore[i].score);
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "%d",i+1);
+                al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Map.newscore[i].score);
+
                 if (i==position)
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
+                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col3, y,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
                 else
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y+i*line_space,  ALLEGRO_ALIGN_LEFT, "%s",Map.newscore[i].name);
+                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col3, y,  ALLEGRO_ALIGN_LEFT, "%s",Map.newscore[i].name);
+                y+=line_space;
             }
             //if we are not in the high score table allow thrust to exit
             //don't otherwise, as thrust key might be a character that is typed in to high score table!
@@ -375,9 +404,11 @@ int GameOver()
 
             timer++;            //blinking cursor
             if (timer & 0x10)
-                cursor = ' ';
+                //cursor = ' ';
+                strcpy(cursor,blank);
             else
-                cursor = '_';
+                //cursor = '_';
+                strcpy(cursor,underscore);
 
             if (keypress)
             {
@@ -467,8 +498,17 @@ void SaveScores(void)   //scores/times.
     strncpy(score_file_name, (char*)&MapNames[Menu.group].Map[Menu.map], MAP_NAME_LENGTH);
 
     strcat(score_file_name, scores);
-
-    score_file = fopen(score_file_name,"w");
+#ifdef ANDROID
+    char pathstr[100];
+    char *pathptr;
+    al_set_standard_file_interface();
+    ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DATA_PATH);    //android
+    //ALLEGRO_DEBUG(#std ": %s", al_path_cstr(path, '/'));
+    sprintf(pathstr,"%s",al_path_cstr(path, '/'));
+    al_change_directory(al_path_cstr(path, '/'));  // change the working directory
+    pathptr = al_get_current_directory();
+#endif
+    score_file = al_fopen(score_file_name,"w");
 
     if (score_file == NULL)
     {
@@ -481,16 +521,27 @@ void SaveScores(void)   //scores/times.
         for (i=0 ; i<MAX_SCORES ; i++)
         {
             if (Map.mission)
-                sprintf(temp,"%d %s",Map.newscore[i].score,Map.newscore[i].name);
+                sprintf(temp,"%d %s\n",Map.newscore[i].score,Map.newscore[i].name);
             else if (Map.race)
-                sprintf(temp,"%.3f %s",Map.newtime[i].time,Map.newtime[i].name);
+                sprintf(temp,"%.3f %s\n",Map.newtime[i].time,Map.newtime[i].name);
 
             for (j=0 ; temp[j] != 0 ; j++)
                 temp[j]+=0x81+i;
 
-            fprintf(score_file,"%s\n",temp);
+            al_fprintf(score_file,"%s\n",temp);
+#if 0
+            al_fputs(score_file,temp);
+
+#ifdef _WIN32
+            al_fputc(score_file,0x0D);  //terminate line
+#endif
+            al_fputc(score_file,0x0A);
+#endif
         }
 
-        fclose(score_file);
+        al_fclose(score_file);
+#ifdef ANDROID
+        al_android_set_apk_file_interface();
+#endif
     }
 }

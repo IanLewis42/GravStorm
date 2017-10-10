@@ -52,6 +52,10 @@ typedef struct
 	int up_up;
 	int down_up;
 	int button_up;
+
+	float spin;		//used for variable rotation on android
+    float x;
+    float y;
 } JoystickType;
 
 
@@ -59,6 +63,9 @@ typedef struct
 extern ALLEGRO_JOYSTICK *USBJOY[2];
 extern bool key_down_log[ALLEGRO_KEY_MAX];
 extern bool key_up_log[ALLEGRO_KEY_MAX];
+extern JoystickType USBJoystick[2];
+extern JoystickType TouchJoystick;
+extern int relx,rely;
 
 void ScanInputs(int num_ships);
 void ReadGPIOJoystick();

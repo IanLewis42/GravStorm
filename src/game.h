@@ -285,6 +285,7 @@ typedef struct
 extern RadarType Radar;
 
 extern ALLEGRO_DISPLAY *display;
+extern ALLEGRO_TIMER *timer;
 
 extern ALLEGRO_FONT *menu_font;
 extern ALLEGRO_FONT *glow_font;
@@ -348,13 +349,19 @@ typedef enum
 {
 	DPAD = 0,
 	//JOY_BUTTON, //thrust/select
-	START,
-	SELECT,
+	//START,
+	//SELECT,
 	THRUST_BUTTON,
 	BACK,
 	BIGGER,
 	SMALLER,
+	//LEFT, //names clash, if these are needed.....
+	//RIGHT,
+    FIRE1,
+    FIRE2,
     RADAR,
+	ASTICK,
+    ASTICK2,
 	NO_BUTTON,
 }ButtonType;
 
@@ -366,7 +373,7 @@ typedef struct
 
 //keep track of touches on buttons
 #define NUM_TOUCHES 6
-TouchType Touch[NUM_TOUCHES];
+extern TouchType Touch[NUM_TOUCHES];
 
 #define NO_TOUCH 0xffff
 
@@ -376,8 +383,7 @@ typedef struct
     int idx;    //index into sprite sheet for display
     int x;      //position on screen
     int y;
-    int w;      //size
-    int h;
+    int size;
 } CtrlType;
 
 typedef struct
@@ -387,6 +393,8 @@ typedef struct
     int reversed;       //left handed   - redundant, if dragging?
 
     CtrlType ctrl[NO_BUTTON];
+
+    int ButtonSize;
 
     //CtrlType direction;
     //CtrlType thrust;
@@ -410,7 +418,7 @@ extern CommandType Command;
 
 extern FILE* logfile;
 
-//extern ALLEGRO_VOICE *voice;
+extern ALLEGRO_VOICE *voice;
 extern ALLEGRO_MIXER *mixer;
 
 extern ALLEGRO_SAMPLE *wind;
@@ -431,9 +439,13 @@ extern int keypress;
 extern char current_key;
 extern int fpsnet, fpsnet_acc;
 extern bool redraw;
+extern float scale, invscale;
+extern int halted;
 
 int  ShipMass(int ship_num);
 void FreeMenuBitmaps(void);
-void LoadFonts(void);
+void LoadFonts(float scale);
+void MenuControls(void);
+void GameControls(void);
 int read_maps(void);
 void Exit(void);

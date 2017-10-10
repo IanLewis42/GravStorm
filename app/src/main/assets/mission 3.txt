@@ -1,0 +1,42 @@
+map_type      1
+display_map   hex_aqua.png
+background    hex_bg.png
+collision_map hextiles_col.png
+ascii_map     m3_map.txt
+description   mission3_desc.txt
+mission	      1
+
+time_limit 100
+
+bg_fade 500
+
+sentry_display   sentries.png
+sentry_collision sentries_col.png
+
+ship_first    1
+
+gravity 0.05
+drag 2
+
+wrap 0
+lives 1
+
+; pads
+;   type y    xmin xmax miners jewels
+pad 0    890  3733 3884       
+pad 1    699  2077 2220    0     5
+pad F2	 1466 3476 3628
+pad 3    3387 789  940    5     0 
+
+;      x    y    D  type frames prob% random range image image
+sentry 1890 735  30 2    15     50    2    1000  1     0
+sentry 2658 1314 30 2    15     50    2    2000  8     0  
+sentry 3874 1344 30 2    15     50    2    2000  4     0
+sentry 1696 1984 30 2    15     50    2    2000  8     0  
+sentry 1696 2880 30 2    15     50    2    2000  6     0  
+sentry 544  3136 30 2    15     50    2    2000  2     0
+
+max_players 1
+
+
+

@@ -275,7 +275,9 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	char host[]  = "Host Network Game";
 	char client[]    = "Join Network Game";
 
-	ALLEGRO_COLOR colour;
+	if (halted) return;
+
+    ALLEGRO_COLOR colour;
 	//use pre-multiplied alpha, i.e. rgb components must be multiplied by a.
     ALLEGRO_COLOR GroupActive    = al_map_rgba_f(0, 1, 0.5, 1);
     ALLEGRO_COLOR GroupGlow      = al_map_rgba_f(0, 0.188, 0.0, 0.078);
@@ -322,14 +324,14 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	scale = 0.4;
 	al_identity_transform(&transform);			/* Initialize transformation. */
 	al_scale_transform(&transform, scale, scale);	/* Rotate and scale around the center first. */
-	al_translate_transform(&transform,w/2,y);
+	al_translate_transform(&transform,w/2,h*0.9);//y+Ctrl.ctrl[BACK].size);
 	al_use_transform(&transform);
 	al_draw_textf(title_font, al_map_rgba(0, 0, 0,160),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
     //image
 	bgw = al_get_bitmap_width(logo);
 	al_identity_transform(&transform);
 	al_scale_transform(&transform, scale*font_scale, scale*font_scale);	/* Rotate and scale around the center first. */
-	al_translate_transform(&transform,0,0);//w/2+xoffset-7,y+yoffset+7);
+	al_translate_transform(&transform,0,h*0.89);//w/2+xoffset-7,y+yoffset+7);
 	al_use_transform(&transform);
 	//al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
 	int x = (bgw+40)*scale*font_scale;
@@ -345,6 +347,10 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
     //y+= yoffset;
 
     y=line_space;
+
+#ifdef ANDROID
+    y+= 2* line_space;
+#endif
 
     //timer++;            //blinking cursor
     //if (timer & 0x10)
@@ -474,7 +480,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         }
         if (Menu.netmode == HOST)
         {
-            al_draw_textf(small_font, ItemUnselected,  Menu.offset+w/2, h*0.9,  ALLEGRO_ALIGN_CENTRE, "Select level to start network game.");
+            al_draw_textf(small_font, ItemUnselected,  Menu.offset+w/2, h*0.8,  ALLEGRO_ALIGN_CENTRE, "Select level to start network game.");
             //al_draw_textf(small_font, ItemUnselected,  Menu.offset+SCREENX/2, SCREENY-50,  ALLEGRO_ALIGN_CENTRE, "%d players connected", Net.clients);
         }
  /*
@@ -490,10 +496,10 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
     else if (Menu.state == PLAYERS)
     {
-        y=line_space;
+        //y=line_space;
         //y+= yoffset;
 
-        //if (!Net.net || Net.server)
+#ifndef ANDROID
         if (!Net.client)
         {
             if (Menu.col_pos == 0)
@@ -511,7 +517,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         }
 
         y+=line_space*1.2;
-
+#endif
         //debug
         //al_draw_textf(small_font, ItemUnselected,col10, y,  ALLEGRO_ALIGN_LEFT, "player:%d item:%d",Menu.player,Menu.item);
         //end debug
@@ -520,7 +526,10 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         {
             if (i>num_ships-1) colour = ItemExcluded;
             else colour = ItemUnselected;
-
+#ifdef ANDROID
+            al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Choose your ship");
+            al_draw_textf(small_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "Choose your ship");
+#else
             if (!Net.client && !Net.server)
             {
                 if (Menu.player == i && Menu.col_pos != 0)
@@ -531,29 +540,34 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                 else
                     al_draw_textf(small_font, GroupInactive,col0, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
             }
+#endif
+            y+=line_space*1.2;
 
-            y+=line_space;
-
+#ifdef ANDROID
+            scale = 1.5;
+#else
+            scale = 1;
+#endif
             //draw spinny ship & highlight
             if (Menu.item == 0 && Menu.player == i)
             {
                 //yellow highlight
-                al_draw_filled_rounded_rectangle(Menu.offset+83,y,Menu.offset+135,y+52,10,10,al_map_rgba(64,64,0,64));
+                al_draw_filled_rounded_rectangle(Menu.offset+103,y,Menu.offset+103+52*scale,y+52*scale,10,10,al_map_rgba(64,64,0,64));
             }
 
             int temp = Ship[i].image-1;
             if (temp < 0) temp += 8;
 
             //greyed-out ship before
-            al_draw_tinted_bitmap_region(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+25+Ship[i].offset,y+2, 0);
+            al_draw_tinted_scaled_bitmap(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+25+Ship[i].offset,y+2,SHIP_SIZE_X*scale,SHIP_SIZE_Y*scale, 0);
             temp+=2;
             if (temp > 7) temp -=8;
             //and after
-            al_draw_tinted_bitmap_region(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+145+Ship[i].offset,y+2, 0);
+            al_draw_tinted_scaled_bitmap(grey_ships,al_map_rgba(160,160,160,160),Ship[i].angle*SHIP_SIZE_X,1*temp*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+185+Ship[i].offset,y+2,SHIP_SIZE_X*scale,SHIP_SIZE_Y*scale, 0);
 
             y+=2;
             //selected ship
-            al_draw_bitmap_region(ships,Ship[i].angle*SHIP_SIZE_X,2*Ship[i].image*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+85+Ship[i].offset,y, 0);
+            al_draw_scaled_bitmap(ships,Ship[i].angle*SHIP_SIZE_X,2*Ship[i].image*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+105+Ship[i].offset,y,SHIP_SIZE_X*scale,SHIP_SIZE_Y*scale, 0);
 
             Ship[i].angle++;
             if (Ship[i].angle == 40) Ship[i].angle = 0;
@@ -562,7 +576,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             if (Ship[i].offset < 0) Ship[i].offset+=6;
 
             y+=45;
-
+#ifndef ANDROID
             //controls - if keys, show keys
             if (Ship[i].controller == KEYS)
                 control_string = keys;
@@ -632,34 +646,36 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             }
 
             y+=line_space;
+#endif
         }
+
         if (Menu.netmode == HOST)
         {
             if (Net.address.host == 0)
-                al_draw_textf(small_font, ItemUnselected,  w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Network host started");
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Network host started");
             else
-                al_draw_textf(small_font, ItemUnselected,  w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Network host started on %s", Net.myaddress);
-            al_draw_textf(small_font, ItemUnselected,  w/2, 0.95*h,  ALLEGRO_ALIGN_CENTRE, "%d players", num_ships);//Net.clients);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Network host started on %s", Net.myaddress);
+            al_draw_textf(small_font, ItemUnselected,  w/2, 0.85*h,  ALLEGRO_ALIGN_CENTRE, "%d players", num_ships);//Net.clients);
         }
 
         else if (Menu.netmode == CLIENT)
         {
             if (Net.client_state == SEARCHING)
-                al_draw_textf(small_font, ItemUnselected,   w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Searching for host...");
+                al_draw_textf(small_font, ItemUnselected,   w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Searching for host...");
             else if (Net.client_state == FOUND)
-                al_draw_textf(small_font, ItemUnselected,  w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Found host at %s", Net.menuaddress);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Found host at %s", Net.menuaddress);
 
             else if (Net.client_state == CONNECTED)
             {
-                al_draw_textf(small_font, ItemUnselected,  w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Connected to host at %s", Net.menuaddress);
-                al_draw_textf(small_font, ItemUnselected,  w/2, 0.95*h,  ALLEGRO_ALIGN_CENTRE, "Host selected level '%s'", Net.mapfile);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Connected to host at %s", Net.menuaddress);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.85*h,  ALLEGRO_ALIGN_CENTRE, "Host selected level '%s'", Net.mapfile);
             }
 
             else if (Net.client_state == NO_SPACE)
-                al_draw_textf(small_font, ItemUnselected,   w/2, 0.9*h,  ALLEGRO_ALIGN_CENTRE, "Host at %s has no space", Net.menuaddress);
+                al_draw_textf(small_font, ItemUnselected,   w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Host at %s has no space", Net.menuaddress);
 
             else if (Net.client_state == NO_MAP)
-                al_draw_textf(small_font, ItemUnselected,  w/2, 0.95*h,  ALLEGRO_ALIGN_CENTRE, "Failed to open host selected level '%s'", Net.mapfile);
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.85*h,  ALLEGRO_ALIGN_CENTRE, "Failed to open host selected level '%s'", Net.mapfile);
         }
 
     }
@@ -674,10 +690,10 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
     //do start/select here
     //al_draw_bitmap(Ctrl.escape.bmp, Ctrl.escape.x, Ctrl.escape.y,0);
 
-    for (i=0 ; i<NO_BUTTON ; i++)
-        if (Ctrl.ctrl[i].active)
-            al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].w, Ctrl.ctrl[i].h, 0);
-
+    //for (i=0 ; i<NO_BUTTON ; i++)
+    //    if (Ctrl.ctrl[i].active)
+    //        al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].size, Ctrl.ctrl[i].size, 0);
+    draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
 
     #endif
 
@@ -767,7 +783,13 @@ void display_map_text(int done, int timer)
     int line_space;
     ALLEGRO_USTR *ustr = NULL;
 
+    if (halted) return;
+
     line_space = 35*font_scale;
+
+#ifdef ANDROID
+    i+=2*line_space;
+#endif
 
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
@@ -788,9 +810,10 @@ void display_map_text(int done, int timer)
 
 	al_draw_filled_rectangle(0,0,w,h,al_map_rgba(0,0,0,timer*6));	//black filter to darken?
 
-	if ((description_file = fopen(Map.description_file_name,"r")))
+	if ((description_file = al_fopen(Map.description_file_name,"r")))
 	{
-		while (fgets(line, 200, description_file) != NULL)
+		//while (fgets(line, 200, description_file) != NULL)
+		while (al_fgets(description_file, line, 200) != NULL)
 		{
 			 ustr = al_ustr_new(line);
 
@@ -800,7 +823,7 @@ void display_map_text(int done, int timer)
 		}
 
 		if (ustr) al_ustr_free(ustr);
-		fclose(description_file); //close file
+		al_fclose(description_file); //close file
 	}
 	else
 	{
@@ -812,6 +835,10 @@ void display_map_text(int done, int timer)
     if (done)
         al_draw_textf(small_font, al_map_rgb(128, 0, 0),(int)(20*font_scale), i+line_space,  ALLEGRO_ALIGN_LEFT, "Painna Nappa / Press Button");
 
+    //for (i=0 ; i<NO_BUTTON ; i++)
+    //    if (Ctrl.ctrl[i].active)
+    //        al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].size, Ctrl.ctrl[i].size, 0);
+    draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
     al_flip_display();
 
     return;
@@ -821,6 +848,8 @@ void display_wait_text(void)
 {
     int w,h,bgw,bgh;
     int bgx,bgy;
+
+    if (halted) return;
 
     w = al_get_display_width(display);
     h = al_get_display_height(display);
@@ -855,14 +884,24 @@ void make_bullet_bitmap(void)
 int component;
 void draw_split_screen(ViewportType viewport, int ship_num)
 {
+    ALLEGRO_TRANSFORM transform;
     int i;
     int x=0, y=0, sbx=0, sby=0;
     int w, h;
 	int scrollx, scrolly;	//These are the centre of the 'viewport' - normally the ship position, except when you get near an edge.
+
+    if (halted) return;
+
+
     //int ctrl_size;
 	//replace with split screen window size.
     w = al_get_display_width(display);
     h = al_get_display_height(display);
+
+    //al_identity_transform(&transform);  		            /* Initialize transformation. */
+    //al_scale_transform(&transform, scale, scale); /* Move to scroll position. */
+    //al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
+    //al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
 
     //use this here, also determined by passed in params
     switch (viewport)
@@ -929,23 +968,33 @@ void draw_split_screen(ViewportType viewport, int ship_num)
 	}
 	al_set_clipping_rectangle(x, y, w, h);
 
+    float sw,sh;
+
+    sw = w*invscale;
+    sh = h*invscale;
+
 	//stop scrolling when you get near to the edge.
 	//scrollx is ship xpos, except saturated at half screen width
-	if (mapx < (w))	//for small maps....
-		scrollx = 0.5*w;
-	else if (Ship[ship_num].xpos < 0.5*w) 						//if the ship is <0.5 viewport width from edge, stop following it.
-		scrollx = 0.5*w;
-	else if (Ship[ship_num].xpos > mapx-0.5*w) //likewise from far edge
-		scrollx = mapx-0.5*w;
+	if (mapx < (sw))	//for small maps....
+		scrollx = (int)(0.5*sw);
+	else if (Ship[ship_num].xpos < (int)(0.5*sw)) 						//if the ship is <0.5 viewport width from edge, stop following it.
+		scrollx = (int)(0.5*sw);
+	else if (Ship[ship_num].xpos > mapx-(int)(0.5*sw)) //likewise from far edge
+		scrollx = mapx-(int)(0.5*sw);
 	else
 		scrollx = Ship[ship_num].xpos;
 
-	if (Ship[ship_num].ypos < 0.5*h) 						//...and for y
-		scrolly = 0.5*h;
-	else if (Ship[ship_num].ypos > mapy-0.5*h)
-		scrolly = mapy-0.5*h;
+	if (Ship[ship_num].ypos < (int)(0.5*sh)) 						//...and for y
+		scrolly = (int)(0.5*sh);
+	else if (Ship[ship_num].ypos > mapy-(int)(0.5*sh))
+		scrolly = mapy-(int)(0.5*sh);
 	else
 		scrolly = Ship[ship_num].ypos;
+
+    //scrollx*=scale;
+    //scrolly*=scale;
+
+    //scale = 1.1;
 
 	//clear to black
 	al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -1015,17 +1064,17 @@ void draw_background(int scrollx, int scrolly, int win_x, int win_y, int w, int 
     bw = al_get_bitmap_width(background);
     bh = al_get_bitmap_height(background);
 
-
     al_identity_transform(&transform);  		            /* Initialize transformation. */
     al_translate_transform(&transform, -scrollx, -scrolly); /* Move to scroll position. */
+    al_scale_transform(&transform,scale,scale);
     al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
     al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
 
-    min_x = ((scrollx - (w>>1) )/bw)-1;
-    min_y = ((scrolly - (h>>1) )/bh)-1;
+    min_x = ((scrollx - (w*invscale/2) )/bw)-1;
+    min_y = ((scrolly - (h*invscale/2) )/bh)-1;
 
-    max_x = ((scrollx + (w>>1) )/bw)+1;
-    max_y = ((scrolly + (h>>1) )/bh)+1;
+    max_x = ((scrollx + (w*invscale/2) )/bw)+1;
+    max_y = ((scrolly + (h*invscale/2) )/bh)+1;
 
     al_hold_bitmap_drawing(1);
 
@@ -1055,15 +1104,18 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 	if (Map.type==1)	//1 for tiled
 	{
 		al_identity_transform(&transform);  		            /* Initialize transformation. */
-		al_translate_transform(&transform, -scrollx, -scrolly); /* Move to scroll position. */
-		al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
-		al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
 
-		min_x = (scrollx - (w>>1) ) >> TILE_SHIFTS;// /(tile_width);	//optimise by using shifts, rather than divides....
-		min_y = (scrolly - (h>>1) ) >> TILE_SHIFTS;// /(tile_height);
+        al_translate_transform(&transform, -scrollx, -scrolly); /* Move to scroll position. */
+        al_scale_transform(&transform,scale,scale);
+        al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
 
-		max_x = ((scrollx + (w>>1) ) >> TILE_SHIFTS )+1;// /(tile_width)) +1;
-		max_y = ((scrolly + (h>>1) ) >> TILE_SHIFTS )+1;// /(tile_height)) +1;
+        al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
+
+		min_x = (int)((scrollx - (w*invscale) )*1) >> TILE_SHIFTS;// /(tile_width);	//optimise by using shifts, rather than divides....
+		min_y = (int)((scrolly - (h*invscale) )*1) >> TILE_SHIFTS;// /(tile_height);
+
+		max_x = ((int)((scrollx + (w*invscale) )*1) >> TILE_SHIFTS )+1;// /(tile_width)) +1;
+		max_y = ((int)((scrolly + (h*invscale) )*1) >> TILE_SHIFTS )+1;// /(tile_height)) +1;
 
 		al_hold_bitmap_drawing(1);
 		for (y = min_y; y < max_y; y++)
@@ -1105,27 +1157,32 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 	}
 	else if (Map.type ==2)  //single image map, but not upscaled
     {
-        al_draw_scaled_bitmap(tr_map, (scrollx-w*0.5),(scrolly-h*0.5), w, h, win_x, win_y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
+        al_identity_transform(&transform);  		            /* Initialize transformation. */
+        al_translate_transform(&transform, -scrollx, -scrolly); /* Move to scroll position. */
+        al_scale_transform(&transform,scale,scale);
+        al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
+        al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
+
+        //al_draw_scaled_bitmap(tr_map, (scrollx-w*0.5),(scrolly-h*0.5), w, h, win_x, win_y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
+        al_draw_bitmap(tr_map,win_x, win_y,0); //src x,y,w,h dst x,y,w,h,flags
+
+        al_identity_transform(&transform);  		            /* Initialize transformation. */
+        al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
     }
 	else	//tr-style single image map, upscaled by 2
 	{
-    	al_draw_scaled_bitmap(tr_map, (scrollx-w*0.5)/2,(scrolly-h*0.5)/2, w/2, h/2, win_x, win_y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
-		if (grid)
-		{
-			if (grid == 1) grid_colour = al_map_rgb(255, 255, 255);
-			if (grid == 2) grid_colour = al_map_rgb(128, 128, 128);
-			if (grid == 3) grid_colour = al_map_rgb(0, 0, 0);
+    	//al_draw_scaled_bitmap(tr_map, (scrollx-w*0.5)/2,(scrolly-h*0.5)/2, w/2, h/2, win_x, win_y, w, h, 0); //src x,y,w,h dst x,y,w,h,flags
 
-			for (i=0 ; i<map_width ; i++)
-			{
-				al_draw_filled_rectangle(i*TILE_WIDTH+win_x,0+win_y,i*TILE_WIDTH+win_x+1,map_height*TILE_HEIGHT+win_y,grid_colour);
-			}
-			for (i=0 ; i<map_height ; i++)
-			{
-				al_draw_filled_rectangle(0+win_x,i*TILE_HEIGHT+win_y,map_width*TILE_WIDTH+win_x,i*TILE_HEIGHT+win_y+1,grid_colour);
-			}
+        al_identity_transform(&transform);  		            /* Initialize transformation. */
+        al_translate_transform(&transform, -scrollx/2, -scrolly/2); /* Move to scroll position. */
+        al_scale_transform(&transform,scale*2,scale*2);
+        al_translate_transform(&transform, w>>1, h>>1);         /* Move scroll position to screen center. */
+        al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
 
-		}
+        al_draw_bitmap(tr_map,win_x, win_y,0); //src x,y,w,h dst x,y,w,h,flags
+
+        al_identity_transform(&transform);  		            /* Initialize transformation. */
+        al_use_transform(&transform);                           /* All subsequent drawing is transformed. */
 	}
 }
 
@@ -1140,16 +1197,27 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 	/* Initialize transformation. */
     al_identity_transform(&transform);
 
+    static float tx_scale=1, ty_scale=1;
+
+    tx_scale = scale;//1-(scale-1)/5;
+    ty_scale = scale;//1+(scale-1)/5;
+
     /* Move to scroll position. */
     //I'm thinking of this like a camera - so we move the camera to where the ship is.
     //Actually, as the numbers are -ve, it seems more like the camera/viewport is fixed, and we're moving the world.
     //so we move everything (ship, bullets, tiles) to 0,0
+
     al_translate_transform(&transform, -scrollx, -scrolly);
+    //al_translate_transform(&transform, )
+
+    al_scale_transform(&transform,scale,scale);
 
     /* Move scroll position to screen center. */
     //Now we move it to centre of viewport/window thing
     //al_translate_transform(&transform, w * 0.5 + STATUS_BAR_WIDTH, h * 0.5);
-    al_translate_transform(&transform, x + w * 0.5 , y + h * 0.5);
+    al_translate_transform(&transform, x + w*0.5 , y + h * 0.5);
+
+
 
     /* All subsequent drawing is transformed. */
 	al_use_transform(&transform);
@@ -1313,13 +1381,29 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 //ship config menu (i.e. weapons, ammo, fuel)
 void draw_menu(int ship_num, int x, int y, int w, int h)
 {
-	int j;
+	ALLEGRO_TRANSFORM transform;
+    int j;
 	int bmw,bmh;
 
 	bmw = al_get_bitmap_width(panel_bmp);
 	bmh = al_get_bitmap_height(panel_bmp);
 
-	if (num_ships == 1)
+#ifdef ANDROID
+    float xscale,yscale,menuscale;
+    xscale = (float)w/bmw;
+    yscale = (float)h/bmh;
+
+    if (xscale > yscale)
+        menuscale = yscale;
+    else
+        menuscale = xscale;
+
+    al_identity_transform(&transform);
+    al_scale_transform(&transform,menuscale,menuscale);
+    al_use_transform(&transform);
+
+#else
+    if (num_ships == 1)
 		{
 			//x+=w/4; //w-(w/2)/2
 			x+=(w-bmw)/2;
@@ -1328,7 +1412,7 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
 		}
 		if (num_ships == 2)
 			x+=w/4;
-
+#endif
 		al_draw_bitmap(panel_bmp,x, y,0);
 
 		//selection bar
@@ -1353,19 +1437,25 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
 		al_draw_filled_rectangle(x+35,y+295,x+35+Ship[ship_num].user_fuel*3.8,y+305,al_map_rgb(128, 128, 0));				//fuel
 		al_draw_filled_rectangle(x+35,y+297,x+35+Ship[ship_num].user_fuel*3.8,y+299,al_map_rgba(255, 255, 255, 20));
 
+    al_identity_transform(&transform);
+    al_use_transform(&transform);
+
 		return;
 }
 
 //void draw_status_bar(int num_ships)
 void draw_status_bar(int ship, int x, int y)
 {
-	int i,j;
+	ALLEGRO_TRANSFORM transform;
+    int i,j;
 	//int w,h,yoffset;
 	int bs;	//size of coloured block;
 	//int bmh;//height of background bitmap
 	//int first_ship;
 
-
+    al_identity_transform(&transform);
+    al_scale_transform(&transform,scale,scale);
+    al_use_transform(&transform);
 
 	//al_set_clipping_rectangle(0, 0, SCREENX, SCREENY);
 	//al_set_clipping_rectangle(0, 0, w, h);
@@ -1456,34 +1546,50 @@ void draw_status_bar(int ship, int x, int y)
 			al_draw_textf(race_font, al_map_rgb(255, 128,   0),50, y+bs-38, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].best_lap_time);
         }
 	}
-
+/*
 // draw android onscreen controls
 //#define ANDROID
-#ifdef ANDROID
+
     //int w,h,ctrl_size;
     //fudge - android screen size shouldn't change.....
     int w=al_get_display_width(display);
     int h=al_get_display_height(display);
 
-    Ctrl.ctrl[DPAD].x = 0.98*w-Ctrl.ctrl[DPAD].w;
-	Ctrl.ctrl[DPAD].y = 0.98*h-Ctrl.ctrl[DPAD].h;
+    //Ctrl.ctrl[DPAD].x = 0.98*w-Ctrl.ctrl[DPAD].w;
+	//Ctrl.ctrl[DPAD].y = 0.98*h-Ctrl.ctrl[DPAD].h;
 
     //Ctrl.ctrl[BACK].y = bs+0.02*h;
 
     for (i=0 ; i<NO_BUTTON ; i++)
         if (Ctrl.ctrl[i].active)
-            al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].w, Ctrl.ctrl[i].h, 0);
+            al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].size, Ctrl.ctrl[i].size, 0);
 
     //al_draw_bitmap_region(Ctrl.dpad,    Ctrl.ctrl[DPAD].idx*200,       0,     200,200, Ctrl.ctrl[DPAD].x,       Ctrl.ctrl[DPAD].y, 0);
     //al_draw_scaled_bitmap(Ctrl.buttons, Ctrl.ctrl[JOY_BUTTON].idx*200, 2*200, 200,200, Ctrl.ctrl[JOY_BUTTON].x, Ctrl.ctrl[JOY_BUTTON].y,    Ctrl.ctrl[JOY_BUTTON].w, Ctrl.ctrl[JOY_BUTTON].h, 0);
     //al_draw_scaled_bitmap(Ctrl.buttons, Ctrl.ctrl[BACK].idx*200,       3*200, 200,200, Ctrl.ctrl[BACK].x,       Ctrl.ctrl[BACK].y,    Ctrl.ctrl[BACK].w, Ctrl.ctrl[BACK].h, 0);
 
-#endif // ANDROID
+*/
+    al_identity_transform(&transform);
+    al_use_transform(&transform);
 }
+#ifdef ANDROID
+void draw_controls(ALLEGRO_COLOR tint)
+{
+    int i;
 
+    if (halted) return;
+
+    for (i=0 ; i<NO_BUTTON ; i++)
+        if (Ctrl.ctrl[i].active)
+            al_draw_tinted_scaled_bitmap(Ctrl.controls, tint, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].size, Ctrl.ctrl[i].size, 0);
+    return;
+}
+#endif // ANDROID
 void draw_dividers(void)
 {
     int w,h;
+
+    if (halted) return;
 
     w = al_get_display_width(display);
     h = al_get_display_height(display);

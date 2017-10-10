@@ -736,6 +736,33 @@ android menu
 - add instructions (and controls? or the same?) entry to network screen
 - 
 
+android to do
+--------------
+* right always pressed in menu???
+* slow from description text to level (Forward or Back)
+* crash on end of level exit -mission only. (controls on top of white-out)
+* force single player
+* control size
+  - storing (size and location)
+* layout for back/size/radar
+* dragging
+* orientation - al_set_new_display_option() 
+* networking - *crash (as client) on SOCKET_SET thing..... - needed permissions in manifest :-)
+* tilt comes out as joystick 0. Try using this for rotation,
+  could do variable rate, take float from joystick, add to angle, 
+  round to int for display etc.....
+* Gone for analogue stick style controls - just does direction, so need 2 fire buttons as well. Seems OK......
+* scaling - base on screen resolution, so everything is in proportion.
+* slow in level menu
+* leave app??
+* hi scores - keyboard
+* render controls opaque, draw with variable transparency. better....
+* saving hi scores
+
+- debounce!
+- credits
+- haptics
+
 Instructions:
 ----------------
 Fly around, shoot your enemy. Don't crash into the walls.

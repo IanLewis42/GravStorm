@@ -147,6 +147,7 @@ typedef struct
 
 	//calculated angle, position and velocity
 	int angle;  //0 to NUM_ANGLES-1
+	float fangle;
 	float xpos;
 	float ypos;
 	float xv;

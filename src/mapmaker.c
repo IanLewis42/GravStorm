@@ -168,7 +168,7 @@ int main (int argc, char *argv[]){
                 save_query = 1;
             else
             {
-                fclose(logfile);
+                al_fclose(logfile);
                 break;
             }
         }
@@ -182,7 +182,7 @@ int main (int argc, char *argv[]){
                     save_query = 1;
                 else
                 {
-                    fclose(logfile);
+                    al_fclose(logfile);
                     break;
                 }
 
@@ -676,7 +676,7 @@ int init_map(char *map_file_name)
     Map.race = false;
     Map.max_players=1;
 
-	while (fgets(str, 100, map_file) != NULL)
+	//while (fgets(str, 100, map_file) != NULL)
 	{
 		line = str;
 

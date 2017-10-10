@@ -1,0 +1,18 @@
+map_type      0
+display_map   ekolos.png
+collision_map ekolos_col.png
+description   ekolos_desc.txt
+
+ship_first    1
+
+gravity 0.05
+drag    2
+
+;   type y    xmin xmax
+pad 0    408  530  620  
+pad 1    884  640  730 
+
+;    xmin xmax ymin ymax g    drag
+area 0    150  270  650 -0.05 2
+
+max_players 2

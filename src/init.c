@@ -25,6 +25,9 @@
 #include "allegro5/allegro_primitives.h"
 #include "allegro5/allegro_font.h"
 #include "allegro5/allegro_audio.h"
+#ifdef ANDROID
+#include <allegro5/allegro_android.h>
+#endif
 
 #include "game.h"
 #include "init.h"
@@ -36,7 +39,7 @@
 #if RPI
 #include <wiringPi.h>
 #endif
-FILE* map_file;	//text file containing map-specific data
+ALLEGRO_FILE* map_file;	//text file containing map-specific data
 const char txt[5] = ".txt\0";
 const char scores[7] = "_s.bin\0";
 
@@ -45,6 +48,47 @@ ALLEGRO_COLOR StatusColour[8];
 
 void load_map_file(void);
 void swap(int* a, int* b);
+
+int get_map_players(int group, int map)
+{
+    //int i = 0, j = 0, l = 0, m = 0, n = 0, o = 0, p = 0;    //counters for pads, special areas, blackholes, sentries, forcefields etc.
+    //int length;
+    char map_file_name[MAP_NAME_LENGTH];
+    char str[100];
+    char *line;
+    int players;
+
+    strncpy(map_file_name, (char *) &MapNames[group].Map[map], MAP_NAME_LENGTH);
+    strcat(map_file_name, txt);
+
+    map_file = al_fopen(map_file_name, "r");
+
+    if (map_file == NULL) {
+        fprintf(logfile, "Couldn't open file %s\n", map_file_name);
+        return 1;
+    }
+    fprintf(logfile, "Opened map file %s\n", map_file_name);
+
+    Map.max_players = 1;
+
+    //while (fgets(str, 100, map_file) != NULL)
+    while (al_fgets(map_file, str, 100) != NULL)
+    {
+        line = str;
+
+        while (isspace(*line)) line++;
+
+        if (strncmp(line, "max_players", 11) == 0)
+        {
+            sscanf(line + 11, " %d", &Map.max_players);
+            return 1;
+        }
+    }
+    return 1;
+}
+
+
+
 //parse:
 //align label first column, parameters separated by spaces, suits scanf I think.
 //so read line, check label, scanf, pattern determined by label.
@@ -67,7 +111,7 @@ int init_map(int group, int map)
 
 	strcat(map_file_name, txt);
 
-	map_file = fopen(map_file_name,"r");
+	map_file = al_fopen(map_file_name,"r");
 
 	if (map_file == NULL)
 	{
@@ -112,7 +156,8 @@ int init_map(int group, int map)
 
     Map.race = 0;
 
-	while (fgets(str, 100, map_file) != NULL)
+	//while (fgets(str, 100, map_file) != NULL)
+	while (al_fgets(map_file, str, 100) != NULL)
 	{
 		line = str;
 
@@ -398,15 +443,24 @@ int init_map(int group, int map)
 	fprintf(logfile,"--End of mapfile %s--\n",map_file_name);
 
 	fflush(logfile);
-	fclose  (map_file);
+	al_fclose  (map_file);
 
 	//read hi scores
 	if (Map.mission || Map.race)
     {
         strncpy(map_file_name, (char*)&MapNames[group].Map[map], MAP_NAME_LENGTH);
         strcat(map_file_name, scores);
-
-        map_file = fopen(map_file_name,"r");
+#ifdef ANDROID
+        char pathstr[100];
+        char *pathptr;
+        al_set_standard_file_interface();
+        ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DATA_PATH);    //android
+        //ALLEGRO_DEBUG(#std ": %s", al_path_cstr(path, '/'));
+        sprintf(pathstr,"%s",al_path_cstr(path, '/'));
+        al_change_directory(al_path_cstr(path, '/'));  // change the working directory
+        pathptr = al_get_current_directory();
+#endif
+        map_file = al_fopen(map_file_name,"r");
         if (map_file == NULL)
         {
             fprintf(logfile,"Couldn't open scores/times file %s. Using default high scores/times.\n",map_file_name);
@@ -428,7 +482,8 @@ int init_map(int group, int map)
         {
             fprintf(logfile,"Opened scores/times file %s\n",map_file_name);
             j=0;
-            while (fgets(str, 100, map_file) != NULL)
+            //while (fgets(str, 100, map_file) != NULL)
+            while (al_fgets(map_file, str, 100) != NULL)
             {
                 length = strlen(str);
                 for (i=0 ; i<length-1 ; i++)
@@ -446,9 +501,11 @@ int init_map(int group, int map)
                 j++;
                 if (j==MAX_SCORES) break;
             }
-            fclose(map_file);
+            al_fclose(map_file);
         }
-
+#ifdef ANDROID
+        al_android_set_apk_file_interface();
+#endif
     }
 
 	return 0;
@@ -468,14 +525,15 @@ void load_map_file(void)
     FILE* map_file;
 	unsigned char line[200];    //unsigned to allow values up to 256 for maps with many tiles.
 
-	if ((map_file = fopen(Map.ascii_map_file_name,"r")) == NULL)  fprintf(logfile,"Couldn't open %s for reading.\n",Map.ascii_map_file_name);
+	if ((map_file = al_fopen(Map.ascii_map_file_name,"r")) == NULL)  fprintf(logfile,"Couldn't open %s for reading.\n",Map.ascii_map_file_name);
 
 	map_width = 0;
 
 	j=0;
 	while(1)
 	{
-		if (fgets((char *)line,200,map_file) == NULL)	//get a line from the file, exit on end of file
+		//if (fgets((char *)line,200,map_file) == NULL)	//get a line from the file, exit on end of file
+		if (al_fgets(map_file, (char *)line,200) == NULL)	//get a line from the file, exit on end of file
 			break;
 
 		i=0;
@@ -501,7 +559,7 @@ void load_map_file(void)
 	}
 	map_width++;
 
-	fclose(map_file);
+	al_fclose(map_file);
 
 	fprintf(logfile,"ASCII Map: H:%d W:%d\n",map_height,map_width);
 }
@@ -543,10 +601,11 @@ void init_controls(void)
 	Ship[3].right_key  = ALLEGRO_KEY_RIGHT;
 	Ship[3].thrust_key = ALLEGRO_KEY_RCTRL;
 
-  #define ANDROID
+  //#define ANDROID
   #ifdef ANDROID
 
-    //Ship[0].controller = TOUCH_JOYSTICK;
+    Ship[0].controller = TOUCH_JOYSTICK;
+	TouchJoystick.spin = 0;
 
 	//On-screen controls
     //if ((Ctrl.dpad = al_load_bitmap("dpad.png")) == NULL)  fprintf(logfile,"dpad.png load fail");
@@ -558,38 +617,70 @@ void init_controls(void)
 	dh = al_get_display_height(display);
 
 	Ctrl.reversed = false;
+    Ctrl.ButtonSize = 100*scale;  //tweak for scaling????
 
 	//init size/position of buttons
 	//could read/store this in file, but I guess still need this for defaults....
 	Ctrl.ctrl[DPAD].active = TRUE;
-	Ctrl.ctrl[DPAD].w = 200;//al_get_bitmap_width(Ctrl.direction.bmp);
-	Ctrl.ctrl[DPAD].h = 200;//al_get_bitmap_width(Ctrl.direction.bmp);
-	Ctrl.ctrl[DPAD].x = 0.98*dw-Ctrl.ctrl[DPAD].w;
-	Ctrl.ctrl[DPAD].y = 0.98*dh-Ctrl.ctrl[DPAD].h;
+	Ctrl.ctrl[DPAD].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
+	Ctrl.ctrl[DPAD].x = 0.98*dw-Ctrl.ctrl[DPAD].size;
+	Ctrl.ctrl[DPAD].y = 0.98*dh-Ctrl.ctrl[DPAD].size;
+
+    Ctrl.ctrl[ASTICK].active = FALSE;
+    Ctrl.ctrl[ASTICK].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
+    Ctrl.ctrl[ASTICK].x = 0.99*dw-Ctrl.ctrl[ASTICK].size;
+    Ctrl.ctrl[ASTICK].y = 0.99*dh-Ctrl.ctrl[ASTICK].size;
+
+    Ctrl.ctrl[ASTICK2].active = FALSE;
+    Ctrl.ctrl[ASTICK2].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
+    Ctrl.ctrl[ASTICK2].x = 0.99*dw-Ctrl.ctrl[ASTICK2].size;
+    Ctrl.ctrl[ASTICK2].y = 0.99*dh-Ctrl.ctrl[ASTICK2].size;
 
 	Ctrl.ctrl[THRUST_BUTTON].active = TRUE;
-	Ctrl.ctrl[THRUST_BUTTON].w = 100;//al_get_bitmap_width(Ctrl.thrust.bmp);
-	Ctrl.ctrl[THRUST_BUTTON].h = 100;//al_get_bitmap_width(Ctrl.thrust.bmp);
-	Ctrl.ctrl[THRUST_BUTTON].x = 0.02*dw;
-	Ctrl.ctrl[THRUST_BUTTON].y = 0.98*dh-Ctrl.ctrl[THRUST_BUTTON].h;
+	Ctrl.ctrl[THRUST_BUTTON].size = 1.5*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
+	Ctrl.ctrl[THRUST_BUTTON].x = 0.01*dw;//+Ctrl.ButtonSize*0.7;
+	Ctrl.ctrl[THRUST_BUTTON].y = 0.99*dh-Ctrl.ctrl[THRUST_BUTTON].size;//-Ctrl.ButtonSize*0.7;
 
-	Ctrl.ctrl[BACK].active = TRUE;
-	Ctrl.ctrl[BACK].w = 100;//al_get_bitmap_width(Ctrl.escape.bmp);
-	Ctrl.ctrl[BACK].h = 100;//al_get_bitmap_width(Ctrl.escape.bmp);
-	Ctrl.ctrl[BACK].x = 200;//0.02*dw;
+    Ctrl.ctrl[FIRE1].active = FALSE;
+    Ctrl.ctrl[FIRE1].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
+    Ctrl.ctrl[FIRE1].x = 0.02*dw;
+    Ctrl.ctrl[FIRE1].y = 0.98*dh-Ctrl.ctrl[FIRE1].size-Ctrl.ButtonSize*1.5;
+
+    Ctrl.ctrl[FIRE2].active = FALSE;
+    Ctrl.ctrl[FIRE2].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
+    Ctrl.ctrl[FIRE2].x = 0.02*dw+Ctrl.ButtonSize*1.5;
+    Ctrl.ctrl[FIRE2].y = 0.98*dh-Ctrl.ctrl[FIRE2].size;
+
+    Ctrl.ctrl[BACK].active = TRUE;
+	Ctrl.ctrl[BACK].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+	Ctrl.ctrl[BACK].x = 0.5*dw - (Ctrl.ctrl[BACK].size * 2.15);
 	Ctrl.ctrl[BACK].y = 0.02*dh;
 
-	/*
-	//same as thrust??
-	Ctrl.ctrl[].w = 200;//al_get_bitmap_width(Ctrl.select.bmp);
-	Ctrl.select.h = 200;//al_get_bitmap_width(Ctrl.select.bmp);
-	Ctrl.select.x = 0.02*dw;
-	Ctrl.select.y = 0.02*dh;
+    Ctrl.ctrl[SMALLER].active = TRUE;
+    Ctrl.ctrl[SMALLER].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[SMALLER].x = 0.5*dw - (Ctrl.ctrl[SMALLER].size * 1.05);
+    Ctrl.ctrl[SMALLER].y = 0.02*dh;
 
-	Ctrl.start.w = 200;//al_get_bitmap_width(Ctrl.start.bmp);
-	Ctrl.start.h = 200;//al_get_bitmap_width(Ctrl.start.bmp);
-	Ctrl.start.x = 0.02*dw;
-	Ctrl.start.y = 0.02*dh;
+    Ctrl.ctrl[BIGGER].active = TRUE;
+    Ctrl.ctrl[BIGGER].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[BIGGER].x = 0.5*dw + (Ctrl.ctrl[BIGGER].size * 0.05);
+    Ctrl.ctrl[BIGGER].y = 0.02*dh;
+
+    Ctrl.ctrl[RADAR].active = FALSE;
+    Ctrl.ctrl[RADAR].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[RADAR].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 1.15);
+    Ctrl.ctrl[RADAR].y = 0.02*dh;
+    /*
+    //same as thrust??
+    Ctrl.ctrl[].w = 200;//al_get_bitmap_width(Ctrl.select.bmp);
+    Ctrl.select.h = 200;//al_get_bitmap_width(Ctrl.select.bmp);
+    Ctrl.select.x = 0.02*dw;
+    Ctrl.select.y = 0.02*dh;
+
+    Ctrl.start.w = 200;//al_get_bitmap_width(Ctrl.start.bmp);
+    Ctrl.start.h = 200;//al_get_bitmap_width(Ctrl.start.bmp);
+    Ctrl.start.x = 0.02*dw;
+    Ctrl.start.y = 0.02*dh;
     */
 
     //init touch array
@@ -692,6 +783,7 @@ void reinit_ship(int i)
 	Ship[i].gravity = Map.gravity;//9.81;
 
 	Ship[i].angle = 0;
+    Ship[i].fangle = 0;
 	Ship[i].xv = 0;
 	Ship[i].yv = 0;
 

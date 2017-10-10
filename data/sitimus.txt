@@ -8,6 +8,8 @@ ship_first    0
 gravity 0.05
 drag 2
 
+lives 1
+
 ; pads
 ;   type y    xmin xmax
 pad 0    1228 240  350  

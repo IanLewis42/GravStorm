@@ -1,0 +1,27 @@
+map_type      0
+display_map   mutolos.png
+collision_map mutolos_col.png
+description   mutolos_desc.txt
+
+ship_first    0
+
+gravity 0.05
+
+drag    2
+
+;   type y    xmin xmax
+pad 0    593  190  300  
+pad 1    1505 1340  1490 
+
+pad 2    1543 124  162
+pad 3    1101 522  563
+pad 4    536  797  839
+pad 5    1145 798  837
+pad 6    1549 881  924
+pad 7    315  1227 1262
+pad 8    781  1479 1512
+pad 9    310  976  1017
+
+max_players 2
+
+

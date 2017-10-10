@@ -27,6 +27,9 @@
 #include "allegro5/allegro_ttf.h"
 #include "allegro5/allegro_audio.h"
 #include "allegro5/allegro_acodec.h"
+#ifdef ANDROID
+  #include <allegro5/allegro_android.h>
+#endif
 
 #include "game.h"
 #include "drawing.h"
@@ -42,6 +45,8 @@
 #endif
 
 ALLEGRO_DISPLAY *display;
+//ALLEGRO_HAPTIC *hap;
+ALLEGRO_TIMER *timer;
 
 ALLEGRO_FONT *font;         //debug
 ALLEGRO_FONT *menu_font;
@@ -147,7 +152,8 @@ int keypress = false;
 char current_key = 0;
 float volume, v_squared;
 bool redraw = true;
-
+float scale,invscale;
+int halted = 0;
 FILE* logfile;
 
 //Local prototypes
@@ -164,15 +170,17 @@ void draw_debug(void);
 #define FIRE 1
 #define ESCAPE 2
 
-int main (int argc, char *argv[]){
+int game(int argc, char **argv )
+{
+//int main (int argc, char *argv[]){
 //int main(void) {
-    ALLEGRO_TIMER *timer;
     ALLEGRO_EVENT_QUEUE *queue;
     ALLEGRO_EVENT event;
 
 	int i;//,j,k,temp;
 	//int num_maps,selected_map;
 	int exit, back_to_menu = false;
+    float scalex,scaley;//scale;
 
 	//parse command line arguments
 	for (i=1 ; i<argc ; i++)
@@ -181,17 +189,43 @@ int main (int argc, char *argv[]){
 		if (strncmp(argv[i],"-d",2) == 0) debug_on = true;		//Enable debug output
 	}
 
+    //debug_on = true;		//Enable debug output
+
 	/* Init Allegro 5 + addons. */
     al_init();
 
 	//set path
-    ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
-	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
+    //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 
+
+    char pathstr[100];
+    char *pathptr;
+
+    al_set_standard_file_interface();
+    //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);    //win/linux
+    ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DATA_PATH);    //android
+    //ALLEGRO_DEBUG(#std ": %s", al_path_cstr(path, '/'));
+    sprintf(pathstr,"%s",al_path_cstr(path, '/'));
+	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
+    pathptr = al_get_current_directory();
+
+    logfile = fopen("logfile.txt","w");
+
+    ALLEGRO_FILE *testfile;
+    char str[] = "File Open\n";
+    int error;
 	//open logfile in executable directory
-	logfile = fopen("logfile.txt","w");
-    fprintf(logfile,"%s %s\n",NAME,VERSION);
-    fprintf(logfile,"Init Allegro\n");
+	testfile = al_fopen("ipl.txt","w");
+    //fprintf(logfile,"%s %s\n",NAME,VERSION);
+    //fprintf(logfile,"Init Allegro\n");
+    error = al_fputs(testfile, str);
+    error = al_fclose(testfile);
+
+    char str2[50];
+    char *strptr;
+    testfile = al_fopen("ipl.txt","r");
+    strptr = al_fgets(testfile, str2, 50);
+    error = al_fclose(testfile);
 
     //init other bits of allegro
     al_init_image_addon();
@@ -202,8 +236,9 @@ int main (int argc, char *argv[]){
     al_install_keyboard();
     al_install_audio();
 	al_init_acodec_addon();
+    al_android_set_apk_fs_interface();
 
-	fprintf(logfile,"Init Allegro done\n");
+	//fprintf(logfile,"Init Allegro done\n");
 
     srand(time(NULL));
 
@@ -224,7 +259,9 @@ int main (int argc, char *argv[]){
     #endif
     #endif // _WIN32
 
-    fprintf(logfile,"Creating display\n");
+    al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS,ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE,ALLEGRO_REQUIRE);
+
+    //fprintf(logfile,"Creating display\n");
     display = al_create_display(SCREENX, SCREENY);
     //display = al_create_display(960, 540);  //Moto E resolution
     //display = al_create_display(800, 480);  //Cheap android phone resolution
@@ -232,18 +269,40 @@ int main (int argc, char *argv[]){
     //ANDROID - SCREEN ROTATION!!!!!
 
 	//change directory to data, where all resources live (images, fonts, sounds and text files)
-	al_append_path_component(path, "data");
-	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
 
+    //al_append_path_component(path, "data");
+	//al_change_directory(al_path_cstr(path, '/'));  // change the working directory
+    //sprintf(pathstr,"%s",al_path_cstr(path, '/'));
+
+#ifdef ANDROID
+    //al_install_haptic();
+    //hap = al_get_haptic_from_display(display);
+#endif
     al_set_window_title(display, NAME);
 
     al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
 
-    if ((icon = al_load_bitmap("gs_icon.png")) == NULL)  fprintf(logfile,"gs_icon.png load fail\n");
+    scalex = (float)al_get_display_width(display)/SCREENX;
+    scaley = (float)al_get_display_height(display)/SCREENY;
+
+    if (scalex < scaley) scale = scalex;
+    else scale = scaley;
+
+    invscale = 1/scale;
+
+    //scale = 1.0;
+
+    //pathptr = al_get_current_directory();
+    //al_change_directory(pathptr);
+
+    al_android_set_apk_file_interface();
+
+    if ((icon = al_load_bitmap("gs_icon.png")) == NULL)
+        printf(logfile,"gs_icon.png load fail\n");
 
     if (icon) al_set_display_icon(display, icon);
 
-    LoadFonts();
+    LoadFonts(scale);
 
     voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
     mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
@@ -256,7 +315,7 @@ int main (int argc, char *argv[]){
 	if ((particle = al_load_sample("particle.wav")) == NULL)  fprintf(logfile,"particle.wav load fail");
 	if ((dead = al_load_sample    ("dead.wav"))     == NULL)  fprintf(logfile,"dead.wav load fail");
 	if ((clunk = al_load_sample   ("clunk.wav"))    == NULL)  fprintf(logfile,"clunk.wav load fail");
-	if ((wind = al_load_sample    ("wind.wav"))     == NULL)  fprintf(logfile,"wind.wav load fail");
+	if ((wind = al_load_sample    ("wind.ogg"))     == NULL)  fprintf(logfile,"wind.ogg load fail");
 	if ((yippee = al_load_sample  ("yippee.wav"))   == NULL)  fprintf(logfile,"yippee.wav load fail");
 	if ((loop = al_load_sample    ("gsloop.ogg"))   == NULL)  fprintf(logfile,"gsloop.ogg load fail");
 	fprintf(logfile,"Loaded Audio Samples\n");
@@ -359,11 +418,11 @@ int main (int argc, char *argv[]){
 		fflush(logfile);
 
         //wait for fire(thrust) to clear text / enter map
+        display_map_text(true,30);	//this is the description text file, plus 'press fire' message
+
         while(1)
         {
             ServiceNetwork();
-
-            display_map_text(true,30);	//this is the description text file, plus 'press fire' message
 
             ForwardOrBack(queue, event);    //check input devices for forward/back keys/buttons/touches
 
@@ -422,6 +481,8 @@ int main (int argc, char *argv[]){
 
         fprintf(logfile,"Game Start\n");
 
+        GameControls();
+
         //into game here
         for (i=0 ; i<MAX_SHIPS ; i++)
         {
@@ -477,7 +538,24 @@ int main (int argc, char *argv[]){
                 exit = true;
                 break;
             }
-
+            if (event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)   //we've been sidelined by the user/os
+            {
+                al_acknowledge_drawing_halt(display);   //acknowledge
+                halted = true;                          //flag to drawing routines to do nothing
+                al_stop_timer(timer);                   //no more timer events, so we should do nothing, saving battery
+                //al_set_default_voice(NULL);             //destroy voice, so no more sound events, ditto.
+                al_destroy_voice(voice);
+                //break;
+            }
+            if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
+            {
+                al_acknowledge_drawing_resume(display); //ack
+                halted = false;                         //remove flag
+                al_start_timer(timer);                  //restart timer
+                voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);  //restart audio
+                al_attach_mixer_to_voice(mixer, voice);
+                //break;
+            }
 			if (event.type == ALLEGRO_EVENT_KEY_DOWN)
 			{
 				debug_key = event.keyboard.keycode;
@@ -564,7 +642,7 @@ int main (int argc, char *argv[]){
             {
                 Command.toggleradar = false;
 
-                if (Net.client || Net.server)
+                //if (Net.client || Net.server)
                 {
                     Radar.on = !Radar.on;
                 }
@@ -575,7 +653,7 @@ int main (int argc, char *argv[]){
                     redraw = true;
 			if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 				al_acknowledge_resize(display);
-				LoadFonts();
+				LoadFonts(0);
 				redraw = true;
 			}
 
@@ -714,6 +792,7 @@ int main (int argc, char *argv[]){
 				}
 				else
 				{
+                    draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
                     game_over = UpdateShips(num_ships);		//Calculate Ship positions based on controls
                                                                 //Also handle firing, updating fuel, ammo, lives etc.
 					CheckSWCollisions(num_ships);//Ship-to-wall collisions
@@ -776,6 +855,8 @@ int main (int argc, char *argv[]){
 		fprintf(logfile,"Game Over\n");
         FreeGameBitmaps();
 
+        MenuControls();
+
         //for (i=0 ; i<num_ships ; i++)
         //for (i=0 ; i<Menu.ships ; i++)
         for (i=0 ; i<MAX_SHIPS ; i++)
@@ -799,17 +880,36 @@ int main (int argc, char *argv[]){
     return 0;
 }
 
+void MenuControls(void)
+{
+    Ctrl.ctrl[RADAR].active = FALSE;
+    Ctrl.ctrl[ASTICK].active = FALSE;
+    Ctrl.ctrl[ASTICK2].active = FALSE;
+    Ctrl.ctrl[FIRE1].active = FALSE;
+    Ctrl.ctrl[FIRE2].active = FALSE;
+    Ctrl.ctrl[DPAD].active = TRUE;
+}
+
+void GameControls(void)
+{
+    Ctrl.ctrl[RADAR].active = TRUE;
+    Ctrl.ctrl[ASTICK].active = TRUE;
+    Ctrl.ctrl[ASTICK2].active = TRUE;
+    Ctrl.ctrl[FIRE1].active = TRUE;
+    Ctrl.ctrl[FIRE2].active = TRUE;
+    Ctrl.ctrl[DPAD].active = FALSE;
+}
 //int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
-    int i;
+    int i,redraw=TRUE;
 
     al_wait_for_event(queue, &event);
 
     if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
     {
         al_acknowledge_resize(display);
-        LoadFonts();
+        LoadFonts(0);
     }
 
     else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -820,14 +920,30 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
         if (gpio_active)
             ReadGPIOJoystick();
     }
-
-    else if (al_is_touch_input_installed())
+    else if (event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)   //we've been sidelined by the user/os
     {
-        if (event.any.source == al_get_touch_input_event_source())
-        {
-            CheckTouchControls(event);  //will set command.goforward etc.
-        }
+        al_acknowledge_drawing_halt(display);   //acknowledge
+        halted = true;                          //flag to drawing routines to do nothing
+        al_stop_timer(timer);                   //no more timer events, so we should do nothing, saving battery
+        al_set_default_voice(NULL);             //destroy voice, so no more sound events, ditto.
+        //break;
     }
+    else if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
+    {
+        al_acknowledge_drawing_resume(display); //ack
+        halted = false;                         //remove flag
+        al_start_timer(timer);                  //restart timer
+        voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);  //restart audio
+        al_attach_mixer_to_voice(mixer, voice);
+        //break;
+    }
+    //else if (al_is_touch_input_installed())
+    //{
+    //    if (event.any.source == al_get_touch_input_event_source())
+    //    {
+    //        CheckTouchControls(event);  //will set command.goforward etc.
+    //    }
+    //}
 
     else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
     {
@@ -840,7 +956,11 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     else if (event.type == ALLEGRO_EVENT_KEY_UP)
         key_up_log[event.keyboard.keycode]=true;
 
-    else CheckUSBJoyStick(event);
+    else
+    {
+        CheckUSBJoyStick(event);
+        CheckTouchControls(event);  //will set command.goforward etc.
+    }
 
     ScanInputs(num_ships);
 
@@ -875,11 +995,12 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     */
 }
 
-void LoadFonts(void)
+void LoadFonts(float scale)
 {
     FreeFonts();
 
-    font_scale = (float)al_get_display_width(display)/(SCREENX);    //font sizes chosen to suit SCREENX, so scale according to what we actually have!
+    //font_scale = (float)al_get_display_width(display)/(SCREENX);    //font sizes chosen to suit SCREENX, so scale according to what we actually have!
+    if (scale) font_scale = scale;
 
     if ((font       = al_load_font("miriam.ttf", 20*font_scale, 0))          == NULL)  fprintf(logfile,"miriam.ttf load fail\n"); //debug font
     if ((menu_font  = al_load_font("Audiowide-Regular.ttf", 40*font_scale,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
@@ -887,7 +1008,7 @@ void LoadFonts(void)
     if ((small_font = al_load_font("Audiowide-Regular.ttf", 30*font_scale,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
     if ((small_glow_font = al_load_font("Audiowide-500.ttf", 30*font_scale,0))== NULL) fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
     if ((big_font   = al_load_font("Zebulon.otf", 200*font_scale, 0))      == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
-    if ((title_font = al_load_font("Zebulon.otf", 131*font_scale, 0))    == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
+    if ((title_font = al_load_font("Zebulon.otf", 125*font_scale, 0))    == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
     //don't scale this one....
     if ((race_font  = al_load_font("7seg.ttf", 18, 0))            == NULL)  fprintf(logfile,"7seg.ttf load fail\n");
 
@@ -903,7 +1024,7 @@ int read_maps(void)
 
 	FILE* mapfile;
 
-	mapfile = fopen("maps.txt","r");
+	mapfile = al_fopen("maps.txt","r");
 
 	if (mapfile == NULL)
 		fprintf(logfile,"Failed to open file maps.txt\n");
@@ -912,7 +1033,8 @@ int read_maps(void)
 	{
 		//if (fscanf(mapfile,"%s",&map_names[MAP_NAME_LENGTH * i]) == EOF) break;
 		//if (fscanf(mapfile,"%s",&temp) == EOF) break;
-		if (fgets(temp,MAP_NAME_LENGTH,mapfile) == NULL) break;
+		//if (fgets(temp,MAP_NAME_LENGTH,mapfile) == NULL) break;
+        if (al_fgets(mapfile,temp,MAP_NAME_LENGTH) == NULL) break;
 
 		len = strcspn(temp, "\r\n");
 
@@ -951,7 +1073,7 @@ int read_maps(void)
 	MapNames[group].Count = map;
 	//fprintf(logfile,"Group %d Count = %d\n",group, MapNames[group].Count);
 
-	fclose(mapfile);
+	al_fclose(mapfile);
 
 	fprintf(logfile,"%d Map groups\n",group+1);
 
@@ -1220,8 +1342,8 @@ void Exit(void)
     FreeFonts();
     al_destroy_display(display);
 	fclose(logfile);
-	if (hostfile) fclose (hostfile);
-	if (clientfile) fclose (clientfile);
+	if (hostfile) al_fclose (hostfile);
+	if (clientfile) al_fclose (clientfile);
 	exit(0);
 }
 
@@ -1246,13 +1368,15 @@ void draw_debug(void)
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
 
-	for (i=0 ; Touch[i].id != NO_TOUCH ; i++)
-    {
-        al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Touch:%d, But:%d",Touch[i].id,Touch[i].button);
-    }
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NumTouches:%d",i);
+	//for (i=0 ; Touch[i].id != NO_TOUCH ; i++)
+    //{
+    //    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Touch:%d, But:%d",Touch[i].id,Touch[i].button);
+    //}
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NumTouches:%d",i);
 
-	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Net: %d", fpsnet);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Spin:%0.3f",TouchJoystick.spin);
+
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Net: %d", fpsnet);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Missed: %d", missed_packets);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NetQual: %.1f", Net.quality);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Ship: %d", d);
@@ -1261,6 +1385,9 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[d].ypos);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Xv: %.0f", Ship[d].xv);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Yv: %.0f", Ship[d].yv);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Relx: %d", relx);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Rely: %d", rely);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "FAngle: %0.2f", Ship[d].fangle);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[d].angle);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Shield: %d", Ship[d].shield);
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "G: %.2f", Ship[d].gravity);

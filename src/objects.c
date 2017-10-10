@@ -32,6 +32,7 @@
 #include "init.h"
 #include "gameover.h"
 #include "network.h"
+#include "inputs.h"
 
 //Trig LUTs
 float sinlut[NUM_ANGLES];
@@ -134,6 +135,31 @@ int UpdateShips(int num_ships)
 		else
 		{
 			//if (Ship[i].right) //increment angle. wrap if necessary.
+#ifdef ANDROID
+			//Ship[i].fangle += TouchJoystick.spin;
+			//if (Ship[i].fangle > NUM_ANGLES) Ship[i].fangle -= NUM_ANGLES;
+            //if (Ship[i].fangle < 0) Ship[i].fangle += NUM_ANGLES;
+            //Ship[i].angle = (int)Ship[i].fangle;
+
+            //int temp = Ship[i].angle*9;
+            //if (temp > 19) temp -= NUM_ANGLES;  //delta >180.......?? 0-360. if (difference < 180) sum -= 180; //??
+#define ASTICK_SPEED 0.5
+
+            float temp = ASTICK_SPEED*(float)Ship[i].angle*9 + (1-ASTICK_SPEED)*(Ship[i].fangle); //convert 'angle' index to degrees, and go part way to control angle
+
+            if (fabsf(((float)Ship[i].angle*9 - Ship[i].fangle)) > 180)
+                temp +=180;
+            if (temp > 360)
+                temp -=360;
+
+            Ship[i].angle = (int)(temp/9);
+
+
+
+
+            //if (Ship[i].angle < 0) Ship[i].angle += NUM_ANGLES;
+
+#else
 			if (Ship[i].right_held)
 			{
 				//Ship[i].xpos++;	//DEBUG
@@ -149,7 +175,7 @@ int UpdateShips(int num_ships)
 				if (Ship[i].angle == -1)
 				  Ship[i].angle = NUM_ANGLES-1;
 			}
-
+#endif
 			//if (Ship[i].thrust)
 			if (Ship[i].thrust_held && Ship[i].fuel)
             {
@@ -504,6 +530,11 @@ void UpdateLandedShip(int i)
 		Ship[i].menu = FALSE;
 		Ship[i].landed = FALSE;
 		Ship[i].thrust = THRUST;
+        GameControls();
+        Ship[i].fangle = 0;
+        Ship[i].angle = 0;
+        Ctrl.ctrl[ASTICK2].x = Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size/2  - Ctrl.ctrl[ASTICK2].size/2;
+        Ctrl.ctrl[ASTICK2].y = Ctrl.ctrl[ASTICK].y + Ctrl.ctrl[ASTICK].size/10 - Ctrl.ctrl[ASTICK2].size/2;
 	}
 
 	else if (Ship[i].menu)
@@ -612,6 +643,7 @@ void UpdateLandedShip(int i)
 		if (Ship[i].pad == Ship[i].home_pad)	//but only on home pad.
 		{
 			Ship[i].menu = TRUE;
+            MenuControls();
 		}
 	}
 

@@ -29,27 +29,28 @@ int NetStartNetwork(void)
 
     Net.ping_port = 1803;
 
-    if ((portfile = fopen("ports.txt","r")) == NULL)
+    if ((portfile = al_fopen("ports.txt","r")) == NULL)
         fprintf(logfile,"FAILED TO OPEN ports.txt , USING DEFAULT PORT\n");
     else
     {
-        fgets(line,6,portfile);
+        //fgets(line,6,portfile);
+        al_fgets(portfile,line,6);
         Net.ping_port = atoi(line);
     }
     fprintf(logfile,"Broadcast port:%d\n",Net.ping_port);
-    fclose (portfile);
+    al_fclose (portfile);
 
     if (enet_initialize () != 0)
     {
-        if (hostfile) fprintf (hostfile, "An error occurred while initializing ENet.\n");
-        if (clientfile) fprintf (clientfile, "An error occurred while initializing ENet.\n");
+        if (hostfile) al_fprintf (hostfile, "An error occurred while initializing ENet.\n");
+        if (clientfile) al_fprintf (clientfile, "An error occurred while initializing ENet.\n");
         return EXIT_FAILURE;
     }
 
     else
     {
-        if (hostfile) fprintf (hostfile, "Initialized ENet.\n");
-        if (clientfile) fprintf (clientfile, "Initialized ENet.\n");
+        if (hostfile) al_fprintf (hostfile, "Initialized ENet.\n");
+        if (clientfile) al_fprintf (clientfile, "Initialized ENet.\n");
     }
 
     atexit(enet_deinitialize);
@@ -75,30 +76,30 @@ int NetStartHost(int players)
     listenaddr.port = Net.ping_port;
     enet_socket_bind(Net.ping, &listenaddr);
     enet_socket_get_address(Net.ping, &listenaddr);
-    fprintf(hostfile,"Listening for scans on port %d\n", listenaddr.port);
+    al_fprintf(hostfile,"Listening for scans on port %d\n", listenaddr.port);
 
     //Create a host using enet_host_create
     Net.address.host = ENET_HOST_ANY;
-    Net.address.port = ENET_PORT_ANY;//Net.game_port;
+    Net.address.port = Net.game_port;//ENET_PORT_ANY;//Net.game_port;
 
     Net.host = enet_host_create(&Net.address, players, 2, 0, 0);
 
     if (Net.host == NULL) {
-        fprintf(hostfile, "An error occured while trying to create an ENet server host\n");
+        al_fprintf(hostfile, "An error occured while trying to create an ENet server host\n");
         exit(EXIT_FAILURE);
     }
 
 	//get host address
 	char buffer[128];
 	if (enet_address_get_host( &Net.address, buffer, 128 ) < 0)
-        fprintf(hostfile,"enet_address_get_host failed.\n");
+        al_fprintf(hostfile,"enet_address_get_host failed.\n");
 	if (enet_address_set_host( &Net.address, buffer ) < 0)      	//address.host field now contains the ip address as hex number
-        fprintf(hostfile,"enet_address_set_host failed.\n");
+        al_fprintf(hostfile,"enet_address_set_host failed.\n");
 
-    fprintf(hostfile,"Server address = 0x%08X\n", Net.address.host);
+    al_fprintf(hostfile,"Server address = 0x%08X\n", Net.address.host);
 
     AddressToString(Net.address.host, Net.myaddress);       //convert to string
-    fprintf(hostfile,"Server address = %s\n", Net.myaddress);
+    al_fprintf(hostfile,"Server address = %s\n", Net.myaddress);
 
     strcpy(buffer,NAME);                                    //display in title bar
     sprintf(buffer+strlen(NAME)," (Host: %s ; %d players)",Net.myaddress,num_ships);
@@ -106,19 +107,19 @@ int NetStartHost(int players)
     al_set_window_title(display, buffer);
 
     if (enet_address_get_host_ip (&Net.address, buffer, 128) < 0)
-        fprintf(hostfile,"enet_address_get_host_ip failed.\n");
+        al_fprintf(hostfile,"enet_address_get_host_ip failed.\n");
 
-    fprintf(hostfile,"Server address(2) = %s\n", buffer);
+    al_fprintf(hostfile,"Server address(2) = %s\n", buffer);
 
     return EXIT_SUCCESS;
 }
 
 void NetStopListen(void)
 {
-	fprintf(hostfile,"Stop listening\n");
+	al_fprintf(hostfile,"Stop listening\n");
 	if (enet_socket_shutdown(Net.ping, ENET_SOCKET_SHUTDOWN_READ_WRITE) != 0)
 	{
-		fprintf(hostfile,"Failed to shutdown listen socket\n");
+		al_fprintf(hostfile,"Failed to shutdown listen socket\n");
 	}
 	enet_socket_destroy(Net.ping);
 }
@@ -173,7 +174,7 @@ int NetStartClient(void)
         Net.host = enet_host_create(NULL, 1, 2, 0, 0);
 
     if (Net.host == NULL) {
-        fprintf(clientfile, "An error occured while trying to create an ENet server host\n");
+        al_fprintf(clientfile, "An error occured while trying to create an ENet server host\n");
         exit(EXIT_FAILURE);
     }
 
@@ -182,7 +183,7 @@ int NetStartClient(void)
 
     if (Net.peer == NULL)
     {
-        fprintf(clientfile, "No available peers for initializing an ENet connection");
+        al_fprintf(clientfile, "No available peers for initializing an ENet connection");
         exit(EXIT_FAILURE);
     }
 
@@ -217,7 +218,7 @@ void NetStartGame(void)
     ENetPacket * packet = enet_packet_create (&temp_pkt,1,ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast (Net.host, 0, packet);
     Net.started = true;
-    fprintf(hostfile,"Sent GO (broadcast)\n");
+    al_fprintf(hostfile,"Sent GO (broadcast)\n");
 }
 
 void NetSendReady(void)
@@ -233,7 +234,7 @@ void NetSendReady(void)
 
     ENetPacket * packet = enet_packet_create (&temp_pkt,3,ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (Net.peer, 0, packet);
-    fprintf(clientfile,"Sent Ready. ID:%d Image:%d\n",Net.id,Ship[0].image);
+    al_fprintf(clientfile,"Sent Ready. ID:%d Image:%d\n",Net.id,Ship[0].image);
     Net.quality = 100;
 }
 
@@ -302,7 +303,7 @@ void NetSendKilled(int killer)
     ENetPacket * packet = enet_packet_create (&temp_pkt,4,ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (Net.peer, 0, packet);
 
-    fprintf(clientfile,"Sent CLIENT KILLED\n");
+    al_fprintf(clientfile,"Sent CLIENT KILLED\n");
 
 }
 
@@ -316,7 +317,7 @@ void NetSendOutOfLives(void)
     ENetPacket * packet = enet_packet_create (&temp_pkt,3,ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send (Net.peer, 0, packet);
 
-    fprintf(clientfile,"Sent CLIENT OUTOFLIVES\n");
+    al_fprintf(clientfile,"Sent CLIENT OUTOFLIVES\n");
 }
 
 void NetSendKeys(void)
@@ -462,7 +463,7 @@ void NetSendGameState()
     if (i > max_packet_size)
     {
         max_packet_size = i;
-        fprintf(hostfile,"Max Packet:%d bytes (%d ships, %d bullets)\n",i,num_ships,num_bullets);
+        al_fprintf(hostfile,"Max Packet:%d bytes (%d ships, %d bullets)\n",i,num_ships,num_bullets);
     }
 
     ENetPacket * packet = enet_packet_create (&temp_pkt,i,ENET_PACKET_FLAG_RELIABLE);
@@ -486,7 +487,7 @@ void NetSendGameOver(void)
 
     ENetPacket * packet = enet_packet_create (&temp_pkt,num_ships*3+1,ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast (Net.host, 0, packet);
-    fprintf(hostfile,"Sent GAMEOVER (broadcast)\n");
+    al_fprintf(hostfile,"Sent GAMEOVER (broadcast)\n");
     NetStopListen();
 }
 
@@ -498,7 +499,7 @@ void NetSendAbort(void)
 
     ENetPacket * packet = enet_packet_create (&temp_pkt,1,ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast (Net.host, 0, packet);
-    fprintf(hostfile,"Sent ABORT (broadcast)\n");
+    al_fprintf(hostfile,"Sent ABORT (broadcast)\n");
     NetStopListen();
 }
 
@@ -532,7 +533,7 @@ NetMessageType ServiceNetwork(void)
                 switch(Net.event.type)
                 {
                     case ENET_EVENT_TYPE_CONNECT:
-                        fprintf(clientfile,"Connection to %s:%d succeeded.\n",Net.menuaddress,Net.address.port);
+                        al_fprintf(clientfile,"Connection to %s:%d succeeded.\n",Net.menuaddress,Net.address.port);
                     break;
                     case ENET_EVENT_TYPE_RECEIVE:
                         switch(Net.event.packet->data[0])
@@ -541,7 +542,7 @@ NetMessageType ServiceNetwork(void)
                             Net.id = Net.event.packet->data[1];
                             Ship[0].image = Net.id;                         //for menu display
                             Ship[0].colour = ShipColour[Net.id];                         //for menu display
-                            fprintf(clientfile,"Received ID:%d\n",Net.id);
+                            al_fprintf(clientfile,"Received ID:%d\n",Net.id);
                             enet_packet_destroy (Net.event.packet);
 
                             reinit_ship(Net.id);
@@ -552,10 +553,10 @@ NetMessageType ServiceNetwork(void)
                         break;
                         case HOST_LEVEL:
                             strncpy(Net.mapfile, (char *)&Net.event.packet->data[1], MAP_NAME_LENGTH);
-                            fprintf(clientfile,"Received Level:%s\n",Net.mapfile);
+                            al_fprintf(clientfile,"Received Level:%s\n",Net.mapfile);
                             if (init_map(0,0) != 0)
                             {
-                                fprintf(clientfile,"Failed to open level:%s\n",Net.mapfile);
+                                al_fprintf(clientfile,"Failed to open level:%s\n",Net.mapfile);
                                 Net.client_state = NO_MAP;
                                 enet_peer_disconnect(Net.peer,0);
                             }
@@ -565,13 +566,13 @@ NetMessageType ServiceNetwork(void)
                             enet_packet_destroy (Net.event.packet);
                         break;
                         case HOST_NOSPACE:
-                            fprintf(clientfile,"Received FULL message\n");
+                            al_fprintf(clientfile,"Received FULL message\n");
                             Net.client_state = NO_SPACE;
                             enet_peer_disconnect(Net.peer,0);
                             enet_packet_destroy (Net.event.packet);
                         break;
                         case HOST_GO:
-                            fprintf(clientfile,"Received GO message\n");
+                            al_fprintf(clientfile,"Received GO message\n");
                             Net.started = true;
                             Net.quality = 100;
                             enet_packet_destroy (Net.event.packet);
@@ -723,7 +724,7 @@ NetMessageType ServiceNetwork(void)
                         break;
 
                         case HOST_GAMEOVER:
-                            fprintf(clientfile,"Received GAMEOVER message\n");
+                            al_fprintf(clientfile,"Received GAMEOVER message\n");
                             game_over = GO_TIMER;
                             //read scores.
                             i=1;
@@ -739,7 +740,7 @@ NetMessageType ServiceNetwork(void)
                         break;
 
                         case HOST_ABORT:
-                            fprintf(clientfile,"Received ABORT message\n");
+                            al_fprintf(clientfile,"Received ABORT message\n");
                             enet_peer_disconnect(Net.peer,0);
                             //Net.client_state = ABORTING;
                             Net.aborted = true;
@@ -752,7 +753,7 @@ NetMessageType ServiceNetwork(void)
                         }
                     break;
                     case ENET_EVENT_TYPE_DISCONNECT:
-                        fprintf(clientfile,"Disconnected from host.\n");
+                        al_fprintf(clientfile,"Disconnected from host.\n");
 
                         //if (Net.client_state == ABORTING)        //we were in game, so
                         //    Net.client_state = ABORTED;            //flag to foreground
@@ -786,7 +787,7 @@ NetMessageType ServiceNetwork(void)
 
                 case ENET_EVENT_TYPE_CONNECT:
                     AddressToString(Net.event.peer->address.host, temp_pkt);
-                    fprintf(hostfile,"Connection from %s\n",temp_pkt);
+                    al_fprintf(hostfile,"Connection from %s\n",temp_pkt);
 
                     if (num_ships >= Map.max_players)
                     {
@@ -794,7 +795,7 @@ NetMessageType ServiceNetwork(void)
                         temp_pkt[0] = HOST_NOSPACE;
                         ENetPacket * packet = enet_packet_create ((char*)&temp_pkt,2,ENET_PACKET_FLAG_RELIABLE);
                         enet_peer_send (Net.event.peer, 0, packet);
-                        fprintf(hostfile,"Sent FULL message\n");
+                        al_fprintf(hostfile,"Sent FULL message\n");
                         num_ships++;    //will be decremented again when client disconnects.
                     }
                     else
@@ -804,21 +805,21 @@ NetMessageType ServiceNetwork(void)
                         temp_pkt[1] = num_ships;//Net.clients;
                         ENetPacket * packet = enet_packet_create ((char*)&temp_pkt,3,ENET_PACKET_FLAG_RELIABLE);
                         enet_peer_send (Net.event.peer, 0, packet);
-                        fprintf(hostfile,"Issued ID: %d\n",num_ships++);//Net.clients++);
+                        al_fprintf(hostfile,"Issued ID: %d\n",num_ships++);//Net.clients++);
 
                         //send level to client
                         temp_pkt[0] = HOST_LEVEL;
                         strncpy(&temp_pkt[1],(char*)&MapNames[Menu.group].Map[Menu.map],100);
                         packet = enet_packet_create ((char*)&temp_pkt,strlen((char*)&MapNames[Menu.group].Map[Menu.map])+2,ENET_PACKET_FLAG_RELIABLE);
                         enet_peer_send (Net.event.peer, 0, packet);
-                        fprintf(hostfile,"Sent Level: %s\n",&temp_pkt[1]);
+                        al_fprintf(hostfile,"Sent Level: %s\n",&temp_pkt[1]);
 
                         if (Net.started)
                         {
                             temp_pkt[0] = HOST_GO;
                             packet = enet_packet_create ((char*)&temp_pkt,2,ENET_PACKET_FLAG_RELIABLE);
                             enet_peer_send (Net.event.peer, 0, packet);
-                            fprintf(hostfile,"Sent GO (late joiner)\n");
+                            al_fprintf(hostfile,"Sent GO (late joiner)\n");
                         }
                     }
                     char buffer[256];
@@ -828,14 +829,14 @@ NetMessageType ServiceNetwork(void)
                 break;
 
                 case ENET_EVENT_TYPE_RECEIVE:
-                    //fprintf(hostfile,"(Server) Message from client : %s\n", Net.event.packet->data);
+                    //al_fprintf(hostfile,"(Server) Message from client : %s\n", Net.event.packet->data);
                     switch(Net.event.packet->data[0])
                     {
                         case CLIENT_READY:
                             i = Net.event.packet->data[1];
                             Ship[i].image = Net.event.packet->data[2];
                             Ship[i].colour = ShipColour[Ship[i].image];
-                            fprintf(hostfile,"Received 'Ready'. Client:%d Image:%d\n",i,Ship[i].image);
+                            al_fprintf(hostfile,"Received 'Ready'. Client:%d Image:%d\n",i,Ship[i].image);
                         break;
                         case CLIENT_KEYS:
                             i = Net.event.packet->data[1];
@@ -893,12 +894,12 @@ NetMessageType ServiceNetwork(void)
                             Net.sounds |= Net.event.packet->data[i++];    //take sounds from client
                         break;
                         case CLIENT_KILLED:
-                            fprintf(hostfile,"Received CLIENT KILLED\n");
+                            al_fprintf(hostfile,"Received CLIENT KILLED\n");
                             Ship[Net.event.packet->data[1]].kills++;
                             Ship[Net.event.packet->data[2]].killed++;
                         break;
                         case CLIENT_OUTOFLIVES:
-                            fprintf(hostfile,"Received CLIENT OUTOFLIVES\n");
+                            al_fprintf(hostfile,"Received CLIENT OUTOFLIVES\n");
                             game_over = GO_TIMER;
                         break;
                     }
@@ -937,7 +938,7 @@ void PingServer(void)
     sendbuf.data = &data;
     sendbuf.dataLength = 1;
     enet_socket_send(Net.ping, &addr, &sendbuf, 1);
-    fprintf(clientfile,"Pinged server on port:%d\n",Net.ping_port);
+    al_fprintf(clientfile,"Pinged server on port:%d\n",Net.ping_port);
     return;
 }
 
@@ -961,13 +962,13 @@ void PingReply(void)
 
         char addrbuf[256];
         enet_address_get_host_ip(&addr, addrbuf, sizeof addrbuf);
-        fprintf(hostfile,"Listen port: received (%d) from %s:%d\n", *(char *)recvbuf.data, addrbuf, addr.port);
+        al_fprintf(hostfile,"Listen port: received (%d) from %s:%d\n", *(char *)recvbuf.data, addrbuf, addr.port);
 
         ServerInfo sinfo;
 
         if (enet_address_get_host(&Net.host->address, sinfo.hostname, sizeof sinfo.hostname) != 0)
         {
-            fprintf(stderr, "Failed to get hostname\n");
+            al_fprintf(stderr, "Failed to get hostname\n");
             return;
         }
 
@@ -975,7 +976,7 @@ void PingReply(void)
         recvbuf.data = &sinfo;
         recvbuf.dataLength = sizeof sinfo;
         enet_socket_send(Net.ping, &addr, &recvbuf, 1);
-        fprintf(hostfile,"Sent server address to: %s:%d\n", addrbuf, addr.port);
+        al_fprintf(hostfile,"Sent server address to: %s:%d\n", addrbuf, addr.port);
 
         return;
 }
@@ -998,7 +999,7 @@ void CheckPingReply(void)
         {
             if (recvlen != sizeof(ServerInfo))
             {
-                fprintf(stderr, "Unexpected reply from scan\n");
+                al_fprintf(stderr, "Unexpected reply from scan\n");
                 return;
             }
 
@@ -1006,7 +1007,7 @@ void CheckPingReply(void)
             Net.address.port = ntohs(sinfo.port);
             char buf[256];
             enet_address_get_host_ip(&Net.address, buf, sizeof buf);
-            fprintf(clientfile,"Found server '%s' at %s:%d\n", sinfo.hostname, buf, Net.address.port);
+            al_fprintf(clientfile,"Found server '%s' at %s:%d\n", sinfo.hostname, buf, Net.address.port);
             strncpy(Net.menuaddress,buf,16);
 
             NetStartClient();
