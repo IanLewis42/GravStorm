@@ -1399,7 +1399,8 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
         menuscale = xscale;
 
     al_identity_transform(&transform);
-    al_scale_transform(&transform,menuscale,menuscale);
+    al_scale_transform(&transform,0.8*menuscale,0.8*menuscale);
+    al_translate_transform(&transform, 0.1*w,0.1*h);
     al_use_transform(&transform);
 
 #else
