@@ -411,6 +411,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 		{
 			display_new_menu();
 
+            UpdateTouches();
+
 			//expanding maps
 			if (Menu.expand < 35*font_scale)
 				Menu.expand += 5*font_scale;

@@ -688,6 +688,10 @@ void init_controls(void)
     {
         Touch[i].id = NO_TOUCH;
         Touch[i].button = NO_BUTTON;
+        Touch[i].count = 0;
+        Touch[i].x = 0;
+        Touch[i].y = 0;
+        Touch[i].valid = 0;
     }
 
 #endif // ANDROID

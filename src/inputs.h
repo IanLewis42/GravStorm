@@ -71,4 +71,6 @@ void ScanInputs(int num_ships);
 void ReadGPIOJoystick();
 void CheckUSBJoyStick(ALLEGRO_EVENT event);
 void CheckTouchControls(ALLEGRO_EVENT event);
+void UpdateTouches(void);
+void ValidateTouch(int i);
 

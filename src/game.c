@@ -210,7 +210,7 @@ int game(int argc, char **argv )
     pathptr = al_get_current_directory();
 
     logfile = fopen("logfile.txt","w");
-
+/*
     ALLEGRO_FILE *testfile;
     char str[] = "File Open\n";
     int error;
@@ -226,7 +226,7 @@ int game(int argc, char **argv )
     testfile = al_fopen("ipl.txt","r");
     strptr = al_fgets(testfile, str2, 50);
     error = al_fclose(testfile);
-
+*/
     //init other bits of allegro
     al_init_image_addon();
     al_init_primitives_addon();
@@ -661,6 +661,8 @@ int game(int argc, char **argv )
 			{
 				if (gpio_active) ReadGPIOJoystick();	//No events, so have to read this in the timer loop.
 
+                UpdateTouches();
+
 				double t = al_get_time();
 
 				if (take_screenshot)
@@ -919,6 +921,7 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     {
         if (gpio_active)
             ReadGPIOJoystick();
+        UpdateTouches();
     }
     else if (event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)   //we've been sidelined by the user/os
     {

@@ -367,15 +367,19 @@ typedef enum
 
 typedef struct
 {
-	int id;
+	float x;
+    float y;
+    int id;
 	ButtonType button;
+    int count;
+    int valid;
 }TouchType;
 
 //keep track of touches on buttons
 #define NUM_TOUCHES 6
 extern TouchType Touch[NUM_TOUCHES];
-
 #define NO_TOUCH 0xffff
+#define TOUCH_THRESHOLD 3
 
 typedef struct
 {

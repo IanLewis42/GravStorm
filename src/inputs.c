@@ -47,9 +47,9 @@ bool key_up_log[ALLEGRO_KEY_MAX];
 void ScanInputs(int num_ships);
 void ReadGPIOJoystick();
 void CheckUSBJoyStick(ALLEGRO_EVENT event);
-void NewTouch(ALLEGRO_EVENT event, int i);
-void DoDPAD(ALLEGRO_EVENT event);
-void DoAStick(ALLEGRO_EVENT event);
+void NewTouch(float x, float y, int i);
+void DoDPAD(float x, float y);
+void DoAStick(float x, float y);
 ButtonType FindButton(float x, float y);
 
 
@@ -268,160 +268,203 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event)
 //drag dpad and thrust.
 
 //
+
 void CheckTouchControls(ALLEGRO_EVENT event)
 {
 	int i;
 
-	if (event.type == ALLEGRO_EVENT_TOUCH_BEGIN)
-	{
+	if (event.type == ALLEGRO_EVENT_TOUCH_BEGIN) {
 		//find free entry in touch array
 		i = 0;
 		while (Touch[i].id != NO_TOUCH && Touch[i].id != event.touch.id) i++;
 
 		if (i >= NUM_TOUCHES)   //protection for running out of array.....
-            return;
+			return;
 
 		Touch[i].id = event.touch.id;
-		Touch[i].button = FindButton(event.touch.x, event.touch.y);
-
-		NewTouch(event,i);  //check x,y for dpad, poke structures
+		Touch[i].count = 1;
+        Touch[i].x = event.touch.x;
+        Touch[i].y = event.touch.y;
 	}
+
 	else if (event.type == ALLEGRO_EVENT_TOUCH_END)
-    {
-        for (i = 0; Touch[i].id != event.touch.id; i++) //find touch
-        {}
+	{
+		for (i = 0; Touch[i].id != event.touch.id; i++) //find touch
+		{}
 
-        Touch[i].id = NO_TOUCH;             //reset array entry
+		Touch[i].id = NO_TOUCH;             //reset array entry
+		Touch[i].count = 0;
+        Touch[i].x = 0;
+        Touch[i].y = 0;
+        Touch[i].valid = 0;
 
-        switch (Touch[i].button) {
-            case DPAD:        //release joystick
-                TouchJoystick.right_up = true;
-                TouchJoystick.left_up = true;
-                TouchJoystick.down_up = true;
-                TouchJoystick.up_up = true;
-                TouchJoystick.spin = 0;
-                break;
-            case THRUST_BUTTON:
-                TouchJoystick.button_up = true;
-                break;
-            case FIRE1:
-                TouchJoystick.up_up = TRUE;
-                break;
-            case FIRE2:
-                TouchJoystick.down_up = TRUE;
-                break;
-                //don't care about release of these?
-                //else if (Touch[i].button == BACK)
-                //    Command.goback = true;
-                //else if (Touch[i].button == RADAR)
-                //    Command.toggleradar = true;
-                //else if (Touch[i].button == START || Touch[i].button == SELECT)
-                //    Command.goforward = true;
-        }
-        Touch[i].button = NO_BUTTON;        //probably not really needed....
-    }
-    else if (event.type == ALLEGRO_EVENT_TOUCH_MOVE)
-    {
-        for (i=0 ; Touch[i].id != event.touch.id ; i++) //find touch
-        {}
+		switch (Touch[i].button) {
+			case DPAD:        //release joystick
+				TouchJoystick.right_up = true;
+				TouchJoystick.left_up = true;
+				TouchJoystick.down_up = true;
+				TouchJoystick.up_up = true;
+				TouchJoystick.spin = 0;
+				break;
+			case THRUST_BUTTON:
+				TouchJoystick.button_up = true;
+				break;
+			case FIRE1:
+				TouchJoystick.up_up = TRUE;
+				break;
+			case FIRE2:
+				TouchJoystick.down_up = TRUE;
+				break;
+				//don't care about release of these?
+				//else if (Touch[i].button == BACK)
+				//    Command.goback = true;
+				//else if (Touch[i].button == RADAR)
+				//    Command.toggleradar = true;
+				//else if (Touch[i].button == START || Touch[i].button == SELECT)
+				//    Command.goforward = true;
+		}
+		Touch[i].button = NO_BUTTON;        //probably not really needed....
+	}
+	else if (event.type == ALLEGRO_EVENT_TOUCH_MOVE)
+	{
+		for (i=0 ; Touch[i].id != event.touch.id ; i++) //find touch
+		{}
 
-        if (i >= NUM_TOUCHES)   //protection for running out of array.....
+		if (i >= NUM_TOUCHES)   //protection for running out of array.....
+			return;
+
+        Touch[i].x = event.touch.x;
+        Touch[i].y = event.touch.y;
+
+        if (Touch[i].valid == 0)
             return;
 
         ButtonType oldbutton = Touch[i].button;
-        Touch[i].button = FindButton(event.touch.x, event.touch.y);
+		Touch[i].button = FindButton(event.touch.x, event.touch.y);
 
-        if (oldbutton == DPAD)        //touch WAS on DPAD
-        {
-            if (Touch[i].button == DPAD)             //touch STILL on DPAD
-            {
-                DoDPAD(event);  //map touch event x/y to TouchJoystick struct.
-            }
-            else    //drag DPAD - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
-            {
-                if (event.touch.x < Ctrl.ctrl[DPAD].x)
-                    Ctrl.ctrl[DPAD].x = event.touch.x;
-                else if (event.touch.x > Ctrl.ctrl[DPAD].x + Ctrl.ctrl[DPAD].size)
-                    Ctrl.ctrl[DPAD].x = event.touch.x - Ctrl.ctrl[DPAD].size;
-                if (event.touch.y < Ctrl.ctrl[DPAD].y)
-                    Ctrl.ctrl[DPAD].y = event.touch.y;
-                else if (event.touch.y > Ctrl.ctrl[DPAD].y + Ctrl.ctrl[DPAD].size)
-                    Ctrl.ctrl[DPAD].y = event.touch.y - Ctrl.ctrl[DPAD].size;
-                Touch[i].button = DPAD;
-            }
-        }
-        else if (oldbutton == ASTICK)                    //touch was on ASTICK
-        {
-            if (Touch[i].button == ASTICK)             //touch STILL on ASTICK
-            {
-                DoAStick(event);  //map touch event x/y to TouchJoystick struct.
-            }
-            else    //drag ASTICK - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
-            {
-                if (event.touch.x < Ctrl.ctrl[ASTICK].x)
-                    Ctrl.ctrl[ASTICK].x = event.touch.x;
-                else if (event.touch.x > Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size)
-                    Ctrl.ctrl[ASTICK].x = event.touch.x - Ctrl.ctrl[ASTICK].size;
-                if (event.touch.y < Ctrl.ctrl[DPAD].y)
-                    Ctrl.ctrl[ASTICK].y = event.touch.y;
-                else if (event.touch.y > Ctrl.ctrl[ASTICK].y + Ctrl.ctrl[ASTICK].size)
-                    Ctrl.ctrl[ASTICK].y = event.touch.y - Ctrl.ctrl[ASTICK].size;
-                Touch[i].button = ASTICK;
-                DoAStick(event);  //map touch event x/y to TouchJoystick struct.
-            }
-        }
-        else if (oldbutton == THRUST_BUTTON)        //touch was on thrust
-        {
-            if (Touch[i].button == THRUST_BUTTON)  //touch still on thrust
-            {}                                  //nothing to do
+		if (oldbutton == DPAD)        //touch WAS on DPAD
+		{
+			if (Touch[i].button == DPAD)             //touch STILL on DPAD
+			{
+				DoDPAD(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
+			}
+			else    //drag DPAD - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
+			{
+				if (event.touch.x < Ctrl.ctrl[DPAD].x)
+					Ctrl.ctrl[DPAD].x = event.touch.x;
+				else if (event.touch.x > Ctrl.ctrl[DPAD].x + Ctrl.ctrl[DPAD].size)
+					Ctrl.ctrl[DPAD].x = event.touch.x - Ctrl.ctrl[DPAD].size;
+				if (event.touch.y < Ctrl.ctrl[DPAD].y)
+					Ctrl.ctrl[DPAD].y = event.touch.y;
+				else if (event.touch.y > Ctrl.ctrl[DPAD].y + Ctrl.ctrl[DPAD].size)
+					Ctrl.ctrl[DPAD].y = event.touch.y - Ctrl.ctrl[DPAD].size;
+				Touch[i].button = DPAD;
+			}
+		}
+		else if (oldbutton == ASTICK)                    //touch was on ASTICK
+		{
+			if (Touch[i].button == ASTICK)             //touch STILL on ASTICK
+			{
+				DoAStick(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
+			}
+			else    //drag ASTICK - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
+			{
+				if (event.touch.x < Ctrl.ctrl[ASTICK].x)
+					Ctrl.ctrl[ASTICK].x = event.touch.x;
+				else if (event.touch.x > Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size)
+					Ctrl.ctrl[ASTICK].x = event.touch.x - Ctrl.ctrl[ASTICK].size;
+				if (event.touch.y < Ctrl.ctrl[DPAD].y)
+					Ctrl.ctrl[ASTICK].y = event.touch.y;
+				else if (event.touch.y > Ctrl.ctrl[ASTICK].y + Ctrl.ctrl[ASTICK].size)
+					Ctrl.ctrl[ASTICK].y = event.touch.y - Ctrl.ctrl[ASTICK].size;
+				Touch[i].button = ASTICK;
+				DoAStick(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
+			}
+		}
+		else if (oldbutton == THRUST_BUTTON)        //touch was on thrust
+		{
+			if (Touch[i].button == THRUST_BUTTON)  //touch still on thrust
+			{}                                  //nothing to do
 
-            else //drag thrust button
-            {
-                if (event.touch.x < Ctrl.ctrl[THRUST_BUTTON].x)
-                    Ctrl.ctrl[THRUST_BUTTON].x = event.touch.x;
-                else if (event.touch.x > Ctrl.ctrl[THRUST_BUTTON].x + Ctrl.ctrl[THRUST_BUTTON].size)
-                    Ctrl.ctrl[THRUST_BUTTON].x = event.touch.x - Ctrl.ctrl[THRUST_BUTTON].size;
-                if (event.touch.y < Ctrl.ctrl[THRUST_BUTTON].y)
-                    Ctrl.ctrl[THRUST_BUTTON].y = event.touch.y;
-                else if (event.touch.y > Ctrl.ctrl[THRUST_BUTTON].y + Ctrl.ctrl[THRUST_BUTTON].size)
-                    Ctrl.ctrl[THRUST_BUTTON].y = event.touch.y - Ctrl.ctrl[THRUST_BUTTON].size;
-                Touch[i].button = THRUST_BUTTON;
-            }
-        }
+			else //drag thrust button
+			{
+				if (event.touch.x < Ctrl.ctrl[THRUST_BUTTON].x)
+					Ctrl.ctrl[THRUST_BUTTON].x = event.touch.x;
+				else if (event.touch.x > Ctrl.ctrl[THRUST_BUTTON].x + Ctrl.ctrl[THRUST_BUTTON].size)
+					Ctrl.ctrl[THRUST_BUTTON].x = event.touch.x - Ctrl.ctrl[THRUST_BUTTON].size;
+				if (event.touch.y < Ctrl.ctrl[THRUST_BUTTON].y)
+					Ctrl.ctrl[THRUST_BUTTON].y = event.touch.y;
+				else if (event.touch.y > Ctrl.ctrl[THRUST_BUTTON].y + Ctrl.ctrl[THRUST_BUTTON].size)
+					Ctrl.ctrl[THRUST_BUTTON].y = event.touch.y - Ctrl.ctrl[THRUST_BUTTON].size;
+				Touch[i].button = THRUST_BUTTON;
+			}
+		}
 
-        else if (oldbutton == NO_BUTTON)            //were on no button
+		else if (oldbutton == NO_BUTTON)            //were on no button
+		{
+			if (Touch[i].button != NO_BUTTON)       //now touching button
+			{
+				NewTouch(Touch[i].x, Touch[i].y,i);                  //treat as new touch
+			}
+		}
+		//don't need any other cases, don't care about holding or release of other buttons.???
+		return;
+	}
+}
+
+void UpdateTouches(void)
+{
+    int i;
+    for (i=0 ; i<NUM_TOUCHES ; i++)
+    {
+        if (Touch[i].count > 0)
+            if (Touch[i].count < TOUCH_THRESHOLD)
+                Touch[i].count++;
+        if (Touch[i].count == TOUCH_THRESHOLD)
         {
-            if (Touch[i].button != NO_BUTTON)       //now touching button
-            {
-                NewTouch(event,i);                  //treat as new touch
-            }
+            Touch[i].count = 0;
+            ValidateTouch(i);
         }
-        //don't need any other cases, don't care about holding or release of other buttons.???
-        return;
     }
+    return;
+}
+
+void ValidateTouch(int i) {
+	Touch[i].button = FindButton(Touch[i].x, Touch[i].y);
+    Touch[i].valid = 1;
+	NewTouch(Touch[i].x, Touch[i].y, i);  //check x,y for dpad, poke structures
+	return;
 }
 
 int relx,rely;
 
-void NewTouch(ALLEGRO_EVENT event, int i)
+void NewTouch(float x, float y, int i)
 {
     switch (Touch[i].button)
     {
         case DPAD:
-            DoDPAD(event);  //map touch event x/y to TouchJoystick struct.
+            DoDPAD(x,y);  //map touch event x/y to TouchJoystick struct.
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
         break;
         case ASTICK:
-            DoAStick(event);
+            DoAStick(x,y);
         break;
         case THRUST_BUTTON:
             TouchJoystick.button_down = true;
-
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
         break;
         case BACK:
             Command.goback = true;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
         break;
         case RADAR:
             Command.toggleradar = true;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
+
         break;
         //case START:
         //case SELECT:
@@ -430,10 +473,14 @@ void NewTouch(ALLEGRO_EVENT event, int i)
         case FIRE1:
             TouchJoystick.up_down = TRUE;
             Ctrl.ctrl[FIRE1].idx = 1;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
         break;
         case FIRE2:
             TouchJoystick.down_down = TRUE;
             Ctrl.ctrl[FIRE2].idx = 1;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
         break;
         //break;
         case BIGGER:
@@ -452,6 +499,8 @@ void NewTouch(ALLEGRO_EVENT event, int i)
             Ctrl.ctrl[ASTICK2].y -=10;
             Ctrl.ctrl[FIRE1].y -=10;
             Ctrl.ctrl[FIRE2].y -=10;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
         break;
         case SMALLER:
             for (i=0 ; i<NO_BUTTON ; i++)
@@ -469,15 +518,17 @@ void NewTouch(ALLEGRO_EVENT event, int i)
             Ctrl.ctrl[ASTICK2].y +=10;
             Ctrl.ctrl[FIRE1].y +=10;
             Ctrl.ctrl[FIRE2].y +=10;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
             break;
     }
     return;
 }
 
-void DoDPAD(ALLEGRO_EVENT event)
+void DoDPAD(float x, float y)
 {
-    relx = event.touch.x - Ctrl.ctrl[DPAD].x;    //relative x               //relative to top-left corner
-    rely = event.touch.y - Ctrl.ctrl[DPAD].y;    //relative y
+    relx = x - Ctrl.ctrl[DPAD].x;    //relative x               //relative to top-left corner
+    rely = y - Ctrl.ctrl[DPAD].y;    //relative y
 
     //TouchJoystick.spin = 4*((float)relx/Ctrl.ctrl[DPAD].size-0.5);
 
@@ -523,13 +574,13 @@ void DoDPAD(ALLEGRO_EVENT event)
     return;
 }
 
-void DoAStick(ALLEGRO_EVENT event)
+void DoAStick(float x, float y)
 {
     int centre_x = (Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size/2);
     int centre_y = (Ctrl.ctrl[ASTICK].y + Ctrl.ctrl[ASTICK].size/2);
 
-    relx = event.touch.x - centre_x;    //relative to centre
-    rely = event.touch.y - centre_y;
+    relx = x - centre_x;    //relative to centre
+    rely =y - centre_y;
 
     Ship[Net.id].fangle = atan2(relx,-1*rely);                            //find angle
 
