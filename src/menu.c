@@ -42,7 +42,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
 	ALLEGRO_TRANSFORM transform;
-    ALLEGRO_SAMPLE *slam;
     ALLEGRO_SAMPLE_INSTANCE *slam_inst;
 	ALLEGRO_SAMPLE_INSTANCE *wind_inst;
 
@@ -67,17 +66,25 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 	FILE* credits;
 
+    if ((ttg_logo = al_load_bitmap("tootired.png")) == NULL) fprintf(logfile,"tootired.png load fail\n");
+
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+    bgw = al_get_bitmap_width(ttg_logo);
+    bgh = al_get_bitmap_height(ttg_logo);
+
+    al_clear_to_color(al_map_rgb(255, 255, 255));
+    al_draw_bitmap(ttg_logo,(w-bgw)/2,(h-bgh)/2,0);
+
+    al_flip_display();
+
 	if ((menu_bg_bmp = al_load_bitmap("menu_bg.png")) == NULL) fprintf(logfile,"menu_bg.png load fail\n");
 	if ((logo = al_load_bitmap("gs2.png")) == NULL) fprintf(logfile,"gs.png load fail\n");
-	if ((ttg_logo = al_load_bitmap("tootired.png")) == NULL) fprintf(logfile,"tootired.png load fail\n");
+
 
 	if ((credits = al_fopen ("credits.txt","r")) == NULL)  fprintf(logfile,"credits.txt load fail\n");
 	fflush(logfile);
 
-    w = al_get_display_width(display);
-    h = al_get_display_height(display);
-    bgw = al_get_bitmap_width(menu_bg_bmp);
-    bgh = al_get_bitmap_height(menu_bg_bmp);
 
     fade_in_y  = 0.75*h +30*font_scale;
     visible_y  = 0.75*h;
@@ -95,7 +102,8 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     sound_latency = 1;
 #endif // RPI
 
-    if ((slam = al_load_sample   ("slam.wav"))    == NULL)  fprintf(logfile,"slam.wav load fail");
+    LoadSamples();
+
 	slam_inst = al_create_sample_instance(slam);
     al_attach_sample_instance_to_mixer(slam_inst, mixer);
 
@@ -103,44 +111,39 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     al_attach_sample_instance_to_mixer(wind_inst, mixer);
     al_set_sample_instance_playmode(wind_inst, ALLEGRO_PLAYMODE_LOOP);
 
-    w = al_get_display_width(display);
-    h = al_get_display_height(display);
-    bgw = al_get_bitmap_width(ttg_logo);
-    bgh = al_get_bitmap_height(ttg_logo);
-
-	al_clear_to_color(al_map_rgb(255, 255, 255));
-	al_draw_bitmap(ttg_logo,(w-bgw)/2,(h-bgh)/2,0);
-
-    al_flip_display();
-
-	for (i=0 ; i<60 ; )
+	for (i=0 ; i<1 ; )
 	{
 		al_wait_for_event(queue, &event);
 
-        if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-            return 1;
+            if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+                return 1;
 
-        if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
-            al_acknowledge_resize(display);
-        if (event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)   //we've been sidelined by the user/os
-        {
-            al_acknowledge_drawing_halt(display);   //acknowledge
-            halted = true;                          //flag to drawing routines to do nothing
-            al_stop_timer(timer);                   //no more timer events, so we should do nothing, saving battery
-            al_set_default_voice(NULL);             //destroy voice, so no more sound events, ditto.
-            //break;
-        }
-        if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
-        {
-            al_acknowledge_drawing_resume(display); //ack
-            halted = false;                         //remove flag
-            al_start_timer(timer);                  //restart timer
-            voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);  //restart audio
-            al_attach_mixer_to_voice(mixer, voice);
-            //break;
-        }
-		if (event.type == ALLEGRO_EVENT_TIMER)
-			i++;
+            if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+                al_acknowledge_resize(display);
+            if (event.type ==
+                ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)   //we've been sidelined by the user/os
+            {
+                al_acknowledge_drawing_halt(display);   //acknowledge
+                halted = true;                          //flag to drawing routines to do nothing
+                al_stop_timer(
+                        timer);                   //no more timer events, so we should do nothing, saving battery
+                al_set_default_voice(
+                        NULL);             //destroy voice, so no more sound events, ditto.
+                //break;
+            }
+            if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
+            {
+                al_acknowledge_drawing_resume(display); //ack
+                halted = false;                         //remove flag
+                al_start_timer(timer);                  //restart timer
+                voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16,
+                                        ALLEGRO_CHANNEL_CONF_2);  //restart audio
+                al_attach_mixer_to_voice(mixer, voice);
+                //break;
+            }
+            if (event.type == ALLEGRO_EVENT_TIMER) {
+                i++;
+            }
 	}
 
     bgw = al_get_bitmap_width(menu_bg_bmp);

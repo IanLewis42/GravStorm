@@ -89,6 +89,7 @@ ALLEGRO_BITMAP *menu_bg_bmp;
 ALLEGRO_VOICE *voice;
 ALLEGRO_MIXER *mixer;
 
+ALLEGRO_SAMPLE *slam;
 ALLEGRO_SAMPLE *clunk;
 ALLEGRO_SAMPLE *wind;
 ALLEGRO_SAMPLE *shoota;
@@ -194,10 +195,6 @@ int game(int argc, char **argv )
 	/* Init Allegro 5 + addons. */
     al_init();
 
-	//set path
-    //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
-
-
     char pathstr[100];
     char *pathptr;
 
@@ -210,23 +207,7 @@ int game(int argc, char **argv )
     pathptr = al_get_current_directory();
 
     logfile = fopen("logfile.txt","w");
-/*
-    ALLEGRO_FILE *testfile;
-    char str[] = "File Open\n";
-    int error;
-	//open logfile in executable directory
-	testfile = al_fopen("ipl.txt","w");
-    //fprintf(logfile,"%s %s\n",NAME,VERSION);
-    //fprintf(logfile,"Init Allegro\n");
-    error = al_fputs(testfile, str);
-    error = al_fclose(testfile);
 
-    char str2[50];
-    char *strptr;
-    testfile = al_fopen("ipl.txt","r");
-    strptr = al_fgets(testfile, str2, 50);
-    error = al_fclose(testfile);
-*/
     //init other bits of allegro
     al_init_image_addon();
     al_init_primitives_addon();
@@ -240,16 +221,6 @@ int game(int argc, char **argv )
 
 	//fprintf(logfile,"Init Allegro done\n");
 
-    srand(time(NULL));
-
-
-	//move to objects / init??
-    for(i=0 ; i<NUM_ANGLES ; i++)
-    {
-		sinlut[i] = sin(i*ANGLE_INC_RAD);
-		coslut[i] = cos(i*ANGLE_INC_RAD);
-	}
-
     /* Create our window. */
     #if RPI
     al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);//ALLEGRO_WINDOWED);// | ALLEGRO_RESIZABLE);
@@ -258,21 +229,22 @@ int game(int argc, char **argv )
     al_set_new_display_flags(ALLEGRO_RESIZABLE);//ALLEGRO_WINDOWED);// | ALLEGRO_RESIZABLE);
     #endif
     #endif // _WIN32
-
+#ifdef ANDROID
     al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS,ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE,ALLEGRO_REQUIRE);
+#endif
 
     //fprintf(logfile,"Creating display\n");
     display = al_create_display(SCREENX, SCREENY);
     //display = al_create_display(960, 540);  //Moto E resolution
     //display = al_create_display(800, 480);  //Cheap android phone resolution
 
-    //ANDROID - SCREEN ROTATION!!!!!
-
 	//change directory to data, where all resources live (images, fonts, sounds and text files)
 
     //al_append_path_component(path, "data");
 	//al_change_directory(al_path_cstr(path, '/'));  // change the working directory
     //sprintf(pathstr,"%s",al_path_cstr(path, '/'));
+
+    //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "HideNavBar", "()V");
 
 #ifdef ANDROID
     //al_install_haptic();
@@ -290,11 +262,6 @@ int game(int argc, char **argv )
 
     invscale = 1/scale;
 
-    //scale = 1.0;
-
-    //pathptr = al_get_current_directory();
-    //al_change_directory(pathptr);
-
     al_android_set_apk_file_interface();
 
     if ((icon = al_load_bitmap("gs_icon.png")) == NULL)
@@ -309,19 +276,6 @@ int game(int argc, char **argv )
     al_set_default_mixer(mixer);
     al_attach_mixer_to_voice(mixer, voice);
     fprintf(logfile,"Setup audio voice and mixer\n");
-
-	if ((shoota = al_load_sample  ("shootA.wav"))   == NULL)  fprintf(logfile,"shootA.wav load fail");
-	if ((shootb = al_load_sample  ("shootB.wav"))   == NULL)  fprintf(logfile,"shootB.wav load fail");
-	if ((particle = al_load_sample("particle.wav")) == NULL)  fprintf(logfile,"particle.wav load fail");
-	if ((dead = al_load_sample    ("dead.wav"))     == NULL)  fprintf(logfile,"dead.wav load fail");
-	if ((clunk = al_load_sample   ("clunk.wav"))    == NULL)  fprintf(logfile,"clunk.wav load fail");
-	if ((wind = al_load_sample    ("wind.ogg"))     == NULL)  fprintf(logfile,"wind.ogg load fail");
-	if ((yippee = al_load_sample  ("yippee.wav"))   == NULL)  fprintf(logfile,"yippee.wav load fail");
-	if ((loop = al_load_sample    ("gsloop.ogg"))   == NULL)  fprintf(logfile,"gsloop.ogg load fail");
-	fprintf(logfile,"Loaded Audio Samples\n");
-
-	clunk_inst = al_create_sample_instance(clunk);
-    al_attach_sample_instance_to_mixer(clunk_inst, mixer);
 
 	fflush(logfile);
 
@@ -357,9 +311,29 @@ int game(int argc, char **argv )
 
 	al_start_timer(timer);
 
+    init_controls();	//setup defaults for what controls which ship.
+
+    exit = DoTitle(queue, event);
+    if (exit) return 0;
+
 	fflush(logfile);
 
-	if (gpio_active)
+
+
+    clunk_inst = al_create_sample_instance(clunk);
+    al_attach_sample_instance_to_mixer(clunk_inst, mixer);
+
+
+    //move to objects / init??
+    for(i=0 ; i<NUM_ANGLES ; i++)
+    {
+        sinlut[i] = sin(i*ANGLE_INC_RAD);
+        coslut[i] = cos(i*ANGLE_INC_RAD);
+    }
+
+    srand(time(NULL));
+
+    if (gpio_active)
 	{
 		fprintf(logfile,"Init GPIO joystick\n");
 		init_joystick();	//Ian's GPIO hacked joystick.
@@ -367,14 +341,12 @@ int game(int argc, char **argv )
 	else
 		fprintf(logfile,"Skip GPIO joystick\n");
 
-	init_controls();	//setup defaults for what controls which ship.
+
     init_ships(MAX_SHIPS);
 	fflush(logfile);
 
 	Menu.map = 0;	//start on first map, but only first time. After that, remember it.
 
-	exit = DoTitle(queue, event);
-	if (exit) return 0;
 
     //back to here when exiting game
 	while(1)
@@ -1019,7 +991,19 @@ void LoadFonts(float scale)
 	fflush(logfile);
 }
 
-
+void LoadSamples(void)
+{
+    if ((slam = al_load_sample   ("slam.wav"))    == NULL)  fprintf(logfile,"slam.wav load fail");
+    if ((shoota = al_load_sample  ("shootA.wav"))   == NULL)  fprintf(logfile,"shootA.wav load fail");
+    if ((shootb = al_load_sample  ("shootB.wav"))   == NULL)  fprintf(logfile,"shootB.wav load fail");
+    if ((particle = al_load_sample("particle.wav")) == NULL)  fprintf(logfile,"particle.wav load fail");
+    if ((dead = al_load_sample    ("dead.wav"))     == NULL)  fprintf(logfile,"dead.wav load fail");
+    if ((clunk = al_load_sample   ("clunk.wav"))    == NULL)  fprintf(logfile,"clunk.wav load fail");
+    if ((wind = al_load_sample    ("wind.ogg"))     == NULL)  fprintf(logfile,"wind.ogg load fail");
+    if ((yippee = al_load_sample  ("yippee.wav"))   == NULL)  fprintf(logfile,"yippee.wav load fail");
+    if ((loop = al_load_sample    ("gsloop.ogg"))   == NULL)  fprintf(logfile,"gsloop.ogg load fail");
+    fprintf(logfile,"Loaded Audio Samples\n");
+}
 int read_maps(void)
 {
 	int i,j,group = -1,map = 0,len;

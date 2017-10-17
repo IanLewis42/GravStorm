@@ -427,6 +427,7 @@ extern ALLEGRO_MIXER *mixer;
 
 extern ALLEGRO_SAMPLE *wind;
 extern ALLEGRO_SAMPLE *loop;
+extern ALLEGRO_SAMPLE *slam;
 
 extern ALLEGRO_SAMPLE_INSTANCE *clunk_inst;
 extern ALLEGRO_SAMPLE_INSTANCE *wind_inst[MAX_SHIPS];
@@ -449,6 +450,7 @@ extern int halted;
 int  ShipMass(int ship_num);
 void FreeMenuBitmaps(void);
 void LoadFonts(float scale);
+void LoadSamples(void);
 void MenuControls(void);
 void GameControls(void);
 int read_maps(void);
