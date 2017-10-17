@@ -102,6 +102,8 @@ int GameOver()
                 Ship[ship].score = Map.score[i].score;
             }
         }
+        for (i=0 ; i<num_ships ; i++)                       //needed for mission and race levels
+            Ship[i].lap_table_pos = MAX_SCORES+1;           //init each ship's position to 'off the table'
 
         if (Map.mission)
         {
@@ -150,7 +152,7 @@ int GameOver()
             for (j=0 ; j<num_ships ; j++)
             {
                 if (Ship[j].lap_complete) show_times = true;    //only show times if a lap was completed
-                Ship[j].lap_table_pos = MAX_SCORES+1;           //init each ship's position to 'off the table'
+                //Ship[j].lap_table_pos = MAX_SCORES+1;           //init each ship's position to 'off the table'
 
                 for (i=0 ; i<MAX_SCORES ; i++)                  //now work out each ship's correct position in table
                 {                                               //and copy into newtime, just like the scores
@@ -288,9 +290,9 @@ int GameOver()
             Command.goforward = false;
             game_over--;
 #ifdef ANDROID
-            if (Map.mission && position < MAX_SCORES)
+            if (Map.mission && (position < MAX_SCORES))
                 _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "OpenKeyBoard", "()V");
-            if (Map.race && Ship[0].lap_table_pos < MAX_SCORES)
+            if (Map.race && (Ship[0].lap_table_pos < MAX_SCORES))
                 _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(),"OpenKeyBoard", "()V");
 #endif
         }
