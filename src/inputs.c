@@ -369,15 +369,28 @@ void CheckTouchControls(ALLEGRO_EVENT event)
 			}
 			else    //drag ASTICK - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
 			{
+                int w = al_get_display_width(display);
+                int h = al_get_display_height(display);
+
+                if (event.touch.x > 0.95*w) event.touch.x = 0.95*w;
+
 				if (event.touch.x < Ctrl.ctrl[ASTICK].x)
 					Ctrl.ctrl[ASTICK].x = event.touch.x;
 				else if (event.touch.x > Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size)
-					Ctrl.ctrl[ASTICK].x = event.touch.x - Ctrl.ctrl[ASTICK].size;
+                    Ctrl.ctrl[ASTICK].x = event.touch.x - Ctrl.ctrl[ASTICK].size;
+
+
 				if (event.touch.y < Ctrl.ctrl[DPAD].y)
 					Ctrl.ctrl[ASTICK].y = event.touch.y;
 				else if (event.touch.y > Ctrl.ctrl[ASTICK].y + Ctrl.ctrl[ASTICK].size)
 					Ctrl.ctrl[ASTICK].y = event.touch.y - Ctrl.ctrl[ASTICK].size;
-				Touch[i].button = ASTICK;
+
+
+
+
+
+
+                Touch[i].button = ASTICK;
 				DoAStick(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
 			}
 		}
