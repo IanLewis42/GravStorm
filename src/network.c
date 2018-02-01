@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
 #include "allegro5/allegro_primitives.h"
@@ -24,20 +26,20 @@ void CheckPingReply(void);
 
 int NetStartNetwork(void)
 {
-    FILE *portfile;
+    ALLEGRO_FILE *portfile;
     char line[6];
 
     Net.ping_port = 1803;
 
     if ((portfile = al_fopen("ports.txt","r")) == NULL)
-        fprintf(logfile,"FAILED TO OPEN ports.txt , USING DEFAULT PORT\n");
+        al_fprintf(logfile,"FAILED TO OPEN ports.txt , USING DEFAULT PORT\n");
     else
     {
         //fgets(line,6,portfile);
         al_fgets(portfile,line,6);
         Net.ping_port = atoi(line);
     }
-    fprintf(logfile,"Broadcast port:%d\n",Net.ping_port);
+    al_fprintf(logfile,"Broadcast port:%d\n",Net.ping_port);
     al_fclose (portfile);
 
     if (enet_initialize () != 0)
@@ -593,6 +595,7 @@ NetMessageType ServiceNetwork(void)
                                     if (Ship[j].bullet.damage)
                                     {
                                         Ship[j].shield -=  Ship[j].bullet.damage; //subtract damage
+                                        ScheduleVibrate( Ship[j].bullet.damage);
                                         Ship[j].bullet.owner = Net.event.packet->data[i++];
                                         if (Ship[j].shield <= 0)
                                         {
@@ -770,6 +773,7 @@ NetMessageType ServiceNetwork(void)
             if (Net.updated)
                 Net.quality++;
         }
+    if (clientfile) al_fflush(clientfile);
     }
 
     else if (Net.server)
@@ -917,9 +921,8 @@ NetMessageType ServiceNetwork(void)
                 break;
             }
         }
+    if (hostfile) al_fflush(hostfile);
     }
-    fflush(hostfile);
-    fflush(clientfile);
 
     return NO_MESSAGE;
 }
@@ -968,7 +971,7 @@ void PingReply(void)
 
         if (enet_address_get_host(&Net.host->address, sinfo.hostname, sizeof sinfo.hostname) != 0)
         {
-            al_fprintf(stderr, "Failed to get hostname\n");
+            al_fprintf(hostfile, "Failed to get hostname\n");
             return;
         }
 
@@ -999,7 +1002,7 @@ void CheckPingReply(void)
         {
             if (recvlen != sizeof(ServerInfo))
             {
-                al_fprintf(stderr, "Unexpected reply from scan\n");
+                al_fprintf(clientfile, "Unexpected reply from scan\n");
                 return;
             }
 
