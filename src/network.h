@@ -87,7 +87,8 @@ typedef struct
 #define DEAD     0x08
 
 extern NetworkType Net;
-extern FILE *hostfile,*clientfile;
+
+extern ALLEGRO_FILE *hostfile,*clientfile;
 
 int NetStartNetwork(void);
 void NetStopNetwork(void);
