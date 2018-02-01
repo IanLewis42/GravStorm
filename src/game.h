@@ -31,8 +31,8 @@
 
 #define MAX_SHIPS 4		//max number of players
 
-#define SCREENX 1280//1920 //1024
-#define SCREENY 720//1080 //768
+#define SCREENX 1024//1280//1920 //1024
+#define SCREENY 576//720//1080 //768
 
 #define STATUS_BAR_WIDTH 150
 #define STATUS_BAR_HEIGHT 720
@@ -51,6 +51,11 @@ extern int map_height, map_width;
 
 #define SHIP_SIZE_X 48
 #define SHIP_SIZE_Y 48
+
+#ifdef RPI
+AL_FUNC(int, al_fprintf, (ALLEGRO_FILE *f, const char *format, ...));
+AL_FUNC(int, al_vfprintf, (ALLEGRO_FILE *f, const char* format, va_list args));
+#endif
 
 typedef enum
 {
@@ -238,6 +243,7 @@ typedef struct
 typedef enum
 {
     NETWORK = 0,
+    INSTRUCTIONS,
     LEVEL,
     PLAYERS
 }MenuStateType;
@@ -246,7 +252,8 @@ typedef enum
 {
     LOCAL = 0,
     HOST,
-    CLIENT
+    CLIENT,
+    INST
 }NetModeType;
 
 typedef struct
@@ -270,6 +277,8 @@ typedef struct
 	int ship_offset;//to make ships slide
 	int x_origin;
 	int y_origin;
+    int scroll;     //instructions
+    int max_scroll;
 	int expand;
 } MenuType;
 
@@ -348,18 +357,15 @@ extern MenuType Menu;
 typedef enum
 {
 	DPAD = 0,
-	//JOY_BUTTON, //thrust/select
-	//START,
-	//SELECT,
+	SELECT,
 	THRUST_BUTTON,
 	BACK,
 	BIGGER,
 	SMALLER,
-	//LEFT, //names clash, if these are needed.....
-	//RIGHT,
     FIRE1,
     FIRE2,
     RADAR,
+    REVERSE,
 	ASTICK,
     ASTICK2,
 	NO_BUTTON,
@@ -388,6 +394,8 @@ typedef struct
     int x;      //position on screen
     int y;
     int size;
+    int movex;   //amount to move when resized.
+    int movey;
 } CtrlType;
 
 typedef struct
@@ -420,7 +428,7 @@ typedef struct
 
 extern CommandType Command;
 
-extern FILE* logfile;
+extern ALLEGRO_FILE* logfile;
 
 extern ALLEGRO_VOICE *voice;
 extern ALLEGRO_MIXER *mixer;
@@ -438,6 +446,9 @@ extern ALLEGRO_SAMPLE_INSTANCE *particle_inst[MAX_SHIPS];
 extern ALLEGRO_SAMPLE_INSTANCE *sentry_particle_inst;
 extern ALLEGRO_SAMPLE_INSTANCE *yippee_inst;
 
+extern ALLEGRO_HAPTIC *hap;
+extern ALLEGRO_HAPTIC_EFFECT_ID *hapID;
+
 extern bool pressed_keys[ALLEGRO_KEY_MAX];
 extern int gpio_active;
 extern int keypress;
@@ -446,6 +457,8 @@ extern int fpsnet, fpsnet_acc;
 extern bool redraw;
 extern float scale, invscale;
 extern int halted;
+extern int vibrate_time;
+extern int vibrate_timer;
 
 int  ShipMass(int ship_num);
 void FreeMenuBitmaps(void);
@@ -455,3 +468,5 @@ void MenuControls(void);
 void GameControls(void);
 int read_maps(void);
 void Exit(void);
+void draw_debug(void);
+void SystemBackPressed(void);
