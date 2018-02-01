@@ -743,7 +743,6 @@ android to do
 * crash on end of level exit -mission only. (controls on top of white-out)
 * force single player
 * control size
-  - storing (size and location)
 * layout for back/size/radar
 * dragging
 * orientation - al_set_new_display_option() 
@@ -758,11 +757,82 @@ android to do
 * hi scores - keyboard
 * render controls opaque, draw with variable transparency. better....
 * saving hi scores
+* debounce
+/////////////Play store. 1.01
+* half normal ammo on mission.
+* kills count / reset?? - seems ok......
+#* immersive :-)
+* DPAD / ASTICK share coords - lock ASTICK on game start
+  * if touch moves off astick, keep calculating angle.
+* Knock on effect on debounce?? seems OK....
+* OK (tick?) button for menu - same place as thrust.  
+#* instructions * code * text * crash on scroll. * better scrolling on instructions  (swipe?)
+* credits->instructions
+* space after keyboard press
+* re immerse after keyboard
+* status on non-android instructions
+* thrust/fire buttons depress on touch
+X fade on android instructions.
+* less aggressive sentries?? Android only???
+* multi-layer background for missions.
+#* haptics
+* better blurb.
+  GravStorm is an underground gravity war game, with echoes of classic games from the '80s and '90s. 
+  Gravstorm can be played solo, or for even more fun, play against friends over WiFi.
+* Alpha on RC tiles
+* tweak level descriptions
+* RPi Build
+* don't drag thrust button.
+#* LH controls?? swap button displayed where radar is, during menus.
+* remove red highlighting 
+* waiting for host animation? seems ok.
 
-- debounce!
-- credits
-- haptics
+- ->github
+- ->playstore
+- ->kids
+- videos
+- promote
+- code clean up
 
+MAYBE LATER.....
+----------------
+- wall collision vibrate proportional to speed??
+- android crash on pause - OK with nav buttons - only crashes with f/p sensor.... Check events??
+  no events -> ignore for now.....
+- back/exit on system back button? 
+  can override OnBackPressed, but don't hit it.....Maybe because we need to override in AllegroActivity, not MainActivity??
+- recalc scale on menu state change?? (why??) - to recover broken startup condition??
+- control size storing (size and location)
+ 
+  
+GravStorm is a game where you try to destroy your opponent's spaceship in a variety of environments. 
+Players of classic gravity games from the '80s and '90s will find much they recognise and enjoy!
+
+o Single Player or Network play
+o 7 Mission Levels
+o 14 multiplayer levels
+o 8 different weapons
+o Completely Free! No Ads, No Nags, No In-App purchases.
+
+ANDROID BUILD:
+---------------
+Follow: https://github.com/liballeg/android
+add ndk.dir=C\:\\Android\\ndk to C:\IPL\gravstorm\local.properties
+add     repositories {
+    	maven { url 'https://bintray.com/liballeg/maven' }
+        maven { url 'http://repo1.maven.org/maven2' }
+    } 
+    to C:\IPL\gravstorm\app\build.gradle
+    
+to force landscape add:
+in AndroidManifest.xml, inside  <activity 
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="landscape" >
+            
+AND            
+    al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS,ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE,ALLEGRO_REQUIRE);
+    
+    
 Instructions:
 ----------------
 Fly around, shoot your enemy. Don't crash into the walls.
