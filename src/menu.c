@@ -20,6 +20,8 @@
 #include <stdlib.h>
 //#include <math.h>
 
+#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
 #include "allegro5/allegro_primitives.h"
@@ -53,20 +55,20 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	float a = 10;	//width of text
 	float shadow_scale, text_scale;
 	int sound_latency;
-	int line_space;
+	//int line_space;
 	int i;
 
-	char fade_in[200],fade_out[200],visible[200];
+	//char fade_in[200],fade_out[200],visible[200];
 	//int fade_in_y = 600, visible_y = 570, fade_out_y = 540;
-	int fade_in_y = 600, visible_y = 570, fade_out_y = 540;
-	int fade_count=0;
-	float alpha;
+	//int fade_in_y = 600, visible_y = 570, fade_out_y = 540;
+	int fade_count=30;
+	//float alpha;
 
 	int w,h,bgw,bgh,bgx,bgy,lw;
 
-	FILE* credits;
+	ALLEGRO_FILE* credits;
 
-    if ((ttg_logo = al_load_bitmap("tootired.png")) == NULL) fprintf(logfile,"tootired.png load fail\n");
+    if ((ttg_logo = al_load_bitmap("tootired.png")) == NULL) al_fprintf(logfile,"tootired.png load fail\n");
 
     w = al_get_display_width(display);
     h = al_get_display_height(display);
@@ -78,23 +80,23 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
     al_flip_display();
 
-	if ((menu_bg_bmp = al_load_bitmap("menu_bg.png")) == NULL) fprintf(logfile,"menu_bg.png load fail\n");
-	if ((logo = al_load_bitmap("gs2.png")) == NULL) fprintf(logfile,"gs.png load fail\n");
+	if ((menu_bg_bmp = al_load_bitmap("menu_bg.png")) == NULL) al_fprintf(logfile,"menu_bg.png load fail\n");
+	if ((logo = al_load_bitmap("gs2.png")) == NULL) al_fprintf(logfile,"gs.png load fail\n");
 
 
-	if ((credits = al_fopen ("credits.txt","r")) == NULL)  fprintf(logfile,"credits.txt load fail\n");
-	fflush(logfile);
+	if ((credits = al_fopen ("credits.txt","r")) == NULL)  al_fprintf(logfile,"credits.txt load fail\n");
+	al_fflush(logfile);
 
 
-    fade_in_y  = 0.75*h +30*font_scale;
-    visible_y  = 0.75*h;
-    fade_out_y = 0.75*h-30*font_scale;
+    //fade_in_y  = 0.75*h +30*font_scale;
+    //visible_y  = 0.75*h;
+    //fade_out_y = 0.75*h-30*font_scale;
 
-	fprintf(logfile,"Title Screen\n");
+	al_fprintf(logfile,"Title Screen\n");
 
-	fade_in[0] = 0;
-	visible[0] = 0;
-	fade_out[0] = 0;
+	//fade_in[0] = 0;
+	//visible[0] = 0;
+	//fade_out[0] = 0;
 
 #if RPI
     sound_latency = 15;
@@ -127,8 +129,9 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
                 halted = true;                          //flag to drawing routines to do nothing
                 al_stop_timer(
                         timer);                   //no more timer events, so we should do nothing, saving battery
-                al_set_default_voice(
-                        NULL);             //destroy voice, so no more sound events, ditto.
+                #ifdef ANDROID
+                    al_set_default_voice(NULL);             //destroy voice, so no more sound events, ditto.
+                #endif // ANDROID
                 //break;
             }
             if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
@@ -166,9 +169,9 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
             w = al_get_display_width(display);
             h = al_get_display_height(display);
             LoadFonts(0);
-            fade_in_y  = 0.75*h +30*font_scale;
-            visible_y  = 0.75*h;
-            fade_out_y = 0.75*h-30*font_scale;
+            //fade_in_y  = 0.75*h +30*font_scale;
+            //visible_y  = 0.75*h;
+            //fade_out_y = 0.75*h-30*font_scale;
         }
 
 		if (event.type == ALLEGRO_EVENT_TIMER)
@@ -176,9 +179,11 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 			if (y < ht) y++;
 
 			al_set_sample_instance_gain(wind_inst,5*y/ht);
-			if (y == ht-sound_latency)
-				//al_play_sample(clunk, 5, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
-				al_play_sample_instance(slam_inst);
+			if (y == ht-sound_latency) {
+                //al_play_sample(clunk, 5, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+                al_play_sample_instance(slam_inst);
+                //Vibrate(200);
+            }
 
 			shadow_scale = (ht*a/y)/hc;	//sin theta. try arcsin???
 			text_scale = a/(y-(ht-hc)); //ditto
@@ -212,7 +217,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
                 lw = al_get_bitmap_width(logo);
                 al_identity_transform(&transform);
 				al_scale_transform(&transform, text_scale*font_scale, text_scale*font_scale);	/* Rotate and scale around the center first. */
-				al_translate_transform(&transform,(w/2)-(lw*font_scale/2),(h/2)-(int)(26*font_scale));
+				al_translate_transform(&transform,(w/2)-(lw*text_scale*font_scale/2),(h/2)-(int)(26*font_scale));
 				al_use_transform(&transform);
 				//al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, -1*al_get_font_ascent(title_font)/2,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
 				//al_draw_bitmap(logo,-w/(2*font_scale),0,0);
@@ -222,23 +227,27 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 			al_identity_transform(&transform);
     		al_use_transform(&transform);
 
-    		line_space = 30*font_scale;
+    		//line_space = 30*font_scale;
 
     		if (y==ht)	//start credits
     		{
-				if (fade_count == 0)
+				if (fade_count == 20)
+                    Vibrate(100);
+
+                if (fade_count == 0)
 				{
-					strcpy(fade_out,visible);
-					strcpy(visible,fade_in);
-					//if (fgets(fade_in,200,credits) == NULL) break;
-                    if (al_fgets(credits,fade_in,200) == NULL) break;
-					fade_count = line_space;
+					break;
+                    //strcpy(fade_out,visible);
+					//strcpy(visible,fade_in);
+					////if (fgets(fade_in,200,credits) == NULL) break;
+                    //if (al_fgets(credits,fade_in,200) == NULL) break;
+					//fade_count = line_space;
 				}
-				alpha = (1.0/line_space)*(line_space-fade_count);
-				al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*(30-fade_count))*/,w/2, fade_in_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_in);
-				al_draw_textf(small_font, al_map_rgba_f(0.35, 0, 0, 1),w/2, visible_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",visible);
-				alpha = (1.0/line_space)*fade_count;
-				al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*fade_count)*/,w/2, fade_out_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_out);
+				//alpha = (1.0/line_space)*(line_space-fade_count);
+				//al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*(30-fade_count))*/,w/2, fade_in_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_in);
+				//al_draw_textf(small_font, al_map_rgba_f(0.35, 0, 0, 1),w/2, visible_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",visible);
+				//alpha = (1.0/line_space)*fade_count;
+				//al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*fade_count)*/,w/2, fade_out_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_out);
 
 				fade_count--;
 			}
@@ -265,7 +274,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	//al_destroy_voice(voice);
 
 	FreeMenuBitmaps();
-	fprintf(logfile,"Exit Title Screen\n");
+	al_fprintf(logfile,"Exit Title Screen\n");
 	return 0;
 }
 
@@ -273,12 +282,12 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
 	int i;
 	int w,h;//,xoffset,yoffset;
-	ShipType AnyShip;
+	static ShipType AnyShip;
 	ALLEGRO_SAMPLE_INSTANCE *loop_inst;
 
-	fprintf(logfile,"\nStart Menu\n");
+	al_fprintf(logfile,"\nStart Menu\n");
 
-	fprintf(logfile,"Init Keyboard\n");
+	al_fprintf(logfile,"Init Keyboard\n");
 	init_keys(pressed_keys);
 	init_keys(key_down_log);
 	init_keys(key_up_log);
@@ -314,14 +323,14 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	menu_bg_bmp = al_load_bitmap("menu_bg.png");
     logo = al_load_bitmap("gs2.png");
 
-    if ((ships = al_load_bitmap("ships.png")) == NULL)  fprintf(logfile,"ships.png load fail");
-    if ((grey_ships = al_load_bitmap("grey_ships.png")) == NULL)  fprintf(logfile,"grey_ships.png load fail");
+    if ((ships = al_load_bitmap("ships.png")) == NULL)  al_fprintf(logfile,"ships.png load fail");
+    if ((grey_ships = al_load_bitmap("grey_ships.png")) == NULL)  al_fprintf(logfile,"grey_ships.png load fail");
 
-	fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
+	al_fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
 
 	if (init_map(Menu.group, Menu.map))		//opens 'map name.txt' and copies into MapTypeStruct.
 	{								//everything else (load map, make col map, init ships etc. reads from MapType struct
-		fprintf(logfile,"Failed to open map file\n");
+		al_fprintf(logfile,"Failed to open map file\n");
 		return 0;
 	}
     //play background music
@@ -338,8 +347,8 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	al_stop_sample_instance(loop_inst);
 	al_destroy_sample_instance(loop_inst);
 
-	fprintf(logfile,"\nPlaying map %s (%d,%d)\n",(char*)&MapNames[Menu.group].Map[Menu.map],Menu.group,Menu.map);
-	fprintf(logfile,"Number of players %d\n",num_ships);
+	al_fprintf(logfile,"\nPlaying map %s (%d,%d)\n",(char*)&MapNames[Menu.group].Map[Menu.map],Menu.group,Menu.map);
+	al_fprintf(logfile,"Number of players %d\n",num_ships);
 
 	/*
 	for (i=0 ; i<30 ; )
@@ -355,12 +364,13 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 	return 0;
 }
 
-FILE *hostfile,*clientfile;
+ALLEGRO_FILE *hostfile,*clientfile;
 
 int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 {
 	int i;
 	int w,h;//,xoffset,yoffset;
+    //int line_space = (int)(35*font_scale);
 
     Ship[0].angle = 0;
     Ship[1].angle = 10;
@@ -396,7 +406,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             al_acknowledge_drawing_halt(display);   //acknowledge
             halted = true;                          //flag to drawing routines to do nothing
             al_stop_timer(timer);                   //no more timer events, so we should do nothing, saving battery
-            al_set_default_voice(NULL);             //destroy voice, so no more sound events, ditto.
+            al_destroy_voice(voice);           //destroy voice, so no more sound events, ditto
             //break;
         }
         if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
@@ -419,6 +429,14 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 			//expanding maps
 			if (Menu.expand < 35*font_scale)
 				Menu.expand += 5*font_scale;
+
+            if (Menu.state == INSTRUCTIONS) {
+                    Menu.y_origin += Menu.scroll;
+                if (Menu.y_origin > 0)
+                    Menu.y_origin = 0;
+                if (Menu.y_origin < (Menu.max_scroll))
+                    Menu.y_origin = Menu.max_scroll;
+            }
 
             if (gpio_active) ReadGPIOJoystick();
 
@@ -516,6 +534,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
         ScanInputs(MAX_SHIPS);
 
 		//Take any ship control to control menu. Also, cursor keys / return always work.
+        AnyShip.fire1_held = false;
+        AnyShip.fire2_held = false;
         for (i=0 ; i<num_ships ; i++)
         {
 			if (Ship[i].left_down || key_down_log[ALLEGRO_KEY_LEFT])
@@ -536,12 +556,22 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 				Ship[i].fire1_down = false;
 				key_down_log[ALLEGRO_KEY_UP] = false;
 			}
-			if (Ship[i].fire2_down || key_down_log[ALLEGRO_KEY_DOWN])
+            if (Ship[i].fire1_held)
+            {
+                AnyShip.fire1_held = true;
+            }
+
+            if (Ship[i].fire2_down || key_down_log[ALLEGRO_KEY_DOWN])
 			{
 				AnyShip.fire2_down = true;
 				Ship[i].fire2_down = false;
 				key_down_log[ALLEGRO_KEY_DOWN] = false;
 			}
+            if (Ship[i].fire2_held)
+            {
+                AnyShip.fire2_held = true;
+            }
+
 			if (Ship[i].thrust_down || key_down_log[ALLEGRO_KEY_ENTER])
 			{
 				//AnyShip.thrust_down = true;
@@ -621,7 +651,12 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         //Net.temp_address[0] = 0;
                     }
                     */
-                    if (Menu.netmode == HOST)
+                    if (Menu.netmode == LOCAL)
+                    {
+                        Menu.state = LEVEL;               //go to next menu
+                        Menu.col_pos = 0;
+                    }
+                    else if (Menu.netmode == HOST)
                     {
                         Menu.state = LEVEL;               //go to next menu
                         //Menu.col_pos = 0;
@@ -629,7 +664,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Menu.map = 0;
                         init_map(Menu.group, Menu.map);
                     }
-                    if (Menu.netmode == CLIENT)
+                    else if (Menu.netmode == CLIENT)
                     {
                         Menu.ships = 1;
                         Menu.state = PLAYERS;
@@ -644,11 +679,15 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         //NetStartClient();
                         Net.client_state = SEARCHING;   //starts pinging
                     }
-                    else
+                    else if (Menu.netmode == INST)
                     {
                         //Net.net = false;
-                        Menu.state = LEVEL;               //go to next menu
-                        Menu.col_pos = 0;
+                        Menu.state = INSTRUCTIONS;               //go to next menu
+                        //if ((miner = al_load_bitmap("astronaut.png")) == NULL)  al_fprintf(logfile,"astronaut.png load fail");
+                        //if ((jewel = al_load_bitmap("jewels.png")) == NULL)  al_fprintf(logfile,"jewels.png load fail");
+                        if ((ui = al_load_bitmap("ui.png")) == NULL)  al_fprintf(logfile,"ui.png load fail");
+                        make_instructions_bitmap();
+                        Ctrl.ctrl[SELECT].active=FALSE;
                     }
                 }
 
@@ -656,7 +695,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 {
                     AnyShip.fire2_down = false;
                     //if (Menu.col_pos < 2/*Menu.max_col_pos*/)
-                    if (Menu.netmode < CLIENT)
+                    if (Menu.netmode < INST)
                     {
                         //Menu.col_pos++;
                         Menu.netmode++;
@@ -699,6 +738,31 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 //else
                     Menu.max_col_pos = 0;
                 */
+            break;
+            case INSTRUCTIONS:
+
+                if (Command.goback)
+                {
+                    Command.goback = false;
+                    Menu.state = NETWORK;            //back to previous menu
+                    Ctrl.ctrl[SELECT].active=TRUE;
+                    break;
+                }
+                else if (Command.goforward)
+                {
+                    Command.goforward = false;
+                    Menu.state = NETWORK;            //back to previous menu
+                    break;
+                }
+                if (AnyShip.fire2_held)    //down
+                {
+                    Menu.scroll = -10*font_scale;
+                }
+                else if (AnyShip.fire1_held)    //up
+                {
+                    Menu.scroll = 10*font_scale;
+                }
+                else Menu.scroll = 0;
             break;
             case LEVEL: //map selection
                 if (Command.goback)
@@ -753,7 +817,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Menu.expand = 0;
                     }
 
-                    fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
+                    al_fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
                     //init_map(Menu.group, Menu.map);
                     get_map_players( Menu.group, Menu.map);
                 }
@@ -771,7 +835,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Menu.expand = 0;
                     }
 
-                    fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
+                    al_fprintf(logfile,"\nSelected map %d,%d\n",Menu.group,Menu.map);
                     //init_map(Menu.group, Menu.map);
                     get_map_players( Menu.group, Menu.map);
 
@@ -931,28 +995,30 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 #ifndef ANDROID
                     else if (Menu.col_pos == 0)
                     {
-                       // if (!Net.net)
+                        //if (!Net.net)
                         {
-                            if (num_ships < Map.max_players) {
+                            if (num_ships < Map.max_players)
+                            {
                                 num_ships++;
                                 Menu.ships++;
                             }
                         }
-                    else if (Menu.item == 1)    //controls
-                    {
-                        if (Ship[Menu.player].controller < 3)
-                            Ship[Menu.player].controller++;
-                        if (Ship[Menu.player].controller == GPIO_JOYSTICK)
+                        if (Menu.item == 1)    //controls
                         {
-                            if (!gpio_active)
-                            {
+                            if (Ship[Menu.player].controller < 3)
                                 Ship[Menu.player].controller++;
+                            if (Ship[Menu.player].controller == GPIO_JOYSTICK)
+                            {
+                                if (!gpio_active)
+                                {
+                                    Ship[Menu.player].controller++;
+                                }
                             }
                         }
-                    }
-                    else if (Menu.item == 2)    //define keys
-                    {
-                        Menu.define_keys = true;    //done above
+                        else if (Menu.item == 2)    //define keys
+                        {
+                            Menu.define_keys = true;    //done above
+                        }
                     }
 #endif
                 }
@@ -962,7 +1028,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 
             break;
             default:
-                Menu.state = 0;
+                Menu.state = NETWORK;
             break;
         }
         event.keyboard.keycode = 0;
