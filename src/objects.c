@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
 #include "allegro5/allegro_primitives.h"
@@ -106,7 +108,7 @@ int UpdateShips(int num_ships)
 					return(GO_TIMER);	//game over
 				}
 				reinit_ship(i);
-				//fprintf(logfile,"Ship %d reincarnated\n",i);
+				//al_fprintf(logfile,"Ship %d reincarnated\n",i);
 			}
 		}
 		else if (Ship[i].shield <= 0)
@@ -123,10 +125,13 @@ int UpdateShips(int num_ships)
 			//al_play_sample(dead, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 			al_play_sample_instance(dead_inst[i]);
 			Net.sounds |= DEAD;
+            ScheduleVibrate(70);
 			Ship[i].reincarnate_timer = 100;
 			Ship[i].lives--;
 			Ship[i].thrust = 0; //stop engine noise
-			//fprintf(logfile,"Ship %d destroyed\n",i);
+			Ship[i].xv = 0;
+			Ship[i].yv = 0;
+			//al_fprintf(logfile,"Ship %d destroyed\n",i);
 		}
 		else if(Ship[i].landed)
 		{
@@ -632,7 +637,7 @@ void UpdateLandedShip(int i)
 					}
 			break;
 			default:
-				fprintf(logfile,"Default in menu switch statement (%d)\n",Ship[i].menu_state);
+				al_fprintf(logfile,"Default in menu switch statement (%d)\n",Ship[i].menu_state);
 			break;
 		}
 	}
@@ -701,7 +706,7 @@ void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, f
 {
 	int j,k,angle_inc;
 
-	//fprintf(logfile,"Explosion.\n");
+	//al_fprintf(logfile,"Explosion.\n");
 
 	angle_inc = 40/num_particles;
 
@@ -725,6 +730,9 @@ void FireNormal(int i)
 
     al_play_sample_instance(shoota_inst[i]);
     Net.sounds |= SHOOTA;
+
+	//al_rumble_haptic(hap, 1.0, 1.0, hapID);
+    //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "shakeItBaby", "(I)V", 100);
 
     Ship[i].ammo1--;
 
@@ -783,6 +791,8 @@ void FireSpecial(int ship_num)
 
 	al_play_sample_instance(shootb_inst[ship_num]);
 	Net.sounds |= SHOOTB;
+	//al_rumble_haptic(hap, 1.0, 1.0, hapID);
+    //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "shakeItBaby", "(I)V", 200);
 
 	if (Net.client)
     {
@@ -1013,12 +1023,12 @@ void NewBullet (int x,int y,int xv,int yv,int angle,float speed,int type,int ran
 	{
 		if (i == MAX_BULLETS)
 		{
-			fprintf(logfile,"***Max Bullets exceeded\n");
+			al_fprintf(logfile,"***Max Bullets exceeded\n");
 			return;
 		}
 	}
 
-	//fprintf(logfile,"Made Bullet %d\n",i);
+	//al_fprintf(logfile,"Made Bullet %d\n",i);
 
 	if (first_bullet == END_OF_LIST)	//if we have no live bullets currently
 		first_bullet = i;		//remember that this is the first one
@@ -1073,8 +1083,8 @@ void UpdateBullets(void)
 	{
 		if (current_bullet >= MAX_BULLETS)
         {
-            fprintf(logfile,"ERROR: Bullet index outside array!!!\n");
-            fflush(logfile);
+            al_fprintf(logfile,"ERROR: Bullet index outside array!!!\n");
+            al_fflush(logfile);
             break;   //just in case...
         }
 
@@ -1082,7 +1092,7 @@ void UpdateBullets(void)
 
 		if (Bullet[current_bullet].ttl <= 0)	//if expired
 		{										//pass index up the list
-            //fprintf(logfile,"Expired Bullet %d\n",current_bullet);
+            //al_fprintf(logfile,"Expired Bullet %d\n",current_bullet);
 
 			if (previous_bullet == END_OF_LIST)							//if we're the first bullet
 			//if (current_bullet == first_bullet)					//(should be equivalent to above)
@@ -1218,4 +1228,21 @@ void UpdateBullets(void)
 	}
 
 	return;
+}
+
+
+void ScheduleVibrate(int time)
+{
+    if (time < 30)
+        time = 30;
+    vibrate_time = time;
+    vibrate_timer = 3;
+
+}
+
+void Vibrate(int time)
+{
+#ifdef ANDROID
+	_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "shakeItBaby","(I)V", time);
+#endif
 }
