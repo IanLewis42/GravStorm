@@ -30,13 +30,13 @@ pad 3    3771 2835 2988    5     0
 
 
 ;      x    y    D  type frames prob% random range image image
-sentry 1245 1181 30 2    15     50    2      700   8     0
-sentry 670  1795 30 2    15     50    2      700   5     0  
-sentry 670  2110 30 2    15     50    2      700   8     0
-sentry 1372 2400 30 2    15     50    2      700   5     0  
-sentry 1638 2335 30 2    15     50    2      700   7     0  
-sentry 2908 3105 30 2    15     50    2      700   8     0
-sentry 3235 3460 30 2    15     50    2      700   6     0
+sentry 1245 1181 30 2    15     25    2      700   8     0
+sentry 670  1795 30 2    15     25    2      700   5     0  
+sentry 670  2110 30 2    15     25    2      700   8     0
+sentry 1372 2400 30 2    15     25    2      700   5     0  
+sentry 1638 2335 30 2    15     25    2      700   7     0  
+sentry 2908 3105 30 2    15     25    2      700   8     0
+sentry 3235 3460 30 2    15     25    2      700   6     0
 
 switch 3367 2563 9     10 300
 ;          x    x    y    y    strength   switches sprite sprite
