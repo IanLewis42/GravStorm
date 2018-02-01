@@ -2,10 +2,8 @@
         
  Credits:
  Game design and coding by Ian Lewis.
- Huge thanks to Heikki Kossola, 
- the creator of TurboRaketti.
- Also thanks to the Raspberry Pi Foundation 
- and the authors of the Allegro libraries.
+ Huge thanks to Heikki Kossola, the creator of TurboRaketti.
+ Also thanks to the Allegro libraries.
  TurboRaketti maps provided by Asbjorn Djupdal.
  Graphics provided by:
  SpiralGraphics.biz
