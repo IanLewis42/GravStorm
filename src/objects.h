@@ -244,3 +244,6 @@ void UpdateSwitches(void);
 void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, float xv, float yv);//float outward_v);
 void FireNormal(int i);	//int
 void FireSpecial(int i);	//int
+
+void ScheduleVibrate(int time);
+void Vibrate(int time);
