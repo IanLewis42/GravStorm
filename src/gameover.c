@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
 #include "allegro5/allegro_primitives.h"
@@ -118,6 +120,9 @@ int GameOver()
                 if (time_left < 0) time_left = 0;
                 score += time_left*PPSECOND;
             }
+
+            //DEBUG
+            //score = 4000;
 
             position = MAX_SCORES+1;            //position in high score table - init to 'off the bottom'
 
@@ -275,8 +280,8 @@ int GameOver()
                     al_draw_textf(menu_font, colour, col1,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "%d",i+1);
 
                 //draw ship and player number
-                al_draw_bitmap_region(ships,Ship[Map.score[i].player].angle*SHIP_SIZE_X,Ship[Map.score[i].player].image*SHIP_SIZE_Y*2,SHIP_SIZE_X,SHIP_SIZE_Y,col2, y+line_space*i,0);
-                al_draw_textf(menu_font, colour, col2+SHIP_SIZE_X,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "(P%d)",Map.score[i].player+1);
+                al_draw_scaled_bitmap(ships,Ship[Map.score[i].player].angle*SHIP_SIZE_X,Ship[Map.score[i].player].image*SHIP_SIZE_Y*2,SHIP_SIZE_X,SHIP_SIZE_Y,col2, y+line_space*i,SHIP_SIZE_X*scale,SHIP_SIZE_Y*scale,0);
+                al_draw_textf(menu_font, colour, col2+SHIP_SIZE_X*scale,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "(P%d)",Map.score[i].player+1);
 
                 //kills and lives
                 al_draw_textf(menu_font, colour, col3,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "%d",Map.score[i].kills);
@@ -290,6 +295,7 @@ int GameOver()
             Command.goforward = false;
             game_over--;
 #ifdef ANDROID
+            //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "UiChangeListener", "()V");
             if (Map.mission && (position < MAX_SCORES))
                 _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "OpenKeyBoard", "()V");
             if (Map.race && (Ship[0].lap_table_pos < MAX_SCORES))
@@ -335,6 +341,7 @@ int GameOver()
                     game_over --;   //exit back to menu
 #ifdef ANDROID
                     _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "CloseKeyBoard", "()V");
+                    //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "onWindowFocusChanged", "()V");
 #endif
                 }
                 else if (current_key == 0x08)   //backspace
@@ -343,13 +350,13 @@ int GameOver()
                         Map.newscore[position].name[strlen(Map.newscore[position].name)-1] = 0;
                 }
                 else if (strlen(Map.newscore[position].name) < 30)
-                    strncat(Map.newscore[position].name,&current_key,50);
+                    strncat(Map.newscore[position].name,&current_key,1);
 
                 keypress = false;
             }
             if (position < MAX_SCORES) {
                 strncpy(display_name, Map.newscore[position].name, 50);
-                strcat(display_name, &cursor);
+                strcat(display_name, cursor);
                 }
 
             al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "HIGH SCORES");
@@ -358,9 +365,9 @@ int GameOver()
             temp=0;
 #ifdef ANDROID
             if (position < MAX_SCORES)
-                temp = position-2;
-            if (temp < 0)
-                temp = 0;
+                temp = position;
+            //if (temp < 0)
+            //    temp = 0;
 #endif
             for (i=temp ; i<MAX_SCORES ; i++)
             {
@@ -435,6 +442,7 @@ int GameOver()
                             game_over--;
 #ifdef ANDROID
                             _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "CloseKeyBoard", "()V");
+                            //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "onWindowFocusChanged", "()V");
 #endif
                             break;
                         }
@@ -446,13 +454,13 @@ int GameOver()
                         Map.newtime[Ship[ship].lap_table_pos].name[strlen(Map.newtime[Ship[ship].lap_table_pos].name)-1] = 0;
                 }
                 else if (strlen(Map.newtime[Ship[ship].lap_table_pos].name) < 30)
-                    strncat(Map.newtime[Ship[ship].lap_table_pos].name,&current_key,50);
+                    strncat(Map.newtime[Ship[ship].lap_table_pos].name,&current_key,1);
 
                 keypress = false;
             }
 
             strncpy(display_name,Map.newtime[Ship[ship].lap_table_pos].name,50);
-            strcat(display_name,&cursor);
+            strcat(display_name,cursor);
 
             al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "BEST TIMES");
             y+=line_space;
@@ -513,7 +521,7 @@ int GameOver()
 
 void SaveScores(void)   //scores/times.
 {
-    FILE *score_file;
+    ALLEGRO_FILE *score_file;
     char score_file_name[50];
     char temp[100];
     const char scores[7] = "_s.bin\0";
@@ -536,11 +544,11 @@ void SaveScores(void)   //scores/times.
 
     if (score_file == NULL)
     {
-        fprintf(logfile,"Couldn't open scores/times file %s. High scores/times can't be saved.\n",score_file_name);
+        al_fprintf(logfile,"Couldn't open scores/times file %s. High scores/times can't be saved.\n",score_file_name);
     }
     else
     {
-        fprintf(logfile,"Opened scores/times file %s\n",score_file_name);
+        al_fprintf(logfile,"Opened scores/times file %s\n",score_file_name);
 
         for (i=0 ; i<MAX_SCORES ; i++)
         {
