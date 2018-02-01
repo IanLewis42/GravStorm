@@ -17,6 +17,9 @@
 */
 
 #include <stdio.h>
+#include <math.h>
+
+#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -34,7 +37,7 @@
 ALLEGRO_BITMAP *ship_mask,*map_mask,*sentry_mask;
 extern ALLEGRO_SAMPLE *particle;
 
-FILE *map_file;
+ALLEGRO_FILE *map_file;
 
 #define MAX_MAP_X	(1440 + 64) //sizes in pixels for tr-style single-picture maps (isemania = 1440 wide)
 #define MAX_MAP_Y	(960  + 24) //extra is for padding to prevent collisions on 'wrapping' maps (neutron start = 960 high)
@@ -58,11 +61,11 @@ void make_ship_col_mask()
 	mask_width = al_get_bitmap_width(ship_mask);
 	mask_height = al_get_bitmap_height(ship_mask);
 
-	fprintf(logfile,"ship mask:%d,%d \n",mask_width,mask_height);
+	al_fprintf(logfile,"ship mask:%d,%d \n",mask_width,mask_height);
 
 	for (i=0 ; i<mask_height ; i++)
 	{
-		//fprintf(logfile,"%02d ",i);
+		//al_fprintf(logfile,"%02d ",i);
 
 		for(j=0 ; j<NUM_ANGLES ; j++)
 		{
@@ -73,21 +76,21 @@ void make_ship_col_mask()
 				if(!EquivalentColour(al_get_pixel(ship_mask,(j*24)+k,i), al_map_rgb(255,0,255))) //SHIP_SIZE/2
 				{
 					ship_col_mask[i*40+j] |= (0x80000000 >> k);
-					//fprintf(logfile,"1,");
+					//al_fprintf(logfile,"1,");
 				}
-				//else fprintf(logfile,"0,");
+				//else al_fprintf(logfile,"0,");
 			}
-			//fprintf(logfile,"%08X ",ship_col_mask[i*40+j]);
+			//al_fprintf(logfile,"%08X ",ship_col_mask[i*40+j]);
 
 			//if(j==1)	//duplicate middle column
 			//{
 			//	j++;
 			//	ship_col_mask[i*j] = ship_col_mask[i*(j-1)];
-			//	fprintf(logfile,"%08X ",ship_col_mask[i*(j-1)]);
+			//	al_fprintf(logfile,"%08X ",ship_col_mask[i*(j-1)]);
 			//}
 
 		}
-		//fprintf(logfile,"\n");
+		//al_fprintf(logfile,"\n");
 
 	}
 	al_destroy_bitmap(ship_mask);
@@ -105,7 +108,7 @@ void make_sentry_col_mask()
 	sentry_mask = al_load_bitmap(Map.sentry_collision_file_name);
 	if (sentry_mask == NULL)
 	{
-		fprintf(logfile,"No sentry mask\n");
+		al_fprintf(logfile,"No sentry mask\n");
 
 		for (i=0 ; i< 1*MAX_SENTRIES*32 ; i++)
 			sentry_col_mask[i] = 0;
@@ -116,13 +119,13 @@ void make_sentry_col_mask()
 	mask_width = al_get_bitmap_width(sentry_mask);
 	mask_height = al_get_bitmap_height(sentry_mask);
 
-	fprintf(logfile,"sentry mask:%d,%d \n",mask_width,mask_height);
+	al_fprintf(logfile,"sentry mask:%d,%d \n",mask_width,mask_height);
 
 	Map.num_sentry_sprites = mask_width/32;
 
 	for (i=0 ; i<mask_height ; i++)
 	{
-		//fprintf(logfile,"%02d ",i);
+		//al_fprintf(logfile,"%02d ",i);
 
 		for(j=0 ; j<(Map.num_sentry_sprites) ; j++)
 		{
@@ -133,13 +136,13 @@ void make_sentry_col_mask()
 				if(!EquivalentColour(al_get_pixel(sentry_mask,(j*32)+k,i), al_map_rgb(255,0,255))) //SHIP_SIZE/2
 				{
 					sentry_col_mask[i*(Map.num_sentry_sprites)+j] |= (0x80000000 >> k);
-					//fprintf(logfile,"1,");
+					//al_fprintf(logfile,"1,");
 				}
-				//else fprintf(logfile,"0");
+				//else al_fprintf(logfile,"0");
 			}
-			//fprintf(logfile,"%08X ",sentry_col_mask[i*(mask_width/32)+j]);
+			//al_fprintf(logfile,"%08X ",sentry_col_mask[i*(mask_width/32)+j]);
 		}
-		//fprintf(logfile,"\n");
+		//al_fprintf(logfile,"\n");
 
 	}
 	al_destroy_bitmap(sentry_mask);
@@ -168,7 +171,6 @@ void make_map_col_mask(void)
 	mask_width = al_get_bitmap_width(map_mask);
 	mask_height = al_get_bitmap_height(map_mask);
 
-
 	map_file = al_fopen("mapfile.txt","w");
 
 	words_per_row = (mask_width/32);//+2;// +2 for padding.
@@ -176,9 +178,9 @@ void make_map_col_mask(void)
 	if (Map.type == 0 || Map.type == 2)
 		words_per_row +=2;
 
-	fprintf(logfile,"map:%d,%d wpr:%d (including padding)\n",mask_width,mask_height,words_per_row);
+	al_fprintf(logfile,"map:%d,%d wpr:%d (including padding)\n",mask_width,mask_height,words_per_row);
 	if ((mask_width & 0x001f) != 0)
-		fprintf(logfile,"ERROR:map width must be a multiple of 32!\n");
+		al_fprintf(logfile,"ERROR:map width must be a multiple of 32!\n");
 
 	if (Map.type == 0 || Map.type == 2)
 	{
@@ -187,9 +189,9 @@ void make_map_col_mask(void)
 			for(j=0 ; j<words_per_row ; j++)
 			{
 				map_col_mask[i*words_per_row+j] = 0;	//top padding
-				if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+				if (map_file) al_fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 			}
-            if (map_file) fprintf(map_file,"\n");
+            if (map_file) al_fprintf(map_file,"\n");
 		}
 		row_start = 12;
 		row_end = mask_height+12;
@@ -209,7 +211,7 @@ void make_map_col_mask(void)
 		if (Map.type == 0 || Map.type == 2)
 		{
 			map_col_mask[i*words_per_row+0] = 0;	//left hand padding column
-            if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+            if (map_file) al_fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		for(j=col_start ; j<col_end ; j++)
@@ -226,22 +228,22 @@ void make_map_col_mask(void)
 				}
 			}
 			//if (i<320)
-            if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+            if (map_file) al_fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		if (Map.type == 0 || Map.type == 2)
 		{
 			map_col_mask[i*words_per_row+j] = 0;	//right hand padding column
-            if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+            if (map_file) al_fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 		}
 
 		//if (i<320)
-        if (map_file) fprintf(map_file,"\n");
+        if (map_file) al_fprintf(map_file,"\n");
 		//for (k=0 ; k<65535 ; k++)
 		//{
 		//	asm("nop");
 		//}
-		//fprintf(logfile,"%d\n",i);
+		//al_fprintf(logfile,"%d\n",i);
 
 	}
 
@@ -252,17 +254,22 @@ void make_map_col_mask(void)
 			for(j=0 ; j<words_per_row ; j++)
 			{
 				map_col_mask[i*words_per_row+j] = 0;	//top padding
-                if (map_file) fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
+                if (map_file) al_fprintf(map_file,"%08lX ",map_col_mask[i*words_per_row+j]);
 			}
-            if (map_file) fprintf(map_file,"\n");
+            if (map_file) al_fprintf(map_file,"\n");
 		}
 	}
 
 
 	al_destroy_bitmap(map_mask);
 	map_mask = NULL;
-    if (map_file) al_fclose(map_file);
-	//fprintf(logfile,"File done\n");
+    if (map_file)
+
+    al_fclose(map_file);
+
+
+
+	//al_fprintf(logfile,"File done\n");
 
 	//return 0;
 	//
@@ -270,13 +277,13 @@ void make_map_col_mask(void)
 	//{
 	//	for (j=0 ; j<(mask_width>>5) ; j++)
 	//	{
-	//		fprintf(map_file,"%08X ",map_col_mask[i*20+j]);
+	//		al_fprintf(map_file,"%08X ",map_col_mask[i*20+j]);
 	//	}
-	//	fprintf(map_file,"\n");
-	//	fprintf(logfile,"%d\n",i);
+	//	al_fprintf(map_file,"\n");
+	//	al_fprintf(logfile,"%d\n",i);
 	//}
 	//fclose(map_file);
-	//fprintf(logfile,"File done\n");
+	//al_fprintf(logfile,"File done\n");
 
 	//return 0;
 
@@ -296,7 +303,7 @@ void make_radar_bitmap(void)
 
     Radar.height = (mask_height)/8;
     Radar.width  = (mask_width)/8;
-    fprintf(logfile,"Radar Mask Height = %d, Width = %d\n",Radar.height, Radar.width);
+    al_fprintf(logfile,"Radar Mask Height = %d, Width = %d\n",Radar.height, Radar.width);
 
     //al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
     Radar.mask = al_create_bitmap(Radar.width, Radar.height);	//create a bitmap - 400
@@ -360,7 +367,7 @@ void make_radar_bitmap(void)
         Radar.height = map_height*4;
         Radar.width  = map_width*4;
         Radar.display = al_create_bitmap(Radar.width, Radar.height);	//create a bitmap -
-        fprintf(logfile,"Radar Display Height = %d, Width = %d\n",Radar.height, Radar.width);
+        al_fprintf(logfile,"Radar Display Height = %d, Width = %d\n",Radar.height, Radar.width);
 
         al_set_target_bitmap(Radar.display);				//set it as the default target for all al_draw_ operations
         al_clear_to_color(al_map_rgba(0, 0, 0, 0));
@@ -400,9 +407,9 @@ void CheckSSCollisions(int num_ships)	//Ship-to-ship collisions
 				if (Ship[j].reincarnate_timer == 0)
 				{
 					//check collision between Ship[i] and Ship[j];
-					if (abs(Ship[i].xpos-Ship[j].xpos) < SHIP_SIZE_X)
+					if (fabsf(Ship[i].xpos-Ship[j].xpos) < SHIP_SIZE_X)
 					{
-						if (abs(Ship[i].ypos-Ship[j].ypos) < SHIP_SIZE_Y)
+						if (fabsf(Ship[i].ypos-Ship[j].ypos) < SHIP_SIZE_Y)
 						{
 							//now do pixel checking
 
@@ -475,12 +482,12 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 		{
 			for (j=first_bullet ; j != END_OF_LIST ; j = Bullet[j].next_bullet)
 			{
-				if (j > MAX_BULLETS) fprintf(logfile,"bullet index = %d\n",j);
+				if (j > MAX_BULLETS) al_fprintf(logfile,"bullet index = %d\n",j);
 
 				//check collision between Ship[i] and bullet[j];
-				if (abs(Ship[i].xpos-Bullet[j].xpos) < SHIP_SIZE_X/2)	//does bounding box save you much here??
+				if (fabsf(Ship[i].xpos-Bullet[j].xpos) < SHIP_SIZE_X/2)	//does bounding box save you much here??
 				{
-					if (abs(Ship[i].ypos-Bullet[j].ypos) < SHIP_SIZE_Y/2)
+					if (fabsf(Ship[i].ypos-Bullet[j].ypos) < SHIP_SIZE_Y/2)
 					{
 						//now do pixel checking
 						//mostly good, occasionally fast bullets miss the tip (presumably 'cos they go from one side to the other in a frame....)
@@ -540,6 +547,7 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
                                     }
                                     Ship[i].xv     += Bullet[j].mass*Bullet[j].xv;	//momentum from bullet to ship
                                     Ship[i].yv     += Bullet[j].mass*Bullet[j].yv;
+                                    ScheduleVibrate(Bullet[j].damage);
                                 }
 
                                 if (Bullet[j].type == BLT_HEAVY)    //stop explosion on hitting ship
@@ -571,14 +579,14 @@ void CheckBSentryCollisions(void)	//Bullet-to-sentry collisions
 		{
 			for (j=first_bullet ; j != END_OF_LIST ; j = Bullet[j].next_bullet)
 			{
-				if (j > MAX_BULLETS) fprintf(logfile,"ERROR:bullet index = %d\n",j);
+				if (j > MAX_BULLETS) al_fprintf(logfile,"ERROR:bullet index = %d\n",j);
 				if (Bullet[j].type != BLT_SENTRY && Bullet[j].type != BLT_LAVA)
 				{
 					//check collision between sentry[i] and bullet[j];
 					//bounding box, arbitrary 100 pixels from sentry centre (to allow for forward checking, see later)
-					if (abs(Map.sentry[i].x-Bullet[j].xpos) < 100)
+					if (fabsf(Map.sentry[i].x-Bullet[j].xpos) < 100)
 					{
-						if (abs(Map.sentry[i].y-Bullet[j].ypos) < 100)
+						if (fabsf(Map.sentry[i].y-Bullet[j].ypos) < 100)
 						{
 							//now do pixel checking
 							//Occasionally fast bullets missed the tip (presumably 'cos they go from one side to the other in a frame....)
@@ -645,14 +653,14 @@ void CheckBSwitchCollisions(void)	//Bullet-to-switch collisions, copied from ..s
 		{
 			for (j=first_bullet ; j != END_OF_LIST ; j = Bullet[j].next_bullet)
 			{
-				if (j > MAX_BULLETS) fprintf(logfile,"ERROR:bullet index = %d\n",j);
+				if (j > MAX_BULLETS) al_fprintf(logfile,"ERROR:bullet index = %d\n",j);
 				if (Bullet[j].type != BLT_SENTRY && Bullet[j].type != BLT_LAVA)
 				{
 					//check collision between sentry[i] and bullet[j];
 					//bounding box, arbitrary 100 pixels from sentry centre (to allow for forward checking, see later)
-					if (abs(Map.switches[i].x-Bullet[j].xpos) < 100)
+					if (fabsf(Map.switches[i].x-Bullet[j].xpos) < 100)
 					{
-						if (abs(Map.switches[i].y-Bullet[j].ypos) < 100)
+						if (fabsf(Map.switches[i].y-Bullet[j].ypos) < 100)
 						{
 							//now do pixel checking
 							//Occasionally fast bullets missed the tip (presumably 'cos they go from one side to the other in a frame....)
