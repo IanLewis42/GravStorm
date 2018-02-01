@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
 #include "allegro5/allegro_primitives.h"
@@ -40,12 +42,15 @@
 #include "gameover.h"
 #include "network.h"
 
-#if RPI
+#ifdef RPI
 #include <wiringPi.h>
 #endif
 
+
 ALLEGRO_DISPLAY *display;
-//ALLEGRO_HAPTIC *hap;
+ALLEGRO_HAPTIC *hap;
+ALLEGRO_HAPTIC_EFFECT_ID *hapID;
+
 ALLEGRO_TIMER *timer;
 
 ALLEGRO_FONT *font;         //debug
@@ -87,6 +92,7 @@ ALLEGRO_BITMAP *menu_bg_bmp;
 
 //Sounds
 ALLEGRO_VOICE *voice;
+//ALLEGRO_VOICE dummy_voice;
 ALLEGRO_MIXER *mixer;
 
 ALLEGRO_SAMPLE *slam;
@@ -152,10 +158,15 @@ int debug_key = 0;
 int keypress = false;
 char current_key = 0;
 float volume, v_squared;
-bool redraw = true;
+bool redraw = false;
 float scale,invscale;
 int halted = 0;
-FILE* logfile;
+int vibrate_time = 0;
+int vibrate_timer = 0;
+
+ALLEGRO_FILE* logfile;
+
+
 
 //Local prototypes
 int  DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
@@ -171,8 +182,62 @@ void draw_debug(void);
 #define FIRE 1
 #define ESCAPE 2
 
+#ifndef ANDROID
+int game(int argc, char **argv );
+int main (int argc, char *argv[])
+{
+	game (argc, argv);
+	return 0;
+}
+
+#endif // ANDROID
+
+
 int game(int argc, char **argv )
 {
+
+
+#if 0   //check haptic installation
+
+    /* Init Allegro 5 + addons. */
+    al_init();
+
+    //init other bits of allegro
+    al_init_image_addon();
+    al_init_primitives_addon();
+    al_init_font_addon();
+    al_init_ttf_addon();
+    al_install_mouse();
+    al_install_keyboard();
+    al_install_audio();
+    al_init_acodec_addon();
+    al_android_set_apk_fs_interface();
+
+    al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS,ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE,ALLEGRO_REQUIRE);
+
+    display = al_create_display(960, 540);  //Moto E resolution
+
+    ALLEGRO_TOUCH_INPUT *touch;
+    int temp = al_install_haptic();
+    if (al_is_haptic_installed())
+    {
+        if (al_is_display_haptic(display))
+            hap = al_get_haptic_from_display(display);
+
+        else if (al_is_touch_input_haptic(touch))
+            al_get_haptic_from_touch_input(touch);
+    }
+
+    while(1);
+
+#endif
+
+    ALLEGRO_EVENT_SOURCE *EVSRC_KEYBOARD;
+    ALLEGRO_EVENT_SOURCE *EVSRC_DISPLAY;
+    ALLEGRO_EVENT_SOURCE *EVSRC_JOYSTICK;
+    ALLEGRO_EVENT_SOURCE *EVSRC_TOUCH;
+    ALLEGRO_EVENT_SOURCE *EVSRC_TIMER;
+
 //int main (int argc, char *argv[]){
 //int main(void) {
     ALLEGRO_EVENT_QUEUE *queue;
@@ -196,17 +261,20 @@ int game(int argc, char **argv )
     al_init();
 
     char pathstr[100];
-    char *pathptr;
+    //char *pathptr;
 
     al_set_standard_file_interface();
-    //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);    //win/linux
-    ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DATA_PATH);    //android
+    ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);    //win/linux
+    //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DATA_PATH);    //android
     //ALLEGRO_DEBUG(#std ": %s", al_path_cstr(path, '/'));
     sprintf(pathstr,"%s",al_path_cstr(path, '/'));
 	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
-    pathptr = al_get_current_directory();
+    //pathptr = al_get_current_directory();
 
-    logfile = fopen("logfile.txt","w");
+    logfile = al_fopen("logfile.txt","w");
+
+    al_fprintf(logfile,"log open\n");
+    al_fflush(logfile);
 
     //init other bits of allegro
     al_init_image_addon();
@@ -217,9 +285,10 @@ int game(int argc, char **argv )
     al_install_keyboard();
     al_install_audio();
 	al_init_acodec_addon();
+#ifdef ANDROID
     al_android_set_apk_fs_interface();
-
-	//fprintf(logfile,"Init Allegro done\n");
+#endif
+	//al_fprintf(logfile,"Init Allegro done\n");
 
     /* Create our window. */
     #if RPI
@@ -233,26 +302,35 @@ int game(int argc, char **argv )
     al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS,ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE,ALLEGRO_REQUIRE);
 #endif
 
-    //fprintf(logfile,"Creating display\n");
+    //al_fprintf(logfile,"Creating display\n");
     display = al_create_display(SCREENX, SCREENY);
     //display = al_create_display(960, 540);  //Moto E resolution
     //display = al_create_display(800, 480);  //Cheap android phone resolution
 
 	//change directory to data, where all resources live (images, fonts, sounds and text files)
 
-    //al_append_path_component(path, "data");
-	//al_change_directory(al_path_cstr(path, '/'));  // change the working directory
-    //sprintf(pathstr,"%s",al_path_cstr(path, '/'));
+    al_append_path_component(path, "data");
+	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
+    sprintf(pathstr,"%s",al_path_cstr(path, '/'));
 
     //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "HideNavBar", "()V");
 
 #ifdef ANDROID
-    //al_install_haptic();
-    //hap = al_get_haptic_from_display(display);
+    ALLEGRO_TOUCH_INPUT *touch;
+    int temp = al_install_haptic();
+    if (al_is_haptic_installed())
+    {
+        if (al_is_display_haptic(display))
+            hap = al_get_haptic_from_display(display);
+
+        else if (al_is_touch_input_haptic(touch))
+            al_get_haptic_from_touch_input(touch);
+    }
 #endif
+
     al_set_window_title(display, NAME);
 
-    al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
+    al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);// | ALLEGRO_MAG_LINEAR | ALLEGRO_MIN_LINEAR);
 
     scalex = (float)al_get_display_width(display)/SCREENX;
     scaley = (float)al_get_display_height(display)/SCREENY;
@@ -262,51 +340,71 @@ int game(int argc, char **argv )
 
     invscale = 1/scale;
 
+    al_fprintf(logfile,"Display Created. Scale = %f, i/scale = %f\n",scale,invscale);
+    al_fflush(logfile);
+#ifdef ANDROID
     al_android_set_apk_file_interface();
-
+#endif
     if ((icon = al_load_bitmap("gs_icon.png")) == NULL)
-        printf(logfile,"gs_icon.png load fail\n");
+        al_fprintf(logfile,"gs_icon.png load fail\n");
 
+    al_fflush(logfile);
     if (icon) al_set_display_icon(display, icon);
 
     LoadFonts(scale);
+    if (al_is_audio_installed())
+    {
+        voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
+        mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
+        al_set_default_mixer(mixer);
+        al_attach_mixer_to_voice(mixer, voice);
+        al_fprintf(logfile,"Setup audio voice and mixer\n");
+    }
+    else    //get here if no audio available - create mixer to stop rest of code whinging.
+        mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
 
-    voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
-    mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
-    al_set_default_mixer(mixer);
-    al_attach_mixer_to_voice(mixer, voice);
-    fprintf(logfile,"Setup audio voice and mixer\n");
+	al_fflush(logfile);
 
-	fflush(logfile);
-
-	fprintf(logfile,"Creating Events\n");
+	al_fprintf(logfile,"Creating Events\n");
 	timer = al_create_timer(1.0 / 30);
 	queue = al_create_event_queue();
-	fflush(logfile);
+	al_fflush(logfile);
 
 	//Allegro Joystick routines
 	//move to inputs/init??
 	if (al_install_joystick())	//USB joystick, hopefully
-		fprintf(logfile,"Init allegro joystick\n");
-	fprintf(logfile,"%d Joysticks on system\n",al_get_num_joysticks());
-	fflush(logfile);
+		al_fprintf(logfile,"Init allegro joystick\n");
+	al_fprintf(logfile,"%d Joysticks on system\n",al_get_num_joysticks());
+	al_fflush(logfile);
 
 	if (al_install_touch_input())
-        fprintf(logfile,"Init allegro touch input\n");
+        al_fprintf(logfile,"Init allegro touch input\n");
 
-	al_register_event_source(queue, al_get_keyboard_event_source());
-	al_register_event_source(queue, al_get_display_event_source(display));
-	al_register_event_source(queue, al_get_timer_event_source(timer));
-	al_register_event_source(queue, al_get_joystick_event_source());
-    if (al_is_touch_input_installed()) al_register_event_source(queue, al_get_touch_input_event_source());
+    EVSRC_KEYBOARD = al_get_keyboard_event_source();
+    al_register_event_source(queue,EVSRC_KEYBOARD);
+
+    EVSRC_DISPLAY = al_get_display_event_source(display);
+	al_register_event_source(queue, EVSRC_DISPLAY);
+
+    EVSRC_TIMER = al_get_timer_event_source(timer);
+	al_register_event_source(queue, EVSRC_TIMER);
+
+    EVSRC_JOYSTICK = al_get_joystick_event_source();
+	al_register_event_source(queue,EVSRC_JOYSTICK);
+
+    if (al_is_touch_input_installed())
+    {
+        EVSRC_TOUCH = al_get_touch_input_event_source();
+        al_register_event_source(queue, EVSRC_TOUCH);
+    }
 
 	for (i=0 ; i<al_get_num_joysticks() ; i++)
 	{
 		USBJOY[i] = al_get_joystick(i);
 		if (al_get_joystick_active(USBJOY[i]))
-			fprintf(logfile,"Joystick %d active\n",i);
+			al_fprintf(logfile,"Joystick %d active\n",i);
 		else
-			fprintf(logfile,"Joystick %d NOT active\n",i);
+			al_fprintf(logfile,"Joystick %d NOT active\n",i);
 	}
 
 	al_start_timer(timer);
@@ -316,9 +414,9 @@ int game(int argc, char **argv )
     exit = DoTitle(queue, event);
     if (exit) return 0;
 
-	fflush(logfile);
+	al_fflush(logfile);
 
-
+    init_controls();	//do again now nav bar has gone to get dpad in correct place
 
     clunk_inst = al_create_sample_instance(clunk);
     al_attach_sample_instance_to_mixer(clunk_inst, mixer);
@@ -335,15 +433,15 @@ int game(int argc, char **argv )
 
     if (gpio_active)
 	{
-		fprintf(logfile,"Init GPIO joystick\n");
+		al_fprintf(logfile,"Init GPIO joystick\n");
 		init_joystick();	//Ian's GPIO hacked joystick.
 	}
 	else
-		fprintf(logfile,"Skip GPIO joystick\n");
+		al_fprintf(logfile,"Skip GPIO joystick\n");
 
 
     init_ships(MAX_SHIPS);
-	fflush(logfile);
+	al_fflush(logfile);
 
 	Menu.map = 0;	//start on first map, but only first time. After that, remember it.
 
@@ -357,37 +455,39 @@ int game(int argc, char **argv )
 
 		if (exit) break;
 
-		fprintf(logfile,"Loading map\n");
-		fflush(logfile);
+		al_fprintf(logfile,"Loading map\n");
+		al_fflush(logfile);
 		LoadMap();	//load TR map. Filenames from map struct.
 
-        fprintf(logfile,"Making collision masks\n");
-        fflush(logfile);
+        al_fprintf(logfile,"Making collision masks\n");
+        al_fflush(logfile);
         make_ship_col_mask();
         make_sentry_col_mask();
 		make_map_col_mask();
 
 		make_radar_bitmap();
+		if (num_ships > 1)
+            Radar.on = false;
 
-        fprintf(logfile,"Loading game bitmaps\n");
-		fflush(logfile);
-        if ((ships = al_load_bitmap("ships.png")) == NULL)  fprintf(logfile,"ships.png load fail");
-        if ((pickups = al_load_bitmap("pickups.png")) == NULL)  fprintf(logfile,"pickups.png load fail");
-        if ((miner = al_load_bitmap("astronaut.png")) == NULL)  fprintf(logfile,"astronaut.png load fail");
-        if ((jewel = al_load_bitmap("jewels.png")) == NULL)  fprintf(logfile,"jewels.png load fail");
-        if ((status_bg = al_load_bitmap("status_bg.png")) == NULL)  fprintf(logfile,"status_bg.png load fail");
-		if ((panel_bmp = al_load_bitmap("panel.png")) == NULL)  fprintf(logfile,"panel.png load fail");
-		if ((panel_pressed_bmp = al_load_bitmap("panel_pressed.png")) == NULL)  fprintf(logfile,"panel_pressed.png load fail");
-        if ((ui = al_load_bitmap("ui.png")) == NULL)  fprintf(logfile,"ui.png load fail");
+        al_fprintf(logfile,"Loading game bitmaps\n");
+		al_fflush(logfile);
+        if ((ships = al_load_bitmap("ships.png")) == NULL)  al_fprintf(logfile,"ships.png load fail");
+        if ((pickups = al_load_bitmap("pickups.png")) == NULL)  al_fprintf(logfile,"pickups.png load fail");
+        if ((miner = al_load_bitmap("astronaut.png")) == NULL)  al_fprintf(logfile,"astronaut.png load fail");
+        if ((jewel = al_load_bitmap("jewels.png")) == NULL)  al_fprintf(logfile,"jewels.png load fail");
+        if ((status_bg = al_load_bitmap("status_bg.png")) == NULL)  al_fprintf(logfile,"status_bg.png load fail");
+		if ((panel_bmp = al_load_bitmap("panel.png")) == NULL)  al_fprintf(logfile,"panel.png load fail");
+		if ((panel_pressed_bmp = al_load_bitmap("panel_pressed.png")) == NULL)  al_fprintf(logfile,"panel_pressed.png load fail");
+        if ((ui = al_load_bitmap("ui.png")) == NULL)  al_fprintf(logfile,"ui.png load fail");
         make_bullet_bitmap();
 
-		fprintf(logfile,"Init Ships\n");	//init ship structs
+		al_fprintf(logfile,"Init Ships\n");	//init ship structs
 		init_ships(MAX_SHIPS);				//read stuff from map struct.
-		fprintf(logfile,"Init Bullets\n");  //zeroing out the array
+		al_fprintf(logfile,"Init Bullets\n");  //zeroing out the array
 		init_bullets();
 
-		fprintf(logfile,"Init done\n");
-		fflush(logfile);
+		al_fprintf(logfile,"Init done\n");
+		al_fflush(logfile);
 
         //wait for fire(thrust) to clear text / enter map
         display_map_text(true,30);	//this is the description text file, plus 'press fire' message
@@ -451,7 +551,7 @@ int game(int argc, char **argv )
 
         FreeMenuBitmaps();
 
-        fprintf(logfile,"Game Start\n");
+        al_fprintf(logfile,"Game Start\n");
 
         GameControls();
 
@@ -494,10 +594,17 @@ int game(int argc, char **argv )
 			Ship[0].racing = true;
 		}
 
+#define DISPLAY 0
+#define KEYBOARD 1
+#define TOUCH 2
+#define TIMER 3
+#define JOYSTICK 4
+
 		//Main game loop here
 		while (1)
 		{
-			if (back_to_menu)
+			int evsrc;
+            if (back_to_menu)
             {
                 back_to_menu = false;
                 break;
@@ -505,94 +612,125 @@ int game(int argc, char **argv )
 
 			al_wait_for_event(queue, &event);
 
-			if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+            if (event.any.source == EVSRC_DISPLAY)
+                evsrc = DISPLAY;
+            if (event.any.source == EVSRC_KEYBOARD)
+                evsrc = KEYBOARD;
+            if (event.any.source == EVSRC_TOUCH)
+                evsrc = TOUCH;
+            if (event.any.source == EVSRC_TIMER)
+                evsrc = TIMER;
+            if (event.any.source == EVSRC_JOYSTICK)
+                evsrc = JOYSTICK;
+            switch(evsrc)
             {
-                exit = true;
-                break;
-            }
-            if (event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)   //we've been sidelined by the user/os
-            {
-                al_acknowledge_drawing_halt(display);   //acknowledge
-                halted = true;                          //flag to drawing routines to do nothing
-                al_stop_timer(timer);                   //no more timer events, so we should do nothing, saving battery
-                //al_set_default_voice(NULL);             //destroy voice, so no more sound events, ditto.
-                al_destroy_voice(voice);
-                //break;
-            }
-            if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
-            {
-                al_acknowledge_drawing_resume(display); //ack
-                halted = false;                         //remove flag
-                al_start_timer(timer);                  //restart timer
-                voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);  //restart audio
-                al_attach_mixer_to_voice(mixer, voice);
-                //break;
-            }
-			if (event.type == ALLEGRO_EVENT_KEY_DOWN)
-			{
-				debug_key = event.keyboard.keycode;
-
-				//DEBUG THINGS
-				if (debug_on)
-				{
-					if (event.keyboard.keycode == ALLEGRO_KEY_S)//DEBUG; SUICIDE
-					{
-						Ship[0].shield = 0;
-					}
-					if (event.keyboard.keycode == ALLEGRO_KEY_G)
-					{
-						grid++;
-						if (grid > MAX_GRID) grid = 0;
-					}
-					if (event.keyboard.keycode == ALLEGRO_KEY_D)
-					{
-						d++;
-						if (d >= MAX_SHIPS) d = 0;
-					}
-				}
-				//END DEBUG
-
-				if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+            case  DISPLAY:
+                    if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+                    {
+                        exit = true;
+                        break;
+                    }
+                    else if (event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)//  || event.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)    //we've been sidelined by the user/os
+                    {
+                        al_acknowledge_drawing_halt(display);   //acknowledge
+                        halted = true;                          //flag to drawing routines to do nothing
+                        al_stop_timer(timer);                   //no more timer events, so we should do nothing, saving battery
+                        al_destroy_voice(voice);
+                        //break;
+                    }
+                    else if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING )//|| event.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN) //we've been restored
+                    {
+                        al_acknowledge_drawing_resume(display); //ack
+                        halted = false;                         //remove flag
+                        al_start_timer(timer);                  //restart timer
+                        voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);  //restart audio
+                        al_attach_mixer_to_voice(mixer, voice);
+                        //break;
+                    }
+                    else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+                        al_acknowledge_resize(display);
+                        LoadFonts(0);
+                        redraw = true;
+                    }
+                    else
+                    {
+                        break;
+                    }
+            break;
+            case KEYBOARD:
+                if (event.type == ALLEGRO_EVENT_KEY_DOWN)
                 {
-                    Command.goback = true;
-                }
+                    debug_key = event.keyboard.keycode;
 
-				else if  (event.keyboard.keycode == ALLEGRO_KEY_PRINTSCREEN ||
-                          event.keyboard.keycode == ALLEGRO_KEY_F12)
-				{
-					take_screenshot = true;
-					fprintf(logfile,"Screenshot %d\n",screenshot_count);
-				}
-				else if (event.keyboard.keycode == ALLEGRO_KEY_F10) //radar
+                    //DEBUG THINGS
+                    if (debug_on)
+                    {
+                        if (event.keyboard.keycode == ALLEGRO_KEY_S)//DEBUG; SUICIDE
+                        {
+                            Ship[0].shield = 0;
+                        }
+                        if (event.keyboard.keycode == ALLEGRO_KEY_G)
+                        {
+                            grid++;
+                            if (grid > MAX_GRID) grid = 0;
+                        }
+                        if (event.keyboard.keycode == ALLEGRO_KEY_D)
+                        {
+                            d++;
+                            if (d >= MAX_SHIPS) d = 0;
+                        }
+                    }
+                    //END DEBUG
+
+                    if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                    {
+                        Command.goback = true;
+                    }
+
+                    else if  (event.keyboard.keycode == ALLEGRO_KEY_PRINTSCREEN ||
+                              event.keyboard.keycode == ALLEGRO_KEY_F12)
+                    {
+                        take_screenshot = true;
+                        al_fprintf(logfile,"Screenshot %d\n",screenshot_count);
+                    }
+                    else if (event.keyboard.keycode == ALLEGRO_KEY_F10) //radar
+                    {
+                        Command.toggleradar = true;
+                    }
+
+                    else
+                    {
+                        pressed_keys[event.keyboard.keycode]=true;
+                        key_down_log[event.keyboard.keycode]=true;
+                    }
+                }
+                else if (event.type == ALLEGRO_EVENT_KEY_UP)
                 {
-                    Command.toggleradar = true;
+                    pressed_keys[event.keyboard.keycode]=false;
+                    key_up_log[event.keyboard.keycode]=true;
                 }
-
-				else
-				{
-					pressed_keys[event.keyboard.keycode]=true;
-					key_down_log[event.keyboard.keycode]=true;
-				}
-			}
-
-			if (event.type == ALLEGRO_EVENT_KEY_UP)
-			{
-				pressed_keys[event.keyboard.keycode]=false;
-				key_up_log[event.keyboard.keycode]=true;
-			}
-			if (event.type == ALLEGRO_EVENT_KEY_CHAR)   //used for high score entry
-            {
-                if (game_over==1)
+                else if (event.type == ALLEGRO_EVENT_KEY_CHAR)   //used for high score entry
                 {
-                    keypress = true;
-                    current_key = event.keyboard.unichar;
+                    if (game_over==1)
+                    {
+                        keypress = true;
+                        current_key = event.keyboard.unichar;
+                    }
                 }
+            break;
+            case JOYSTICK:
+                CheckUSBJoyStick(event);
+            break;
+            case TOUCH:
+                CheckTouchControls(event);
+            break;
+            case TIMER:
+                if (event.type == ALLEGRO_EVENT_TIMER)
+                    redraw = true;
+            break;
+            default:
+            break;
             }
-
-			//USB Joystick events here
-			CheckUSBJoyStick(event);
-			//and touch events
-			CheckTouchControls(event);
 
 			if (Command.goback)
             {
@@ -614,21 +752,13 @@ int game(int argc, char **argv )
             {
                 Command.toggleradar = false;
 
-                //if (Net.client || Net.server)
+                if (Net.client || Net.server || num_ships==1)
                 {
                     Radar.on = !Radar.on;
                 }
             }
 
-			if (event.type == ALLEGRO_EVENT_TIMER)
-				//if (!Net.client)
-                    redraw = true;
-			if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-				al_acknowledge_resize(display);
-				LoadFonts(0);
-				redraw = true;
-			}
-
+            //Stuff to do on timer tick
 			if (redraw && al_is_event_queue_empty(queue))
 			{
 				if (gpio_active) ReadGPIOJoystick();	//No events, so have to read this in the timer loop.
@@ -649,7 +779,7 @@ int game(int argc, char **argv )
 
 					al_save_bitmap(screenshot_name, al_get_backbuffer(display));
 
-					fprintf(logfile,"Screenshot %d saved\n",screenshot_count-1);
+					al_fprintf(logfile,"Screenshot %d saved\n",screenshot_count-1);
 				}
 
 				al_flip_display();
@@ -824,9 +954,17 @@ int game(int argc, char **argv )
                     }
 				}
 				redraw = FALSE;
+                if (vibrate_timer)
+                {
+                    vibrate_timer--;
+                    if (vibrate_timer==0) {
+                        Vibrate(vibrate_time);
+                        vibrate_time = 0;
+                    }
+                }
 			}
 		}
-		fprintf(logfile,"Game Over\n");
+		al_fprintf(logfile,"Game Over\n");
         FreeGameBitmaps();
 
         MenuControls();
@@ -848,7 +986,7 @@ int game(int argc, char **argv )
         //al_destroy_mixer(mixer);
         //al_destroy_voice(voice);
 
-        fflush(logfile);
+        al_fflush(logfile);
         if (exit) break;
 	}
     return 0;
@@ -861,7 +999,10 @@ void MenuControls(void)
     Ctrl.ctrl[ASTICK2].active = FALSE;
     Ctrl.ctrl[FIRE1].active = FALSE;
     Ctrl.ctrl[FIRE2].active = FALSE;
+    Ctrl.ctrl[THRUST_BUTTON].active = FALSE;
     Ctrl.ctrl[DPAD].active = TRUE;
+    Ctrl.ctrl[SELECT].active = TRUE;
+    Ctrl.ctrl[REVERSE].active = TRUE;
 }
 
 void GameControls(void)
@@ -871,12 +1012,21 @@ void GameControls(void)
     Ctrl.ctrl[ASTICK2].active = TRUE;
     Ctrl.ctrl[FIRE1].active = TRUE;
     Ctrl.ctrl[FIRE2].active = TRUE;
+    Ctrl.ctrl[THRUST_BUTTON].active = TRUE;
     Ctrl.ctrl[DPAD].active = FALSE;
+    Ctrl.ctrl[SELECT].active = FALSE;
+    Ctrl.ctrl[REVERSE].active = FALSE;
 }
+
+void SystemBackPressed(void)
+{
+    Command.goback = true;
+}
+
 //int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
-    int i,redraw=TRUE;
+    int i;//,redraw=TRUE;
 
     al_wait_for_event(queue, &event);
 
@@ -894,13 +1044,19 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
         if (gpio_active)
             ReadGPIOJoystick();
         UpdateTouches();
+#ifdef ANDROID
+        //if (_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "WasBackPressed", "()I"))
+        //    Command.goback = true;
+#endif
     }
     else if (event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)   //we've been sidelined by the user/os
     {
         al_acknowledge_drawing_halt(display);   //acknowledge
         halted = true;                          //flag to drawing routines to do nothing
         al_stop_timer(timer);                   //no more timer events, so we should do nothing, saving battery
-        al_set_default_voice(NULL);             //destroy voice, so no more sound events, ditto.
+        #ifdef ANDROID
+            al_set_default_voice(NULL);             //destroy voice, so no more sound events, ditto.
+        #endif // ANDROID
         //break;
     }
     else if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
@@ -975,46 +1131,46 @@ void LoadFonts(float scale)
     FreeFonts();
 
     //font_scale = (float)al_get_display_width(display)/(SCREENX);    //font sizes chosen to suit SCREENX, so scale according to what we actually have!
-    if (scale) font_scale = scale;
+    if (scale) font_scale = scale*0.8;
 
-    if ((font       = al_load_font("miriam.ttf", 20*font_scale, 0))          == NULL)  fprintf(logfile,"miriam.ttf load fail\n"); //debug font
-    if ((menu_font  = al_load_font("Audiowide-Regular.ttf", 40*font_scale,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
-    if ((glow_font  = al_load_font("Audiowide-500.ttf", 40*font_scale,0))== NULL)      fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
-    if ((small_font = al_load_font("Audiowide-Regular.ttf", 30*font_scale,0))== NULL)  fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
-    if ((small_glow_font = al_load_font("Audiowide-500.ttf", 30*font_scale,0))== NULL) fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
-    if ((big_font   = al_load_font("Zebulon.otf", 200*font_scale, 0))      == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
-    if ((title_font = al_load_font("Zebulon.otf", 125*font_scale, 0))    == NULL)  fprintf(logfile,"Zebulon.otf load fail\n");
+    if ((font       = al_load_font("miriam.ttf", 20*font_scale, 0))          == NULL)  al_fprintf(logfile,"miriam.ttf load fail\n"); //debug font
+    if ((menu_font  = al_load_font("Audiowide-Regular.ttf", 40*font_scale,0))== NULL)  al_fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
+    if ((glow_font  = al_load_font("Audiowide-500.ttf", 40*font_scale,0))== NULL)      al_fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
+    if ((small_font = al_load_font("Audiowide-Regular.ttf", 30*font_scale,0))== NULL)  al_fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
+    if ((small_glow_font = al_load_font("Audiowide-500.ttf", 30*font_scale,0))== NULL) al_fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
+    if ((big_font   = al_load_font("Zebulon.otf", 200*font_scale, 0))      == NULL)  al_fprintf(logfile,"Zebulon.otf load fail\n");
+    if ((title_font = al_load_font("Zebulon.otf", 125*font_scale, 0))    == NULL)  al_fprintf(logfile,"Zebulon.otf load fail\n");
     //don't scale this one....
-    if ((race_font  = al_load_font("7seg.ttf", 18, 0))            == NULL)  fprintf(logfile,"7seg.ttf load fail\n");
+    if ((race_font  = al_load_font("7seg.ttf", 18, 0))            == NULL)  al_fprintf(logfile,"7seg.ttf load fail\n");
 
-	fprintf(logfile,"Loaded fonts (scaled by %.2f)\n",font_scale);
-	fflush(logfile);
+	al_fprintf(logfile,"Loaded fonts (scaled by %.2f)\n",font_scale);
+	al_fflush(logfile);
 }
 
 void LoadSamples(void)
 {
-    if ((slam = al_load_sample   ("slam.wav"))    == NULL)  fprintf(logfile,"slam.wav load fail");
-    if ((shoota = al_load_sample  ("shootA.wav"))   == NULL)  fprintf(logfile,"shootA.wav load fail");
-    if ((shootb = al_load_sample  ("shootB.wav"))   == NULL)  fprintf(logfile,"shootB.wav load fail");
-    if ((particle = al_load_sample("particle.wav")) == NULL)  fprintf(logfile,"particle.wav load fail");
-    if ((dead = al_load_sample    ("dead.wav"))     == NULL)  fprintf(logfile,"dead.wav load fail");
-    if ((clunk = al_load_sample   ("clunk.wav"))    == NULL)  fprintf(logfile,"clunk.wav load fail");
-    if ((wind = al_load_sample    ("wind.ogg"))     == NULL)  fprintf(logfile,"wind.ogg load fail");
-    if ((yippee = al_load_sample  ("yippee.wav"))   == NULL)  fprintf(logfile,"yippee.wav load fail");
-    if ((loop = al_load_sample    ("gsloop.ogg"))   == NULL)  fprintf(logfile,"gsloop.ogg load fail");
-    fprintf(logfile,"Loaded Audio Samples\n");
+    if ((slam = al_load_sample   ("slam.wav"))    == NULL)  al_fprintf(logfile,"slam.wav load fail");
+    if ((shoota = al_load_sample  ("shootA.wav"))   == NULL)  al_fprintf(logfile,"shootA.wav load fail");
+    if ((shootb = al_load_sample  ("shootB.wav"))   == NULL)  al_fprintf(logfile,"shootB.wav load fail");
+    if ((particle = al_load_sample("particle.wav")) == NULL)  al_fprintf(logfile,"particle.wav load fail");
+    if ((dead = al_load_sample    ("dead.wav"))     == NULL)  al_fprintf(logfile,"dead.wav load fail");
+    if ((clunk = al_load_sample   ("clunk.wav"))    == NULL)  al_fprintf(logfile,"clunk.wav load fail");
+    if ((wind = al_load_sample    ("wind.ogg"))     == NULL)  al_fprintf(logfile,"wind.ogg load fail");
+    if ((yippee = al_load_sample  ("yippee.wav"))   == NULL)  al_fprintf(logfile,"yippee.wav load fail");
+    if ((loop = al_load_sample    ("gsloop.ogg"))   == NULL)  al_fprintf(logfile,"gsloop.ogg load fail");
+    al_fprintf(logfile,"Loaded Audio Samples\n");
 }
 int read_maps(void)
 {
 	int i,j,group = -1,map = 0,len;
 	char temp[MAP_NAME_LENGTH];
 
-	FILE* mapfile;
+	ALLEGRO_FILE* mapfile;
 
 	mapfile = al_fopen("maps.txt","r");
 
 	if (mapfile == NULL)
-		fprintf(logfile,"Failed to open file maps.txt\n");
+		al_fprintf(logfile,"Failed to open file maps.txt\n");
 
 	for (i=0 ; /*i<MAX_MAPS*/ ; i++)
 	{
@@ -1031,45 +1187,45 @@ int read_maps(void)
 
 		//temp[strlen(temp)]=0;
 
-		//fprintf(logfile,"%s *%d\n",temp,strcspn(temp, " \r\n"));
+		//al_fprintf(logfile,"%s *%d\n",temp,strcspn(temp, " \r\n"));
 
 		if (temp[0] == ':')	//group name
 		{
 			if (group != -1)
 			{
 				MapNames[group].Count = map;
-				//fprintf(logfile,"Group %d Count = %d\n",group, MapNames[group].Count);
+				//al_fprintf(logfile,"Group %d Count = %d\n",group, MapNames[group].Count);
 			}
 			group++;
 			map = 0;
 
 			strncpy ((char*)&MapNames[group].Group, &temp[1], MAP_NAME_LENGTH-1);
-			//fprintf(logfile,"Group: %s\n",&MapNames[group].Group);
+			//al_fprintf(logfile,"Group: %s\n",&MapNames[group].Group);
 
 		}
 		else	//map name
 		{
 			strncpy ((char*)&MapNames[group].Map[map], &temp[0], MAP_NAME_LENGTH);
-			//fprintf(logfile,"Map: %s\n",&MapNames[group].Map[map]);
+			//al_fprintf(logfile,"Map: %s\n",&MapNames[group].Map[map]);
 			map++;
 		}
 
-		//fprintf(logfile,"%s\n",&map_names[MAP_NAME_LENGTH * i]);
+		//al_fprintf(logfile,"%s\n",&map_names[MAP_NAME_LENGTH * i]);
 	}
 
 	MapNames[group].Count = map;
-	//fprintf(logfile,"Group %d Count = %d\n",group, MapNames[group].Count);
+	//al_fprintf(logfile,"Group %d Count = %d\n",group, MapNames[group].Count);
 
 	al_fclose(mapfile);
 
-	fprintf(logfile,"%d Map groups\n",group+1);
+	al_fprintf(logfile,"%d Map groups\n",group+1);
 
 	for (i=0 ; i<group+1 ; i++)
 	{
-		fprintf(logfile,"Group: %s\n",(char*)&MapNames[i].Group);
+		al_fprintf(logfile,"Group: %s\n",(char*)&MapNames[i].Group);
 		for (j=0 ; j<MapNames[i].Count ; j++)
 		{
-			fprintf(logfile,"Map: %s\n",(char*)&MapNames[i].Map[j]);
+			al_fprintf(logfile,"Map: %s\n",(char*)&MapNames[i].Map[j]);
 		}
 	}
 
@@ -1078,13 +1234,13 @@ int read_maps(void)
 
 void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
 {
-    //fprintf(logfile,"tr_map = %d\n",tr_map);
-    //fflush(logfile);
+    //al_fprintf(logfile,"tr_map = %d\n",tr_map);
+    //al_fflush(logfile);
 
     tr_map = al_load_bitmap(Map.display_file_name);
 	if (tr_map == NULL)
     {
-        fprintf(logfile,"Display Map load error\n");
+        al_fprintf(logfile,"Display Map load error\n");
         return;
     }
 
@@ -1112,25 +1268,25 @@ void LoadMap(void)  //different function for tilemaps? Or just a smarter one....
     {
         background = al_load_bitmap(Map.background_file_name);
         if (background == NULL)
-            fprintf(logfile,"Background bitmap load fail.\n");
+            al_fprintf(logfile,"Background bitmap load fail.\n");
     }
 
 	if (Map.sentry_file_name[0] != 0)
     {
 		sentries = al_load_bitmap(Map.sentry_file_name);
 		if (sentries == NULL)
-            fprintf(logfile,"Sentries bitmap load fail.\n");
+            al_fprintf(logfile,"Sentries bitmap load fail.\n");
     }
 
-    fprintf(logfile,"tr_map size %d x %d\n",mapx,mapy);
-    fflush(logfile);
+    al_fprintf(logfile,"tr_map size %d x %d\n",mapx,mapy);
+    al_fflush(logfile);
 }
 
 void FreeGameBitmaps(void)
 {
     int i=0,j=0;;
 
-    fprintf(logfile,"Freeing game bitmaps\n");
+    al_fprintf(logfile,"Freeing game bitmaps\n");
     if (ships)
     {
         al_destroy_bitmap(ships);
@@ -1248,8 +1404,8 @@ void FreeGameBitmaps(void)
         }
     }
 
-    fprintf(logfile,"Freed %d/%d game bitmaps\n",i,j);
-    fflush(logfile);
+    al_fprintf(logfile,"Freed %d/%d game bitmaps\n",i,j);
+    al_fflush(logfile);
 
     return;
 }
@@ -1279,8 +1435,8 @@ void FreeMenuBitmaps()
         i++;
     }
 
-    fprintf(logfile,"Freed %d menu/title bitmaps\n",i);
-    fflush(logfile);
+    al_fprintf(logfile,"Freed %d menu/title bitmaps\n",i);
+    al_fflush(logfile);
 }
 
 void FreeFonts(void)
@@ -1293,7 +1449,7 @@ void FreeFonts(void)
 	al_destroy_font(big_font  );
 	al_destroy_font(race_font );
 	al_destroy_font(title_font);
-	fprintf(logfile,"Freed fonts\n");
+	al_fprintf(logfile,"Freed fonts\n");
 }
 
 void StopNetwork(void)
@@ -1323,12 +1479,12 @@ void StopNetwork(void)
 
 void Exit(void)
 {
-	fprintf(logfile,"Exiting\n");
+	al_fprintf(logfile,"Exiting\n");
     FreeGameBitmaps();
     FreeMenuBitmaps();
     FreeFonts();
     al_destroy_display(display);
-	fclose(logfile);
+	al_fclose(logfile);
 	if (hostfile) al_fclose (hostfile);
 	if (clientfile) al_fclose (clientfile);
 	exit(0);
@@ -1350,21 +1506,28 @@ void draw_debug(void)
 {
 	int level,i;
 
-	if (Map.mission) level = num_ships*180;
-	else             level = num_ships*120;
+	//if (Map.mission) level = num_ships*180;
+	//else             level = num_ships*120;
+
+    level = 100;
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
 
+
+
 	//for (i=0 ; Touch[i].id != NO_TOUCH ; i++)
-    //{
-    //    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Touch:%d, But:%d",Touch[i].id,Touch[i].button);
-    //}
-    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NumTouches:%d",i);
+    for (i=0 ; i<NUM_TOUCHES ; i++)
+    {
+        al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Touch:%d, But:%d",Touch[i].id,Touch[i].button);
+    }
+
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NumTouches:%d",i);
 
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Spin:%0.3f",TouchJoystick.spin);
 
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Net: %d", fpsnet);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Missed: %d", missed_packets);
+    /*
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NetQual: %.1f", Net.quality);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Ship: %d", d);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Image: %d", Ship[d].image);
@@ -1383,6 +1546,7 @@ void draw_debug(void)
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Killed:%d",Ship[d].killed);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Crashes:%d",Ship[d].crashed);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Ammo2:%d",(Ship[d].ammo2*25)/2);
+     */
 
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Clients:%d",Net.clients );
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Clients Ready:%d",Net.clients_ready);
@@ -1524,3 +1688,57 @@ void draw_debug(void)
 
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "JDS:%d", joystick_down_state);
 }
+
+#ifdef RPI
+/* Function: al_vfprintf
+ */
+int al_vfprintf(ALLEGRO_FILE *pfile, const char *format, va_list args)
+{
+   int rv = -1;
+   ALLEGRO_USTR *ustr = 0;
+   size_t size = 0;
+   bool success;
+
+   if (pfile != 0 && format != 0)
+   {
+      ustr = al_ustr_new("");
+      if (ustr)
+      {
+         success = al_ustr_vappendf(ustr, format, args);
+         if (success)
+         {
+            size = al_ustr_size(ustr);
+            if (size > 0)
+            {
+               rv = al_fwrite(pfile, (const void*)(al_cstr(ustr)), size);
+               if (rv != (int)size) {
+                  rv = -1;
+               }
+            }
+         }
+         al_ustr_free(ustr);
+      }
+   }
+   return rv;
+}
+
+
+/* Function: al_fprintf
+ */
+int al_fprintf(ALLEGRO_FILE *pfile, const char *format, ...)
+{
+   int rv = -1;
+   va_list args;
+
+   if (pfile != 0 && format != 0)
+   {
+      va_start(args, format);
+      rv = al_vfprintf(pfile, format, args);
+      va_end(args);
+   }
+   return rv;
+}
+
+
+/* vim: set sts=3 sw=3 et: */
+#endif
