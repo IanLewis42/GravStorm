@@ -19,6 +19,8 @@
 #include <ctype.h>
 //#include <conio.h>
 
+#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
 #include "allegro5/allegro_primitives.h"
@@ -70,7 +72,7 @@ int load_query = 0;
 
 MapGroupType MapNames[MAX_GROUPS];
 
-FILE *logfile;
+ALLEGRO_FILE* logfile;
 
 void map_draw(void);
 void sidebar_draw(void);
@@ -434,8 +436,10 @@ void map_draw(void) {
 				//float u = i * tile_width;
 				//float v = 0;
 
-				int u = (i & 0x0007)<<6;    //bottom 3 bits * 64
-				int v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+				//int u = (i & 0x0007)<<6;    //bottom 3 bits * 64
+				//int v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+				int u = (i & 0x0007)*66;    //bottom 3 bits * 66
+				int v = ((i & 0xfff8)>>3)*66;    //upper bits /8 then * 66
 
 										   //sx  sy sw  sh  dx      dy      dw  dh
 				//al_draw_scaled_bitmap(tiles, u,  v, 64, 64, x * 32, y * 32, 32, 32, 0);
@@ -676,7 +680,7 @@ int init_map(char *map_file_name)
     Map.race = false;
     Map.max_players=1;
 
-	//while (fgets(str, 100, map_file) != NULL)
+	while (fgets(str, 100, map_file) != NULL)
 	{
 		line = str;
 
