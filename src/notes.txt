@@ -786,9 +786,8 @@ X fade on android instructions.
 #* LH controls?? swap button displayed where radar is, during menus.
 * remove red highlighting 
 * waiting for host animation? seems ok.
-
-- ->github
-- ->playstore
+* ->github
+- ->playstore (password for APK signing is usual....)
 - ->kids
 - videos
 - promote
@@ -796,6 +795,12 @@ X fade on android instructions.
 
 MAYBE LATER.....
 ----------------
+- 8 way level? team mode? (switch in txt file)
+  - can't quite see how 'capture the flag' works, unless it's just land on 'their' base
+  - or first to land on 'centre' pad?? - Can't really retrieve anything, as what happens if (when) you crash omn the way back?
+  - so just (team) kill count?
+  - if (team) -> only 2 ship choices, random allocation? or alternate? allow changing?
+  - count kills/lives at end, add up those for same team.....
 - wall collision vibrate proportional to speed??
 - android crash on pause - OK with nav buttons - only crashes with f/p sensor.... Check events??
   no events -> ignore for now.....
