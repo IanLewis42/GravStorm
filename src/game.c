@@ -511,6 +511,11 @@ int game(int argc, char **argv )
                 StopNetwork();          //exit back to menu
                 break;
             }
+            else if (redraw)
+            {
+                redraw = false;
+                display_map_text(true,30);	//this is the description text file, plus 'press fire' message
+            }
         }
 
         //if client, wait for host
@@ -663,21 +668,27 @@ int game(int argc, char **argv )
                     debug_key = event.keyboard.keycode;
 
                     //DEBUG THINGS
-                    if (debug_on)
-                    {
+                    if (debug_on) {
                         if (event.keyboard.keycode == ALLEGRO_KEY_S)//DEBUG; SUICIDE
                         {
                             Ship[0].shield = 0;
                         }
-                        if (event.keyboard.keycode == ALLEGRO_KEY_G)
-                        {
+                        if (event.keyboard.keycode == ALLEGRO_KEY_G) {
                             grid++;
                             if (grid > MAX_GRID) grid = 0;
                         }
-                        if (event.keyboard.keycode == ALLEGRO_KEY_D)
-                        {
+                        if (event.keyboard.keycode == ALLEGRO_KEY_D) {
                             d++;
                             if (d >= MAX_SHIPS) d = 0;
+                        }
+                        
+                        if (event.keyboard.keycode == ALLEGRO_KEY_PGUP) {
+                            scale += 0.025;
+                            invscale = 1 / scale;
+                        }
+                        if (event.keyboard.keycode == ALLEGRO_KEY_PGDN) {
+                            scale -= 0.025;
+                            invscale = 1 / scale;
                         }
                     }
                     //END DEBUG
@@ -1044,6 +1055,7 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
         if (gpio_active)
             ReadGPIOJoystick();
         UpdateTouches();
+        redraw = true;
 #ifdef ANDROID
         //if (_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "WasBackPressed", "()I"))
         //    Command.goback = true;
@@ -1514,7 +1526,7 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
 
 
-
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Scale:%0.3f",scale);
 	//for (i=0 ; Touch[i].id != NO_TOUCH ; i++)
     for (i=0 ; i<NUM_TOUCHES ; i++)
     {

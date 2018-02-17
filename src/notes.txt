@@ -786,12 +786,24 @@ X fade on android instructions.
 #* LH controls?? swap button displayed where radar is, during menus.
 * remove red highlighting 
 * waiting for host animation? seems ok.
-* ->github
-- ->playstore (password for APK signing is usual....)
+* new flicker fix
+* zero controls on menu state scahnge
+* size / switch buttons work on level text screen
+->github
+->playstore (password for APK signing is usual....)
 - ->kids
 - videos
 - promote
 - code clean up
+
+Added instructions
+Added support for Android Immersive Mode
+Added vibration effects
+Added support for left-handed controls
+Assorted small enhancements to playability and graphics
+
+0.77
+y 704
 
 MAYBE LATER.....
 ----------------

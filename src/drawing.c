@@ -1286,8 +1286,8 @@ void draw_map(int scrollx, int scrolly, int win_x, int win_y, int w, int h)
 
 				//int u = (i & 0x0007)<<6;    //bottom 3 bits * 64
 				//int v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
-				int u = (i & 0x0007)*66;    //bottom 3 bits * 66
-				int v = ((i & 0xfff8)>>3)*66;    //upper bits /8 then * 66
+				int u = 1+(i & 0x0007)*66;    //bottom 3 bits * 66
+				int v = 1+((i & 0xfff8)>>3)*66;    //upper bits /8 then * 66
 
                                                         //sx sy sw          sh           dx                        dy
 				//if (i != 0)
@@ -1476,17 +1476,17 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 	for(i=0 ; i<Map.num_sentries ; i++)
 	{
 		if (Map.sentry[i].alive)
-			al_draw_bitmap_region(sentries,Map.sentry[i].alive_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
+			al_draw_bitmap_region(sentries,1+Map.sentry[i].alive_sprite*66,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
 		else
-			al_draw_bitmap_region(sentries,Map.sentry[i].dead_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
+			al_draw_bitmap_region(sentries,1+Map.sentry[i].dead_sprite*66,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
 	}
 
 	for(i=0 ; i<Map.num_switches ; i++)
 	{
 		if (Map.switches[i].open)
-			al_draw_bitmap_region(sentries,Map.switches[i].open_sprite*64,  0, 64, 64,Map.switches[i].x-64/2,Map.switches[i].y-64/2, 0);
+			al_draw_bitmap_region(sentries,1+Map.switches[i].open_sprite*66,  0, 64, 64,Map.switches[i].x-64/2,Map.switches[i].y-64/2, 0);
 		else
-			al_draw_bitmap_region(sentries,Map.switches[i].closed_sprite*64,0, 64, 64,Map.switches[i].x-64/2,Map.switches[i].y-64/2, 0);
+			al_draw_bitmap_region(sentries,1+Map.switches[i].closed_sprite*66,0, 64, 64,Map.switches[i].x-64/2,Map.switches[i].y-64/2, 0);
 	}
 
 	//finally ships, miners and jewels

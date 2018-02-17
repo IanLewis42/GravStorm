@@ -669,7 +669,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Menu.ships = 1;
                         Menu.state = PLAYERS;
                         Menu.col_pos = 1;
-
+                        AnyShip.left_down = false;
+                        AnyShip.right_down = false;
                         //Net.net = true;
                         Net.server = false;
                         Net.client = true;
@@ -746,6 +747,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     Command.goback = false;
                     Menu.state = NETWORK;            //back to previous menu
                     Ctrl.ctrl[SELECT].active=TRUE;
+                    AnyShip.fire1_down = false;     //stop scroll up on exit
                     break;
                 }
                 else if (Command.goforward)
@@ -775,6 +777,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 {
                     Command.goforward = false;
                     Menu.state = PLAYERS;               //thrust to go to next menu
+                    AnyShip.left_down = false;
+                    AnyShip.right_down = false;
 #ifdef ANDROID
                     num_ships = 1;
                     Menu.col_pos = 1;

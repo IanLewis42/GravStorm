@@ -115,7 +115,7 @@ int main (int argc, char *argv[]){
     	//set path
     ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 	al_change_directory(al_path_cstr(path, '/'));  // change the working directory
-	logfile = fopen("mmlog.txt","w");
+	logfile = al_fopen("mmlog.txt","w");
 
 	//change directory to data, where all resources live (images, fonts, sounds and text files)
 	al_append_path_component(path, "data");
@@ -208,7 +208,7 @@ int main (int argc, char *argv[]){
                     }
                     else
                     {
-                        fclose(logfile);
+                        al_fclose(logfile);
                         break;
                     }
                 }
@@ -218,7 +218,7 @@ int main (int argc, char *argv[]){
             {
                 if (save_query)
                 {
-                    fclose(logfile);
+                    al_fclose(logfile);
                     break;
                 }
                 if (load_query)
@@ -375,12 +375,12 @@ int main (int argc, char *argv[]){
             redraw = false;
             //double t = al_get_time();
 
-            if (up_key)		scroll_y -= 10/zoom;//10/(1+(5*(zoom-1)));
-            if (down_key)	scroll_y += 10/zoom;//10/(1+(5*(zoom-1)));
-            if (left_key)  	scroll_x -= 10/zoom;//10/(1+(5*(zoom-1)));
-            if (right_key) 	scroll_x += 10/zoom;//10/(1+(5*(zoom-1)));
-            if (pgup_key)  	zoom += 0.03*zoom;
-            if (pgdn_key)  	zoom -= 0.03*zoom;
+            if (up_key)		scroll_y -= 5/zoom;//10/(1+(5*(zoom-1)));
+            if (down_key)	scroll_y += 5/zoom;//10/(1+(5*(zoom-1)));
+            if (left_key)  	scroll_x -= 5/zoom;//10/(1+(5*(zoom-1)));
+            if (right_key) 	scroll_x += 5/zoom;//10/(1+(5*(zoom-1)));
+            if (pgup_key)  	zoom += 0.01*zoom;
+            if (pgdn_key)  	zoom -= 0.01*zoom;
 
             if (zoom < 0.1) zoom = 0.1;
             if (zoom > 10)	zoom = 10;
@@ -438,8 +438,8 @@ void map_draw(void) {
 
 				//int u = (i & 0x0007)<<6;    //bottom 3 bits * 64
 				//int v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
-				int u = (i & 0x0007)*66;    //bottom 3 bits * 66
-				int v = ((i & 0xfff8)>>3)*66;    //upper bits /8 then * 66
+				int u = 1+(i & 0x0007)*66;    //bottom 3 bits * 66
+				int v = 1+((i & 0xfff8)>>3)*66;    //upper bits /8 then * 66
 
 										   //sx  sy sw  sh  dx      dy      dw  dh
 				//al_draw_scaled_bitmap(tiles, u,  v, 64, 64, x * 32, y * 32, 32, 32, 0);
@@ -515,12 +515,12 @@ void draw_sprites(void)
 			{
 				while (x<Map.forcefield[i].max_x)
 			 	{	                      //bmp    srcx                              srcy size    dstx dsty
-					al_draw_bitmap_region(sentries,Map.forcefield[i].closed_sprite*64,0,   64, 64, x,   y, 0);
+					al_draw_bitmap_region(sentries,1+Map.forcefield[i].closed_sprite*66,0,   64, 64, x,   y, 0);
 					x+=64;
 					if (x+64>Map.forcefield[i].max_x)
 					{
 						//al_draw_bitmap_region(sentries,Map.forcefield[i].alive_sprite*64,0,   64, 64, Map.forcefield[i].max_x-64,   y, 0);
-						al_draw_bitmap_region(sentries,Map.forcefield[i].closed_sprite*64,0,   Map.forcefield[i].max_x-x, 64, x, y, 0);
+						al_draw_bitmap_region(sentries,1+Map.forcefield[i].closed_sprite*66,0,   Map.forcefield[i].max_x-x, 64, x, y, 0);
 						break;
 					}
 				}
@@ -529,12 +529,12 @@ void draw_sprites(void)
 			{
 				while (y<Map.forcefield[i].max_y)
 			 	{	                      //bmp    srcx                              srcy size    dstx dsty
-					al_draw_bitmap_region(sentries,Map.forcefield[i].closed_sprite*64,0,   64, 64, x,   y, 0);
+					al_draw_bitmap_region(sentries,1+Map.forcefield[i].closed_sprite*66,0,   64, 64, x,   y, 0);
 					y+=64;
 					if (y+64>Map.forcefield[i].max_y)
 					{
 						//al_draw_bitmap_region(sentries,Map.forcefield[i].alive_sprite*64,0,   64, 64, x, Map.forcefield[i].max_y-64, 0);
-						al_draw_bitmap_region(sentries,Map.forcefield[i].closed_sprite*64,0,   64, Map.forcefield[i].max_y-y, x, y, 0);
+						al_draw_bitmap_region(sentries,1+Map.forcefield[i].closed_sprite*66,0,   64, Map.forcefield[i].max_y-y, x, y, 0);
 						break;
 					}
 				}
@@ -547,16 +547,16 @@ void draw_sprites(void)
 	{
 		//if (Map.sentry[i].alive)
 		{
-			al_draw_bitmap_region(sentries,Map.sentry[i].alive_sprite*64,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
+			al_draw_bitmap_region(sentries,1+Map.sentry[i].alive_sprite*66,0, 64, 64,Map.sentry[i].x-64/2,Map.sentry[i].y-64/2, 0);
 		}
 	}
 
 	for(i=0 ; i<Map.num_switches ; i++)
 	{
 		if (Map.switches[i].open)
-			al_draw_bitmap_region(sentries,Map.switches[i].open_sprite*64,  0, 64, 64,Map.switches[i].x-64/2,Map.switches[i].y-64/2, 0);
+			al_draw_bitmap_region(sentries,1+Map.switches[i].open_sprite*66,  0, 64, 64,Map.switches[i].x-64/2,Map.switches[i].y-64/2, 0);
 		else
-			al_draw_bitmap_region(sentries,Map.switches[i].closed_sprite*64,0, 64, 64,Map.switches[i].x-64/2,Map.switches[i].y-64/2, 0);
+			al_draw_bitmap_region(sentries,1+Map.switches[i].closed_sprite*66,0, 64, 64,Map.switches[i].x-64/2,Map.switches[i].y-64/2, 0);
 	}
 
 }
@@ -584,8 +584,10 @@ void sidebar_draw(void)
 			else i_char = i-10+'A';
 			al_draw_textf(font, al_map_rgb(255, 255, 255),10, (i+tile_offset)*(tile_height+5) ,  ALLEGRO_ALIGN_LEFT, "%c", i_char);
 
-			u = (i & 0x0007)<<6;    //bottom 3 bits * 64
-			v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+			//u = (i & 0x0007)<<6;    //bottom 3 bits * 64
+			//v = (i & 0xfff8)<<3;    //upper bits /8 then * 64
+			int u = 1+(i & 0x0007)*66;    //bottom 3 bits * 66
+			int v = 1+((i & 0xfff8)>>3)*66;    //upper bits /8 then * 66
 
 			al_draw_bitmap_region(tiles, u, v, tile_width, tile_height, 50, (i+tile_offset)*(tile_height+5),0);
 		}
@@ -688,68 +690,68 @@ int init_map(char *map_file_name)
 		if (strncmp(line,"map_type",8) == 0)
 		{
 			sscanf(line+8," %d",&Map.type);
-			fprintf(logfile,"Map type:%d\n",Map.type);
+			al_fprintf(logfile,"Map type:%d\n",Map.type);
 		}
 
 		else if (strncmp(line,"display_map",11) == 0)
 		{
 			sscanf(line+11," %s",(char *)&Map.display_file_name);
-			fprintf(logfile,"Display Map:%s\n",Map.display_file_name);
+			al_fprintf(logfile,"Display Map:%s\n",Map.display_file_name);
 		}
 
 		else if (strncmp(line,"background",10) == 0)
 		{
 			sscanf(line+10," %s",(char *)&Map.background_file_name);
-			fprintf(logfile,"Map background:%s\n",Map.background_file_name);
+			al_fprintf(logfile,"Map background:%s\n",Map.background_file_name);
 		}
 
 		else if (strncmp(line,"bg_fade",7) == 0)
 		{
 			Map.background_fade = true;
 			sscanf(line+7," %d",&Map.bg_fade_thresh);
-			fprintf(logfile,"Background fading: On\n");
-			fprintf(logfile,"Background fade threshold:%d\n",Map.bg_fade_thresh);
+			al_fprintf(logfile,"Background fading: On\n");
+			al_fprintf(logfile,"Background fade threshold:%d\n",Map.bg_fade_thresh);
 		}
 
 		else if (strncmp(line,"collision_map",13) == 0)
 		{
 			sscanf(line+13," %s",(char *)&Map.collision_file_name);
-			fprintf(logfile,"Collision Map:%s\n",Map.collision_file_name);
+			al_fprintf(logfile,"Collision Map:%s\n",Map.collision_file_name);
 		}
 
 		else if (strncmp(line,"ascii_map",9) == 0)
 		{
 			sscanf(line+9," %s",(char *)&Map.ascii_map_file_name);
-			fprintf(logfile,"ASCII map file:%s\n",Map.ascii_map_file_name);
+			al_fprintf(logfile,"ASCII map file:%s\n",Map.ascii_map_file_name);
 		}
 
 		else if (strncmp(line,"sentry_display",14) == 0)
 		{
 			sscanf(line+14," %s",(char *)&Map.sentry_file_name);
-			fprintf(logfile,"Sentry Image file:%s\n",Map.sentry_file_name);
+			al_fprintf(logfile,"Sentry Image file:%s\n",Map.sentry_file_name);
 		}
 
 		else if (strncmp(line,"sentry_collision",16) == 0)
 		{
 			sscanf(line+16," %s",(char *)&Map.sentry_collision_file_name);
-			fprintf(logfile,"Sentry Collision file:%s\n",Map.sentry_collision_file_name);
+			al_fprintf(logfile,"Sentry Collision file:%s\n",Map.sentry_collision_file_name);
 		}
 
 		else if (strncmp(line,"description",11) == 0)
 		{
 			sscanf(line+11," %s",(char *)&Map.description_file_name);
-			fprintf(logfile,"Description file:%s\n",Map.description_file_name);
+			al_fprintf(logfile,"Description file:%s\n",Map.description_file_name);
 		}
 		else if (strncmp(line,"ship_first",10) == 0)
 		{
 			sscanf(line+10," %d",&Map.ship_first);
-			fprintf(logfile,"Ship first:%d\n",Map.ship_first);
+			al_fprintf(logfile,"Ship first:%d\n",Map.ship_first);
 		}
 
 		else if (strncmp(line,"mission",7) == 0)
 		{
 			sscanf(line+7," %d",&Map.mission);
-			fprintf(logfile,"Mission:%d\n",Map.mission);
+			al_fprintf(logfile,"Mission:%d\n",Map.mission);
 		}
 
 		else if (strncmp(line,"lives",5) == 0)
@@ -758,37 +760,37 @@ int init_map(char *map_file_name)
 			if (Map.lives > 6)
 				Map.lives = 6;
 
-			fprintf(logfile,"Lives:%d\n",Map.lives);
+			al_fprintf(logfile,"Lives:%d\n",Map.lives);
 		}
 
 		else if (strncmp(line,"time_limit",10) == 0)
 		{
 			sscanf(line+10," %d",&Map.time_limit);
-			fprintf(logfile,"Time Limit:%d\n",Map.time_limit);
+			al_fprintf(logfile,"Time Limit:%d\n",Map.time_limit);
 		}
 
 		else if (strncmp(line,"max_players",11) == 0)
 		{
 			sscanf(line+11," %d",&Map.max_players);
-			fprintf(logfile,"Max players:%d\n",Map.max_players);
+			al_fprintf(logfile,"Max players:%d\n",Map.max_players);
 		}
 
 		else if (strncmp(line,"gravity",7) == 0)
 		{
 			sscanf(line+7," %f",&Map.gravity);
-			fprintf(logfile,"Gravity:%f\n",Map.gravity);
+			al_fprintf(logfile,"Gravity:%f\n",Map.gravity);
 		}
 
 		else if (strncmp(line,"drag",4) == 0)
 		{
 			sscanf(line+4," %f",&Map.drag);
-			fprintf(logfile,"Drag:%f\n",Map.drag);
+			al_fprintf(logfile,"Drag:%f\n",Map.drag);
 		}
 
 		else if (strncmp(line,"wrap",4) == 0)
 		{
 			sscanf(line+4," %d",&Map.wrap);
-			fprintf(logfile,"Wrap:%d\n",Map.wrap);
+			al_fprintf(logfile,"Wrap:%d\n",Map.wrap);
 		}
 
 		else if (strncmp(line,"pad",3) == 0)
@@ -796,7 +798,7 @@ int init_map(char *map_file_name)
 			Map.pad[i].miners = 0;
 			Map.pad[i].jewels = 0;
 			sscanf(line+3," %x %d %d %d %d %d",&Map.pad[i].type,&Map.pad[i].y,&Map.pad[i].min_x,&Map.pad[i].max_x,&Map.pad[i].miners,&Map.pad[i].jewels);
-			fprintf(logfile,"Pad %d: type:%02x y:%d x:%d x:%d miners:%d jewels:%d\n",i,Map.pad[i].type,Map.pad[i].y,Map.pad[i].min_x,Map.pad[i].max_x,Map.pad[i].miners,Map.pad[i].jewels);
+			al_fprintf(logfile,"Pad %d: type:%02x y:%d x:%d x:%d miners:%d jewels:%d\n",i,Map.pad[i].type,Map.pad[i].y,Map.pad[i].min_x,Map.pad[i].max_x,Map.pad[i].miners,Map.pad[i].jewels);
 
 			//if ((Map.pad[i].type & 0x000f) < MAX_SHIPS)
 	        //    Ship[Map.pad[i].type & 0x000f].home_pad = i;    //bottom nibble of type gives ship which this is home pad for.
@@ -809,7 +811,7 @@ int init_map(char *map_file_name)
 		else if (strncmp(line,"area",4) == 0)
 		{
 			sscanf(line+4," %d %d %d %d %f %f",                           &Map.area[j].min_x,&Map.area[j].max_x,&Map.area[j].min_y,&Map.area[j].max_y,&Map.area[j].gravity,&Map.area[j].drag);
-			fprintf(logfile,"area %d: x:%d x:%d y:%d y:%d g:%f drag:%f\n",j,Map.area[j].min_x, Map.area[j].max_x, Map.area[j].min_y, Map.area[j].max_y, Map.area[j].gravity, Map.area[j].drag);
+			al_fprintf(logfile,"area %d: x:%d x:%d y:%d y:%d g:%f drag:%f\n",j,Map.area[j].min_x, Map.area[j].max_x, Map.area[j].min_y, Map.area[j].max_y, Map.area[j].gravity, Map.area[j].drag);
 			j++;
 		}
 
@@ -817,10 +819,10 @@ int init_map(char *map_file_name)
 		{
 			Map.radial_gravity = true;
 			if (l==0)
-				fprintf(logfile,"Radial Gravity On\n");
+				al_fprintf(logfile,"Radial Gravity On\n");
 
 			sscanf(line+9," %d %d %f",                        &Map.blackhole[l].x,&Map.blackhole[l].y,&Map.blackhole[l].g);
-			fprintf(logfile,"blackhole %d: x:%d y:%d g:%f\n",l,Map.blackhole[l].x,Map.blackhole[l].y,Map.blackhole[l].g);
+			al_fprintf(logfile,"blackhole %d: x:%d y:%d g:%f\n",l,Map.blackhole[l].x,Map.blackhole[l].y,Map.blackhole[l].g);
 			l++;
 		}
 
@@ -830,7 +832,7 @@ int init_map(char *map_file_name)
 		else if (strncmp(line,"sentry",6) == 0)
 		{
 			sscanf(line+6," %i %i %i %i %i %i %i %i %i %i",                                                                   &Map.sentry[m].x, &Map.sentry[m].y, &Map.sentry[m].direction, &Map.sentry[m].type, &Map.sentry[m].period, &Map.sentry[m].probability, &Map.sentry[m].random, &Map.sentry[m].range, &Map.sentry[m].alive_sprite, &Map.sentry[m].dead_sprite);
-			fprintf(logfile,"Sentry %i: x:%i, y:%i, Direction:%i, Type:%i, Period:%i, Prob:%i, Random:%i, Range:%i, Sprite%d, Sprite%d\n",m, Map.sentry[m].x,  Map.sentry[m].y,  Map.sentry[m].direction,  Map.sentry[m].type,  Map.sentry[m].period,  Map.sentry[m].probability,  Map.sentry[m].random,  Map.sentry[m].range, Map.sentry[m].alive_sprite, Map.sentry[m].dead_sprite);
+			al_fprintf(logfile,"Sentry %i: x:%i, y:%i, Direction:%i, Type:%i, Period:%i, Prob:%i, Random:%i, Range:%i, Sprite%d, Sprite%d\n",m, Map.sentry[m].x,  Map.sentry[m].y,  Map.sentry[m].direction,  Map.sentry[m].type,  Map.sentry[m].period,  Map.sentry[m].probability,  Map.sentry[m].random,  Map.sentry[m].range, Map.sentry[m].alive_sprite, Map.sentry[m].dead_sprite);
 			Map.sentry[m].range = Map.sentry[m].range * Map.sentry[m].range;	//square to save square rooting later.
 			Map.sentry[m].count = Map.sentry[m].period;	//init countdown timer
 			Map.sentry[m].shield = 15;//SENTRY_SHIELD;		//init shield
@@ -870,7 +872,7 @@ int init_map(char *map_file_name)
 				Map.raceline[p].before_maxx = Map.raceline[p].line_maxx;
 				Map.raceline[p].after_maxx  = Map.raceline[p].line_maxx;
 			}
-			else fprintf(logfile,"X or Y values must match in race start/finish line (i.e. line must be horizontal or vertical)\n");
+			else al_fprintf(logfile,"X or Y values must match in race start/finish line (i.e. line must be horizontal or vertical)\n");
 
             if (Map.raceline[p].reverse)
             {
@@ -879,9 +881,9 @@ int init_map(char *map_file_name)
                 swap(&Map.raceline[p].before_minx, &Map.raceline[p].after_minx);
                 swap(&Map.raceline[p].before_maxx, &Map.raceline[p].after_maxx);
             }
-			fprintf(logfile,"Race %d: x:%d x:%d y:%d y:%d\n",p,Map.raceline[p].line_minx,Map.raceline[p].line_maxx,Map.raceline[p].line_miny,Map.raceline[p].line_maxy);
-			fprintf(logfile,"Before: x:%d x:%d y:%d y:%d\n",Map.raceline[p].before_minx,Map.raceline[p].before_maxx,Map.raceline[p].before_miny,Map.raceline[p].before_maxy);
-			fprintf(logfile,"After:  x:%d x:%d y:%d y:%d\n",Map.raceline[p].after_minx,Map.raceline[p].after_maxx,Map.raceline[p].after_miny,Map.raceline[p].after_maxy);
+			al_fprintf(logfile,"Race %d: x:%d x:%d y:%d y:%d\n",p,Map.raceline[p].line_minx,Map.raceline[p].line_maxx,Map.raceline[p].line_miny,Map.raceline[p].line_maxy);
+			al_fprintf(logfile,"Before: x:%d x:%d y:%d y:%d\n",Map.raceline[p].before_minx,Map.raceline[p].before_maxx,Map.raceline[p].before_miny,Map.raceline[p].before_maxy);
+			al_fprintf(logfile,"After:  x:%d x:%d y:%d y:%d\n",Map.raceline[p].after_minx,Map.raceline[p].after_maxx,Map.raceline[p].after_miny,Map.raceline[p].after_maxy);
 			p++;
 		}
 
@@ -910,20 +912,20 @@ int init_map(char *map_file_name)
 				//Map.forcefield[n].y_force = strength = ff_strength;
 			}
 
-			else fprintf(logfile,"X or Y values must match in forcefield (i.e. line must be horizontal or vertical)\n");
+			else al_fprintf(logfile,"X or Y values must match in forcefield (i.e. line must be horizontal or vertical)\n");
 
 			Map.forcefield[n].alpha = 255;
 			Map.forcefield[n].state = CLOSED;
 
-			fprintf(logfile,"ForceField: x:%d x:%d x:%d y:%d y:%d y:%d\n",Map.forcefield[n].min_x,Map.forcefield[n].half_x,Map.forcefield[n].max_x,Map.forcefield[n].min_y,Map.forcefield[n].half_y,Map.forcefield[n].max_y);
-			fprintf(logfile,"ForceField: strength:%0.0f switch1:%d, switch2:%d\n",Map.forcefield[n].strength,Map.forcefield[n].switch1,Map.forcefield[n].switch2);
+			al_fprintf(logfile,"ForceField: x:%d x:%d x:%d y:%d y:%d y:%d\n",Map.forcefield[n].min_x,Map.forcefield[n].half_x,Map.forcefield[n].max_x,Map.forcefield[n].min_y,Map.forcefield[n].half_y,Map.forcefield[n].max_y);
+			al_fprintf(logfile,"ForceField: strength:%0.0f switch1:%d, switch2:%d\n",Map.forcefield[n].strength,Map.forcefield[n].switch1,Map.forcefield[n].switch2);
 			n++;
 		}
 
 		else if (strncmp(line,"switch",6) == 0)
 		{
 			sscanf(line+6," %i %i %i %i %i ",                                        &Map.switches[o].x, &Map.switches[o].y, &Map.switches[o].closed_sprite, &Map.switches[o].open_sprite, &Map.switches[o].open_time);
-			fprintf(logfile,"Switch %i: x:%i, y:%i, Sprite%d, Sprite%d, Time:%d\n",o, Map.switches[o].x,  Map.switches[o].y,  Map.switches[o].closed_sprite,  Map.switches[o].open_sprite,  Map.switches[o].open_time);
+			al_fprintf(logfile,"Switch %i: x:%i, y:%i, Sprite%d, Sprite%d, Time:%d\n",o, Map.switches[o].x,  Map.switches[o].y,  Map.switches[o].closed_sprite,  Map.switches[o].open_sprite,  Map.switches[o].open_time);
 			Map.switches[o].shield = 15;		//init shield
 			Map.switches[o].open = 0;
 			o++;
@@ -939,28 +941,28 @@ int init_map(char *map_file_name)
 	Map.num_racelines = p;
 
 	if (Map.display_file_name[0] == 0)
-		fprintf(logfile,"ERROR: No display file specified\n");
+		al_fprintf(logfile,"ERROR: No display file specified\n");
 	if (Map.collision_file_name[0] == 0)
-		fprintf(logfile,"ERROR: No collision file specified\n");
+		al_fprintf(logfile,"ERROR: No collision file specified\n");
 	if (Map.type == 1)
 	{
 		if (Map.ascii_map_file_name[0] == 0)
-			fprintf(logfile,"ERROR: No ASCII map file specified\n");
+			al_fprintf(logfile,"ERROR: No ASCII map file specified\n");
 	}
 	if (Map.num_sentries != 0)
 	{
 		if (Map.sentry_file_name[0] == 0)
-			fprintf(logfile,"ERROR: No sentry display file specified\n");
+			al_fprintf(logfile,"ERROR: No sentry display file specified\n");
 
 		if (Map.sentry_collision_file_name[0] == 0)
-			fprintf(logfile,"Possible error: No sentry collision file specified. Sentries will be indestructible.\n");
+			al_fprintf(logfile,"Possible error: No sentry collision file specified. Sentries will be indestructible.\n");
 	}
 	if (Map.num_pads == 0)
-		fprintf(logfile,"ERROR: No pads specified\n");
+		al_fprintf(logfile,"ERROR: No pads specified\n");
 
-	fprintf(logfile,"--End of mapfile %s--\n",map_file_name);
+	al_fprintf(logfile,"--End of mapfile %s--\n",map_file_name);
 
-	fflush(logfile);
+	al_fflush(logfile);
 	fclose  (map_file);
 	return 0;
 }
@@ -1059,8 +1061,8 @@ void save_map_file (void)
 
 void Exit(void)
 {
-	fprintf(logfile,"Exiting\n");
-	fclose(logfile);
+	al_fprintf(logfile,"Exiting\n");
+	al_fclose(logfile);
     if (tiles)
     {
         al_destroy_bitmap(tiles);
