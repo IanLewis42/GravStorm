@@ -360,98 +360,68 @@ void CheckTouchControls(ALLEGRO_EVENT event)
         ButtonType oldbutton = Touch[i].button;
 		Touch[i].button = FindButton(event.touch.x, event.touch.y);
 
-		if (oldbutton == DPAD)        //touch WAS on DPAD
-		{
-			if (Touch[i].button == DPAD)             //touch STILL on DPAD
-			{
-				DoDPAD(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
-			}
-			else    //drag DPAD - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
-			{
-				if (event.touch.x < Ctrl.ctrl[DPAD].x) {
-                    Ctrl.ctrl[DPAD].x = event.touch.x;
-                    Ctrl.ctrl[ASTICK].x = event.touch.x;
+        switch (oldbutton) {
+            case DPAD: {
+                if (Touch[i].button == DPAD)             //touch STILL on DPAD
+                {
+                    DoDPAD(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
+                } else    //drag DPAD - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
+                {
+                    if (event.touch.x < Ctrl.ctrl[DPAD].x) {
+                        Ctrl.ctrl[DPAD].x = event.touch.x;
+                        Ctrl.ctrl[ASTICK].x = event.touch.x;
+                    } else if (event.touch.x > Ctrl.ctrl[DPAD].x + Ctrl.ctrl[DPAD].size) {
+                        Ctrl.ctrl[DPAD].x = event.touch.x - Ctrl.ctrl[DPAD].size;
+                        Ctrl.ctrl[ASTICK].x = event.touch.x - Ctrl.ctrl[DPAD].size;
+                    }
+                    if (event.touch.y < Ctrl.ctrl[DPAD].y) {
+                        Ctrl.ctrl[DPAD].y = event.touch.y;
+                        Ctrl.ctrl[ASTICK].y = event.touch.y;
+                    } else if (event.touch.y > Ctrl.ctrl[DPAD].y + Ctrl.ctrl[DPAD].size) {
+                        Ctrl.ctrl[DPAD].y = event.touch.y - Ctrl.ctrl[DPAD].size;
+                        Ctrl.ctrl[ASTICK].y = event.touch.y - Ctrl.ctrl[DPAD].size;
+                    }
+                    Touch[i].button = DPAD;
                 }
-				else if (event.touch.x > Ctrl.ctrl[DPAD].x + Ctrl.ctrl[DPAD].size) {
-                    Ctrl.ctrl[DPAD].x = event.touch.x - Ctrl.ctrl[DPAD].size;
-                    Ctrl.ctrl[ASTICK].x = event.touch.x - Ctrl.ctrl[DPAD].size;
-                }
-				if (event.touch.y < Ctrl.ctrl[DPAD].y) {
-                    Ctrl.ctrl[DPAD].y = event.touch.y;
-                    Ctrl.ctrl[ASTICK].y = event.touch.y;
-                }
-				else if (event.touch.y > Ctrl.ctrl[DPAD].y + Ctrl.ctrl[DPAD].size) {
-                    Ctrl.ctrl[DPAD].y = event.touch.y - Ctrl.ctrl[DPAD].size;
-                    Ctrl.ctrl[ASTICK].y = event.touch.y - Ctrl.ctrl[DPAD].size;
-                }
-				Touch[i].button = DPAD;
-			}
-		}
-		else if (oldbutton == ASTICK)                    //touch was on ASTICK
-		{
-            //don't drag - but keep updating.
-            Touch[i].button = ASTICK;
-            DoAStick(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
-
-            /*
-            if (Touch[i].button == ASTICK)             //touch STILL on ASTICK
-			{
-				DoAStick(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
-			}
-			else    //drag ASTICK - hopefully don't need to limit, as event.touch.x/y shouldn't go off screen
-			{
-                int w = al_get_display_width(display);
-                int h = al_get_display_height(display);
-
-                if (event.touch.x > 0.95*w) event.touch.x = 0.95*w;
-
-				if (event.touch.x < Ctrl.ctrl[ASTICK].x)
-					Ctrl.ctrl[ASTICK].x = event.touch.x;
-				else if (event.touch.x > Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size)
-                    Ctrl.ctrl[ASTICK].x = event.touch.x - Ctrl.ctrl[ASTICK].size;
-
-
-				if (event.touch.y < Ctrl.ctrl[DPAD].y)
-					Ctrl.ctrl[ASTICK].y = event.touch.y;
-				else if (event.touch.y > Ctrl.ctrl[ASTICK].y + Ctrl.ctrl[ASTICK].size)
-					Ctrl.ctrl[ASTICK].y = event.touch.y - Ctrl.ctrl[ASTICK].size;
-
+            }
+            case ASTICK: {
+                //don't drag - but keep updating.
                 Touch[i].button = ASTICK;
-				DoAStick(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
-			}
-			 */
-		}
+                DoAStick(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
+            }
+            case THRUST_BUTTON: {
+                if (Touch[i].button == THRUST_BUTTON)  //touch still on thrust
+                {}                                  //nothing to do
 
-		 else if (oldbutton == THRUST_BUTTON)        //touch was on thrust
-		{
-			if (Touch[i].button == THRUST_BUTTON)  //touch still on thrust
-			{}                                  //nothing to do
-
-			else //drag thrust button - NO!
-			{
-				/*if (event.touch.x < Ctrl.ctrl[THRUST_BUTTON].x)
-					Ctrl.ctrl[THRUST_BUTTON].x = event.touch.x;
-				else if (event.touch.x > Ctrl.ctrl[THRUST_BUTTON].x + Ctrl.ctrl[THRUST_BUTTON].size)
-					Ctrl.ctrl[THRUST_BUTTON].x = event.touch.x - Ctrl.ctrl[THRUST_BUTTON].size;
-				if (event.touch.y < Ctrl.ctrl[THRUST_BUTTON].y)
-					Ctrl.ctrl[THRUST_BUTTON].y = event.touch.y;
-				else if (event.touch.y > Ctrl.ctrl[THRUST_BUTTON].y + Ctrl.ctrl[THRUST_BUTTON].size)
-					Ctrl.ctrl[THRUST_BUTTON].y = event.touch.y - Ctrl.ctrl[THRUST_BUTTON].size;
-				Touch[i].button = THRUST_BUTTON;*/
-				TouchJoystick.button_up = true;
-                Ctrl.ctrl[THRUST_BUTTON].idx = 0;
-			}
-		}
-
-
-		else if (oldbutton == NO_BUTTON)            //were on no button
-		{
-			if (Touch[i].button != NO_BUTTON)       //now touching button
-			{
-				NewTouch(Touch[i].x, Touch[i].y,i);                  //treat as new touch
-			}
-		}
-		//don't need any other cases, don't care about holding or release of other buttons.???
+                else //drag thrust button - NO!
+                {
+                    TouchJoystick.button_up = true;
+                    Ctrl.ctrl[THRUST_BUTTON].idx = 0;
+                }
+            }
+            case FIRE1:
+                if (Touch[i].button != FIRE1) {
+                    TouchJoystick.up_up = true;
+                    Ctrl.ctrl[FIRE1].idx = 0;
+                }
+            break;
+            case FIRE2:
+                if (Touch[i].button != FIRE2) {
+                    TouchJoystick.down_up = true;
+                    Ctrl.ctrl[FIRE2].idx = 0;
+                }
+            break;
+            case NO_BUTTON: {
+                if (Touch[i].button != NO_BUTTON)       //now touching button
+                {
+                    NewTouch(Touch[i].x, Touch[i].y, i);                  //treat as new touch
+                }
+            }
+            //other buttons, just un-press (only affects drawing)
+            default :
+               if (Touch[i].button != oldbutton)
+                Ctrl.ctrl[oldbutton].idx = 0;       //unpress
+        }
 		return;
 	}
 }
