@@ -538,16 +538,18 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
                                 }
                                 else //local, or network, and it's the server that's been hit
                                 {
-                                    Ship[i].shield -= Bullet[j].damage;				//decrement shield
-                                    if (Ship[i].shield <= 0)
-                                    {
-                                        Ship[i].killed++;
-                                        if (Bullet[j].owner != NO_OWNER)
-                                            Ship[Bullet[j].owner].kills++;
+                                    if (Ship[i].shield > 0) {                               //prevent multiple kills from 1 'spreader'
+                                        Ship[i].shield -= Bullet[j].damage;                //decrement shield
+                                        if (Ship[i].shield <= 0) {
+                                            Ship[i].killed++;
+                                            if (Bullet[j].owner != NO_OWNER)
+                                                Ship[Bullet[j].owner].kills++;
+                                        }
+                                        Ship[i].xv += Bullet[j].mass *
+                                                      Bullet[j].xv;    //momentum from bullet to ship
+                                        Ship[i].yv += Bullet[j].mass * Bullet[j].yv;
+                                        ScheduleVibrate(Bullet[j].damage);
                                     }
-                                    Ship[i].xv     += Bullet[j].mass*Bullet[j].xv;	//momentum from bullet to ship
-                                    Ship[i].yv     += Bullet[j].mass*Bullet[j].yv;
-                                    ScheduleVibrate(Bullet[j].damage);
                                 }
 
                                 if (Bullet[j].type == BLT_HEAVY)    //stop explosion on hitting ship

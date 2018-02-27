@@ -384,11 +384,13 @@ void CheckTouchControls(ALLEGRO_EVENT event)
                     Touch[i].button = DPAD;
                 }
             }
+            break;
             case ASTICK: {
                 //don't drag - but keep updating.
                 Touch[i].button = ASTICK;
                 DoAStick(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
             }
+            break;
             case THRUST_BUTTON: {
                 if (Touch[i].button == THRUST_BUTTON)  //touch still on thrust
                 {}                                  //nothing to do
@@ -399,6 +401,7 @@ void CheckTouchControls(ALLEGRO_EVENT event)
                     Ctrl.ctrl[THRUST_BUTTON].idx = 0;
                 }
             }
+            break;
             case FIRE1:
                 if (Touch[i].button != FIRE1) {
                     TouchJoystick.up_up = true;
@@ -417,6 +420,7 @@ void CheckTouchControls(ALLEGRO_EVENT event)
                     NewTouch(Touch[i].x, Touch[i].y, i);                  //treat as new touch
                 }
             }
+            break;
             //other buttons, just un-press (only affects drawing)
             default :
                if (Touch[i].button != oldbutton)

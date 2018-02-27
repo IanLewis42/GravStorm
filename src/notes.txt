@@ -786,9 +786,12 @@ X fade on android instructions.
 #* LH controls?? swap button displayed where radar is, during menus.
 * remove red highlighting 
 * waiting for host animation? seems ok.
+/////////////Play store. 1.02
 * new flicker fix
-* zero controls on menu state scahnge
+* zero controls on menu state change
 * size / switch buttons work on level text screen
+/////////////Play store. 1.03
+* touch move off -> release button.
 ->github
 ->playstore (password for APK signing is usual....)
 - ->kids
@@ -818,6 +821,7 @@ MAYBE LATER.....
   no events -> ignore for now.....
 - back/exit on system back button? 
   can override OnBackPressed, but don't hit it.....Maybe because we need to override in AllegroActivity, not MainActivity??
+  Ah, is this because I'm using the FP sensor again???
 - recalc scale on menu state change?? (why??) - to recover broken startup condition??
 - control size storing (size and location)
  

@@ -1553,9 +1553,9 @@ void draw_debug(void)
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[d].angle);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Shield: %d", Ship[d].shield);
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "G: %.2f", Ship[d].gravity);
-
+*/
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Kills:%d",Ship[d].kills);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Killed:%d",Ship[d].killed);
+    /*al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Killed:%d",Ship[d].killed);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Crashes:%d",Ship[d].crashed);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Ammo2:%d",(Ship[d].ammo2*25)/2);
      */
