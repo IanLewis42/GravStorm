@@ -1,0 +1,76 @@
+INSTRUCTIONS:
+
+Fly around, shoot your enemy, don't crash into the walls :-)
+
+If it's a mission level, rescue miners, and pick up bonus 
+jewels by landing on the pads. Fly off away from the surface 
+to complete the level.
+
+[ctrl]10
+[ctrl]11 
+ 
+ 
+                       
+                          Use the direction pad to steer your ship...
+ 
+ 
+ 
+[ctrl]2
+
+               
+                    ...and the thrust button to fire your engine.
+
+
+[ctrl]6
+             
+             This fires your normal weapon...      
+                  
+[ctrl]7
+
+             ...and this fires your special weapon.
+             Press while on your home pad to adjust your fuel and ammo.
+[ctrl]8
+             
+             This one toggles your radar
+
+[ctrl]4
+
+             This makes the controls larger...
+
+[ctrl]5
+
+             this makes them smaller
+
+[ctrl]9
+
+             And this swaps the controls left/right
+
+
+The status panel is in the top left corner
+[status]        
+                       Shield
+                       Normal Ammo
+                       Special Ammo
+                       Fuel
+                       Ships left
+                     
+Mission/Race time is shown below the status panel, 
+along with miners rescued and jewels collected.
+
+ Credits:
+   Game design and coding by Ian Lewis.
+   Huge thanks to Heikki Kossola, the creator of TurboRaketti.
+   Also thanks to the Allegro community.
+ Graphics provided by:
+   Asbjorn Djupdal
+   SpiralGraphics.biz
+   pzUH / GameArt2D.com
+   justinredfield.deviantart.com
+   Kaladun on imgur.com
+   thefirstfleet.deviantart.com
+   KIIRA
+ Music by KIIRA
+ Fonts Used:
+   Audiowide (Astigmatic One Eye)
+   Zebulon (Pixel Sagas) 
+   7-Segment (IPL)
