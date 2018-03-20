@@ -25,7 +25,7 @@ o Windows
   If you run it on any other version, please let me know how you get on.
   
 o Android  
-  Development is awaiting my acquisition of a 64-bit Windows PC. Android studio doesn't like 32-bit Windows.....
+  Available on google Play store. Free, obviously :-) Phone or tablet, Android 4.4 and up.
 
 o iOS
   No chance. Unless you want to do it :-)
@@ -91,12 +91,15 @@ Press any key to skip the title screen and go to the menu.
 In general, use up and down cursor keys to navigate the menu, left and right to change a highlighted item.
 'Enter' will take you forward to the next menu level, 'Escape' will take you back to the previous level.
 
+Menus on Android are touchy/scrolly as you'd (hopefully) expect.
+
 o MODE
   Use cursor 'up' and 'down' to select game mode.
     Local Game        - Select this for single player, or for up to 4 players in split-screen mode on the same device.
     Host Network Game - Select this to allow other players to join 'your' game. As the host, you get to select the level.
     Join Network Game - Select this to join a game hosted by another player.
-  
+    Instructions      - Select this to show instructions(!)
+    
     NOTE: Network support is ONLY for a local network, not over the internet.
   Enter:  Next menu
   Escape: Exit 
@@ -115,6 +118,8 @@ o PLAYERS
 
 NOTE: Any set of player defined keys, or joystick can also be used to navigate the menu. 
 
+
+
 PLAYING
 -------
 Default controls are:
@@ -125,6 +130,8 @@ Right and Left rotate the ship clockwise and anti-clockwise.
 Up/Forwards fires your 'normal' weapon (rapid fire, low damage)
 Down/Back fires your 'special' weapon (limited ammo, more damage, various types)
 Thrust/Joystick Button fires your engine.
+
+Android uses touch screen controls, described in the instructions available from teh first menu.
 
 Some levels have a race track. This should be described in the level text.
 Current lap time, last completed lap time and best lap time for this game are displayed in the status panel.
@@ -179,7 +186,7 @@ For network games, a file called 'host.txt' or 'client.txt' will also be produce
 
 KNOWN ISSUES
 ------------
-On Raspberry Pi, there's a significant lag between events that cause sounds and the sounds themselves. I've spent a while trying to fix it. If anyone knows all about ALSA, please get in touch!
+On Raspberry Pi, there's a significant lag between events that cause sounds and the sounds themselves. I've spent a while trying to fix it. If anyone knows all about ALSA, please get in touch! EDIT: It seems that this issue has been fixed in the latest version of the Allegro library. 
 
 MAKING MAPS
 -----------
@@ -189,7 +196,7 @@ The game has been designed to make creating your own levels as easy as possible.
 
 I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusion this causes :-)
 
-- The file 'data/maps.txt' lists all the maps(/levels) that can be played. A colon ':' at the start of an entry indicates a group. Each entry in maps.txt (apart from the groups) must have a corresponding .txt file in the /data directory. So if the entry in maps.txt is my_level, you must have a file called data/my_level.txt
+- The file 'data/maps.txt' lists all the maps(/levels) that can be played. A colon ':' at the start of an entry indicates a group. Each entry in maps.txt (apart from the groups) must have a corresponding .txt file in the /data directory. So if the entry in maps.txt is my_level, you must have a file called data/my_level.txt. (This applies to Raspberry Pi & Windows versions. Android packs everything into an .apk file, so you need to download the source from Github, add your data files to \app\src\main\assets and then build the app.)
   
 - This .txt file contains all the information about the level. Each parameter should be typed on its own line. 
   Pretty much anything (other than whitespace) can be used as a single-line comment, but I tend to use a semicolon ;
@@ -288,7 +295,7 @@ o sentry <x> <y> <direction> <type>(0/1/2) <period> <probability> <random> <rang
                  2 is 'volcano' (lava coloured bullets) damage = 10
   
   <period> <probability> every <period> frames, the sentry has <probability> of firing. Each frame is 1/30th of a second.
-    e.g. if period is 30 and probability is 50, then each secondd, the sentry has a 50% chance of firing.
+    e.g. if period is 30 and probability is 50, then each second, the sentry has a 50% chance of firing.
   
   <random> amount of randomness applied to each shot. Typically 0-20.
   
@@ -360,7 +367,7 @@ Alternatively, you can edit the ascii map file in a text editor, and reload it u
 
 LEGAL STUFF
 -----------
-GravStorm Copyright (C) 2015-2017  Ian Lewis
+GravStorm Copyright (C) 2015-2018  Ian Lewis
 This program and its source code are released under the GPL.
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
@@ -369,5 +376,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 02/03/17
+IPL 20/03/18
 gravstorm9@gmail.com

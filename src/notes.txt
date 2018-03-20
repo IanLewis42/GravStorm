@@ -718,8 +718,8 @@ in touch handler
 - touch cancel: ??
 
 in display
-- multiply speed by damping factor
-- add speed to offfset
+- multiply speed by damping factor (?)
+- add speed to offset
 - limit offset. ping if limiting
 - draw with offset
 
@@ -727,6 +727,11 @@ Add field(s) to Command struct for menu selection??
 or have menu code read touch array?
 
 need left/right buttons for ship selection, I think.....
+
+---------
+could have touch to select / display, then tick button to confirm.
+or 
+
 
 **MUSIC/FX VOLUME
 
@@ -792,12 +797,16 @@ X fade on android instructions.
 * size / switch buttons work on level text screen
 /////////////Play store. 1.03
 * touch move off -> release button.
+* scroll/touch menus
+* less debounce
+* 5/3 buttons
+- network messages (fit on screen, show waiting?)
 ->github
 ->playstore (password for APK signing is usual....)
 - ->kids
 - videos
 - promote
-- code clean up
+- code clean up (dead code, scale factors)
 
 Added instructions
 Added support for Android Immersive Mode
@@ -812,7 +821,7 @@ MAYBE LATER.....
 ----------------
 - 8 way level? team mode? (switch in txt file)
   - can't quite see how 'capture the flag' works, unless it's just land on 'their' base
-  - or first to land on 'centre' pad?? - Can't really retrieve anything, as what happens if (when) you crash omn the way back?
+  - or first to land on 'centre' pad?? - Can't really retrieve anything, as what happens if (when) you crash on the way back?
   - so just (team) kill count?
   - if (team) -> only 2 ship choices, random allocation? or alternate? allow changing?
   - count kills/lives at end, add up those for same team.....

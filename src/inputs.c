@@ -43,6 +43,8 @@ JoystickType TouchJoystick; //for android
 
 TouchType Touch[NUM_TOUCHES];
 
+SelectType Select;  //for touch menu control. Couldn't think of a better name.....
+
 bool key_down_log[ALLEGRO_KEY_MAX];
 bool key_up_log[ALLEGRO_KEY_MAX];
 
@@ -274,6 +276,7 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event)
 void CheckTouchControls(ALLEGRO_EVENT event)
 {
 	int i;
+    //int w,h;
 
 	if (event.type == ALLEGRO_EVENT_TOUCH_BEGIN) {
 		//find free entry in touch array
@@ -285,7 +288,7 @@ void CheckTouchControls(ALLEGRO_EVENT event)
         }
 
 		Touch[i].id = event.touch.id;
-		Touch[i].count = 1;
+		Touch[i].count = 1;                 //start debounce
         Touch[i].x = event.touch.x;
         Touch[i].y = event.touch.y;
 	}
@@ -335,9 +338,13 @@ void CheckTouchControls(ALLEGRO_EVENT event)
 			case SMALLER:
 				Ctrl.ctrl[SMALLER].idx = 0;
 				break;
+            case NO_BUTTON:
+                Select.x = event.touch.x;
+                Select.y = event.touch.y;
+                Select.action = TOUCH;
+                break;
             case ASTICK:
             case ASTICK2:
-            case NO_BUTTON:
             default:
             break;
 		}
@@ -419,6 +426,20 @@ void CheckTouchControls(ALLEGRO_EVENT event)
                 {
                     NewTouch(Touch[i].x, Touch[i].y, i);                  //treat as new touch
                 }
+                else
+                {
+                    //w = al_get_display_width(display);
+                    //h = al_get_display_height(display);
+                    Select.sumdx += event.touch.dx;
+                    if (Select.sumdx > Select.sumdxmax) Select.sumdx = Select.sumdxmax;
+                    if (Select.sumdx < Select.sumdxmin) Select.sumdx = Select.sumdxmin;
+                    Select.sumdy += event.touch.dy;
+                    if (Select.sumdy > Select.sumdymax) Select.sumdy = Select.sumdymax;
+                    if (Select.sumdy < Select.sumdymin) Select.sumdy = Select.sumdymin;
+                    Select.x = event.touch.x;
+                    Select.y = event.touch.y;
+                    Select.action = MOVE;
+                }
             }
             break;
             //other buttons, just un-press (only affects drawing)
@@ -459,7 +480,7 @@ int relx,rely;
 
 void NewTouch(float x, float y, int i)
 {
-    int j;
+    int j;//,w,h;
 
     switch (Touch[i].button) {
 		case DPAD:
@@ -471,9 +492,13 @@ void NewTouch(float x, float y, int i)
 			DoAStick(x, y);
 			break;
 		case THRUST_BUTTON:
-		case SELECT:
-			TouchJoystick.button_down = true;
-			Ctrl.ctrl[THRUST_BUTTON].idx = 1;
+            TouchJoystick.button_down = true;
+            Ctrl.ctrl[THRUST_BUTTON].idx = 1;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
+            break;
+        case SELECT:
+            Command.goforward = true;
 			Ctrl.ctrl[SELECT].idx = 1;
 			Touch[i].valid = 0;
 			Touch[i].count = 0;
@@ -490,10 +515,6 @@ void NewTouch(float x, float y, int i)
 			Touch[i].valid = 0;
 			Touch[i].count = 0;
 			break;
-			//case START:
-			//case SELECT:
-			//    Command.goforward = true;
-			//break;
 		case FIRE1:
 			TouchJoystick.up_down = TRUE;
 			Ctrl.ctrl[FIRE1].idx = 1;
@@ -515,22 +536,6 @@ void NewTouch(float x, float y, int i)
 				Ctrl.ctrl[j].x -= Ctrl.ctrl[j].movex;
 				Ctrl.ctrl[j].y -= Ctrl.ctrl[j].movey;
 			}
-			/*
-            Ctrl.ctrl[BACK].x -= 20;
-            Ctrl.ctrl[SMALLER].x -= 10;
-            Ctrl.ctrl[BIGGER].x += 0;
-            Ctrl.ctrl[RADAR].x += 10;
-            Ctrl.ctrl[THRUST_BUTTON].y -=10;
-            Ctrl.ctrl[SELECT].y -=10;
-            Ctrl.ctrl[DPAD].x -=10;
-            Ctrl.ctrl[DPAD].y -=10;
-            Ctrl.ctrl[ASTICK].x -=10;
-            Ctrl.ctrl[ASTICK].y -=10;
-            Ctrl.ctrl[ASTICK2].x -=10;
-            Ctrl.ctrl[ASTICK2].y -=10;
-            Ctrl.ctrl[FIRE1].y -=10;
-            Ctrl.ctrl[FIRE2].y -=10;
-            */
             Touch[i].valid = 0;
             Touch[i].count = 0;
         break;
@@ -542,42 +547,28 @@ void NewTouch(float x, float y, int i)
 				Ctrl.ctrl[j].x += Ctrl.ctrl[j].movex;
 				Ctrl.ctrl[j].y += Ctrl.ctrl[j].movey;
 			}
-            /*
-			Ctrl.ctrl[BACK].x += 20;
-            Ctrl.ctrl[SMALLER].x += 10;
-            Ctrl.ctrl[BIGGER].x -= 0;
-            Ctrl.ctrl[RADAR].x -= 10;
-
-            Ctrl.ctrl[THRUST_BUTTON].y +=10;
-            Ctrl.ctrl[SELECT].y +=10;
-
-             Ctrl.ctrl[DPAD].x +=10;
-            Ctrl.ctrl[DPAD].y +=10;
-
-             Ctrl.ctrl[ASTICK].x +=10;
-            Ctrl.ctrl[ASTICK].y +=10;
-
-             Ctrl.ctrl[ASTICK2].x +=10;
-            Ctrl.ctrl[ASTICK2].y +=10;
-
-             Ctrl.ctrl[FIRE1].y +=10;
-
-             Ctrl.ctrl[FIRE2].y +=10;
-             */
             Touch[i].valid = 0;
             Touch[i].count = 0;
             break;
         case REVERSE:
-            flip(DPAD);
-            flip(SELECT);
+            //flip(DPAD);
+            //flip(SELECT);
             flip(ASTICK);
             flip(ASTICK2);
             flip(THRUST_BUTTON);
             flip(FIRE1);
             flip(FIRE2);
         break;
-        case ASTICK2:
         case NO_BUTTON:
+            //w = al_get_display_width(display);
+            //h = al_get_display_height(display);
+            //Select.sumdx = 0;
+            //Select.sumdy = 0;
+            //Select.x = x;
+            //Select.y = y;
+            //Select.action = TOUCH;
+            break;
+        case ASTICK2:
         default:
         break;
     }

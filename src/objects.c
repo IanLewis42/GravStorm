@@ -530,8 +530,9 @@ void UpdateLandedShip(int i)
 	}
 
 	//thrust makes us live again
-	if (Ship[i].thrust_held)
+	if (Ship[i].thrust_held || Command.goforward)
 	{
+		Command.goforward = FALSE;
 		Ship[i].menu = FALSE;
 		Ship[i].landed = FALSE;
 		Ship[i].thrust = THRUST;
@@ -544,7 +545,52 @@ void UpdateLandedShip(int i)
 
 	else if (Ship[i].menu)
 	{
-		if (Ship[i].fire1_down)	//move up
+#ifdef ANDROID
+		if (Select.action == TOUCH || Select.action == MOVE)
+        {
+            Select.action = NO_ACTION;
+            if (Select.x > Scale.xmin && Select.x < Scale.xmax)
+            {                                                                //thresholds are top of corresponding area
+                if (Select.y > Scale.ammo1level)                             //below top of ammolevel...
+                {
+                    if (Select.y < Scale.ammo1type) {                       //above ammo1 type, so adjust ammo1 level
+                        Ship[i].user_ammo1 = ((Select.x - Scale.xmin) * 100) / Scale.xdiff;
+                        ScheduleVibrate(30);
+                        if (Ship[i].user_ammo1 < Ship[i].ammo1)
+                            Ship[i].ammo1 = Ship[i].user_ammo1;
+
+                    }
+                    else if (Select.y < Scale.ammo2level) {                 //above ammo2 level, so adjust ammo1 type
+                        if (Ship[i].ammo1_type != (int)(((Select.x - Scale.xmin) * 4) / Scale.xdiff)) {
+                            Ship[i].ammo1_type = ((Select.x - Scale.xmin) * 4) / Scale.xdiff;
+                            al_play_sample_instance(clunk_inst);
+                            ScheduleVibrate(30);
+                        }
+                    }
+                    else if (Select.y < Scale.ammo2type) {
+                        Ship[i].user_ammo2 = 0.5 + ((Select.x - Scale.xmin) * 8) / Scale.xdiff;
+                        ScheduleVibrate(30);
+                        if (Ship[i].user_ammo2 < Ship[i].ammo2)
+                            Ship[i].ammo2 = Ship[i].user_ammo2;
+                    }
+                    else if (Select.y < Scale.fuellevel) {
+                        if (Ship[i].ammo2_type != (int)(4 + ((Select.x - Scale.xmin) * 4) / Scale.xdiff)) {
+                            Ship[i].ammo2_type = 4 + ((Select.x - Scale.xmin) * 4) / Scale.xdiff;
+                            al_play_sample_instance(clunk_inst);
+                            ScheduleVibrate(30);
+                        }
+                    }
+                    else if (Select.y < Scale.ymax) {
+                        Ship[i].user_fuel = ((Select.x - Scale.xmin) * 100) / Scale.xdiff;
+                        ScheduleVibrate(30);
+                        if (Ship[i].user_fuel<<4 < Ship[i].fuel)
+                            Ship[i].fuel = Ship[i].user_fuel<<4;
+                    }
+                }
+            }
+        }
+#endif
+        if (Ship[i].fire1_down)	//move up
 		{
 			Ship[i].fire1_down = false;	//one shot
 

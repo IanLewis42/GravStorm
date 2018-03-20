@@ -58,13 +58,35 @@ typedef struct
     float y;
 } JoystickType;
 
+typedef enum
+{
+    NO_ACTION=0,
+    TOUCH,
+    MOVE
+}SelectActionType;
 
+typedef struct
+{
+    float x;
+    float y;
+    float dx;
+    float dy;
+    float sumdx;
+    float sumdy;
+    float sumdxmax;
+    float sumdxmin;
+    float sumdymax;
+    float sumdymin;
+    int line;
+    SelectActionType action;
+}SelectType;
 
 extern ALLEGRO_JOYSTICK *USBJOY[2];
 extern bool key_down_log[ALLEGRO_KEY_MAX];
 extern bool key_up_log[ALLEGRO_KEY_MAX];
 extern JoystickType USBJoystick[2];
 extern JoystickType TouchJoystick;
+extern SelectType Select;  //for touch menu control. Couldn't think of a better name.....
 extern int relx,rely;
 
 void ScanInputs(int num_ships);

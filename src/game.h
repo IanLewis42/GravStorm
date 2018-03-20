@@ -22,7 +22,7 @@
 //#define  WINDOWS 1
 
 #define NAME "GravStorm"
-#define VERSION "V1.0.0.0"
+#define VERSION "V1.03"
 
 #define TRUE 1
 #define FALSE 0
@@ -34,8 +34,8 @@
 #define SCREENX 1024//1280//1920 //1024
 #define SCREENY 576//720//1080 //768
 
-#define STATUS_BAR_WIDTH 150
-#define STATUS_BAR_HEIGHT 720
+#define PANEL_WIDTH 565
+#define PANEL_HEIGHT 360
 
 #define MAX_MAP_WIDTH 100
 #define MAX_MAP_HEIGHT 100
@@ -334,6 +334,7 @@ extern char map_names[MAP_NAME_LENGTH * MAX_MAPS];
 typedef struct
 {
 	char map[MAP_NAME_LENGTH];
+    int players;
 } MapNameType;
 
 typedef struct
@@ -385,7 +386,7 @@ typedef struct
 #define NUM_TOUCHES 6
 extern TouchType Touch[NUM_TOUCHES];
 #define NO_TOUCH 0xffff
-#define TOUCH_THRESHOLD 3
+#define TOUCH_THRESHOLD 2
 
 typedef struct
 {
@@ -425,6 +426,25 @@ typedef struct
     int bigger;
     int smaller;
 }CommandType;
+
+typedef struct
+{
+    float scale;
+    float invscale;
+    float fontscale;
+    float menuscale;    //for panel / config menu
+    float xmin;
+    float xmax;
+    float xdiff;
+    float ammo1level;
+    float ammo1type;
+    float ammo2level;
+    float ammo2type;
+    float fuellevel;
+    float ymax;
+}ScaleType;
+
+extern ScaleType Scale;
 
 extern CommandType Command;
 
@@ -468,5 +488,6 @@ void MenuControls(void);
 void GameControls(void);
 int read_maps(void);
 void Exit(void);
+void CalcScales(void);
 void draw_debug(void);
 void SystemBackPressed(void);

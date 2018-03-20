@@ -119,6 +119,7 @@ MenuType Menu;
 RadarType Radar;
 CtrlsType Ctrl;
 CommandType Command;
+ScaleType Scale;
 
 char map_names[MAP_NAME_LENGTH * MAX_MAPS];
 
@@ -339,6 +340,7 @@ int game(int argc, char **argv )
     else scale = scaley;
 
     invscale = 1/scale;
+    CalcScales();
 
     al_fprintf(logfile,"Display Created. Scale = %f, i/scale = %f\n",scale,invscale);
     al_fflush(logfile);
@@ -480,6 +482,8 @@ int game(int argc, char **argv )
 		if ((panel_pressed_bmp = al_load_bitmap("panel_pressed.png")) == NULL)  al_fprintf(logfile,"panel_pressed.png load fail");
         if ((ui = al_load_bitmap("ui.png")) == NULL)  al_fprintf(logfile,"ui.png load fail");
         make_bullet_bitmap();
+
+        CalcScales();   //do again for panel.
 
 		al_fprintf(logfile,"Init Ships\n");	//init ship structs
 		init_ships(MAX_SHIPS);				//read stuff from map struct.
@@ -681,7 +685,7 @@ int game(int argc, char **argv )
                             d++;
                             if (d >= MAX_SHIPS) d = 0;
                         }
-                        
+
                         if (event.keyboard.keycode == ALLEGRO_KEY_PGUP) {
                             scale += 0.025;
                             invscale = 1 / scale;
@@ -857,6 +861,11 @@ int game(int argc, char **argv )
 
 				if (Net.client)
                 {
+                    char buffer[256];
+                    strcpy(buffer,NAME);
+                    sprintf(buffer+strlen(NAME)," (Client: %s ; %d players : Q:%.1f)",Net.myaddress,num_ships,Net.quality);
+                    al_set_window_title(display, buffer);
+
                     if (!game_over)
                     {
                         //NetSendKeys();  //send keypresses to server
@@ -1011,9 +1020,9 @@ void MenuControls(void)
     Ctrl.ctrl[FIRE1].active = FALSE;
     Ctrl.ctrl[FIRE2].active = FALSE;
     Ctrl.ctrl[THRUST_BUTTON].active = FALSE;
-    Ctrl.ctrl[DPAD].active = TRUE;
+    //Ctrl.ctrl[DPAD].active = TRUE;
     Ctrl.ctrl[SELECT].active = TRUE;
-    Ctrl.ctrl[REVERSE].active = TRUE;
+    //Ctrl.ctrl[REVERSE].active = TRUE;
 }
 
 void GameControls(void)
@@ -1024,9 +1033,9 @@ void GameControls(void)
     Ctrl.ctrl[FIRE1].active = TRUE;
     Ctrl.ctrl[FIRE2].active = TRUE;
     Ctrl.ctrl[THRUST_BUTTON].active = TRUE;
-    Ctrl.ctrl[DPAD].active = FALSE;
+    //Ctrl.ctrl[DPAD].active = FALSE;
     Ctrl.ctrl[SELECT].active = FALSE;
-    Ctrl.ctrl[REVERSE].active = FALSE;
+    //Ctrl.ctrl[REVERSE].active = FALSE;
 }
 
 void SystemBackPressed(void)
@@ -1138,6 +1147,52 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     */
 }
 
+void CalcScales(void)
+{
+    float scalex,scaley,w,h,bmw,bmh;
+
+    w = (float)al_get_display_width(display);
+    h = (float)al_get_display_height(display);
+    scalex = w/SCREENX;
+    scaley = h/SCREENY;
+
+    if (scalex < scaley)
+        Scale.scale = scalex;
+    else
+        Scale.scale = scaley;
+
+    Scale.invscale = 1/Scale.scale;
+
+    Scale.fontscale = Scale.scale*0.8;
+
+    if (panel_bmp)
+    {
+        bmw = al_get_bitmap_width(panel_bmp);
+        bmh = al_get_bitmap_height(panel_bmp);
+
+        scalex = (float)w/bmw;
+        scaley = (float)h/bmh;
+
+        if (scalex < scaley)
+            Scale.menuscale = scalex;
+        else
+            Scale.menuscale = scaley;
+
+        Scale.xmin = 0.1*w + 32*0.8*Scale.menuscale;
+        Scale.xmax = 0.1*w + 415*0.8*Scale.menuscale;
+        Scale.xdiff = Scale.xmax - Scale.xmin;
+
+        Scale.ammo1level = 0.1*h + 41*0.8*Scale.menuscale;
+        Scale.ammo1type  = 0.1*h + 80*0.8*Scale.menuscale;
+        Scale.ammo2level = 0.1*h + 151*0.8*Scale.menuscale;
+        Scale.ammo2type  = 0.1*h + 198*0.8*Scale.menuscale;
+        Scale.fuellevel  = 0.1*h + 272*0.8*Scale.menuscale;
+        Scale.ymax       = 0.1*h + 323*0.8*Scale.menuscale;
+
+
+    }
+}
+
 void LoadFonts(float scale)
 {
     FreeFonts();
@@ -1146,12 +1201,15 @@ void LoadFonts(float scale)
     if (scale) font_scale = scale*0.8;
 
     if ((font       = al_load_font("miriam.ttf", 20*font_scale, 0))          == NULL)  al_fprintf(logfile,"miriam.ttf load fail\n"); //debug font
+
+    if ((big_font   = al_load_font("Zebulon.otf", 200*font_scale, 0))      == NULL)  al_fprintf(logfile,"Zebulon.otf load fail\n");
+    if ((title_font = al_load_font("Zebulon.otf", 125*font_scale, 0))    == NULL)  al_fprintf(logfile,"Zebulon.otf load fail\n");
+
     if ((menu_font  = al_load_font("Audiowide-Regular.ttf", 40*font_scale,0))== NULL)  al_fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
     if ((glow_font  = al_load_font("Audiowide-500.ttf", 40*font_scale,0))== NULL)      al_fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
     if ((small_font = al_load_font("Audiowide-Regular.ttf", 30*font_scale,0))== NULL)  al_fprintf(logfile,"Audiowide-Regular.ttf load fail\n"); //*****
     if ((small_glow_font = al_load_font("Audiowide-500.ttf", 30*font_scale,0))== NULL) al_fprintf(logfile,"Audiowide-500.ttf load fail\n"); //*****
-    if ((big_font   = al_load_font("Zebulon.otf", 200*font_scale, 0))      == NULL)  al_fprintf(logfile,"Zebulon.otf load fail\n");
-    if ((title_font = al_load_font("Zebulon.otf", 125*font_scale, 0))    == NULL)  al_fprintf(logfile,"Zebulon.otf load fail\n");
+
     //don't scale this one....
     if ((race_font  = al_load_font("7seg.ttf", 18, 0))            == NULL)  al_fprintf(logfile,"7seg.ttf load fail\n");
 
@@ -1534,6 +1592,12 @@ void draw_debug(void)
     }
 
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NumTouches:%d",i);
+
+
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.x:%0.3f",Select.x);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.y:%0.3f",Select.y);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.dx:%0.3f",Select.dx);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.dx:%0.3f",Select.dy);
 
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Spin:%0.3f",TouchJoystick.spin);
 

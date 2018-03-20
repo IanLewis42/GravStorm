@@ -3,8 +3,9 @@
 	<stdio.h>
 	<stdlib.h>
 
-1517177354 source:c:\ipl\gravstorm\src\collisions.c
+1519568601 source:c:\ipl\gravstorm\src\collisions.c
 	<stdio.h>
+	<math.h>
 	"allegro5/allegro.h"
 	"allegro5/allegro_image.h"
 	"allegro5/allegro_primitives.h"
@@ -310,11 +311,11 @@
 
 1477671482 c:\ipl\gravstorm\src\collisions.h
 
-1517177354 c:\ipl\gravstorm\src\game.h
+1521144189 c:\ipl\gravstorm\src\game.h
 
 1516486819 c:\ipl\gravstorm\src\objects.h
 
-1517218775 source:c:\ipl\gravstorm\src\drawing.c
+1521200872 source:c:\ipl\gravstorm\src\drawing.c
 	<stdio.h>
 	"allegro5/allegro.h"
 	"allegro5/allegro_image.h"
@@ -329,9 +330,9 @@
 
 1510155943 c:\ipl\gravstorm\src\drawing.h
 
-1507821410 c:\ipl\gravstorm\src\inputs.h
+1520955382 c:\ipl\gravstorm\src\inputs.h
 
-1517178006 source:c:\ipl\gravstorm\src\game.c
+1521150560 source:c:\ipl\gravstorm\src\game.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -355,7 +356,7 @@
 
 1507297138 c:\ipl\gravstorm\src\init.h
 
-1517178006 source:c:\ipl\gravstorm\src\init.c
+1521149339 source:c:\ipl\gravstorm\src\init.c
 	<string.h>
 	<stdio.h>
 	<ctype.h>
@@ -373,7 +374,7 @@
 	"network.h"
 	<wiringPi.h>
 
-1517178105 source:c:\ipl\gravstorm\src\inputs.c
+1521146205 source:c:\ipl\gravstorm\src\inputs.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -388,7 +389,7 @@
 	"objects.h"
 	"network.h"
 
-1516878793 source:c:\ipl\gravstorm\src\objects.c
+1520695173 source:c:\ipl\gravstorm\src\objects.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -405,7 +406,7 @@
 	"network.h"
 	"inputs.h"
 
-1517178284 source:c:\ipl\gravstorm\src\menu.c
+1521192830 source:c:\ipl\gravstorm\src\menu.c
 	<stdio.h>
 	<stdlib.h>
 	"allegro5/allegro.h"
@@ -714,7 +715,7 @@
 	"allegro5/allegro.h"
 	"allegro5/allegro_audio.h"
 
-1473756896 source:c:\ipl\gravstorm\src\mapmaker.c
+1518890513 source:c:\ipl\gravstorm\src\mapmaker.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>

@@ -83,9 +83,11 @@ int get_map_players(int group, int map)
         if (strncmp(line, "max_players", 11) == 0)
         {
             sscanf(line + 11, " %d", &Map.max_players);
-            return 1;
+            al_fclose(map_file);
+            return Map.max_players;
         }
     }
+    al_fclose(map_file);
     return 1;
 }
 
@@ -603,15 +605,12 @@ void init_controls(void)
 	Ship[3].right_key  = ALLEGRO_KEY_RIGHT;
 	Ship[3].thrust_key = ALLEGRO_KEY_RCTRL;
 
-  //#define ANDROID
   #ifdef ANDROID
 
     Ship[0].controller = TOUCH_JOYSTICK;
 	TouchJoystick.spin = 0;
 
 	//On-screen controls
-    //if ((Ctrl.dpad = al_load_bitmap("dpad.png")) == NULL)  al_fprintf(logfile,"dpad.png load fail");
-    //if ((Ctrl.buttons = al_load_bitmap("buttons.png")) == NULL)  al_fprintf(logfile,"buttons.png load fail");
     if ((Ctrl.controls = al_load_bitmap("controls.png")) == NULL)  al_fprintf(logfile,"controls.png load fail");
 
 	int dw,dh;//,bw,bh;
@@ -623,7 +622,7 @@ void init_controls(void)
 
 	//init size/position of buttons
 	//could read/store this in file, but I guess still need this for defaults....
-	Ctrl.ctrl[DPAD].active = TRUE;
+	Ctrl.ctrl[DPAD].active = FALSE;
 	Ctrl.ctrl[DPAD].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
 	Ctrl.ctrl[DPAD].x = 0.98*dw-Ctrl.ctrl[DPAD].size;
 	Ctrl.ctrl[DPAD].y = 0.98*dh-Ctrl.ctrl[DPAD].size;
@@ -632,28 +631,28 @@ void init_controls(void)
 
     Ctrl.ctrl[ASTICK].active = FALSE;
     Ctrl.ctrl[ASTICK].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
-    Ctrl.ctrl[ASTICK].x = 0.99*dw-Ctrl.ctrl[ASTICK].size;
-    Ctrl.ctrl[ASTICK].y = 0.99*dh-Ctrl.ctrl[ASTICK].size;
+    Ctrl.ctrl[ASTICK].x = 0.98*dw-Ctrl.ctrl[ASTICK].size;
+    Ctrl.ctrl[ASTICK].y = 0.98*dh-Ctrl.ctrl[ASTICK].size;
 	Ctrl.ctrl[ASTICK].movex = 10;
 	Ctrl.ctrl[ASTICK].movey = 10;
 
     Ctrl.ctrl[ASTICK2].active = FALSE;
     Ctrl.ctrl[ASTICK2].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
-    Ctrl.ctrl[ASTICK2].x = 0.99*dw-Ctrl.ctrl[ASTICK2].size;
-    Ctrl.ctrl[ASTICK2].y = 0.99*dh-Ctrl.ctrl[ASTICK2].size;
+    Ctrl.ctrl[ASTICK2].x = 0.98*dw-Ctrl.ctrl[ASTICK2].size;
+    Ctrl.ctrl[ASTICK2].y = 0.98*dh-Ctrl.ctrl[ASTICK2].size;
 	Ctrl.ctrl[ASTICK2].movex = 10;
 	Ctrl.ctrl[ASTICK2].movey = 10;
 
 	Ctrl.ctrl[THRUST_BUTTON].active = FALSE;
 	Ctrl.ctrl[THRUST_BUTTON].size = 1.5*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
-	Ctrl.ctrl[THRUST_BUTTON].x = 0.01*dw;//+Ctrl.ButtonSize*0.7;
+	Ctrl.ctrl[THRUST_BUTTON].x = 0.01*dw;//-Ctrl.ctrl[THRUST_BUTTON].size;//+Ctrl.ButtonSize*0.7;
 	Ctrl.ctrl[THRUST_BUTTON].y = 0.99*dh-Ctrl.ctrl[THRUST_BUTTON].size;//-Ctrl.ButtonSize*0.7;
 	Ctrl.ctrl[THRUST_BUTTON].movex = 0;
 	Ctrl.ctrl[THRUST_BUTTON].movey = 10;
 
 	Ctrl.ctrl[SELECT].active = TRUE;
 	Ctrl.ctrl[SELECT].size = 1.5*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
-	Ctrl.ctrl[SELECT].x = 0.01*dw;//+Ctrl.ButtonSize*0.7;
+	Ctrl.ctrl[SELECT].x = 0.99*dw-Ctrl.ButtonSize*1.7;
 	Ctrl.ctrl[SELECT].y = 0.99*dh-Ctrl.ctrl[SELECT].size;//-Ctrl.ButtonSize*0.7;
 	Ctrl.ctrl[SELECT].movex = 0;
 	Ctrl.ctrl[SELECT].movey = 10;
@@ -674,38 +673,40 @@ void init_controls(void)
 
     Ctrl.ctrl[BACK].active = TRUE;
 	Ctrl.ctrl[BACK].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
-	Ctrl.ctrl[BACK].x = 0.5*dw - (Ctrl.ctrl[BACK].size * 2.15);
+	Ctrl.ctrl[BACK].x = 0.5*dw - (Ctrl.ctrl[BACK].size * 2.60);
 	Ctrl.ctrl[BACK].y = 0.02*dh;
 	Ctrl.ctrl[BACK].movex = 20;
 	Ctrl.ctrl[BACK].movey = 0;
 
     Ctrl.ctrl[SMALLER].active = TRUE;
     Ctrl.ctrl[SMALLER].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
-    Ctrl.ctrl[SMALLER].x = 0.5*dw - (Ctrl.ctrl[SMALLER].size * 1.05);
+    Ctrl.ctrl[SMALLER].x = 0.5*dw - (Ctrl.ctrl[SMALLER].size * 1.55);
     Ctrl.ctrl[SMALLER].y = 0.02*dh;
 	Ctrl.ctrl[SMALLER].movex = 10;
 	Ctrl.ctrl[SMALLER].movey = 0;
 
     Ctrl.ctrl[BIGGER].active = TRUE;
     Ctrl.ctrl[BIGGER].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
-    Ctrl.ctrl[BIGGER].x = 0.5*dw + (Ctrl.ctrl[BIGGER].size * 0.05);
+    Ctrl.ctrl[BIGGER].x = 0.5*dw - (Ctrl.ctrl[BIGGER].size * 0.5);
     Ctrl.ctrl[BIGGER].y = 0.02*dh;
 	Ctrl.ctrl[BIGGER].movex = 0;
 	Ctrl.ctrl[BIGGER].movey = 0;
 
+    Ctrl.ctrl[REVERSE].active = TRUE;
+    Ctrl.ctrl[REVERSE].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[REVERSE].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 0.55);
+    Ctrl.ctrl[REVERSE].y = 0.02*dh;
+    Ctrl.ctrl[REVERSE].movex = -10;
+    Ctrl.ctrl[REVERSE].movey = 0;
+
     Ctrl.ctrl[RADAR].active = FALSE;
     Ctrl.ctrl[RADAR].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
-    Ctrl.ctrl[RADAR].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 1.15);
+    Ctrl.ctrl[RADAR].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 1.60);
     Ctrl.ctrl[RADAR].y = 0.02*dh;
 	Ctrl.ctrl[RADAR].movex = -10;
 	Ctrl.ctrl[RADAR].movey = 0;
 
-    Ctrl.ctrl[REVERSE].active = TRUE;
-    Ctrl.ctrl[REVERSE].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
-    Ctrl.ctrl[REVERSE].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 1.15);
-    Ctrl.ctrl[REVERSE].y = 0.02*dh;
-    Ctrl.ctrl[REVERSE].movex = -10;
-    Ctrl.ctrl[REVERSE].movey = 0;
+
     //init touch array
     for (i=0 ; i<NUM_TOUCHES ; i++)
     {
@@ -718,6 +719,11 @@ void init_controls(void)
     }
 
 #endif // ANDROID
+    float line_space = 35*font_scale;
+
+    Select.sumdymax =  2*line_space;       //start offset 2 lines from top.
+    Select.sumdymin = Select.sumdymax;//-4*line_space;  //4 lines on first screen
+    Select.sumdy =  Select.sumdymax;       //don't go below that.
 
 	//Colours - redundant??
 	StatusColour[0] = al_map_rgba(0, 32, 0, 20);  //used for background to status (ammo, fuel, lives etc)
@@ -731,7 +737,7 @@ void init_controls(void)
 
 	ShipColour[0] = al_map_rgb(0, 255, 0);  //used for radar
     ShipColour[1] = al_map_rgb(255, 0, 0);
-    ShipColour[2] = al_map_rgb(0, 0, 255);
+    ShipColour[2] = al_map_rgb(0, 64, 255);
     ShipColour[3] = al_map_rgb(255, 255, 0);
     ShipColour[4] = al_map_rgb(255, 128, 0);
     ShipColour[5] = al_map_rgb(0, 255, 255);

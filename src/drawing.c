@@ -52,219 +52,10 @@ void display_instructions(void);
 
 int grid = 0;
 
-#if 0
-void display_menu(void)//int num_maps, int selected)	//show list of maps
-{
-	ALLEGRO_TRANSFORM transform;
-	int i,j,y=-10;
-	int w,h,xoffset,yoffset;
-	int glow;
-	float scale;
-	char keys[]  = "Keys";
-	char gpio[]  = "GPIO Joy";
-	char usb0[]  = "USB Joy 1";
-	char usb1[]  = "USB Joy 2";
-	char na[]    = "N/A";
-	char* control_string;
-	//static int temp = 0,temp2=0;
-
-	ALLEGRO_COLOR colour;
-	//use pre-multiplied alpha, i.e. rgb components must be multiplied by a.
-    ALLEGRO_COLOR GroupActive    = al_map_rgba_f(0, 1, 0.5, 1);
-    ALLEGRO_COLOR GroupGlow      = al_map_rgba_f(0, 0.188, 0.0, 0.078);
-    ALLEGRO_COLOR GroupInactive  = al_map_rgba_f(0, 0.3, 0, 0.078);
-    ALLEGRO_COLOR ItemCurrent    = al_map_rgba_f(1, 1, 0.2, 1);
-    ALLEGRO_COLOR ItemCurrentGlow= al_map_rgba_f(0.2, 0.2, 0.04, 0.078);
-    ALLEGRO_COLOR ItemSelected   = al_map_rgba_f(0.5, 0, 0, 1);
-    ALLEGRO_COLOR ItemUnselected = al_map_rgba_f(1, 1, 0.8, 1);
-    ALLEGRO_COLOR ItemExcluded   = al_map_rgba_f(0.25, 0.25, 0.25, 1);
-
-	w = al_get_display_width(display);
-    h = al_get_display_height(display);
-
-	al_set_clipping_rectangle(0, 0, w, h);
-
-	yoffset = (h-SCREENY)/2;
-	if (yoffset < 0) yoffset = 0;
-
-	xoffset = (w-SCREENX)/2;
-    if (xoffset < 0) xoffset = 0;
-
-    //Menu.offset += xoffset;
-
-	al_clear_to_color(al_map_rgb(0, 0, 0));
-
-	al_draw_bitmap(menu_bg_bmp,xoffset,yoffset,0);
-
-    //Gravstorm logo
-    //shadow
-	scale = 0.4;
-	al_identity_transform(&transform);			/* Initialize transformation. */
-	al_scale_transform(&transform, scale, scale);	/* Rotate and scale around the center first. */
-	al_translate_transform(&transform,SCREENX/2,y+yoffset);
-	al_use_transform(&transform);
-	al_draw_textf(title_font, al_map_rgba(0, 0, 0,64),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
-    //image
-	al_identity_transform(&transform);
-	al_scale_transform(&transform, scale, scale);	/* Rotate and scale around the center first. */
-	al_translate_transform(&transform,SCREENX/2-7,y+yoffset+7);
-	al_use_transform(&transform);
-	//al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, (al_get_font_ascent(title_font)/2)*scale,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
-	al_draw_bitmap(logo,-SCREENX/2+17,47,0);
-
-	//reset transform
-	al_identity_transform(&transform);
-	al_use_transform(&transform);
-	y+= 25;
-    y+= yoffset;
-
-
-	//Display maps; display all group names, and maps in current group
-    for (i=0 ; i<Menu.num_groups ; i++)
-    {
-        if (i == Menu.group)
-        {
-            //colour = GroupActive;
-            al_draw_textf(menu_font, GroupActive ,col0, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
-
-            //colour = GroupInactive;
-            al_draw_textf(glow_font, GroupGlow ,col0, y/*+=LINE_SPACE*/,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
-
-            for (j=0 ; j<MapNames[Menu.group].Count ; j++)
-            {
-                glow = false;
-                if (j == Menu.map)
-                {
-                    if (Menu.col == 0)
-                    {
-                        colour = ItemCurrent;   //so yellow if we're in col 0, i.e. changing this
-                        glow = true;
-                    }
-                    else
-                        colour = ItemSelected;     //red if another col, so you can see it's the current one
-                }
-                else
-                    colour = ItemUnselected;
-
-                al_draw_textf(menu_font, colour ,col1, y+=Menu.expand,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
-                if (glow) al_draw_textf(glow_font, ItemCurrentGlow ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
-            }
-        }
-        else
-        {
-            colour = GroupInactive;
-            al_draw_textf(menu_font, colour ,col0, y+=LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
-        }
-    }
-
-
-    y=80;
-    y+= yoffset;
-
-    for (i=0 ; i<4 ; i++)			//List players
-    {
-        glow = false;
-        if (i >= Map.max_players)                   //can never select this, so grey
-            colour = ItemExcluded;
-
-        else if (i == Menu.player)                  //selected player
-        {
-            if(Menu.col == 1)
-            {
-                colour = ItemCurrent;   //so yellow if we're in col 1, i.e. changing this
-                glow = true;
-            }
-            else
-                colour = ItemSelected;     //red if another col, so you can see it's the current one
-        }
-        else
-            colour = ItemUnselected;
-
-        al_draw_textf(menu_font, colour,col2, y+i*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
-        if (glow) al_draw_textf(glow_font, ItemCurrentGlow,col2, y+i*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
-    }
-
-
-    for (i=0 ; i<4 ; i++)			//List controls
-    {
-        if (Ship[i].controller == KEYS)
-            control_string = keys;
-        else if (Ship[i].controller == GPIO_JOYSTICK)
-            control_string = gpio;
-        else if (Ship[i].controller == USB_JOYSTICK0)
-            control_string = usb0;
-        else if (Ship[i].controller == USB_JOYSTICK1)
-            control_string = usb1;
-        else//if (Ship[i].controller == NA)
-            control_string = na;
-
-        glow = false;
-        //if (i >= Map.max_players)
-        if (i != Menu.player)
-            colour = ItemExcluded;
-        else if (i == Menu.player)
-        {
-            if (Menu.col == 2)
-            {
-                colour = ItemCurrent;
-                glow = true;
-            }
-            else
-                colour = ItemSelected;
-        }
-        else
-            colour = ItemUnselected;
-
-        al_draw_textf(menu_font, colour,Menu.offset+940, y+i*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
-        if (glow)al_draw_textf(glow_font, ItemCurrentGlow,Menu.offset+940, y+i*LINE_SPACE ,  ALLEGRO_ALIGN_LEFT, "%s",control_string);		//Control method for selected player
-    }
-    colour = ItemUnselected;
-    al_draw_textf(small_font, colour, Menu.offset+940, y+(i+1)*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Max Players: %d",Map.max_players);
-    al_draw_textf(small_font, colour, Menu.offset+940, y+(i+2)*LINE_SPACE,  ALLEGRO_ALIGN_LEFT, "Active Players: %d",num_ships);
-
-    if (Ship[Menu.player].controller == KEYS)
-    {
-        al_draw_textf(small_font, ItemUnselected ,Menu.offset+1400, y+line_space*0,  ALLEGRO_ALIGN_LEFT, "Rotate Left :");
-        if (Menu.col == 3 && Menu.current_key == 0){colour = ItemCurrent; glow = true;}
-        else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
-        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
-
-        al_draw_textf(small_font, ItemUnselected, Menu.offset+1400, y+line_space*2,  ALLEGRO_ALIGN_LEFT, "Rotate Right :");
-        if (Menu.col == 3 && Menu.current_key == 1){colour = ItemCurrent; glow = true;}
-        else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
-        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
-
-        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*4,  ALLEGRO_ALIGN_LEFT, "Fire1 :");
-        if (Menu.col == 3 && Menu.current_key == 2){colour = ItemCurrent; glow = true;}
-        else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
-        if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,Menu.offset+1400, y+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
-
-        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*6,  ALLEGRO_ALIGN_LEFT, "Fire2 :");
-        if (Menu.col == 3 && Menu.current_key == 3){colour = ItemCurrent; glow = true;}
-        else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
-        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
-
-        al_draw_textf(small_font, ItemUnselected,Menu.offset+1400, y+line_space*8,  ALLEGRO_ALIGN_LEFT, "Thrust :");
-        if (Menu.col == 3 && Menu.current_key == 4){colour = ItemCurrent; glow = true;}
-        else {colour = ItemSelected; glow = false;}
-        al_draw_textf(small_font, colour,Menu.offset+1400, y+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
-        if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,Menu.offset+1400, y+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
-    }
-
-	al_flip_display();
-
-	return;
-}
-#endif
-
 void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 {
 	ALLEGRO_TRANSFORM transform;
-	int i,j,y=-10;
+	int i,j,y=0;
 	int w,h;
 	int line_space,col0,col1,col1in,col2,col3;
 	int bgx,bgy,bgw,bgh;    //background
@@ -303,7 +94,6 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
     line_space = 35*font_scale;
 
-    //Change for Android.
     col0 = 20*font_scale;
     col1 = 30*font_scale;
     col1in = 40*font_scale; //indented
@@ -345,18 +135,21 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
 	al_draw_bitmap(logo,((w-x)/(2*local_scale*font_scale)),(int)(40*font_scale),0);//-w/2+17,47,0); //NUMBERS!!!
 
-
 	//reset transform
 	al_identity_transform(&transform);
 	al_use_transform(&transform);
-	//y+= 40;
-    //y+= yoffset;
-
-    y=line_space;
 
 #ifdef ANDROID
-    y+= 2* line_space;
+    y = Select.sumdy;
+
+    al_set_clipping_rectangle(0, Ctrl.ctrl[BACK].y + Ctrl.ctrl[BACK].size, w, h);
+
+    al_scale_transform(&transform,2,2);
+    al_use_transform(&transform);
+#else
+    y=line_space;
 #endif
+
 
     //timer++;            //blinking cursor
     //if (timer & 0x10)
@@ -380,7 +173,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
            al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
            al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
 #ifdef ANDROID
-            al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Single player.");
+            //al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Single player.");
 #else
             al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Single player, or all players on one device.");
 #endif
@@ -394,7 +187,9 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         {
            al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
            al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+#ifndef ANDROID
            al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Host chooses level to play on.");
+#endif
         }
         else
             al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
@@ -405,7 +200,9 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         {
            al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
            al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
-           al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Join a game someone else is hosting.");
+#ifndef ANDROID
+            al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Join a game someone else is hosting.");
+#endif
         }
         else
             al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
@@ -424,7 +221,12 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         y+=line_space*3;
 
         if (Net.client_state == ABORTED)
-            al_draw_textf(small_font, ItemUnselected, w/2, y,  ALLEGRO_ALIGN_CENTRE, "Previous game aborted by host.");
+        {
+            al_identity_transform(&transform);
+            al_use_transform(&transform);
+            al_draw_textf(small_font, ItemUnselected, w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Previous game aborted by host.");
+        }
+
 
         //else
         //    al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",netmodestr);
@@ -455,6 +257,8 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
     }
     else if (Menu.state == INSTRUCTIONS)
     {
+        al_identity_transform(&transform);
+        al_use_transform(&transform);
         display_instructions();
         return;
     }
@@ -463,15 +267,31 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	//Display maps; display all group names, and maps in current group
         al_draw_textf(small_font, GroupActive, col0, y,  ALLEGRO_ALIGN_LEFT, "Level");
         al_draw_textf(small_glow_font, GroupGlow,   col0, y,  ALLEGRO_ALIGN_LEFT, "Level");
+#ifdef ANDROID
+        char temp[50];
+        for (i=0 ; i<Menu.num_groups ; i++) {
+            al_draw_textf(small_font, GroupActive, col0, y += line_space, ALLEGRO_ALIGN_LEFT, "%s", (char *) &MapNames[i].Group);
+            al_draw_textf(small_glow_font, GroupGlow, col0, y/*+=LINE_SPACE*/, ALLEGRO_ALIGN_LEFT, "%s", (char *) &MapNames[i].Group);
 
+            for (j = 0; j < MapNames[i].Count; j++) {
+                if (MapNames[i].Map[j].players > 1)
+                    sprintf(temp,"%s (%d P)",(char *) &MapNames[i].Map[j],MapNames[i].Map[j].players);
+                else
+                    sprintf(temp,"%s",(char *) &MapNames[i].Map[j]);
+
+                if (i == Menu.group && j == Menu.map) {
+                    al_draw_textf(small_font, ItemCurrent, col1, y += Menu.expand, ALLEGRO_ALIGN_LEFT, "%s", (char*) temp);
+                    al_draw_textf(small_glow_font, ItemCurrentGlow, col1, y, ALLEGRO_ALIGN_LEFT, "%s", (char *) temp);
+                } else
+                    al_draw_textf(small_font, ItemUnselected, col1, y += Menu.expand, ALLEGRO_ALIGN_LEFT, "%s", (char*) temp);
+            }
+        }
+#else
         for (i=0 ; i<Menu.num_groups ; i++)
         {
             if (i == Menu.group)
             {
-                //colour = GroupActive;
                 al_draw_textf(small_font, GroupActive ,col0, y+=line_space,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
-
-                //colour = GroupInactive;
                 al_draw_textf(small_glow_font, GroupGlow ,col0, y/*+=LINE_SPACE*/,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
 
                 for (j=0 ; j<MapNames[Menu.group].Count ; j++)
@@ -479,13 +299,8 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                     glow = false;
                     if (j == Menu.map)
                     {
-                        if (Menu.col == 0)
-                        {
-                            colour = ItemCurrent;   //so yellow if we're in col 0, i.e. changing this
-                            glow = true;
-                        }
-                        else
-                            colour = ItemSelected;     //red if another col, so you can see it's the current one
+                        colour = ItemCurrent;   //so yellow if we're in col 0, i.e. changing this
+                        glow = true;
                     }
                     else
                         colour = ItemUnselected;
@@ -504,6 +319,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                 al_draw_textf(small_font, colour ,col0, y+=line_space,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Group);
             }
         }
+#endif
         if (Menu.netmode == HOST)
         {
             al_draw_textf(small_font, ItemUnselected,  Menu.offset+w/2, h*0.8,  ALLEGRO_ALIGN_CENTRE, "Select level to start network game.");
@@ -553,8 +369,19 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             if (i>num_ships-1) colour = ItemExcluded;
             else colour = ItemUnselected;
 #ifdef ANDROID
-            al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Choose your ship");
-            al_draw_textf(small_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "Choose your ship");
+            al_draw_textf(small_glow_font, GroupGlow,w/4, y,  ALLEGRO_ALIGN_CENTRE, "Choose your ship");
+            al_draw_textf(small_font, GroupActive,w/4, y,  ALLEGRO_ALIGN_CENTRE, "Choose your ship");
+
+            w = al_get_display_width(display);
+            int step = w/16;
+            y+=line_space *2;
+
+            al_draw_filled_rounded_rectangle(Ship[i].image*step,y,Ship[i].image*step+52*scale,y+52*scale,10,10,al_map_rgba(64,64,0,64));
+
+            for (j=0 ; j<8 ; j++)
+            {
+                al_draw_scaled_bitmap(ships,Ship[i].angle*SHIP_SIZE_X,2*j*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,step*j,y,SHIP_SIZE_X*scale,SHIP_SIZE_Y*scale, 0);
+            }
 #else
             if (!Net.client && !Net.server)
             {
@@ -566,7 +393,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                 else
                     al_draw_textf(small_font, GroupInactive,col0, y,  ALLEGRO_ALIGN_LEFT, "Player %d",i+1);
             }
-#endif
+
             y+=line_space*1.2;
 
             //scale = font_scale;
@@ -592,12 +419,11 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             //selected ship
             al_draw_scaled_bitmap(ships,Ship[i].angle*SHIP_SIZE_X,2*Ship[i].image*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,Menu.offset+(105+Ship[i].offset)*scale,y,SHIP_SIZE_X*scale,SHIP_SIZE_Y*scale, 0);
 
-            Ship[i].angle++;
-            if (Ship[i].angle == 40) Ship[i].angle = 0;
-
             if (Ship[i].offset > 0) Ship[i].offset-=6;
             if (Ship[i].offset < 0) Ship[i].offset+=6;
-
+#endif
+            Ship[i].angle++;
+            if (Ship[i].angle == 40) Ship[i].angle = 0;
             y+=45;
 #ifndef ANDROID
             //controls - if keys, show keys
@@ -672,6 +498,9 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 #endif
         }
 
+        al_identity_transform(&transform);
+        al_use_transform(&transform);
+
         if (Menu.netmode == HOST)
         {
             if (Net.address.host == 0)
@@ -702,6 +531,11 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         }
 
     }
+
+    //reset transform
+    al_identity_transform(&transform);
+    al_use_transform(&transform);
+    al_set_clipping_rectangle(0, 0, w, h);
 
     //#define ANDROID
     #ifdef ANDROID
@@ -866,14 +700,8 @@ void display_map_text(int done, int timer)
 
 void display_instructions(void)
 {
-    //ALLEGRO_FILE * inst;
-    //char line[200];
-
     int w,h,bgw,bgh,bgx,bgy;
     int line_space;
-    //int idx;
-    //static int last_y_origin = 0xffff;
-    //ALLEGRO_USTR *ustr = NULL;
 
     if (halted) return;
 
@@ -884,34 +712,24 @@ void display_instructions(void)
     bgw = al_get_bitmap_width(menu_bg_bmp);
     bgh = al_get_bitmap_height(menu_bg_bmp);
 
+    al_set_clipping_rectangle(0,0,w,h);
 
-    //if (Menu.y_origin != last_y_origin)
-    {
-        //last_y_origin = Menu.y_origin;
-        al_clear_to_color(al_map_rgb(0, 0, 0));
+    al_clear_to_color(al_map_rgb(0, 0, 0));
 
-        for (bgy = 0; bgy < h; bgy += bgh) {
-            for (bgx = 0; bgx < w; bgx += bgw) {
-                al_draw_bitmap(menu_bg_bmp, bgx, bgy, 0);
-            }
+    for (bgy = 0; bgy < h; bgy += bgh) {
+        for (bgx = 0; bgx < w; bgx += bgw) {
+            al_draw_bitmap(menu_bg_bmp, bgx, bgy, 0);
         }
+    }
 
-        al_draw_filled_rectangle(0, 0, w, h,
-                                 al_map_rgba(0, 0, 0, 180));    //black filter to darken?
+    al_draw_filled_rectangle(0, 0, w, h, al_map_rgba(0, 0, 0, 180));    //black filter to darken?
 
 #ifdef ANDROID
-        int i=Menu.y_origin;
-        i+=3*line_space;
-        al_set_clipping_rectangle(0, 3 * line_space, w, (h - 3 * line_space));
+    al_set_clipping_rectangle(0, Ctrl.ctrl[BACK].y + Ctrl.ctrl[BACK].size, w, (h - 3 * line_space));
+    Menu.y_origin = Select.sumdy;
 #endif
 
-        al_draw_bitmap(inst_bmp,0,Menu.y_origin + 3*line_space,0);
-
-        //draw_debug();
-
-            //al_flip_display();
-
-    }
+    al_draw_bitmap(inst_bmp,0,Menu.y_origin + 2*line_space,0);
 
     al_set_clipping_rectangle(0,0,w,h);
     draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
@@ -944,7 +762,7 @@ void display_wait_text(void)
 
     al_draw_textf(small_font, al_map_rgb_f(1, 1, 0.8), w/2, h/2,  ALLEGRO_ALIGN_CENTRE, "Waiting for host...");
 
-    //al_flip_display();
+    al_flip_display();
 }
 
 void make_bullet_bitmap(void)
@@ -1554,6 +1372,7 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
 	bmh = al_get_bitmap_height(panel_bmp);
 
 #ifdef ANDROID
+ /*
     float xscale,yscale,menuscale;
     xscale = (float)w/bmw;
     yscale = (float)h/bmh;
@@ -1562,9 +1381,9 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
         menuscale = yscale;
     else
         menuscale = xscale;
-
+*/
     al_identity_transform(&transform);
-    al_scale_transform(&transform,0.8*menuscale,0.8*menuscale);
+    al_scale_transform(&transform,0.8*Scale.menuscale,0.8*Scale.menuscale);
     al_translate_transform(&transform, 0.1*w,0.1*h);
     al_use_transform(&transform);
 
@@ -1580,10 +1399,10 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
 			x+=w/4;
 #endif
 		al_draw_bitmap(panel_bmp,x, y,0);
-
+#ifndef ANDROID
 		//selection bar
 		al_draw_filled_rectangle(x+430,y+45+60*Ship[ship_num].menu_state,x+550,y+75+60*Ship[ship_num].menu_state,al_map_rgba(32, 0, 0, 20));
-
+#endif
 		//currently pressed buttons
 		al_draw_bitmap_region(panel_pressed_bmp,20+Ship[ship_num].ammo1_type*110,70,80,80,x+20+Ship[ship_num].ammo1_type*110,y+70,0); //src x,y,w,h dst x,y,flags
 		al_draw_bitmap_region(panel_pressed_bmp,20+(Ship[ship_num].ammo2_type-4)*110,200,80,80,x+20+(Ship[ship_num].ammo2_type-4)*110,y+200,0); //src x,y,w,h dst x,y,flags

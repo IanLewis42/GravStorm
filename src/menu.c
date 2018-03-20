@@ -368,7 +368,7 @@ ALLEGRO_FILE *hostfile,*clientfile;
 
 int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 {
-	int i;
+	int i,j;
 	int w,h;//,xoffset,yoffset;
     //int line_space = (int)(35*font_scale);
 
@@ -380,6 +380,21 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
     event.keyboard.keycode = 0;
     Net.pingtimer = 0;
     Menu.expand = 0;
+
+    int total_maps = 0;
+    for (i=0 ; i< Menu.num_groups ; i++)
+        total_maps += MapNames[i].Count;
+    int total_lines = total_maps + Menu.num_groups;
+
+    for (i=0 ; i<Menu.num_groups ; i++ )
+    {
+        for(j=0 ; j<MapNames[i].Count ; j++)
+        {
+            MapNames[i].Map[j].players = get_map_players(i,j);
+        }
+    }
+
+    float line_space = 35*font_scale;
 
     while(1)
 	{
@@ -419,12 +434,15 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             //break;
         }
 
-
 		else if (event.type == ALLEGRO_EVENT_TIMER && al_is_event_queue_empty(queue))
 		{
 			display_new_menu();
 
             UpdateTouches();
+
+#ifdef ANDROID
+            Menu.expand = 35*font_scale;
+#else
 
 			//expanding maps
 			if (Menu.expand < 35*font_scale)
@@ -437,7 +455,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 if (Menu.y_origin < (Menu.max_scroll))
                     Menu.y_origin = Menu.max_scroll;
             }
-
+#endif
             if (gpio_active) ReadGPIOJoystick();
 
              Net.pingtimer++;   //used by client searching for server
@@ -496,24 +514,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
             pressed_keys[event.keyboard.keycode]=false;
             key_up_log[event.keyboard.keycode]=true;
         }
-
-		//_CHAR event for typing in IP address
-		/*
-		else if (event.type == ALLEGRO_EVENT_KEY_CHAR)
-        {
-            if (Menu.state == NETWORK && Menu.col_pos == 1) //defining address
-            {
-                //return picked up elsewhere....
-                if (event.keyboard.keycode == ALLEGRO_KEY_BACKSPACE)  //backspace
-                {
-                    if (strlen(Net.temp_address) > 0)
-                        Net.temp_address[strlen(Net.temp_address)-1] = 0;   //so terminate string one earlier
-                }
-                else
-                    strncat(Net.temp_address,(char*)&event.keyboard.unichar,1);    //append char
-            }
-        }
-        */
 
 		//See if it's a USB joystick or touch event. If it is, log it.
  		else
@@ -582,57 +582,16 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 		}
 		//now have all inputs recorded as AnyShip elements (non-ship keypresses will be in key_down_log / Command struct)
 		//actions are dependent on state....
-/*
-        if (Command.goback)
-        {
-            Command.goback = false;
 
-            switch (Menu.state)
-            {
-            case NETWORK:
-                Exit();   //escape to exit
-            break;
-            case LEVEL:
-                Menu.state = NETWORK;            //or back to previous menu
-            break;
-            case PLAYERS:
-                if (Menu.netmode == CLIENT)
-                {
-                    Menu.state = NETWORK;            //back to previous menu
-
-                    if (Net.client_state == CONNECTED || Net.client_state == RUNNING)
-                    {
-                        NetDisconnectClient();
-                        while (Net.client_state != IDLE)
-                        {
-                            ServiceNetwork();
-                        }
-                    }
-                    NetStopClient();
-                }
-                else if (Menu.netmode == HOST)
-                {
-                    Menu.state = LEVEL;
-                    //disconnect clients
-                    NetStopListen();    //stop new connections
-
-                    NetSendAbort();         //tell clients to disconnect
-                    while (num_ships > 1)   //wait until they do
-                        ServiceNetwork();
-
-                    NetStopServer();        //kill server
-                    Net.server = false;
-                }
-                else
-                    Menu.state = LEVEL;
-
-            break;
-            }
-            //Menu.col_pos = 0;
-            //Menu.netmode = LOCAL;
+        if (Select.action == TOUCH) {
+            w = al_get_display_width(display);
+            //if (Select.x < 0.75*w)
+                Select.line = (int)((Select.y - 2*Select.sumdy)/(line_space * 2)-0.0);
+            //else
+            //    Select.action = NO_ACTION;
         }
-*/
-		switch (Menu.state)
+
+        switch (Menu.state)
         {
             case NETWORK:
                 if (Command.goback)
@@ -644,24 +603,21 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 if (Command.goforward)
                 {
                     Command.goforward = false;
-                    /*
-                    if (Menu.col_pos == 1)  //editing address
-                    {
-                        strncpy(Net.menuaddress,Net.temp_address,16);
-                        //Net.temp_address[0] = 0;
-                    }
-                    */
                     if (Menu.netmode == LOCAL)
                     {
                         Menu.state = LEVEL;               //go to next menu
                         Menu.col_pos = 0;
+                        Select.sumdymin = -1*total_lines*line_space;
+                        Select.sumdy = Select.sumdymax;
                     }
                     else if (Menu.netmode == HOST)
                     {
                         Menu.state = LEVEL;               //go to next menu
-                        //Menu.col_pos = 0;
-                        Menu.group = 1;
+                        Select.sumdymin = -1*total_lines*line_space;    //set max scroll
+                        Select.sumdy = Select.sumdymax;                 //reset current scroll
+                        Menu.group = 1;                                 //network => multiplayer
                         Menu.map = 0;
+                        Select.sumdy -= (MapNames[0].Count + 2) * line_space;//bump scroll to correct place
                         init_map(Menu.group, Menu.map);
                     }
                     else if (Menu.netmode == CLIENT)
@@ -679,16 +635,17 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         NetStartNetwork();
                         //NetStartClient();
                         Net.client_state = SEARCHING;   //starts pinging
+                        Select.sumdymin = 0;//-1*total_lines*line_space;
+                        Select.sumdy = Select.sumdymax;
                     }
                     else if (Menu.netmode == INST)
                     {
-                        //Net.net = false;
                         Menu.state = INSTRUCTIONS;               //go to next menu
-                        //if ((miner = al_load_bitmap("astronaut.png")) == NULL)  al_fprintf(logfile,"astronaut.png load fail");
-                        //if ((jewel = al_load_bitmap("jewels.png")) == NULL)  al_fprintf(logfile,"jewels.png load fail");
                         if ((ui = al_load_bitmap("ui.png")) == NULL)  al_fprintf(logfile,"ui.png load fail");
                         make_instructions_bitmap();
                         Ctrl.ctrl[SELECT].active=FALSE;
+                        Select.sumdymin = Menu.max_scroll;//-1*total_lines*line_space;
+                        Select.sumdy = Select.sumdymax;
                     }
                 }
 
@@ -713,47 +670,33 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Menu.netmode--;
                     }
                 }
-
-                //Menu.netmode = Menu.col_pos;
-                /*
-                else if (AnyShip.left_down)    //left
+                else if (Select.action == TOUCH)
                 {
-                    AnyShip.left_down = false;
-                    //if (Menu.col_pos == 0)          //
-                    {
-                        if (Menu.netmode > 0)
-                            Menu.netmode--;
-                    }
+                    Select.action = NO_ACTION;
+                    if (Select.x < 0.75*w)
+                        Menu.netmode = Select.line-1;
+                    if (Menu.netmode == INST)
+                        Command.goforward = TRUE;
                 }
-                else if (AnyShip.right_down)    //right
-                {
-                    AnyShip.right_down = false;
-                    //if (Menu.col_pos == 0)
-                    {
-                        if (Menu.netmode < 2)
-                            Menu.netmode++;
-                    }
-                }
-                //if (Menu.netmode == CLIENT)
-                //    Menu.max_col_pos = 1;
-                //else
-                    Menu.max_col_pos = 0;
-                */
             break;
             case INSTRUCTIONS:
-
                 if (Command.goback)
                 {
                     Command.goback = false;
                     Menu.state = NETWORK;            //back to previous menu
+                    Select.sumdymin = 0;//-4*line_space;
+                    Select.sumdy = Select.sumdymax;
                     Ctrl.ctrl[SELECT].active=TRUE;
                     AnyShip.fire1_down = false;     //stop scroll up on exit
+                    Menu.netmode = INST;
                     break;
                 }
                 else if (Command.goforward)
                 {
                     Command.goforward = false;
                     Menu.state = NETWORK;            //back to previous menu
+                    Select.sumdymin = 0;//-4*line_space;
+                    Select.sumdy = Select.sumdymax;
                     break;
                 }
                 if (AnyShip.fire2_held)    //down
@@ -764,19 +707,32 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 {
                     Menu.scroll = 10*font_scale;
                 }
+                else if (Select.action == TOUCH) {
+                    Select.action = NO_ACTION;
+                }
                 else Menu.scroll = 0;
             break;
             case LEVEL: //map selection
+#ifndef ANDROID
+                get_map_players( Menu.group, Menu.map);
+#endif
                 if (Command.goback)
                 {
                     Command.goback = false;
                     Menu.state = NETWORK;            //back to previous menu
+                    Select.sumdymin = 0;//-4*line_space;
+                    Select.sumdy = Select.sumdymax;
                     break;
                 }
                 if (Command.goforward)
                 {
                     Command.goforward = false;
                     Menu.state = PLAYERS;               //thrust to go to next menu
+                    Select.sumdymin = Select.sumdymax;
+                    Select.sumdy = Select.sumdymax;
+                    Select.sumdxmin = -1000;
+                    Select.sumdxmax = 1000;
+                    Select.sumdx = 0;
                     AnyShip.left_down = false;
                     AnyShip.right_down = false;
 #ifdef ANDROID
@@ -791,7 +747,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 #endif
                     Menu.ships = num_ships; //for local
 
-
                     if (Menu.netmode == HOST)
                     {
                         //Net.net = true;
@@ -803,6 +758,11 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         NetStartNetwork();
                         NetStartHost(Map.max_players);
                         Menu.state = PLAYERS;               //go to next menu
+                        Select.sumdymin = Select.sumdymax;
+                        Select.sumdy = Select.sumdymax;
+                        Select.sumdxmin = -1000;
+                        Select.sumdxmax = 1000;
+                        Select.sumdx = 0;
                         Menu.ships = 1;
                         Menu.col_pos = 1;
                     }
@@ -844,6 +804,26 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     get_map_players( Menu.group, Menu.map);
 
                 }
+                else if (Select.action == TOUCH)
+                {
+                    Select.action = NO_ACTION;
+                    if (Select.x < 0.75*w) {
+                        for (i = 0; i < Menu.num_groups; i++) {
+                            if (Select.line == 0) break;
+                            Select.line--;                          //group name
+
+                            for (j = 0; j < MapNames[i].Count; j++) {
+                                // MapNames[i].Map[j].players = get_map_players(i,j);
+                                Select.line--;
+                                if (Select.line == 0) {
+                                    Menu.group = i;
+                                    Menu.map = j;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             break;
 
             case PLAYERS: //players/ship/controls
@@ -853,7 +833,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     if (Menu.netmode == CLIENT)
                     {
                         Menu.state = NETWORK;            //back to previous menu
-
+                        Select.sumdymin = 0;//-4*line_space;
+                        Select.sumdy = Select.sumdymax;
                         if (Net.client_state == CONNECTED || Net.client_state == RUNNING)
                         {
                             NetDisconnectClient();
@@ -867,6 +848,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     else if (Menu.netmode == HOST)
                     {
                         Menu.state = LEVEL;
+                        Select.sumdymin = -1*total_lines*line_space;
+                        Select.sumdy = Select.sumdymax;
                         //disconnect clients
                         NetStopListen();    //stop new connections
 
@@ -879,7 +862,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     }
                     else
                         Menu.state = LEVEL;
-
+                        Select.sumdymin = -1*total_lines*line_space;
+                        Select.sumdy = Select.sumdymax;
                     break;
                 }
 
@@ -900,6 +884,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     if (Menu.netmode == HOST)
                     {
                         Menu.state = LEVEL;           //set state for when we return to menu
+                        Select.sumdymin = -1*total_lines*line_space;
+                        Select.sumdy = Select.sumdymax;
                         return 0;                       //return from function to start game
                     }
                     if (Menu.netmode == CLIENT)
@@ -907,6 +893,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         if (Net.client_state == CONNECTED)  //if not connected, ignore.
                         {
                             Menu.state = NETWORK;           //set state for when we return to menu
+                            Select.sumdymin = 0;//-4*line_space;
+                            Select.sumdy = Select.sumdymax;
                             Menu.col_pos = 1;
                             return 0;                       //return from function to start game
                         }
@@ -914,6 +902,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     else
                     {
                         Menu.state = LEVEL;
+                        Select.sumdymin = -1*total_lines*line_space;
+                        Select.sumdy = Select.sumdymax;
                         Menu.col_pos = 0;
                         return 0;                       //return from function to start game
                     }
@@ -1026,19 +1016,29 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     }
 #endif
                 }
+#ifdef ANDROID
+                //Ship[Menu.player].image = Select.sumdx/100;
+                //Ship[Menu.player].offset = 60;
+                if (Select.action == TOUCH) {
+                    Select.action = NO_ACTION;
+                    w = al_get_display_width(display);
+                    Ship[Menu.player].image = 8*(0.0+(Select.x/w));
+                    Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
+                }
+
+#endif
 
                 Menu.player = (Menu.col_pos-1) / 3;
                 Menu.item   = (Menu.col_pos-1) % 3;
-
             break;
             default:
                 Menu.state = NETWORK;
+                Select.sumdymin = 0;//-4*line_space;
+                Select.sumdy = Select.sumdymax;
             break;
         }
         event.keyboard.keycode = 0;
-
         ServiceNetwork();
-
 	}
 }
 
