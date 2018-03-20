@@ -1,0 +1,60 @@
+INSTRUCTIONS:
+
+Fly around, shoot your enemy, don't crash into the walls :-)
+
+If it's a mission level, rescue miners, and pick up bonus 
+jewels by landing on the pads. Fly off away from the surface 
+to complete the level.
+
+Default controls are:
+ Player 1: Cursors and Right Ctrl
+ Player 2: Q A R T and Left Alt
+ Escape: back/exit
+ 
+Right and Left rotate the ship clockwise and anti-clockwise.
+Up/Forwards fires your 'normal' weapon (rapid fire, low damage)
+Down/Back fires your 'special' weapon (limited ammo, more damage, 
+various types)
+Thrust/Joystick Button fires your engine.
+
+In network play only, F10 will toggle a 'radar' display at the 
+top-right of the screen, showing the terrain, and all ships.
+
+At the top-left of each player's window there is a status panel 
+for their ship. 
+[status]        
+                       Shield
+                       Normal Ammo
+                       Special Ammo
+                       Fuel
+                       Ships left
+
+Current, last completed and best lap times are displayed at the 
+bottom of the panel.
+
+For 'Mission' levels, miners rescued and jewels collected are 
+shown, along with the elapsed time.
+
+If you press Down/Fire2 when on your landing pad, a config menu 
+will appear. This lets you choose how much fuel you carry, and 
+how much and what types of ammunition. 
+
+More info, including making your own maps, in readme.txt
+
+ Credits:
+   Game design and coding by Ian Lewis.
+   Huge thanks to Heikki Kossola, the creator of TurboRaketti.
+   Also thanks to the Allegro community.
+ Graphics provided by:
+   Asbjorn Djupdal
+   SpiralGraphics.biz
+   pzUH / GameArt2D.com
+   justinredfield.deviantart.com
+   Kaladun on imgur.com
+   thefirstfleet.deviantart.com
+   KIIRA
+ Music by KIIRA
+ Fonts Used:
+   Audiowide (Astigmatic One Eye)
+   Zebulon (Pixel Sagas) 
+   7-Segment (IPL)
