@@ -1262,13 +1262,13 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 			{
 				while (x<Map.forcefield[i].max_x)
 			 	{	                      //bmp    srcx                              srcy size    dstx dsty
-					al_draw_tinted_bitmap_region(sentries,al_map_rgba(alpha, alpha, alpha, alpha), Map.forcefield[i].closed_sprite*64,0,   64, 64, x,   y, 0);
+					al_draw_tinted_bitmap_region(sentries,al_map_rgba(alpha, alpha, alpha, alpha), Map.forcefield[i].closed_sprite*66+1,0,   64, 64, x,   y, 0);
 					x+=64;
 					if (x+64>Map.forcefield[i].max_x)
 					{
 						//just draw part of the sprite, dummy!
 						//al_draw_bitmap_region(sentries,Map.forcefield[i].alive_sprite*64,0,   64, 64, Map.forcefield[i].max_x-64,   y, 0);
-						al_draw_tinted_bitmap_region(sentries, al_map_rgba(alpha, alpha, alpha, alpha), Map.forcefield[i].closed_sprite*64,0,   Map.forcefield[i].max_x-x, 64, x, y, 0);
+						al_draw_tinted_bitmap_region(sentries, al_map_rgba(alpha, alpha, alpha, alpha), Map.forcefield[i].closed_sprite*66+1,0,   Map.forcefield[i].max_x-x, 64, x, y, 0);
 						break;
 					}
 				}
@@ -1277,12 +1277,12 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
 			{
 				while (y<Map.forcefield[i].max_y)
 			 	{	                      //bmp    srcx                              srcy size    dstx dsty
-					al_draw_tinted_bitmap_region(sentries, al_map_rgba(alpha, alpha, alpha, alpha), Map.forcefield[i].closed_sprite*64,0,   64, 64, x,   y, 0);
+					al_draw_tinted_bitmap_region(sentries, al_map_rgba(alpha, alpha, alpha, alpha), Map.forcefield[i].closed_sprite*66+1,0,   64, 64, x,   y, 0);
 					y+=64;
 					if (y+64>Map.forcefield[i].max_y)
 					{
 						//al_draw_bitmap_region(sentries,Map.forcefield[i].alive_sprite*64,0,   64, 64, x, Map.forcefield[i].max_y-64, 0);
-						al_draw_tinted_bitmap_region(sentries, al_map_rgba(alpha, alpha, alpha, alpha), Map.forcefield[i].closed_sprite*64,0,   64, Map.forcefield[i].max_y-y, x, y, 0);
+						al_draw_tinted_bitmap_region(sentries, al_map_rgba(alpha, alpha, alpha, alpha), Map.forcefield[i].closed_sprite*66+1,0,   64, Map.forcefield[i].max_y-y, x, y, 0);
 						break;
 					}
 				}
