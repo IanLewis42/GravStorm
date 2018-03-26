@@ -1022,7 +1022,7 @@ void MenuControls(void)
     Ctrl.ctrl[THRUST_BUTTON].active = FALSE;
     //Ctrl.ctrl[DPAD].active = TRUE;
     Ctrl.ctrl[SELECT].active = TRUE;
-    //Ctrl.ctrl[REVERSE].active = TRUE;
+    Ctrl.ctrl[REVERSE].active = FALSE;
 }
 
 void GameControls(void)
@@ -1035,7 +1035,7 @@ void GameControls(void)
     Ctrl.ctrl[THRUST_BUTTON].active = TRUE;
     //Ctrl.ctrl[DPAD].active = FALSE;
     Ctrl.ctrl[SELECT].active = FALSE;
-    //Ctrl.ctrl[REVERSE].active = FALSE;
+    Ctrl.ctrl[REVERSE].active = TRUE;
 }
 
 void SystemBackPressed(void)

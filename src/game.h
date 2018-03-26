@@ -395,6 +395,7 @@ typedef struct
     int x;      //position on screen
     int y;
     int size;
+    int border; //extra touch area
     int movex;   //amount to move when resized.
     int movey;
 } CtrlType;

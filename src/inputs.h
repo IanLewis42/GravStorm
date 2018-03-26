@@ -62,7 +62,8 @@ typedef enum
 {
     NO_ACTION=0,
     TOUCH,
-    MOVE
+    MOVE,
+    RELEASE
 }SelectActionType;
 
 typedef struct

@@ -631,6 +631,7 @@ void init_controls(void)
 
     Ctrl.ctrl[ASTICK].active = FALSE;
     Ctrl.ctrl[ASTICK].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
+    Ctrl.ctrl[ASTICK].border = Ctrl.ctrl[ASTICK].size*0.5;
     Ctrl.ctrl[ASTICK].x = 0.98*dw-Ctrl.ctrl[ASTICK].size;
     Ctrl.ctrl[ASTICK].y = 0.98*dh-Ctrl.ctrl[ASTICK].size;
 	Ctrl.ctrl[ASTICK].movex = 10;
@@ -638,6 +639,7 @@ void init_controls(void)
 
     Ctrl.ctrl[ASTICK2].active = FALSE;
     Ctrl.ctrl[ASTICK2].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
+    Ctrl.ctrl[ASTICK2].border = 0;
     Ctrl.ctrl[ASTICK2].x = 0.98*dw-Ctrl.ctrl[ASTICK2].size;
     Ctrl.ctrl[ASTICK2].y = 0.98*dh-Ctrl.ctrl[ASTICK2].size;
 	Ctrl.ctrl[ASTICK2].movex = 10;
@@ -645,6 +647,7 @@ void init_controls(void)
 
 	Ctrl.ctrl[THRUST_BUTTON].active = FALSE;
 	Ctrl.ctrl[THRUST_BUTTON].size = 1.5*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
+    Ctrl.ctrl[THRUST_BUTTON].border = 0;//Ctrl.ctrl[THRUST_BUTTON].size*0.3;
 	Ctrl.ctrl[THRUST_BUTTON].x = 0.01*dw;//-Ctrl.ctrl[THRUST_BUTTON].size;//+Ctrl.ButtonSize*0.7;
 	Ctrl.ctrl[THRUST_BUTTON].y = 0.99*dh-Ctrl.ctrl[THRUST_BUTTON].size;//-Ctrl.ButtonSize*0.7;
 	Ctrl.ctrl[THRUST_BUTTON].movex = 0;
@@ -652,6 +655,7 @@ void init_controls(void)
 
 	Ctrl.ctrl[SELECT].active = TRUE;
 	Ctrl.ctrl[SELECT].size = 1.5*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
+    Ctrl.ctrl[SELECT].border = 0;
 	Ctrl.ctrl[SELECT].x = 0.99*dw-Ctrl.ButtonSize*1.7;
 	Ctrl.ctrl[SELECT].y = 0.99*dh-Ctrl.ctrl[SELECT].size;//-Ctrl.ButtonSize*0.7;
 	Ctrl.ctrl[SELECT].movex = 0;
@@ -659,20 +663,23 @@ void init_controls(void)
 
     Ctrl.ctrl[FIRE1].active = FALSE;
     Ctrl.ctrl[FIRE1].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
+    Ctrl.ctrl[FIRE1].border = 0;
     Ctrl.ctrl[FIRE1].x = 0.02*dw;
     Ctrl.ctrl[FIRE1].y = 0.98*dh-Ctrl.ctrl[FIRE1].size-Ctrl.ButtonSize*1.5;
 	Ctrl.ctrl[FIRE1].movex = 0;
-	Ctrl.ctrl[FIRE1].movey = 10;
+	Ctrl.ctrl[FIRE1].movey = 20;
 
     Ctrl.ctrl[FIRE2].active = FALSE;
     Ctrl.ctrl[FIRE2].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);
+    Ctrl.ctrl[FIRE2].border = 0;
     Ctrl.ctrl[FIRE2].x = 0.02*dw+Ctrl.ButtonSize*1.5;
     Ctrl.ctrl[FIRE2].y = 0.98*dh-Ctrl.ctrl[FIRE2].size;
-	Ctrl.ctrl[FIRE2].movex = 0;
+	Ctrl.ctrl[FIRE2].movex = -10;
 	Ctrl.ctrl[FIRE2].movey = 10;
 
     Ctrl.ctrl[BACK].active = TRUE;
 	Ctrl.ctrl[BACK].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[BACK].border = 0;
 	Ctrl.ctrl[BACK].x = 0.5*dw - (Ctrl.ctrl[BACK].size * 2.60);
 	Ctrl.ctrl[BACK].y = 0.02*dh;
 	Ctrl.ctrl[BACK].movex = 20;
@@ -680,6 +687,7 @@ void init_controls(void)
 
     Ctrl.ctrl[SMALLER].active = TRUE;
     Ctrl.ctrl[SMALLER].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[SMALLER].border = 0;
     Ctrl.ctrl[SMALLER].x = 0.5*dw - (Ctrl.ctrl[SMALLER].size * 1.55);
     Ctrl.ctrl[SMALLER].y = 0.02*dh;
 	Ctrl.ctrl[SMALLER].movex = 10;
@@ -687,6 +695,7 @@ void init_controls(void)
 
     Ctrl.ctrl[BIGGER].active = TRUE;
     Ctrl.ctrl[BIGGER].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[BIGGER].border = 0;
     Ctrl.ctrl[BIGGER].x = 0.5*dw - (Ctrl.ctrl[BIGGER].size * 0.5);
     Ctrl.ctrl[BIGGER].y = 0.02*dh;
 	Ctrl.ctrl[BIGGER].movex = 0;
@@ -694,6 +703,7 @@ void init_controls(void)
 
     Ctrl.ctrl[REVERSE].active = TRUE;
     Ctrl.ctrl[REVERSE].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[REVERSE].border = 0;
     Ctrl.ctrl[REVERSE].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 0.55);
     Ctrl.ctrl[REVERSE].y = 0.02*dh;
     Ctrl.ctrl[REVERSE].movex = -10;
@@ -701,9 +711,10 @@ void init_controls(void)
 
     Ctrl.ctrl[RADAR].active = FALSE;
     Ctrl.ctrl[RADAR].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
+    Ctrl.ctrl[RADAR].border = 0;
     Ctrl.ctrl[RADAR].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 1.60);
     Ctrl.ctrl[RADAR].y = 0.02*dh;
-	Ctrl.ctrl[RADAR].movex = -10;
+	Ctrl.ctrl[RADAR].movex = -20;
 	Ctrl.ctrl[RADAR].movey = 0;
 
 

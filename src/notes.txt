@@ -800,8 +800,8 @@ X fade on android instructions.
 * scroll/touch menus
 * less debounce
 * 5/3 buttons
-- network messages (fit on screen, show waiting?)
-->github
+* network messages (fit on screen, show waiting?)
+* ->github
 ->playstore (password for APK signing is usual....)
 - ->kids
 - videos

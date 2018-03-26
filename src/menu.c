@@ -583,7 +583,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 		//now have all inputs recorded as AnyShip elements (non-ship keypresses will be in key_down_log / Command struct)
 		//actions are dependent on state....
 
-        if (Select.action == TOUCH) {
+        if (Select.action == RELEASE) {
             w = al_get_display_width(display);
             //if (Select.x < 0.75*w)
                 Select.line = (int)((Select.y - 2*Select.sumdy)/(line_space * 2)-0.0);
@@ -670,7 +670,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Menu.netmode--;
                     }
                 }
-                else if (Select.action == TOUCH)
+                else if (Select.action == RELEASE)
                 {
                     Select.action = NO_ACTION;
                     if (Select.x < 0.75*w)
@@ -707,7 +707,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 {
                     Menu.scroll = 10*font_scale;
                 }
-                else if (Select.action == TOUCH) {
+                else if (Select.action == RELEASE) {
                     Select.action = NO_ACTION;
                 }
                 else Menu.scroll = 0;
@@ -804,7 +804,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     get_map_players( Menu.group, Menu.map);
 
                 }
-                else if (Select.action == TOUCH)
+                else if (Select.action == RELEASE)
                 {
                     Select.action = NO_ACTION;
                     if (Select.x < 0.75*w) {
@@ -1019,7 +1019,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 #ifdef ANDROID
                 //Ship[Menu.player].image = Select.sumdx/100;
                 //Ship[Menu.player].offset = 60;
-                if (Select.action == TOUCH) {
+                if (Select.action == RELEASE) {
                     Select.action = NO_ACTION;
                     w = al_get_display_width(display);
                     Ship[Menu.player].image = 8*(0.0+(Select.x/w));

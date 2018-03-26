@@ -530,13 +530,10 @@ void UpdateLandedShip(int i)
 	}
 
 	//thrust makes us live again
-	if (Ship[i].thrust_held || Command.goforward)
+	if (Ship[i].thrust_held)
 	{
-		Command.goforward = FALSE;
-		Ship[i].menu = FALSE;
 		Ship[i].landed = FALSE;
 		Ship[i].thrust = THRUST;
-        GameControls();
         Ship[i].fangle = 0;
         Ship[i].angle = 0;
         Ctrl.ctrl[ASTICK2].x = Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size/2  - Ctrl.ctrl[ASTICK2].size/2;
@@ -590,6 +587,14 @@ void UpdateLandedShip(int i)
             }
         }
 #endif
+
+        if (Ship[i].thrust_held || Command.goforward)
+        {
+            Command.goforward = FALSE;
+            Ship[i].menu = FALSE;
+            GameControls();
+        }
+
         if (Ship[i].fire1_down)	//move up
 		{
 			Ship[i].fire1_down = false;	//one shot
@@ -694,6 +699,8 @@ void UpdateLandedShip(int i)
 		if (Ship[i].pad == Ship[i].home_pad)	//but only on home pad.
 		{
 			Ship[i].menu = TRUE;
+            //Ship[i].thrust_held = FALSE;
+            Command.goforward = FALSE;
             MenuControls();
 		}
 	}

@@ -341,7 +341,7 @@ void CheckTouchControls(ALLEGRO_EVENT event)
             case NO_BUTTON:
                 Select.x = event.touch.x;
                 Select.y = event.touch.y;
-                Select.action = TOUCH;
+                Select.action = RELEASE;
                 break;
             case ASTICK:
             case ASTICK2:
@@ -564,9 +564,9 @@ void NewTouch(float x, float y, int i)
             //h = al_get_display_height(display);
             //Select.sumdx = 0;
             //Select.sumdy = 0;
-            //Select.x = x;
-            //Select.y = y;
-            //Select.action = TOUCH;
+            Select.x = x;
+            Select.y = y;
+            Select.action = TOUCH;
             break;
         case ASTICK2:
         default:
@@ -579,12 +579,11 @@ void flip(ButtonType i )
 {
     int w = al_get_display_width(display);
 
-    Ctrl.ctrl[i].x = w-(Ctrl.ctrl[i].x + Ctrl.ctrl[i].size);
+    Ctrl.ctrl[i].x = w-(Ctrl.ctrl[i].x + Ctrl.ctrl[i].size);    //flip position
 
-    if (Ctrl.ctrl[i].movex == 0)
-        Ctrl.ctrl[i].movex = 10;
-    else
-        Ctrl.ctrl[i].movex = 0;
+    Ctrl.ctrl[i].movex = -1 * (Ctrl.ctrl[i].movex - 10);        //change move tweak for resizing.
+
+    return;
 }
 
 void DoDPAD(float x, float y)
@@ -665,8 +664,8 @@ ButtonType FindButton(float x, float y)
     for (i=0 ; i<NO_BUTTON ; i++)
     {
         if (Ctrl.ctrl[i].active)
-            if ((x > Ctrl.ctrl[i].x) && (x < (Ctrl.ctrl[i].x + Ctrl.ctrl[i].size)))
-                if ((y > Ctrl.ctrl[i].y) && (y < (Ctrl.ctrl[i].y + Ctrl.ctrl[i].size)))
+            if ((x > (Ctrl.ctrl[i].x - Ctrl.ctrl[i].border)) && (x < (Ctrl.ctrl[i].x + Ctrl.ctrl[i].size + Ctrl.ctrl[i].border)))
+                if ((y > (Ctrl.ctrl[i].y - Ctrl.ctrl[i].border)) && (y < (Ctrl.ctrl[i].y + Ctrl.ctrl[i].size + Ctrl.ctrl[i].border)))
                     break;
     }
 
