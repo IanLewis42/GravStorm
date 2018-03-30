@@ -828,11 +828,12 @@ MAYBE LATER.....
 - wall collision vibrate proportional to speed??
 - android crash on pause - OK with nav buttons - only crashes with f/p sensor.... Check events??
   no events -> ignore for now.....
+  .....Hmmmm.. seems Ok now (29/3/18, just released 1.04) - checked with 'reactor core' and sitimus. And menu.
 - back/exit on system back button? 
   can override OnBackPressed, but don't hit it.....Maybe because we need to override in AllegroActivity, not MainActivity??
   Ah, is this because I'm using the FP sensor again???
 - recalc scale on menu state change?? (why??) - to recover broken startup condition??
-- control size storing (size and location)
+X control size storing (size and location)
  
   
 GravStorm is a game where you try to destroy your opponent's spaceship in a variety of environments. 
@@ -862,7 +863,10 @@ in AndroidManifest.xml, inside  <activity
 AND            
     al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS,ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE,ALLEGRO_REQUIRE);
     
-    
+Update version in: game.h AND build.gradle (aka 'app')
+
+
+
 Instructions:
 ----------------
 Fly around, shoot your enemy. Don't crash into the walls.
