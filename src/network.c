@@ -525,6 +525,15 @@ NetMessageType ServiceNetwork(void)
                 CheckPingReply();
             }
         }
+        else if (Net.client_state == NO_SPACE || Net.client_state == NO_MAP)
+        {
+            //Net.msgtimer++;
+            if (Net.msgtimer == 30) {
+               //enet_peer_disconnect(Net.peer, 0);
+                Net.client_state = IDLE;
+            }
+        }
+
         else
         {
             Net.updated = false;
@@ -560,6 +569,7 @@ NetMessageType ServiceNetwork(void)
                             {
                                 al_fprintf(clientfile,"Failed to open level:%s\n",Net.mapfile);
                                 Net.client_state = NO_MAP;
+                                Net.msgtimer = 0;
                                 enet_peer_disconnect(Net.peer,0);
                             }
                             else
@@ -570,6 +580,7 @@ NetMessageType ServiceNetwork(void)
                         case HOST_NOSPACE:
                             al_fprintf(clientfile,"Received FULL message\n");
                             Net.client_state = NO_SPACE;
+                            Net.msgtimer = 0;
                             enet_peer_disconnect(Net.peer,0);
                             enet_packet_destroy (Net.event.packet);
                         break;
@@ -592,23 +603,21 @@ NetMessageType ServiceNetwork(void)
                                     i+=14;                              //skip a few...
 
                                     Ship[j].bullet.damage = Net.event.packet->data[i++];    //read damage
-                                    if (Ship[j].bullet.damage)
+                                    if (Ship[j].bullet.damage && Ship[j].shield > 0)    //prevent multiple kills
                                     {
-                                        Ship[j].shield -=  Ship[j].bullet.damage; //subtract damage
-                                        ScheduleVibrate( Ship[j].bullet.damage);
-                                        Ship[j].bullet.owner = Net.event.packet->data[i++];
-                                        if (Ship[j].shield <= 0)
-                                        {
-                                            Ship[j].killed++;
-                                            if (Ship[j].bullet.owner != NO_OWNER)
-                                                NetSendKilled(Ship[j].bullet.owner);
-                                        }
-                                        //if (Ship[j].bullet.owner != NO_OWNER)
-                                        {
+                                            Ship[j].shield -=  Ship[j].bullet.damage; //subtract damage
+                                            ScheduleVibrate( Ship[j].bullet.damage);
+                                            Ship[j].bullet.owner = Net.event.packet->data[i++];
+                                            if (Ship[j].shield <= 0)
+                                            {
+                                                Ship[j].killed++;
+                                                if (Ship[j].bullet.owner != NO_OWNER)
+                                                    NetSendKilled(Ship[j].bullet.owner);
+                                            }
+
                                             Ship[j].bullet.type = Net.event.packet->data[i++];                                      //read type so we can look up mass
                                             Ship[j].xv     += Mass[Ship[j].bullet.type]*(signed char)Net.event.packet->data[i++];	//momentum from bullet to ship
                                             Ship[j].yv     += Mass[Ship[j].bullet.type]*(signed char)Net.event.packet->data[i++];
-                                        }
                                     }
                                     else
                                         i+=4;
@@ -780,7 +789,7 @@ NetMessageType ServiceNetwork(void)
     {
         int i,j;
 
-        if (num_ships < 2)
+        //if (num_ships < Map.max_players)
             PingReply();    //check if we've been pinged by a client. If so, reply.
 
         while(enet_host_service(Net.host, &Net.event, 0))
@@ -942,6 +951,7 @@ void PingServer(void)
     sendbuf.dataLength = 1;
     enet_socket_send(Net.ping, &addr, &sendbuf, 1);
     al_fprintf(clientfile,"Pinged server on port:%d\n",Net.ping_port);
+
     return;
 }
 

@@ -72,6 +72,7 @@ typedef struct
     int eventStatus;
 
     float quality;
+    int msgtimer;
 } NetworkType;
 
 typedef struct

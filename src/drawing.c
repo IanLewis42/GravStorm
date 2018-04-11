@@ -67,8 +67,13 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	char usb0[]  = "USB Joy 1";
 	char usb1[]  = "USB Joy 2";
 	char* control_string;
+#ifdef ANDROID
+    char local[]  = "Local Game (no network)";
+    char host[]  = "Host Network Game (choose level)";
+#else
 	char local[]  = "Local Game";
 	char host[]  = "Host Network Game";
+#endif
 	char client[]    = "Join Network Game";
     char inst[]    = "Instructions";
 
@@ -507,7 +512,11 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                 al_draw_textf(small_font, ItemUnselected,  w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Network host started");
             else
                 al_draw_textf(small_font, ItemUnselected,  w/2, 0.8*h,  ALLEGRO_ALIGN_CENTRE, "Network host started on %s", Net.myaddress);
-            al_draw_textf(small_font, ItemUnselected,  w/2, 0.85*h,  ALLEGRO_ALIGN_CENTRE, "%d players", num_ships);//Net.clients);
+
+            if (num_ships >= Map.max_players)
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.85*h,  ALLEGRO_ALIGN_CENTRE, "%d players (no more space)", num_ships);//Net.clients);
+            else
+                al_draw_textf(small_font, ItemUnselected,  w/2, 0.85*h,  ALLEGRO_ALIGN_CENTRE, "%d players", num_ships);//Net.clients);
         }
 
         else if (Menu.netmode == CLIENT)

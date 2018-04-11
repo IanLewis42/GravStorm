@@ -801,12 +801,17 @@ X fade on android instructions.
 * less debounce
 * 5/3 buttons
 * network messages (fit on screen, show waiting?)
-* ->github
+//////////////Play store 1.04
+* only 2 players on network?
+* reboot router?
+* network multi kill bug
+* net messages - delay on 'full', host indicates when full.
+->github
 ->playstore (password for APK signing is usual....)
 - ->kids
 - videos
 - promote
-- code clean up (dead code, scale factors)
+- code clean up (dead code (careful.....), scale factors)
 
 Added instructions
 Added support for Android Immersive Mode
@@ -819,8 +824,29 @@ y 704
 
 MAYBE LATER.....
 ----------------
+- Network issue
+  If host gets full of clients (on N-player level), one client leaves, and another attaches, 'new' client will be number N,
+  regardless of who left. So you have 2 'player N's. Not quite sure how to solve this......
+  Worse / more general:
+  If a client ship disconnects, then num_ships is decremented. This means that the highest-numbered, (i.e. last connected) ship
+  won't be updated / collision detected etc. If the disconnected ship was the highest numbered, fine, otherwise, we have a problem.
+  Note that this is OK in 2-player, as disconnected ship *will* be highest numbered.
+- Possible solution:
+  New var, num_connected_ships - inc on connection, dec on disconnect
+  when inc, if (num_conneced_ships > num_ships) num_ships = num_conected_ships.
+  New field in ship: int connected. (make sure this is always true for non-network games)
+  **** CAN I TELL WHO DISCONNECTED?????!!!!!******
+  When connecting, search through ships for lowest-numbered not connected.
+  In collision detection, update ships, check connected before updating
+  add 'connected' to gamestate packet - breaks compatability - do I care? 
+  Could I abuse reincarnate timer?
+  yeah - for disconnected ships, set r_t to non-zero, then won't get collision detected or drawn - passed over net, so clients won't draw.
+  Use disconnected in update_ships, so r_t won't get decremented :-)
+  on connect, make sure r_t = 0;
+
 - 8 way level? team mode? (switch in txt file)
   - can't quite see how 'capture the flag' works, unless it's just land on 'their' base
+  - Ooh, could do 'hit their FF switch'.....
   - or first to land on 'centre' pad?? - Can't really retrieve anything, as what happens if (when) you crash on the way back?
   - so just (team) kill count?
   - if (team) -> only 2 ship choices, random allocation? or alternate? allow changing?

@@ -458,7 +458,9 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
 #endif
             if (gpio_active) ReadGPIOJoystick();
 
-             Net.pingtimer++;   //used by client searching for server
+            Net.pingtimer++;   //used by client searching for server
+            Net.msgtimer++;
+
 		}
 
 		else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
@@ -740,6 +742,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     Menu.col_pos = 1;
                     Menu.player = 0;
                     Menu.item = 0;
+                    get_map_players( Menu.group, Menu.map);
 #else
                     if (Map.max_players == 1) num_ships = 1;    //default 2 players, unless max is 1
                     else num_ships = 2;
