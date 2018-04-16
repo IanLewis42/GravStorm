@@ -1765,7 +1765,8 @@ void draw_debug(void)
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "JDS:%d", joystick_down_state);
 }
 
-#ifdef RPI
+#if 0
+//#ifdef RPI
 /* Function: al_vfprintf
  */
 int al_vfprintf(ALLEGRO_FILE *pfile, const char *format, va_list args)

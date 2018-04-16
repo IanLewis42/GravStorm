@@ -715,9 +715,9 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 else Menu.scroll = 0;
             break;
             case LEVEL: //map selection
-#ifndef ANDROID
-                get_map_players( Menu.group, Menu.map);
-#endif
+//#ifndef ANDROID
+//                get_map_players( Menu.group, Menu.map);
+//#endif
                 if (Command.goback)
                 {
                     Command.goback = false;
