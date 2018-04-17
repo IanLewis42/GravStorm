@@ -202,7 +202,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
                 }
             }
 
-			//al_draw_textf(font, al_map_rgb(255, 255, 0),200, 200,  ALLEGRO_ALIGN_LEFT, "Count:%d",count);
+			al_draw_textf(font, al_map_rgb(255, 255, 0),200, 200,  ALLEGRO_ALIGN_LEFT, "Y:%0.1f",y);
 
 			al_identity_transform(&transform);			/* Initialize transformation. */
 			al_scale_transform(&transform, shadow_scale, shadow_scale);	/* Rotate and scale around the center first. */
@@ -715,9 +715,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 else Menu.scroll = 0;
             break;
             case LEVEL: //map selection
-//#ifndef ANDROID
-//                get_map_players( Menu.group, Menu.map);
-//#endif
                 if (Command.goback)
                 {
                     Command.goback = false;
@@ -742,8 +739,8 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     Menu.col_pos = 1;
                     Menu.player = 0;
                     Menu.item = 0;
-                    get_map_players( Menu.group, Menu.map);
 #else
+                    get_map_players( Menu.group, Menu.map);
                     if (Map.max_players == 1) num_ships = 1;    //default 2 players, unless max is 1
                     else num_ships = 2;
                     Menu.col_pos = 0;
