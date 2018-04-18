@@ -734,13 +734,13 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     Select.sumdx = 0;
                     AnyShip.left_down = false;
                     AnyShip.right_down = false;
+                    get_map_players( Menu.group, Menu.map);
 #ifdef ANDROID
                     num_ships = 1;
                     Menu.col_pos = 1;
                     Menu.player = 0;
                     Menu.item = 0;
 #else
-                    get_map_players( Menu.group, Menu.map);
                     if (Map.max_players == 1) num_ships = 1;    //default 2 players, unless max is 1
                     else num_ships = 2;
                     Menu.col_pos = 0;
@@ -997,23 +997,24 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                                 Menu.ships++;
                             }
                         }
-                        if (Menu.item == 1)    //controls
+                    }
+                    if (Menu.item == 1)    //controls
+                    {
+                        if (Ship[Menu.player].controller < 3)
+                            Ship[Menu.player].controller++;
+                        if (Ship[Menu.player].controller == GPIO_JOYSTICK)
                         {
-                            if (Ship[Menu.player].controller < 3)
-                                Ship[Menu.player].controller++;
-                            if (Ship[Menu.player].controller == GPIO_JOYSTICK)
+                            if (!gpio_active)
                             {
-                                if (!gpio_active)
-                                {
-                                    Ship[Menu.player].controller++;
-                                }
+                                Ship[Menu.player].controller++;
                             }
                         }
-                        else if (Menu.item == 2)    //define keys
-                        {
-                            Menu.define_keys = true;    //done above
-                        }
                     }
+                    else if (Menu.item == 2)    //define keys
+                    {
+                        Menu.define_keys = true;    //done above
+                    }
+
 #endif
                 }
 #ifdef ANDROID
