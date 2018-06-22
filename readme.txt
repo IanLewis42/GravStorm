@@ -14,7 +14,7 @@ If you're curious as to what it looks like, there should be some screenshots in 
 REQUIREMENTS
 ------------
 o Raspberry Pi
-  I built/ran it under Raspbian. If you just want to run it, you'll need Raspbian too. I've tested it under both Wheezy and Jessie versions of Raspbian and it seems OK. If you want to build it yourself, feel free to try under any OS you want ;-)
+  I built/ran it under Raspbian. If you just want to run it, you'll need Raspbian too. There are two versions, which one you need depends on the version of your RPi hardware, and version of Raspbian. See Installation section for details. If you want to build it yourself, feel free to try under any OS you want ;-)
   ~30MB free disk/SD card space.
   TV / Monitor plugged into the Pi. It only runs full-screen (not in a window) and VNC doesn't display anything. I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your display isn't big enough. Feedback welcome :-)
   There don't seem to be any dependencies that aren't in the standard Raspbian Jessie image (as of 23/02/16).
@@ -51,6 +51,7 @@ o Raspbian on Raspberry Pi
       These have the old version of the OpenGL driver, so you need the executable 'gravstorm-jessie'.
       rename it to just 'gravstorm'
       > mv gravstorm-jessie gravstorm
+      NOTE:This version only runs full-screen (not in a window) and VNC doesn't display anything.
       
     - Raspbian version Stretch
       If you are running stretch, then the next step depends on which hardware version you have:
@@ -80,7 +81,9 @@ o Raspbian on Raspberry Pi
       - These enable the old version of the OpenGL driver, so you need the executable 'gravstorm-jessie'.
         rename it to just 'gravstorm'
         > mv gravstorm-jessie gravstorm
-
+  
+        NOTE:This version only runs full-screen (not in a window) and VNC doesn't display anything.
+  
     - Whatever version of OS and hardware you have, you may then need to change the file permissions to make the game executable. Start up a terminal (e.g. LXterminal) 
       change into the gravstorm directory:
       > cd gravstorm
