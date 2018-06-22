@@ -37,7 +37,7 @@ Click the button labelled 'Clone or Download' and then 'Download Zip'.
 
 Save the zip file, and unzip the contents of this into the directory of your choice. 
 
-o Raspberry Pi
+o Raspbian on Raspberry Pi
   On Raspberry Pi, your home directory is a good choice (probably /home/pi). You should end up with the following directory structure:
 
   ~/gravstorm
@@ -45,14 +45,49 @@ o Raspberry Pi
   ~/gravstorm/src
 
   (Github seems to make the directory name 'gravstorm-master'. You can leave it, or change it. I'm going to refer to it as 'gravstorm').
-
-  You may then need to change the file permissions to make the game executable. Start up a terminal (e.g. LXterminal) 
-    - change into the gravstorm directory:
-      cd gravstorm
-    - set file permissions:
-      chmod +x gravstorm
+  
+  - Setup Raspberry Pi
+    - Raspian versions Wheezy or Jessie
+      These have the old version of the OpenGL driver, so you need the executable 'gravstorm-jessie'.
+      rename it to just 'gravstorm'
+      > mv gravstorm-jessie gravstorm
       
-  One level (neutron star) requires the Raspberry Pi to be configured with at least 128MB of Graphics RAM. The default is 64MB. This can be changed by running the config utiliy. In LXterminal type:
+    - Raspbian version Stretch
+      If you are running stretch, then the next step depends on which hardware version you have:
+      - Raspberry Pi 2/3
+        Enable the New OpenGl driver:
+        > sudo raspi-config
+        select 'Advanced Options', then 'GL Drivers' and 'GL (Full KMS)'. 
+
+        You need the executable 'gravstorm-stretch'.
+        rename it to just 'gravstorm'
+        mv gravstorm-stretch gravstorm        
+      
+      - Raspberry Pi 1 (original) (and probably zero, but I don't have one to test)
+        The new openGL driver doesn't run on this hardware, so you need to use the old driver. enable this as follows:
+        > cd /opt/vc/lib
+        > sudo ln -s libbrcmEGL.so libEGL.so
+        > sudo ln -s libbrcmGLESv2.so libGLESv2.so
+        > sudo ln -s libbrcmOpenVG.so libOpenVG.so
+        > sudo ln -s libbrcmWFC.so libWFC.so
+
+        and also:
+
+        > export LD_LIBRARY_PATH=/opt/vc/lib
+
+        I'm told that a better way to do the last step is via a .conf file in etc/ld.so.conf.d but that doesn't seem to work for me :-(        
+      
+      - These enable the old version of the OpenGL driver, so you need the executable 'gravstorm-jessie'.
+        rename it to just 'gravstorm'
+        > mv gravstorm-jessie gravstorm
+
+    - Whatever version of OS and hardware you have, you may then need to change the file permissions to make the game executable. Start up a terminal (e.g. LXterminal) 
+      change into the gravstorm directory:
+      > cd gravstorm
+      set file permissions:
+      > chmod +x gravstorm
+
+  Gravstorm requires the Raspberry Pi to be configured with at least 128MB of Graphics RAM. This can be changed by running the config utiliy. In LXterminal type:
     sudo raspi-config
     select 'Advanced Options', then 'Memory Split' and type '128'. You probably need to reboot for this to take effect. 
   
@@ -119,7 +154,6 @@ o PLAYERS
 NOTE: Any set of player defined keys, or joystick can also be used to navigate the menu. 
 
 
-
 PLAYING
 -------
 Default controls are:
@@ -131,7 +165,7 @@ Up/Forwards fires your 'normal' weapon (rapid fire, low damage)
 Down/Back fires your 'special' weapon (limited ammo, more damage, various types)
 Thrust/Joystick Button fires your engine.
 
-Android uses touch screen controls, described in the instructions available from teh first menu.
+Android uses touch screen controls, described in the instructions available from the first menu.
 
 Some levels have a race track. This should be described in the level text.
 Current lap time, last completed lap time and best lap time for this game are displayed in the status panel.
@@ -376,5 +410,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 20/03/18
+IPL 19/06/18
 gravstorm9@gmail.com
