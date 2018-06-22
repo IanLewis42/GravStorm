@@ -274,6 +274,124 @@
 // (well, will be, 'cos pixels are integers....)
 // but keep in float for calculation.
 // NB use htonl / htons etc. for host-to-netwok byte swapping :-)
+//*CRASH on display map text....... (RPI, jessie build on stretch)
+
+// Double/quad blackholes on figure 8 / clover race level?
+
+Autonomous Ships.....
+- ships choose one of 8 directions (N,NE,E,SE etc.) ie 0,4,9,14,19,24,29,34)
+- start at 0??
+- so on each pass, for each autonomous ship, scan all 8 directions, until you hit a wall (compile-time config step size and max distnce.)
+  may need new collision function. 
+- Also find direction vector to each other ship. See if there's a wall closer than the ship, i.e. if your path is blocked.
+
+- If clear path, then track ship (similar to heatseeker??), when close, fire normal, when closer fire special.
+- else
+- if current direction is < threshold, try next direction CW, then next CCW etc until you find a longer one. 
+  (Store distance-to-wall in an array [0-7], start with current, 2 pointers, scan both ways, wrap)
+  OR biggest distance OR random from all bigger than current??
+- then set that as 'desired direction' (like input from Android direction control. (poke Ship[].fangle = 0-360) Existing code should take over and adjust actual direction.)
+- fixed (target) speed, if actual speed (calculated for wind volume) is less, thrust, if more, don't thrust. (poke Sip[].thrust_held == true/false.
+  Need hysteresis. value from config file, so slower on tight, twisty maps? (also 'distance where we turn threshold per map??)
+
+- Alternative:
+  For all ships, find distance and direction. 
+  sort by distance
+  starting with closest, see if we have clear line of sight
+  if we do, head for it, as above
+  if not, see if we have line of sight to next, and so on.
+  if no line of sight, revert to closest, head towards it, steer minimally off line if forced.
+
+- ...and there's more:
+  Different modes (FSM): 
+    CRUISE (as described first above) (get this working first :-)
+    HUNT ('Alternative')
+    RETURN: Use 100-200 pix above centre of 'own' pad as target, then as HUNT, slow down when distance becomes small.
+            When distance < 0.25* pad width, direction = 0, -> LAND
+    LAND: assume we have RETURNed, so just wait until we're refuelled, then go again.
+    
+    For variable difficulty, could vary between periods of CRUISE and HUNT, and/or put some random deviation of direction in HUNT when firing.
+    Could go from CRUISE to HUNT on clear line of sight, and/or being hit by something.
+
+- Odds and ends:
+  Unlimited ammo/fuel for auto ships, as they can't navigate back to pads?
+  'push' towards closest ship when not tracking??
+  'a' to toggle autonomous mode (debug)
+  Network + autonomous.... (hopefully not too hard...)
+  
+  Ship.auto
+      .auto_heading (i.e. target direction)
+      .
+      
+  
+void AutoShip(int i)
+{
+	int j,k;
+	float dx,dy,distance[MAX_SHIPS-1],direction[MAX_SHIPS-1];
+	
+	for (j=0 ; j<num_ships ; j++)
+	{
+		if (i=j)
+		{
+			distance[j] = 9999999;	//big, so we shouldn't choose it
+			direction[j] = 120;	//degrees
+		}
+		else
+		{
+			dx = -1*(Ship[i].x - Ship[j].x);
+			dy =     Ship[i].y - Ship[j].y;
+		
+			//for each ship, work out distance, work out direction
+
+	/*		___o___Opponent(Ship[j])
+			|     /
+			|    /
+		       a|   /
+			|  /
+			|t/
+			|/
+			Us(Ship[i])
+
+			tan(t) = o/a
+			t = arctan o/a
+	*/
+			distance[j] = sqrt((dx * dx) + (dy * dy)); 
+			direction[j] = (180/PI) * atan2(dx,dx);	//degrees
+			if (direction[j] < 0) direction[j] += 360;
+	}
+	
+	min = 0;
+	for (j=0 ; j<num_ships ; j++)
+	{		
+		for (k=0 ; k<num_ships ; k++)
+		{	
+			if (distance[k] < distance[min])
+			min = k;
+		}
+		
+		
+		if (find_obstruction(k)) > distance[k];
+		break;	
+	}
+
+	if (j == num_ships) //no break, so no clear line of sight
+	{
+	
+	}
+
+
+	Ship[i].fangle = direction[k];
+	Ship[i].thrust_held = v_squared < 10; //Map.auto_v
+	Ship[i].fire1_held = distance[k] < 400;
+	Ship[i].fire2_down = distance[k] < 200;
+}
+  
+
+
+  - Win/RPI
+    Local game ->  Multiplayer -> LEVEL -> Player 1 - Human/CPU etc....
+  - Android
+    Local Game ->  Multiplayer -> LEVEL -> Choose ship, Num CPU ships (same screen)
 
 net startup:
 HOST:   Select 'host game'
@@ -806,10 +924,10 @@ X fade on android instructions.
 * reboot router?
 * network multi kill bug
 * net messages - delay on 'full', host indicates when full.
-->github
+* ->github
 ->playstore (password for APK signing is usual....)
 - ->kids
-- videos
+* videos
 - promote
 - code clean up (dead code (careful.....), scale factors)
 
@@ -818,6 +936,28 @@ Added support for Android Immersive Mode
 Added vibration effects
 Added support for left-handed controls
 Assorted small enhancements to playability and graphics
+
+OpenGLES (Embedded systems) - libGLESv2.so -> renamed libbrcmGLESv2.so
+EGL -> layer below GLES?? libEGL.so, asabove
+libOpenVG, libWFC
+
+Mesa; open source implementation of OPenGL, GLES, EGL
+
+Stretch has both flavours of libs, in different locations? (opt/vc/lib - opt/vc/lib/brcm)
+
+dispmanx replaced by openwf??
+
+*update mesa???
+try with fake kms??
+try jessie build with symlinks?? -> works! jessie version, symlinks, export LD_LIBRARY_PATH=/opt/vc/lib 128MB graphics ram.
+try jessie build from cmd line??
+
+need to fix:
+ *bracket in menu stopping key define
+ *sentry image bitmap 66 pixel thing
+ *frame count debug.
+ *(build 5.1.8 / wheezy.) - restore RPI al_fprintf (game.c, bottom)
+ 
 
 0.77
 y 704
@@ -836,6 +976,8 @@ MAYBE LATER.....
   when inc, if (num_conneced_ships > num_ships) num_ships = num_conected_ships.
   New field in ship: int connected. (make sure this is always true for non-network games)
   **** CAN I TELL WHO DISCONNECTED?????!!!!!******
+  - think so, use Net.event.peer.address(.host (U32)) - store this in Ship struct on connect (so need new address element) 
+    When we get a disconnect, search ship array for matching address, and zero it. So 0 = not connected.
   When connecting, search through ships for lowest-numbered not connected.
   In collision detection, update ships, check connected before updating
   add 'connected' to gamestate packet - breaks compatability - do I care? 
