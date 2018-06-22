@@ -39,14 +39,14 @@
 #include "network.h"
 
 //int DoOldMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip);
-int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip);
+int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, /*ALLEGRO_EVENT event, */ShipType AnyShip);
 
-int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
+int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
 {
 	ALLEGRO_TRANSFORM transform;
     ALLEGRO_SAMPLE_INSTANCE *slam_inst;
 	ALLEGRO_SAMPLE_INSTANCE *wind_inst;
-
+    ALLEGRO_EVENT event;
 	ALLEGRO_BITMAP *ttg_logo;
 
 	float ht = 100;	//total height (light)
@@ -202,7 +202,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
                 }
             }
 
-			al_draw_textf(font, al_map_rgb(255, 255, 0),200, 200,  ALLEGRO_ALIGN_LEFT, "Y:%0.1f",y);
+			//al_draw_textf(font, al_map_rgb(255, 255, 0),200, 200,  ALLEGRO_ALIGN_LEFT, "Y:%0.1f",y);
 
 			al_identity_transform(&transform);			/* Initialize transformation. */
 			al_scale_transform(&transform, shadow_scale, shadow_scale);	/* Rotate and scale around the center first. */
@@ -341,7 +341,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     al_play_sample_instance(loop_inst);
 
 	//if (DoOldMenu(queue, event, AnyShip)) return 1;
-	if (DoNewMenu(queue, event, AnyShip)) return 1;
+	if (DoNewMenu(queue, AnyShip)) return 1;
 
 	//stop music
 	al_stop_sample_instance(loop_inst);
@@ -366,8 +366,9 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 ALLEGRO_FILE *hostfile,*clientfile;
 
-int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
+int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, /*ALLEGRO_EVENT event, */ShipType AnyShip)
 {
+	ALLEGRO_EVENT event;
 	int i,j;
 	int w,h;//,xoffset,yoffset;
     //int line_space = (int)(35*font_scale);
@@ -611,6 +612,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                         Menu.col_pos = 0;
                         Select.sumdymin = -1*total_lines*line_space;
                         Select.sumdy = Select.sumdymax;
+                        init_map(Menu.group, Menu.map);
                     }
                     else if (Menu.netmode == HOST)
                     {
@@ -675,7 +677,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                 else if (Select.action == RELEASE)
                 {
                     Select.action = NO_ACTION;
-                    if (Select.x < 0.75*w)
+                    //if (Select.x < 0.75*w)
                         Menu.netmode = Select.line-1;
                     if (Menu.netmode == INST)
                         Command.goforward = TRUE;
@@ -1014,7 +1016,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip)
                     {
                         Menu.define_keys = true;    //done above
                     }
-
 #endif
                 }
 #ifdef ANDROID

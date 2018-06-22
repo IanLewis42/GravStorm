@@ -55,7 +55,7 @@ int get_map_players(int group, int map)
 {
     //int i = 0, j = 0, l = 0, m = 0, n = 0, o = 0, p = 0;    //counters for pads, special areas, blackholes, sentries, forcefields etc.
     //int length;
-    char map_file_name[MAP_NAME_LENGTH];
+    char map_file_name[MAP_NAME_LENGTH+1];
     char str[100];
     char *line;
     //int players;
@@ -105,7 +105,7 @@ int init_map(int group, int map)
 {
 	int i=0, j=0,l=0,m=0,n=0,o=0,p=0;	//counters for pads, special areas, blackholes, sentries, forcefields etc.
     int length;
-	char map_file_name[MAP_NAME_LENGTH];
+	char map_file_name[MAP_NAME_LENGTH+1];
 	char str[100];
 	char *line;
 	strncpy(map_file_name, (char*)&MapNames[group].Map[map], MAP_NAME_LENGTH);
@@ -279,7 +279,7 @@ int init_map(int group, int map)
 		{
 			Map.pad[i].miners = 0;
 			Map.pad[i].jewels = 0;
-			sscanf(line+3," %x %d %d %d %d %d",&Map.pad[i].type,&Map.pad[i].y,&Map.pad[i].min_x,&Map.pad[i].max_x,&Map.pad[i].miners,&Map.pad[i].jewels);
+			sscanf(line+3," %x %d %d %d %d %d",(unsigned int*)&Map.pad[i].type,&Map.pad[i].y,&Map.pad[i].min_x,&Map.pad[i].max_x,&Map.pad[i].miners,&Map.pad[i].jewels);
 			al_fprintf(logfile,"Pad %d: type:%02x y:%d x:%d x:%d miners:%d jewels:%d\n",i,Map.pad[i].type,Map.pad[i].y,Map.pad[i].min_x,Map.pad[i].max_x,Map.pad[i].miners,Map.pad[i].jewels);
 
 			if ((Map.pad[i].type & 0x000f) < MAX_SHIPS)
@@ -701,7 +701,7 @@ void init_controls(void)
 	Ctrl.ctrl[BIGGER].movex = 0;
 	Ctrl.ctrl[BIGGER].movey = 0;
 
-    Ctrl.ctrl[REVERSE].active = TRUE;
+    Ctrl.ctrl[REVERSE].active = FALSE;
     Ctrl.ctrl[REVERSE].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
     Ctrl.ctrl[REVERSE].border = 0;
     Ctrl.ctrl[REVERSE].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 0.55);

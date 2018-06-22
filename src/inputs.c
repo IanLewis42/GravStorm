@@ -33,6 +33,9 @@
 #include "inputs.h"
 #include "objects.h"
 #include "network.h"
+#ifdef RPI
+#include <wiringPi.h>
+#endif
 
 ALLEGRO_JOYSTICK *USBJOY[2];
 

@@ -822,7 +822,7 @@ NetMessageType ServiceNetwork(void)
 
                         //send level to client
                         temp_pkt[0] = HOST_LEVEL;
-                        strncpy(&temp_pkt[1],(char*)&MapNames[Menu.group].Map[Menu.map],100);
+                        strncpy(&temp_pkt[1],(char*)&MapNames[Menu.group].Map[Menu.map],99);
                         packet = enet_packet_create ((char*)&temp_pkt,strlen((char*)&MapNames[Menu.group].Map[Menu.map])+2,ENET_PACKET_FLAG_RELIABLE);
                         enet_peer_send (Net.event.peer, 0, packet);
                         al_fprintf(hostfile,"Sent Level: %s\n",&temp_pkt[1]);

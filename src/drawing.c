@@ -39,6 +39,7 @@ int tile_map[MAX_MAP_WIDTH * MAX_MAP_HEIGHT];
 int map_height=0, map_width=0;
 
 ALLEGRO_BITMAP *inst_bmp;
+ALLEGRO_BITMAP *map_text_bmp;
 
 void draw_background(int scrollx, int scrolly, int win_x, int win_y, int w, int h);
 void draw_map(int scrollx, int scrolly, int x, int y, int w, int h);
@@ -642,15 +643,19 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
 void display_map_text(int done, int timer)
 {
-    ALLEGRO_FILE * description_file;
-    char line[200];
-    int i=20;
-    int w,h,bgw,bgh,bgx,bgy;
-    int line_space;
-    ALLEGRO_USTR *ustr = NULL;
+    //ALLEGRO_FILE * description_file;
+    //char line[200];
+    //int i=20;
+    //int w,h,bgw,bgh,bgx,bgy;
+    //int line_space;
+    //ALLEGRO_USTR *ustr = NULL;
 
     if (halted) return;
 
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    al_draw_bitmap(map_text_bmp,0,0,0);
+
+/*
     line_space = 35*font_scale;
 
 #ifdef ANDROID
@@ -678,12 +683,12 @@ void display_map_text(int done, int timer)
 	{
 		while (al_fgets(description_file, line, 200) != NULL)
 		{
-			 ustr = al_ustr_new(line);
+            ustr = al_ustr_new(line);
             al_draw_ustr(small_font, al_map_rgb(timer*8, timer*8, timer*8),(int)(20*font_scale), i,  ALLEGRO_ALIGN_LEFT, ustr);
 			i+=line_space;
+            if (ustr) al_ustr_free(ustr);
 		}
 
-		if (ustr) al_ustr_free(ustr);
 		al_fclose(description_file); //close file
 	}
 	else
@@ -695,9 +700,10 @@ void display_map_text(int done, int timer)
 
     if (done)
         al_draw_textf(small_font, al_map_rgb(128, 0, 0),(int)(20*font_scale), i+line_space,  ALLEGRO_ALIGN_LEFT, "Painna Nappa / Press Button");
-
+       */
     Ctrl.ctrl[SELECT].idx = 0;
     draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
+
     al_flip_display();
 
     return;
@@ -774,7 +780,7 @@ void display_wait_text(void)
     al_flip_display();
 }
 
-void make_bullet_bitmap(void)
+void __attribute__ ((noinline)) make_bullet_bitmap(void)
 {
     al_fprintf(logfile,"Creating bullets bitmap\n");
     bullets_bmp = al_create_bitmap(10, 10);			//create a bitmap
@@ -784,6 +790,72 @@ void make_bullet_bitmap(void)
     al_set_target_backbuffer(display);			//Put default target back
 }
 
+
+void make_map_text_bitmap(void)
+{
+    int line_space;
+    char line[200];
+
+    ALLEGRO_FILE * description_file;
+    int i=20;
+    int w,h,bgw,bgh,bgx,bgy;
+    ALLEGRO_USTR *ustr = NULL;
+
+    //line_space = 30*font_scale;
+
+    map_text_bmp = al_create_bitmap(al_get_display_width(display), al_get_display_height(display));			//create a bitmap
+    al_set_target_bitmap(map_text_bmp);					//set it as the default target for all al_draw_ operations
+
+   line_space = 35*font_scale;
+
+#ifdef ANDROID
+    i+=2*line_space;
+#endif
+
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+
+    w = al_get_display_width(display);
+    h = al_get_display_height(display);
+    bgw = al_get_bitmap_width(menu_bg_bmp);
+    bgh = al_get_bitmap_height(menu_bg_bmp);
+
+    for(bgy=0 ; bgy<h ; bgy+=bgh)
+    {
+        for(bgx=0 ; bgx<w ; bgx+=bgw)
+        {
+            al_draw_bitmap(menu_bg_bmp,bgx,bgy,0);
+        }
+    }
+
+	al_draw_filled_rectangle(0,0,w,h,al_map_rgba(0,0,0,180));	//black filter to darken?
+
+	if ((description_file = al_fopen(Map.description_file_name,"r")))
+	{
+		while (al_fgets(description_file, line, 200) != NULL)
+		{
+            ustr = al_ustr_new(line);
+            al_draw_ustr(small_font, al_map_rgb(240, 240, 240),(int)(20*font_scale), i,  ALLEGRO_ALIGN_LEFT, ustr);
+			i+=line_space;
+            if (ustr) al_ustr_free(ustr);
+		}
+
+		al_fclose(description_file); //close file
+	}
+	else
+	{
+		al_draw_textf(small_font, al_map_rgb(240, 240, 240),(int)(20*font_scale), i,  ALLEGRO_ALIGN_LEFT, "%s",(char*)&MapNames[Menu.group].Map[Menu.map]);
+		i+=line_space;
+		al_draw_textf(small_font, al_map_rgb(240, 240, 240),(int)(20*font_scale), i,  ALLEGRO_ALIGN_LEFT, "Couldn't open description file: %s",Map.description_file_name);
+	}
+
+    al_draw_textf(small_font, al_map_rgb(128, 0, 0),(int)(20*font_scale), i+line_space,  ALLEGRO_ALIGN_LEFT, "Painna Nappa / Press Button");
+
+    //Ctrl.ctrl[SELECT].idx = 0;
+    //draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
+
+    al_set_target_backbuffer(display);			//Put default target back
+
+}
 void make_instructions_bitmap(void)
 {
     ALLEGRO_FILE * inst;

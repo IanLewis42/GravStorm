@@ -22,6 +22,7 @@ void draw_status_bar(int ship, int x, int y);
 void draw_dividers(void);
 void display_menu(void);
 void display_new_menu(void);
+void make_map_text_bitmap(void);
 void display_map_text(int done, int timer);
 void display_wait_text(void);
 void make_bullet_bitmap(void);
@@ -34,6 +35,9 @@ extern ALLEGRO_BITMAP *bullets_bmp;
 extern ALLEGRO_BITMAP *tr_map;
 extern ALLEGRO_BITMAP *tr_col_map;//Collision map. Might not need this to be an allegro bitmap, just a made-up binary format.
 extern ALLEGRO_BITMAP *tr_map_section;
+
+extern ALLEGRO_BITMAP *inst_bmp;
+extern ALLEGRO_BITMAP *map_text_bmp;
 
 extern int grid;
 #define MAX_GRID 3

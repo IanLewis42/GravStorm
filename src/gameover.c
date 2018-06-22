@@ -355,7 +355,7 @@ int GameOver()
                 keypress = false;
             }
             if (position < MAX_SCORES) {
-                strncpy(display_name, Map.newscore[position].name, 50);
+                strncpy(display_name, Map.newscore[position].name, 49);
                 strcat(display_name, cursor);
                 }
 
@@ -459,7 +459,7 @@ int GameOver()
                 keypress = false;
             }
 
-            strncpy(display_name,Map.newtime[Ship[ship].lap_table_pos].name,50);
+            strncpy(display_name,Map.newtime[Ship[ship].lap_table_pos].name,49);
             strcat(display_name,cursor);
 
             al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "BEST TIMES");
@@ -522,12 +522,12 @@ int GameOver()
 void SaveScores(void)   //scores/times.
 {
     ALLEGRO_FILE *score_file;
-    char score_file_name[50];
+    char score_file_name[MAP_NAME_LENGTH];
     char temp[100];
     const char scores[7] = "_s.bin\0";
     int i,j;
 
-    strncpy(score_file_name, (char*)&MapNames[Menu.group].Map[Menu.map], MAP_NAME_LENGTH);
+    strncpy(score_file_name, (char*)&MapNames[Menu.group].Map[Menu.map], MAP_NAME_LENGTH-1);
 
     strcat(score_file_name, scores);
 #ifdef ANDROID

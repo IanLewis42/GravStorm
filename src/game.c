@@ -170,7 +170,7 @@ ALLEGRO_FILE* logfile;
 
 
 //Local prototypes
-int  DoTitle(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
+int  DoTitle(ALLEGRO_EVENT_QUEUE *queue);//, ALLEGRO_EVENT event);
 int  DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
 int  GameOver(void);
 //int  FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event);
@@ -413,7 +413,7 @@ int game(int argc, char **argv )
 
     init_controls();	//setup defaults for what controls which ship.
 
-    exit = DoTitle(queue, event);
+    exit = DoTitle(queue);//, event);
     if (exit) return 0;
 
 	al_fflush(logfile);
@@ -494,6 +494,7 @@ int game(int argc, char **argv )
 		al_fflush(logfile);
 
         //wait for fire(thrust) to clear text / enter map
+        make_map_text_bitmap();
         display_map_text(true,30);	//this is the description text file, plus 'press fire' message
 
         while(1)
@@ -515,7 +516,7 @@ int game(int argc, char **argv )
                 StopNetwork();          //exit back to menu
                 break;
             }
-            else if (redraw)
+            else if (redraw && al_is_event_queue_empty(queue))
             {
                 redraw = false;
                 display_map_text(true,30);	//this is the description text file, plus 'press fire' message
@@ -625,8 +626,9 @@ int game(int argc, char **argv )
                 evsrc = DISPLAY;
             if (event.any.source == EVSRC_KEYBOARD)
                 evsrc = KEYBOARD;
-            if (event.any.source == EVSRC_TOUCH)
-                evsrc = TOUCH;
+            if (al_is_touch_input_installed())
+                if (event.any.source == EVSRC_TOUCH)
+                    evsrc = TOUCH;
             if (event.any.source == EVSRC_TIMER)
                 evsrc = TIMER;
             if (event.any.source == EVSRC_JOYSTICK)
@@ -1453,6 +1455,14 @@ void FreeGameBitmaps(void)
     }
     j++;
 
+    if (map_text_bmp)
+    {
+        al_destroy_bitmap(map_text_bmp);
+        map_text_bmp = NULL;
+        i++;
+    }
+    j++;
+
     if (Radar.mask)
     {
         if (Radar.display == Radar.mask)
@@ -1502,6 +1512,13 @@ void FreeMenuBitmaps()
     {
         al_destroy_bitmap(grey_ships);
         grey_ships = NULL;
+        i++;
+    }
+
+    if (inst_bmp)
+    {
+        al_destroy_bitmap(inst_bmp);
+        inst_bmp = NULL;
         i++;
     }
 
