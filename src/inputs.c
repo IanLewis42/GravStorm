@@ -701,289 +701,294 @@ void ScanInputs(int num_ships)
         else
             j=i;
 
-		if (Ship[j].controller == KEYS)
-		{
-			//Up key, fire1
-			if (key_down_log[Ship[j].up_key])
-			{
-				Ship[i].fire1_down = true;
-				Ship[i].fire1_held = true;
-				key_down_log[Ship[j].up_key] = false;
-			}
-			if (key_up_log[Ship[j].up_key])
-			{
-				Ship[i].fire1_held = false;
-				key_up_log[Ship[j].up_key] = false;
-			}
-
-			//Down key, fire2
-			if (key_down_log[Ship[j].down_key])
-			{
-				Ship[i].fire2_down = true;
-				Ship[i].fire2_held = true;
-				key_down_log[Ship[j].down_key] = false;
-
-			}
-			if (key_up_log[Ship[j].down_key])
-			{
-				Ship[i].fire2_held = false;
-				key_up_log[Ship[j].down_key] = false;
-			}
-
-			//Left key, left
-			if (key_down_log[Ship[j].left_key])
-			{
-				Ship[i].left_down = true;
-				Ship[i].left_held = true;
-				key_down_log[Ship[j].left_key] = false;
-
-			}
-			if (key_up_log[Ship[j].left_key])
-			{
-				Ship[i].left_held = false;
-				key_up_log[Ship[j].left_key] = false;
-			}
-
-			//Right key, right
-			if (key_down_log[Ship[j].right_key])
-			{
-				Ship[i].right_down = true;
-				Ship[i].right_held = true;
-				key_down_log[Ship[j].right_key] = false;
-			}
-			if (key_up_log[Ship[j].right_key])
-			{
-				Ship[i].right_held = false;
-				key_up_log[Ship[j].right_key] = false;
-			}
-
-			//Thrust key, thrust
-			if (key_down_log[Ship[j].thrust_key])
-			{
-				Ship[i].thrust_down = true;
-				Ship[i].thrust_held = true;
-				key_down_log[Ship[j].thrust_key] = false;
-			}
-			if (key_up_log[Ship[j].thrust_key])
-			{
-				Ship[i].thrust_down = false;
-				Ship[i].thrust_held = false;
-				key_up_log[Ship[j].thrust_key] = false;
-			}
-		}
-
-		else if (Ship[j].controller == GPIO_JOYSTICK)
-		{
-			if (GPIOJoystick.left_down)
-			{
-				Ship[i].left_down   = true;
-				Ship[i].left_held   = true;
-				GPIOJoystick.left_down = false;
-			}
-			if (GPIOJoystick.left_up)
-			{
-				Ship[i].left_held   = false;
-				GPIOJoystick.left_up = false;
-			}
-
-			if (GPIOJoystick.right_down)
-			{
-				Ship[i].right_down   = true;
-				Ship[i].right_held   = true;
-				GPIOJoystick.right_down = false;
-			}
-			if (GPIOJoystick.right_up)
-			{
-				Ship[i].right_held   = false;
-				GPIOJoystick.right_up = false;
-			}
-
-			if (GPIOJoystick.up_down)
-			{
-				Ship[i].fire1_down   = true;
-				Ship[i].fire1_held   = true;
-				GPIOJoystick.up_down = false;
-			}
-			if (GPIOJoystick.up_up)
-			{
-				Ship[i].fire1_held   = false;
-				GPIOJoystick.up_up = false;
-			}
-
-			if (GPIOJoystick.down_down)
-			{
-				Ship[i].fire2_down   = true;
-				Ship[i].fire2_held   = true;
-				GPIOJoystick.down_down = false;
-			}
-			if (GPIOJoystick.down_up)
-			{
-				Ship[i].fire2_held   = false;
-				GPIOJoystick.down_up = false;
-			}
-
-			if (GPIOJoystick.button_down)
-			{
-				Ship[i].thrust_down   = true;
-				Ship[i].thrust_held   = true;
-				GPIOJoystick.button_down = false;
-			}
-			if (GPIOJoystick.button_up)
-			{
-				Ship[i].thrust_down   = false;
-				Ship[i].thrust_held   = false;
-				GPIOJoystick.button_up = false;
-			}
-			//Ship[i].thrust_held = GPIOJoystick.button;
-		}
-
-		else if (Ship[j].controller == USB_JOYSTICK0 || Ship[j].controller == USB_JOYSTICK1 )
-		{
-			if (Ship[j].controller == USB_JOYSTICK0) joy_idx = 0;
-			if (Ship[j].controller == USB_JOYSTICK1) joy_idx = 1;
-
-			if (USBJoystick[joy_idx].left_down)
-			{
-				Ship[i].left_down   = true;
-				Ship[i].left_held   = true;
-				USBJoystick[joy_idx].left_down = false;
-			}
-			if (USBJoystick[joy_idx].left_up)
-			{
-				Ship[i].left_held   = false;
-				USBJoystick[joy_idx].left_up = false;
-			}
-
-			if (USBJoystick[joy_idx].right_down)
-			{
-				Ship[i].right_down   = true;
-				Ship[i].right_held   = true;
-				USBJoystick[joy_idx].right_down = false;
-			}
-			if (USBJoystick[joy_idx].right_up)
-			{
-				Ship[i].right_held   = false;
-				USBJoystick[joy_idx].right_up = false;
-			}
-
-			if (USBJoystick[joy_idx].up_down)
-			{
-				Ship[i].fire1_down   = true;
-				Ship[i].fire1_held   = true;
-				USBJoystick[joy_idx].up_down = false;
-			}
-			if (USBJoystick[joy_idx].up_up)
-			{
-				Ship[i].fire1_held   = false;
-				USBJoystick[joy_idx].up_up = false;
-			}
-
-			if (USBJoystick[joy_idx].down_down)
-			{
-				Ship[i].fire2_down   = true;
-				Ship[i].fire2_held   = true;
-				USBJoystick[joy_idx].down_down = false;
-			}
-			if (USBJoystick[joy_idx].down_up)
-			{
-				Ship[i].fire2_held   = false;
-				USBJoystick[joy_idx].down_up = false;
-			}
-
-			if (USBJoystick[joy_idx].button_down)
-			{
-				Ship[i].thrust_down   = true;
-				Ship[i].thrust_held   = true;
-				USBJoystick[joy_idx].button_down = false;
-			}
-			if (USBJoystick[joy_idx].button_up)
-			{
-				Ship[i].thrust_down   = false;
-				Ship[i].thrust_held   = false;
-				USBJoystick[joy_idx].button_up = false;
-			}
-			//Ship[i].thrust_held = USBJoystick[0].button;
-		}
-
-		else if (Ship[j].controller == TOUCH_JOYSTICK)
-		{
-			if (TouchJoystick.left_down)
-			{
-				Ship[i].left_down   = true;
-				Ship[i].left_held   = true;
-				TouchJoystick.left_down = false;
-			}
-			if (TouchJoystick.left_up)
-			{
-				Ship[i].left_held   = false;
-				TouchJoystick.left_up = false;
-			}
-
-			if (TouchJoystick.right_down)
-			{
-				Ship[i].right_down   = true;
-				Ship[i].right_held   = true;
-				TouchJoystick.right_down = false;
-			}
-			if (TouchJoystick.right_up)
-			{
-				Ship[i].right_held   = false;
-				TouchJoystick.right_up = false;
-			}
-
-			if (TouchJoystick.up_down)
-			{
-				Ship[i].fire1_down   = true;
-				Ship[i].fire1_held   = true;
-				TouchJoystick.up_down = false;
-			}
-			if (TouchJoystick.up_up)
-			{
-				Ship[i].fire1_held   = false;
-				TouchJoystick.up_up = false;
-			}
-
-			if (TouchJoystick.down_down)
-			{
-				Ship[i].fire2_down   = true;
-				Ship[i].fire2_held   = true;
-				TouchJoystick.down_down = false;
-			}
-			if (TouchJoystick.down_up)
-			{
-				Ship[i].fire2_held   = false;
-				TouchJoystick.down_up = false;
-			}
-
-			if (TouchJoystick.button_down)
-			{
-				Ship[i].thrust_down   = true;
-				Ship[i].thrust_held   = true;
-				TouchJoystick.button_down = false;
-			}
-			if (TouchJoystick.button_up)
-			{
-				Ship[i].thrust_down   = false;
-				Ship[i].thrust_held   = false;
-				TouchJoystick.button_up = false;
-			}
-			//Ship[i].thrust_held = USBJoystick[0].button;
-		}
-
-		if (Ship[i].thrust_down)
+        if (Ship[i].automode != MANUAL)
+            AutoShip(i);
+        else
         {
-            Ship[i].thrust_down = false;
-            Command.goforward = true;
+            if (Ship[j].controller == KEYS)
+            {
+                //Up key, fire1
+                if (key_down_log[Ship[j].up_key])
+                {
+                    Ship[i].fire1_down = true;
+                    Ship[i].fire1_held = true;
+                    key_down_log[Ship[j].up_key] = false;
+                }
+                if (key_up_log[Ship[j].up_key])
+                {
+                    Ship[i].fire1_held = false;
+                    key_up_log[Ship[j].up_key] = false;
+                }
+
+                //Down key, fire2
+                if (key_down_log[Ship[j].down_key])
+                {
+                    Ship[i].fire2_down = true;
+                    Ship[i].fire2_held = true;
+                    key_down_log[Ship[j].down_key] = false;
+
+                }
+                if (key_up_log[Ship[j].down_key])
+                {
+                    Ship[i].fire2_held = false;
+                    key_up_log[Ship[j].down_key] = false;
+                }
+
+                //Left key, left
+                if (key_down_log[Ship[j].left_key])
+                {
+                    Ship[i].left_down = true;
+                    Ship[i].left_held = true;
+                    key_down_log[Ship[j].left_key] = false;
+
+                }
+                if (key_up_log[Ship[j].left_key])
+                {
+                    Ship[i].left_held = false;
+                    key_up_log[Ship[j].left_key] = false;
+                }
+
+                //Right key, right
+                if (key_down_log[Ship[j].right_key])
+                {
+                    Ship[i].right_down = true;
+                    Ship[i].right_held = true;
+                    key_down_log[Ship[j].right_key] = false;
+                }
+                if (key_up_log[Ship[j].right_key])
+                {
+                    Ship[i].right_held = false;
+                    key_up_log[Ship[j].right_key] = false;
+                }
+
+                //Thrust key, thrust
+                if (key_down_log[Ship[j].thrust_key])
+                {
+                    Ship[i].thrust_down = true;
+                    Ship[i].thrust_held = true;
+                    key_down_log[Ship[j].thrust_key] = false;
+                }
+                if (key_up_log[Ship[j].thrust_key])
+                {
+                    Ship[i].thrust_down = false;
+                    Ship[i].thrust_held = false;
+                    key_up_log[Ship[j].thrust_key] = false;
+                }
+            }
+
+            else if (Ship[j].controller == GPIO_JOYSTICK)
+            {
+                if (GPIOJoystick.left_down)
+                {
+                    Ship[i].left_down   = true;
+                    Ship[i].left_held   = true;
+                    GPIOJoystick.left_down = false;
+                }
+                if (GPIOJoystick.left_up)
+                {
+                    Ship[i].left_held   = false;
+                    GPIOJoystick.left_up = false;
+                }
+
+                if (GPIOJoystick.right_down)
+                {
+                    Ship[i].right_down   = true;
+                    Ship[i].right_held   = true;
+                    GPIOJoystick.right_down = false;
+                }
+                if (GPIOJoystick.right_up)
+                {
+                    Ship[i].right_held   = false;
+                    GPIOJoystick.right_up = false;
+                }
+
+                if (GPIOJoystick.up_down)
+                {
+                    Ship[i].fire1_down   = true;
+                    Ship[i].fire1_held   = true;
+                    GPIOJoystick.up_down = false;
+                }
+                if (GPIOJoystick.up_up)
+                {
+                    Ship[i].fire1_held   = false;
+                    GPIOJoystick.up_up = false;
+                }
+
+                if (GPIOJoystick.down_down)
+                {
+                    Ship[i].fire2_down   = true;
+                    Ship[i].fire2_held   = true;
+                    GPIOJoystick.down_down = false;
+                }
+                if (GPIOJoystick.down_up)
+                {
+                    Ship[i].fire2_held   = false;
+                    GPIOJoystick.down_up = false;
+                }
+
+                if (GPIOJoystick.button_down)
+                {
+                    Ship[i].thrust_down   = true;
+                    Ship[i].thrust_held   = true;
+                    GPIOJoystick.button_down = false;
+                }
+                if (GPIOJoystick.button_up)
+                {
+                    Ship[i].thrust_down   = false;
+                    Ship[i].thrust_held   = false;
+                    GPIOJoystick.button_up = false;
+                }
+                //Ship[i].thrust_held = GPIOJoystick.button;
+            }
+
+            else if (Ship[j].controller == USB_JOYSTICK0 || Ship[j].controller == USB_JOYSTICK1 )
+            {
+                if (Ship[j].controller == USB_JOYSTICK0) joy_idx = 0;
+                if (Ship[j].controller == USB_JOYSTICK1) joy_idx = 1;
+
+                if (USBJoystick[joy_idx].left_down)
+                {
+                    Ship[i].left_down   = true;
+                    Ship[i].left_held   = true;
+                    USBJoystick[joy_idx].left_down = false;
+                }
+                if (USBJoystick[joy_idx].left_up)
+                {
+                    Ship[i].left_held   = false;
+                    USBJoystick[joy_idx].left_up = false;
+                }
+
+                if (USBJoystick[joy_idx].right_down)
+                {
+                    Ship[i].right_down   = true;
+                    Ship[i].right_held   = true;
+                    USBJoystick[joy_idx].right_down = false;
+                }
+                if (USBJoystick[joy_idx].right_up)
+                {
+                    Ship[i].right_held   = false;
+                    USBJoystick[joy_idx].right_up = false;
+                }
+
+                if (USBJoystick[joy_idx].up_down)
+                {
+                    Ship[i].fire1_down   = true;
+                    Ship[i].fire1_held   = true;
+                    USBJoystick[joy_idx].up_down = false;
+                }
+                if (USBJoystick[joy_idx].up_up)
+                {
+                    Ship[i].fire1_held   = false;
+                    USBJoystick[joy_idx].up_up = false;
+                }
+
+                if (USBJoystick[joy_idx].down_down)
+                {
+                    Ship[i].fire2_down   = true;
+                    Ship[i].fire2_held   = true;
+                    USBJoystick[joy_idx].down_down = false;
+                }
+                if (USBJoystick[joy_idx].down_up)
+                {
+                    Ship[i].fire2_held   = false;
+                    USBJoystick[joy_idx].down_up = false;
+                }
+
+                if (USBJoystick[joy_idx].button_down)
+                {
+                    Ship[i].thrust_down   = true;
+                    Ship[i].thrust_held   = true;
+                    USBJoystick[joy_idx].button_down = false;
+                }
+                if (USBJoystick[joy_idx].button_up)
+                {
+                    Ship[i].thrust_down   = false;
+                    Ship[i].thrust_held   = false;
+                    USBJoystick[joy_idx].button_up = false;
+                }
+                //Ship[i].thrust_held = USBJoystick[0].button;
+            }
+
+            else if (Ship[j].controller == TOUCH_JOYSTICK)
+            {
+                if (TouchJoystick.left_down)
+                {
+                    Ship[i].left_down   = true;
+                    Ship[i].left_held   = true;
+                    TouchJoystick.left_down = false;
+                }
+                if (TouchJoystick.left_up)
+                {
+                    Ship[i].left_held   = false;
+                    TouchJoystick.left_up = false;
+                }
+
+                if (TouchJoystick.right_down)
+                {
+                    Ship[i].right_down   = true;
+                    Ship[i].right_held   = true;
+                    TouchJoystick.right_down = false;
+                }
+                if (TouchJoystick.right_up)
+                {
+                    Ship[i].right_held   = false;
+                    TouchJoystick.right_up = false;
+                }
+
+                if (TouchJoystick.up_down)
+                {
+                    Ship[i].fire1_down   = true;
+                    Ship[i].fire1_held   = true;
+                    TouchJoystick.up_down = false;
+                }
+                if (TouchJoystick.up_up)
+                {
+                    Ship[i].fire1_held   = false;
+                    TouchJoystick.up_up = false;
+                }
+
+                if (TouchJoystick.down_down)
+                {
+                    Ship[i].fire2_down   = true;
+                    Ship[i].fire2_held   = true;
+                    TouchJoystick.down_down = false;
+                }
+                if (TouchJoystick.down_up)
+                {
+                    Ship[i].fire2_held   = false;
+                    TouchJoystick.down_up = false;
+                }
+
+                if (TouchJoystick.button_down)
+                {
+                    Ship[i].thrust_down   = true;
+                    Ship[i].thrust_held   = true;
+                    TouchJoystick.button_down = false;
+                }
+                if (TouchJoystick.button_up)
+                {
+                    Ship[i].thrust_down   = false;
+                    Ship[i].thrust_held   = false;
+                    TouchJoystick.button_up = false;
+                }
+                //Ship[i].thrust_held = USBJoystick[0].button;
+            }
+
+            if (Ship[i].thrust_down)
+            {
+                Ship[i].thrust_down = false;
+                Command.goforward = true;
+            }
         }
 	}
-
+/*
 	//Android - set display indexes.
 	Ctrl.ctrl[DPAD].idx = 4;
 	if (Ship[first_ship].left_held)  Ctrl.ctrl[DPAD].idx-=1;
 	if (Ship[first_ship].right_held) Ctrl.ctrl[DPAD].idx+=1;
 	if (Ship[first_ship].fire1_held) Ctrl.ctrl[DPAD].idx-=3;
 	if (Ship[first_ship].fire2_held) Ctrl.ctrl[DPAD].idx+=3;
-/*
+
 	if (Ship[first_ship].thrust_held)
 	{
 		Ctrl.ctrl[THRUST_BUTTON].idx = 1;

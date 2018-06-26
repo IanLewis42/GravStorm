@@ -304,6 +304,7 @@ Autonomous Ships.....
 
 - ...and there's more:
   Different modes (FSM): 
+    MANUAL (not auto) = 0; (enum)
     CRUISE (as described first above) (get this working first :-)
     HUNT ('Alternative')
     RETURN: Use 100-200 pix above centre of 'own' pad as target, then as HUNT, slow down when distance becomes small.
@@ -318,7 +319,23 @@ Autonomous Ships.....
   'push' towards closest ship when not tracking??
   'a' to toggle autonomous mode (debug)
   Network + autonomous.... (hopefully not too hard...)
+ 
+- Implementation thoughts:
+  Could [expand find_walls to 10 directions (4 degree increments),] average adjacent pairs, head for biggest average - i.e. in between original 2 directions (or just total...)
+  Or total each dirn + one either side, head for middle.
+  3 ideas:
+  Average (i.e. average distances in threes, head for middle of biggest. Didn't like twos) (as above)
+  Vector sum (Vector sum of all distances, fangle is opposite) 
+  Velocity correction (find current velocity, correct desired direction with opposite)
   
+  
+  
+  Also, issue with steering not-quite making desired angle - spreadsheet?? 
+    OK, issue is throwing away resolution, intermediate value only kept as Ship[].angle, i.e. 1-40. probably need 0.1degree resoultion. i.e. keep as float.
+    So 'required_angle', fangle, angle???. Done. Better, I think.
+ 
+ 
+ 
   Ship.auto
       .auto_heading (i.e. target direction)
       .

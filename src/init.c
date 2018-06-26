@@ -770,6 +770,7 @@ void init_ships(int num_ships)
 	for (i=0 ; i<MAX_SHIPS ; i++)   //init all, as we can have late joiner on network games.
 	{
 		//Ship[i].image      = i+4;
+		Ship[i].automode   = MANUAL;
 		Ship[i].lives      = Map.lives;
 		Ship[i].crashed    = 0;
 		Ship[i].killed     = 0;
@@ -845,6 +846,12 @@ void reinit_ship(int i)
 	Ship[i].landed = TRUE;
 	Ship[i].pad = Ship[i].home_pad;
 	Ship[i].menu = FALSE;
+
+    if (Ship[i].automode != MANUAL)
+    {
+        Ship[i].automode = TAKEOFF;
+        Ship[i].autotimer = 60;
+    }
 
 	if (!Map.mission)	//keep timer running on mission levels
 	{

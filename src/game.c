@@ -41,6 +41,7 @@
 #include "inputs.h"
 #include "gameover.h"
 #include "network.h"
+#include "auto.h"
 
 #ifdef RPI
 #include <wiringPi.h>
@@ -145,6 +146,7 @@ int mapx, mapy;
 
 int gpio_active = false;
 int debug_on = false;
+int tracking = false;
 int d=0;    //index for ship array for debug
 bool pressed_keys[ALLEGRO_KEY_MAX];
 
@@ -687,7 +689,28 @@ int game(int argc, char **argv )
                             d++;
                             if (d >= MAX_SHIPS) d = 0;
                         }
+                        //Auto modes
+                        if (event.keyboard.keycode == ALLEGRO_KEY_0) {
+                            Ship[0].automode = MANUAL;
+                        }
+                        if (event.keyboard.keycode == ALLEGRO_KEY_1) {
+                            Ship[0].automode = TAKEOFF;
+                            Ship[0].autotimer = 10;
+                        }
+                        if (event.keyboard.keycode == ALLEGRO_KEY_2) {
+                            Ship[0].automode = CRUISE;
+                        }
+                        if (event.keyboard.keycode == ALLEGRO_KEY_3) {
+                            Ship[0].automode = HUNT;
+                        }
+                        if (event.keyboard.keycode == ALLEGRO_KEY_3) {
+                            Ship[0].automode = RETURN;
+                        }
+                        if (event.keyboard.keycode == ALLEGRO_KEY_T) {
+                            tracking = true;
+                        }
 
+                        //ZOOM
                         if (event.keyboard.keycode == ALLEGRO_KEY_PGUP) {
                             scale += 0.025;
                             invscale = 1 / scale;
@@ -748,7 +771,7 @@ int game(int argc, char **argv )
             default:
             break;
             }
-
+            if (exit) break;
 			if (Command.goback)
             {
                 Command.goback = false;
@@ -900,6 +923,10 @@ int game(int argc, char **argv )
 				if (game_over)
 				{
 					//al_stop_samples();	//stop the audio
+
+					for (i=0 ; i<num_ships ; i++)
+                        Ship[i].automode = MANUAL;
+
 					if (game_over == GO_TIMER-1)    //wait 1 tick to calculate / sort scores.
                     {
                         if (Net.server) NetSendGameOver();
@@ -1593,28 +1620,34 @@ void draw_debug(void)
 {
 	int level,i;
 
+
 	//if (Map.mission) level = num_ships*180;
 	//else             level = num_ships*120;
 
     level = 100;
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Automode: %i", Ship[0].automode);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Autotimer: %i", Ship[0].autotimer);
+
+    for (i=0 ; i<8 ; i++)
+        al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Wall[%d] = %d",i,walls[i]);
 
 
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Scale:%0.3f",scale);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Scale:%0.3f",scale);
 	//for (i=0 ; Touch[i].id != NO_TOUCH ; i++)
-    for (i=0 ; i<NUM_TOUCHES ; i++)
-    {
-        al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Touch:%d, But:%d",Touch[i].id,Touch[i].button);
-    }
+    //for (i=0 ; i<NUM_TOUCHES ; i++)
+    //{
+    //    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Touch:%d, But:%d",Touch[i].id,Touch[i].button);
+    //}
 
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NumTouches:%d",i);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "NumTouches:%d",i);
 
 
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.x:%0.3f",Select.x);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.y:%0.3f",Select.y);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.dx:%0.3f",Select.dx);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.dx:%0.3f",Select.dy);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.x:%0.3f",Select.x);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.y:%0.3f",Select.y);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.dx:%0.3f",Select.dx);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Select.dx:%0.3f",Select.dy);
 
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Spin:%0.3f",TouchJoystick.spin);
 
@@ -1630,8 +1663,10 @@ void draw_debug(void)
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Yv: %.0f", Ship[d].yv);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Relx: %d", relx);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Rely: %d", rely);
+    */
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "FAngle: %0.2f", Ship[d].fangle);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[d].angle);
+    /*
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Shield: %d", Ship[d].shield);
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "G: %.2f", Ship[d].gravity);
 */

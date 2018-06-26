@@ -477,9 +477,11 @@ extern char current_key;
 extern int fpsnet, fpsnet_acc;
 extern bool redraw;
 extern float scale, invscale;
+extern float v_squared;
 extern int halted;
 extern int vibrate_time;
 extern int vibrate_timer;
+extern int tracking;
 
 int  ShipMass(int ship_num);
 void FreeMenuBitmaps(void);

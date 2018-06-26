@@ -995,6 +995,64 @@ void CheckSWCollisions(int num_ships)
 	}
 }
 
+int find_wall(int i, int angle)
+{
+    int j,k;
+    int distance = 0;
+    int step = 10;
+    int limit = 200;
+    int x,y;
+
+    for (j=0 ; j < limit ; j+=step)
+    {
+        x = (int)(Ship[i].xpos) + j*sinlut[angle];
+        y = (int)(Ship[i].ypos) - j*coslut[angle];
+
+        if (Map.type == 0 || Map.type == 2)
+        {
+            //TBD
+        }
+        else //Map.type == 1, i.e. tiled
+        {
+            //find the tile which the top-left corner of the ship is in
+            tile_x = (x) >> 6;	//dividing by 64 here, as display tiles are 64
+            tile_y = (y) >> 6;
+
+            if (tile_x < 0) tile_x = 0;
+            if (tile_y < 0) tile_y = 0;
+
+            start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+            tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+            tl_tile = tile;
+
+            shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+            start_row = ((y-24) & 0x003f)>>1;	//
+            current_row = start_row;
+            rows = 32-start_row;		//rows until we get to the bottom of the tile
+
+            if (tile != 0)	//if it's not an empty tile
+            {
+                //for (k=0 ; k<rows ; k++)
+                {
+                    //if (k==24) break;
+                    //map_word1 = map_col_mask[tile + current_row*words_per_row]; //here
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1_shift = ship_word1 >> shift1;
+
+                    if(/*ship_word1_shift & */map_word1)
+                    {
+                        break;
+                    }
+                    current_row++;
+                }
+            }
+        }
+    }
+
+    return j;
+}
+
 //we know we've collided; check if we're roughly vertical, and on a pad.
 void CheckForLanding(int i)
 {

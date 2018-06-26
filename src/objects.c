@@ -104,7 +104,7 @@ int UpdateShips(int num_ships)
                         NetSendOutOfLives();
                         return 0;
                     }
-
+                    Ship[i].automode = MANUAL;
 					return(GO_TIMER);	//game over
 				}
 				reinit_ship(i);
@@ -140,6 +140,7 @@ int UpdateShips(int num_ships)
 		else
 		{
 			//if (Ship[i].right) //increment angle. wrap if necessary.
+#define ASTICK_SPEED 0.5
 #ifdef ANDROID
 			//Ship[i].fangle += TouchJoystick.spin;
 			//if (Ship[i].fangle > NUM_ANGLES) Ship[i].fangle -= NUM_ANGLES;
@@ -148,7 +149,7 @@ int UpdateShips(int num_ships)
 
             //int temp = Ship[i].angle*9;
             //if (temp > 19) temp -= NUM_ANGLES;  //delta >180.......?? 0-360. if (difference < 180) sum -= 180; //??
-#define ASTICK_SPEED 0.5
+
 
             float temp = ASTICK_SPEED*(float)Ship[i].angle*9 + (1-ASTICK_SPEED)*(Ship[i].fangle); //convert 'angle' index to degrees, and go part way to control angle
 
@@ -165,6 +166,18 @@ int UpdateShips(int num_ships)
             //if (Ship[i].angle < 0) Ship[i].angle += NUM_ANGLES;
 
 #else
+            if (Ship[i].automode != MANUAL)
+            {
+                float temp = ASTICK_SPEED*(float)Ship[i].saved_angle + (1-ASTICK_SPEED)*(Ship[i].fangle); //convert 'angle' index to degrees, and go part way to control angle
+
+                if (fabsf(((float)Ship[i].saved_angle - Ship[i].fangle)) > 180)
+                    temp +=180;
+                if (temp > 360)
+                    temp -=360;
+
+                Ship[i].saved_angle = temp;
+                Ship[i].angle = (int)((temp/9)+0.5);
+            }
 			if (Ship[i].right_held)
 			{
 				//Ship[i].xpos++;	//DEBUG

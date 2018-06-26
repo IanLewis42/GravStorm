@@ -103,8 +103,20 @@ typedef struct
 	int owner;
 } BulletType;
 
+typedef enum
+{
+    MANUAL = 0,
+    TAKEOFF,
+    CRUISE,
+    HUNT,
+    RETURN,
+    LAND
+} AutoModeType;
+
 typedef struct
 {
+	AutoModeType automode;
+	int autotimer;
 	int image;      //what does it look like?
 	int offset;     //for scrolling in menu
 	//key mapping
@@ -147,7 +159,8 @@ typedef struct
 
 	//calculated angle, position and velocity
 	int angle;  //0 to NUM_ANGLES-1
-	float fangle;
+	float saved_angle;    //with extra precision
+	float fangle;   //desired angle, from Android or auto
 	float xpos;
 	float ypos;
 	float xv;
