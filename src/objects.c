@@ -85,6 +85,8 @@ int UpdateShips(int num_ships)
         num_ships = 1;
     }
 
+    Map.timer++;
+
 	for (i=first_ship ; i<first_ship+num_ships ; i++)
 	{
 		if (Map.mission)
@@ -105,6 +107,7 @@ int UpdateShips(int num_ships)
                         return 0;
                     }
                     Ship[i].automode = MANUAL;
+                    Ship[i].thrust_held = 0;
 					return(GO_TIMER);	//game over
 				}
 				reinit_ship(i);
@@ -177,6 +180,8 @@ int UpdateShips(int num_ships)
 
                 Ship[i].saved_angle = temp;
                 Ship[i].angle = (int)((temp/9)+0.5);
+                if (Ship[i].angle == 40)
+                    Ship[i].angle = 0;
             }
 			if (Ship[i].right_held)
 			{

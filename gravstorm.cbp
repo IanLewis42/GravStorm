@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="-d" />
 				<Compiler>
 					<Add option="-m32" />
 					<Add option="-g" />
@@ -99,6 +100,17 @@
 			<Add library="C:/IPL/mslibs/ws2_32.lib" />
 			<Add library="C:/IPL/mslibs/winmm.lib" />
 		</Linker>
+		<Unit filename="src/auto.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="dynamic" />
+		</Unit>
+		<Unit filename="src/auto.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="dynamic" />
+		</Unit>
 		<Unit filename="src/collisions.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />

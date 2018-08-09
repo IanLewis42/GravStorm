@@ -73,6 +73,10 @@ typedef struct
 	int y;
 	int min_x;
 	int max_x;
+	int exit_x;
+	int exit_y;
+	int return_x;
+	int return_y;
 	int type;	//0,1,2,3 for home bases, 4=fuel,5=ammo1,6=ammo2, 7shield
 	int miners;
 	int jewels;
@@ -238,6 +242,7 @@ typedef struct
 	int race;
     RacelineType raceline[MAX_RACELINES];
     int num_racelines;
+    int timer;
 } MapType;
 
 typedef enum
@@ -447,6 +452,14 @@ typedef struct
 
 extern ScaleType Scale;
 
+typedef struct
+{
+    int angle;  //0-39
+    int distance;
+    float x;
+    float y;
+}WallType;
+
 extern CommandType Command;
 
 extern ALLEGRO_FILE* logfile;
@@ -477,7 +490,7 @@ extern char current_key;
 extern int fpsnet, fpsnet_acc;
 extern bool redraw;
 extern float scale, invscale;
-extern float v_squared;
+//extern float v_squared;
 extern int halted;
 extern int vibrate_time;
 extern int vibrate_timer;

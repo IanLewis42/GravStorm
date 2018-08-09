@@ -113,10 +113,35 @@ typedef enum
     LAND
 } AutoModeType;
 
+typedef enum
+{
+    NORMAL = 0,
+    ESCAPE_PLUS,
+    ESCAPE_MINUS
+} AutoStateType;
+
 typedef struct
 {
 	AutoModeType automode;
-	int autotimer;
+	int automodechangetime;
+	int autotargetchangetime;
+	int autofire1;
+	AutoStateType autostate;
+	int autoalgorithm;
+	int autostatechangetime;
+	int autofire1toggletime;
+	//int autofire2time;
+	//int autolastdmin;
+
+	//float autonewtargetx;
+	//float autonewtargety;
+	float autotargetx;
+	float autotargety;
+	float autotargetdistance;
+	float autovectintegrator;
+	float autovsqint;
+	float autoratio;
+
 	int image;      //what does it look like?
 	int offset;     //for scrolling in menu
 	//key mapping

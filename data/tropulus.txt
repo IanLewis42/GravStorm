@@ -8,9 +8,9 @@ ship_first    1
 gravity 0.05
 drag    2
 
-;   type y    xmin xmax
-pad 0    713  110  180  
-pad 1    169  710  780 
+;   type y    xmin xmax m j exitx/y return x/y
+pad 0    713  100  190  0 0 374 724 264 759 ;149 714
+pad 1    169  700  790  0 0 534 74  534 74  ;719 59
 
 max_players 2
 

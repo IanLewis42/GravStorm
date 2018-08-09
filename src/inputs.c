@@ -33,6 +33,7 @@
 #include "inputs.h"
 #include "objects.h"
 #include "network.h"
+#include "auto.h"
 #ifdef RPI
 #include <wiringPi.h>
 #endif

@@ -605,6 +605,7 @@ int game(int argc, char **argv )
 			Ship[0].current_lap_time = 0;
 			Ship[0].racing = true;
 		}
+		Map.timer = 0;  //timer for auto ships.
 
 #define DISPLAY 0
 #define KEYBOARD 1
@@ -691,23 +692,22 @@ int game(int argc, char **argv )
                         }
                         //Auto modes
                         if (event.keyboard.keycode == ALLEGRO_KEY_0) {
-                            Ship[0].automode = MANUAL;
+                            Ship[d].automode = MANUAL;
                         }
                         if (event.keyboard.keycode == ALLEGRO_KEY_1) {
-                            Ship[0].automode = TAKEOFF;
-                            Ship[0].autotimer = 10;
+                            GotoTakeoff(d);
                         }
                         if (event.keyboard.keycode == ALLEGRO_KEY_2) {
-                            Ship[0].automode = CRUISE;
+                            GotoCruise(d);
                         }
                         if (event.keyboard.keycode == ALLEGRO_KEY_3) {
-                            Ship[0].automode = HUNT;
+                            GotoHunt(d);
                         }
-                        if (event.keyboard.keycode == ALLEGRO_KEY_3) {
-                            Ship[0].automode = RETURN;
+                        if (event.keyboard.keycode == ALLEGRO_KEY_4) {
+                            GotoReturn(d);
                         }
-                        if (event.keyboard.keycode == ALLEGRO_KEY_T) {
-                            tracking = true;
+                        if (event.keyboard.keycode == ALLEGRO_KEY_Y) {
+                            tracking = !tracking;
                         }
 
                         //ZOOM
@@ -924,8 +924,8 @@ int game(int argc, char **argv )
 				{
 					//al_stop_samples();	//stop the audio
 
-					for (i=0 ; i<num_ships ; i++)
-                        Ship[i].automode = MANUAL;
+					//for (i=0 ; i<num_ships ; i++)
+                    //    Ship[i].automode = MANUAL;
 
 					if (game_over == GO_TIMER-1)    //wait 1 tick to calculate / sort scores.
                     {
@@ -994,7 +994,7 @@ int game(int argc, char **argv )
                             //max_v_squared = (THRUST / Map.drag)^2;
                             //              = (50/2)^2
                             //              =  625
-                            v_squared = Ship[0].xv*Ship[0].xv + Ship[0].yv*Ship[0].yv;
+                            v_squared = Ship[i].xv*Ship[i].xv + Ship[i].yv*Ship[i].yv;
                             volume = 1+(v_squared/625)*2;
                         }
 
@@ -1028,6 +1028,8 @@ int game(int argc, char **argv )
             al_destroy_sample_instance(shootb_inst[i]);
             al_destroy_sample_instance(dead_inst[i]);
             al_destroy_sample_instance(particle_inst[i]);
+            Ship[i].automode = MANUAL;
+            Ship[i].thrust_held = false;                    //for auto ships.
         }
         al_destroy_sample_instance(yippee_inst);
         al_destroy_sample_instance(sentry_particle_inst);
@@ -1627,11 +1629,25 @@ void draw_debug(void)
     level = 100;
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Automode: %i", Ship[0].automode);
-	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Autotimer: %i", Ship[0].autotimer);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Ship: %d", d);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Automode: %i", Ship[d].automode);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Autotimer: %i", Map.timer);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Af1TT: %i", Ship[d].autofire1toggletime);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Autofire1: %i", Ship[d].autofire1);
 
-    for (i=0 ; i<8 ; i++)
-        al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Wall[%d] = %d",i,walls[i]);
+    //for (i=0 ; i<8 ; i++)
+    //    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Wall[%d] = %d",i,walls[i]);
+
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "target: %d", target_angle);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "avoid: %d", avoid_angle);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "ratio: %0.2f", ratio);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "avoidx: %0.2f", avoidx);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "avoidy: %0.2f", avoidy);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "sumx: %0.2f", sumx);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "sumy: %0.2f", sumy);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "AVI: %0.2f", Ship[d].autovectintegrator);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "VSquint: %0.2f", Ship[d].autovsqint);
+
 
 
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Scale:%0.3f",scale);
@@ -1659,7 +1675,9 @@ void draw_debug(void)
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Image: %d", Ship[d].image);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[d].xpos);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[d].ypos);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Xv: %.0f", Ship[d].xv);
+    */
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Xv: %.2f", Ship[d].xv);
+    /*
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Yv: %.0f", Ship[d].yv);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Relx: %d", relx);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Rely: %d", rely);

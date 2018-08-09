@@ -5,17 +5,18 @@ collision_map scifitiles32_col.png
 ascii_map     rcmap.txt
 description   rc_desc.txt
 
-ship_first 1
+;ship_first 1
+ship_first 0
 
 lives 1
 
 gravity 0.05
 
-pad 0   889 249 390     ;bottom left
-pad 1	185 1782 1927	;top right
+pad 0   889 249 390    0 0 317  709 317  709 ;bottom left
+pad 1	185 1782 1927  0 0 1697 129 1697 64  ;top right
 
-pad 2   249  204 372	;top left
-pad 3   761  1804 1967     
+pad 2   249  257 372   0 0 367  159 367  159 ;top left
+pad 3   761  1804 1917 0 0 1862 634 1862 634    
 
 pad F4   505 503 647
 pad F5   441 1482 1655

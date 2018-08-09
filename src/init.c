@@ -279,8 +279,8 @@ int init_map(int group, int map)
 		{
 			Map.pad[i].miners = 0;
 			Map.pad[i].jewels = 0;
-			sscanf(line+3," %x %d %d %d %d %d",(unsigned int*)&Map.pad[i].type,&Map.pad[i].y,&Map.pad[i].min_x,&Map.pad[i].max_x,&Map.pad[i].miners,&Map.pad[i].jewels);
-			al_fprintf(logfile,"Pad %d: type:%02x y:%d x:%d x:%d miners:%d jewels:%d\n",i,Map.pad[i].type,Map.pad[i].y,Map.pad[i].min_x,Map.pad[i].max_x,Map.pad[i].miners,Map.pad[i].jewels);
+			sscanf(line+3," %x %d %d %d %d %d %d %d %d %d",(unsigned int*)&Map.pad[i].type,&Map.pad[i].y,&Map.pad[i].min_x,&Map.pad[i].max_x,&Map.pad[i].miners,&Map.pad[i].jewels,&Map.pad[i].exit_x,&Map.pad[i].exit_y,&Map.pad[i].return_x,&Map.pad[i].return_y);
+			al_fprintf(logfile,"Pad %d: type:%02x y:%d x:%d x:%d miners:%d jewels:%d exit_x:%d,exit_y:%d,return_x:%d,return_y:%d\n",i,Map.pad[i].type,Map.pad[i].y,Map.pad[i].min_x,Map.pad[i].max_x,Map.pad[i].miners,Map.pad[i].jewels,Map.pad[i].exit_x,Map.pad[i].exit_y,Map.pad[i].return_x,Map.pad[i].return_y);
 
 			if ((Map.pad[i].type & 0x000f) < MAX_SHIPS)
 	            Ship[Map.pad[i].type & 0x000f].home_pad = i;    //bottom nibble of type gives ship which this is home pad for.
@@ -849,9 +849,9 @@ void reinit_ship(int i)
 
     if (Ship[i].automode != MANUAL)
     {
-        Ship[i].automode = TAKEOFF;
-        Ship[i].autotimer = 60;
+        GotoTakeoff(i);
     }
+    //Ship[i].autostucktime = 0;
 
 	if (!Map.mission)	//keep timer running on mission levels
 	{

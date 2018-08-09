@@ -323,22 +323,134 @@ Autonomous Ships.....
 - Implementation thoughts:
   Could [expand find_walls to 10 directions (4 degree increments),] average adjacent pairs, head for biggest average - i.e. in between original 2 directions (or just total...)
   Or total each dirn + one either side, head for middle.
-  3 ideas:
-  Average (i.e. average distances in threes, head for middle of biggest. Didn't like twos) (as above)
-  Vector sum (Vector sum of all distances, fangle is opposite) 
-  Velocity correction (find current velocity, correct desired direction with opposite)
+  3 ideas (for cruise, may be applicable to hunt.:
+    *Average (i.e. average distances in threes, head for middle of biggest. Didn't like twos) (as above). NV good
+    *Vector sum (Vector sum of all distances, fangle is opposite)  - tried this, doesn't crash, but doesn't really go anywhere.....
+    *point away from min distance. doesn't crash, but doesn't go anywhere....
+    Velocity correction (find current velocity, correct desired direction with opposite). Could be applied to any of the above....
+    
+    Thinking we maybe need 2 factors: a place we want to get to, and a push out of the wall, and combine them somehow. 
+    Perhaps head for point if nothing too close, and avoid walls when they're close. 
+    Or can we just combine 2 vectors?? In proportion? So wehn no walls close, 1.0*desination, when walls v.close, 0.1 destination, 0.9 'away from wall' 
+    hopefully this keeps us going where we want.....
+    hysteresis on speed would be good......
+    Works for HUNT. In cruise, just change the target point when we get close.
+    So, weighted average of angles seems hard (or maybe simply impossible :-)
+    A better solution seems to be to treat them as *vectors*. So take n unit vectors, sum them, and divide by n. You have a unit length, average direction vector.
+    So create a weighted vector for destination, away, (x,y) add them, turn back to angle :-)
+    Maybe better could be another vector for 'slight turn' so if a wall is close, but not too close, deviate slightly. if we get too close, back off.??
   
-  
+  Speed dependant on distance to wall? (with max?) In direction we're pointing, or direction we're moving??
   
   Also, issue with steering not-quite making desired angle - spreadsheet?? 
     OK, issue is throwing away resolution, intermediate value only kept as Ship[].angle, i.e. 1-40. probably need 0.1degree resoultion. i.e. keep as float.
     So 'required_angle', fangle, angle???. Done. Better, I think.
  
+So, weighted average of 'target' and 'avoid' vectors seems to work (with very limited testing)
+To do:
+------
+- try vector sum for 'away' vector. Seems alittle smoother, but more reluctant to go into corners. Hmmmm.....
+  Try again: take all vectors, sum (xmax-x), (ymax-y), so ignore any at max. Also get more effect from closer range. 
+  Then sum this with target vector. Target vector length fixed, until we get close, then shrink. 
+  Speed dependent on final vector length.
+  Ah, or *difference* between final vector and current velocity? (vector difference, obvs...)
+  Even better?: Calc desired angle as currently, then subtract current velocity - that's the angle to point (thrust) in. 
+  Apply engine if length of this vector is > (small) threshold. 
+  
+  leaky integrator on this vector length. if below threshold, change target.....
+  ok, but better was leaky int on target, so gradual change, also on ratio. both of these avoid sudden changes.
+  However, possibly need diff ratio for diff levels, unlesss auto change, perhaps on average wall distance?
+  
+  So, tuning numbers are:
+    limit - how far we look for / consider walls : 200
+    ratio - (0-1, target gets ratio, avoid gets 1-ratio) : 0.4 (0.45?)
+    speed factor - multiply by current speed to correct vector : 4
+    max speed(squared) - if v^2 >= to this, thrust off - 16
+    thrust threshold - if magnitude of final vector (target + avoid - current speed) is > then thrust on: 2000
+  
+    current settings (above 200,0.4,4,16,2000) OK, but tends to get stuck.....
+  
+* find_walls for type 0 / type 2 maps.
+* test on more maps....
+- clean up / parameterise code.
+* variable speed?
+* could set initial target (from home pad) per map. (escape vector)
+* single count up timer (Map.time?) + many thresholds for control system
+X LURK mode (if walls[0] = walls[4] = MAX) then go up, then fall.) - less fuel burn with new navigation, so not needed.
+- HUNT mode (should be v. similar to cruise, really.....)
+* RETURN & LAND modes
+- Mode supervisor (change target in CRUISE, switch from CRUISE to LURK to HUNT. Also return on low fuel/ammo)
+* stability? 
+- Difficulty: proportion of time in HUNT, switch to HUNT if clear line of sight, shot frequency. 
+- Do we need speed / max scan / threshold parameters in map file?
+
+gone for algorithm 1 (vector sums) for type 0/2 maps (single bmp)
+         algorithm 2 (closest vector) for type 1 (tiled).
+Seems to work well.... except for takeoff on sitimus.... maybe have per-map algorithm? 1 is better on ekolos, I think....
+
+limiting target vector (alg 1) may be cauing problems...
+Landing broken?? Maybe need to recheck targets / thresholds.
+Prob need exit and return points for pads.
+
+vague thought: al2 is better at going through gaps (so takeoff/land on sitimus, likvidius?)
+but more prone to getting stuck, partly as it has no escape strategy. Also a bit crashier,
+though often when it's stuck. Could add similar '45 degree' option for escape?? Tried. crashes a lot. implemenattion, or just a bad idea??
+when stuck flip algorithm? 
+
+3-stage return:
+- [set algo 1] go to 'close to' defined return point
+- [set algo 1] go to 'centre of pad, up 150?'
+- wait until above pad, up<200, xv < 0.5.
+
+algorithms
+1:
+  ekolos
+
+  
+2:
+  sitimus 
+  canyon
+  
+
+
+New to do:
+- landing
+- firing in hunt
+- FSM as below
+- menus
+- network.
  
  
-  Ship.auto
-      .auto_heading (i.e. target direction)
-      .
+
+TAKEOFF
+  modechangetime->cruise (target = exit)
+ 
+CRUISE
+ modechangetime->cruise/lurk or hunt
+ stuck->switch pilot
+ fuel->return (target = return)
+ 
+CRUISE/LURK
+  if space, lurk, else cruise
+  modechangetime->hunt or cruise
+  fuel->return (target = return)
+  
+HUNT
+  modechangetime->cruise or cruise/lurk
+  fuel or ammo->return (target = return)
+  
+RETURN
+  target->above pad on close to (return)
+  above pad->land
+  
+LAND
+  wait for full -> takeoff
+  
+  
+  
+  
+ 
+
       
   
 void AutoShip(int i)

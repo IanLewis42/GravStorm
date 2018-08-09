@@ -27,7 +27,8 @@ void CheckSWCollisions(int num_ships);
 void CheckBWCollisions(void);
 void CheckBSentryCollisions(void);
 void CheckBSwitchCollisions(void);
-int find_wall(int i, int angle);
+void find_wall(int i, int angle, WallType* wall);
+int IsClear(int x, int y);
 
 int EquivalentColour(ALLEGRO_COLOR col1, ALLEGRO_COLOR col2);
 

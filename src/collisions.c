@@ -29,8 +29,8 @@
 #include "allegro5/allegro_audio.h"
 #include "allegro5/allegro_acodec.h"
 
-#include "collisions.h"
 #include "game.h"
+#include "collisions.h"
 #include "objects.h"
 #include "network.h"
 
@@ -995,28 +995,309 @@ void CheckSWCollisions(int num_ships)
 	}
 }
 
-int find_wall(int i, int angle)
+void find_wall(int i, int angle, WallType* wall)
 {
     int j,k;
     int distance = 0;
-    int step = 10;
+    int step = 5;
     int limit = 200;
     int x,y;
 
-    for (j=0 ; j < limit ; j+=step)
+    for (j=10 ; j < limit ; j+=step)
     {
         x = (int)(Ship[i].xpos) + j*sinlut[angle];
         y = (int)(Ship[i].ypos) - j*coslut[angle];
 
         if (Map.type == 0 || Map.type == 2)
         {
+
+            map_idx_x = (x-24 + 64) >> 6;	//-24 to get left hand side, +64 because of 2 columns padding.																//>>5 to divide by 32, >>1 more because display map x2 collision map
+            map_idx_y = (y-24 + 24) >> 1;	// as above, +24 rows padding
+            map_idx =  map_idx_x + map_idx_y * words_per_row;	//This assumes that display map and collision map are the same size
+
+            shift1 =  ((x-24) >> 1) & 0x001F;
+            shift2 = 31-shift1;
+
+            //DEBUG
+            k=12;
+            ship_word1 = (ship_col_mask[k*NUM_ANGLES + Ship[i].angle]);
+            ship_word1_shift = ship_word1 >> shift1;
+            //shift2 = 30-shift1;	//seems better. don't know why!
+            ship_word2 = (ship_col_mask[k*NUM_ANGLES + Ship[i].angle]);
+            ship_word2_shift = ship_word2 << shift2;
+            collision=0;
+            //END DEBUG
+
+            //ship_word1 = 0x000ff000;
+
+            //map_idx += 12;
+
+            map_word1 = map_col_mask[map_idx];
+            if((ship_word1 >> shift1) & map_word1)
+                break;
+
+            if (shift2 < 32)
+            {
+                map_word2 = map_col_mask[map_idx+1];
+                if((ship_word2 << shift2) & map_word2)
+                    break;
+            }
+            //
+            map_idx_y = (y+24 + 24) >> 1;	// as above, +24 rows padding
+            map_idx =  map_idx_x + map_idx_y * words_per_row;	//This assumes that display map and collision map are the same size
+            map_word1 = map_col_mask[map_idx];
+            if((ship_word1 >> shift1) & map_word1)
+                break;
+
+            if (shift2 < 32)
+            {
+                map_word2 = map_col_mask[map_idx+1];
+                if((ship_word2 << shift2) & map_word2)
+                    break;
+            }
+
+
+
+
             //TBD
         }
         else //Map.type == 1, i.e. tiled
         {
+            ship_word1 = 0x80000000;
+
+            //current_row = 0;
+            if (angle>=35 || angle <=5)
+            {
+                //find the tile which the top-left corner of the ship is in
+                tile_x = (x-24) >> 6;	//dividing by 64 here, as display tiles are 64
+                tile_y = (y-24) >> 6;
+
+                if (tile_x < 0) tile_x = 0;
+                if (tile_y < 0) tile_y = 0;
+
+                start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+                tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+                if (tile != 0)
+                {
+                    shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+                    start_row = ((y-24) & 0x003f)>>1;	//
+                    current_row = start_row;
+
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1 = 0x00ff0000;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                }
+
+                //find the tile which the top-right corner of the ship is in
+                tile_x = (x+24) >> 6;	//dividing by 64 here, as display tiles are 64
+                tile_y = (y-24) >> 6;
+
+                if (tile_x < 0) tile_x = 0;
+                if (tile_y < 0) tile_y = 0;
+
+                start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+                tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+                //if (tile != 0) break;
+                if (tile != 0)
+                {
+                    shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+                    start_row = ((y-24) & 0x003f)>>1;	//
+                    current_row = start_row;
+
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1 = 0x10000000;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                }
+
+            }
+            if (angle>=5 && angle<=15)
+            {
+                //find the tile which the top-right corner of the ship is in
+                tile_x = (x+24) >> 6;	//dividing by 64 here, as display tiles are 64
+                tile_y = (y-24) >> 6;
+
+                if (tile_x < 0) tile_x = 0;
+                if (tile_y < 0) tile_y = 0;
+
+                start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+                tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+                if (tile != 0)
+                {
+                    shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+                    start_row = ((y-24) & 0x003f)>>1;	//
+                    current_row = start_row;
+
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1 = 0x10000000;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                }
+
+                //find the tile which the bottom-right corner of the ship is in
+                tile_x = (x+24) >> 6;	//dividing by 64 here, as display tiles are 64
+                tile_y = (y+24) >> 6;
+
+                if (tile_x < 0) tile_x = 0;
+                if (tile_y < 0) tile_y = 0;
+
+                start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+                tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+                if (tile != 0)
+                {
+                    shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+                    start_row = ((y-24) & 0x003f)>>1;	//
+                    current_row = start_row;
+
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1 = 0x10000000;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                }
+            }
+            if (angle>=15 && angle<=25)
+            {
+                                //find the tile which the bottom-right corner of the ship is in
+                tile_x = (x+24) >> 6;	//dividing by 64 here, as display tiles are 64
+                tile_y = (y+24) >> 6;
+
+                if (tile_x < 0) tile_x = 0;
+                if (tile_y < 0) tile_y = 0;
+
+                start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+                tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+                if (tile != 0)
+                {
+                    shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+                    start_row = ((y-24) & 0x003f)>>1;	//
+                    current_row = start_row;
+
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1 = 0x10000000;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                }
+
+                //find the tile which the bottom-left corner of the ship is in
+                tile_x = (x-24) >> 6;	//dividing by 64 here, as display tiles are 64
+                tile_y = (y+24) >> 6;
+
+                if (tile_x < 0) tile_x = 0;
+                if (tile_y < 0) tile_y = 0;
+
+                start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+                tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+                if (tile != 0)
+                {
+                    shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+                    start_row = ((y-24) & 0x003f)>>1;	//
+                    current_row = start_row;
+
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1 = 0x10000000;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                }
+            }
+            if (angle>=25 && angle<=35)
+            {
+                                //find the tile which the bottom-left corner of the ship is in
+                tile_x = (x-24) >> 6;	//dividing by 64 here, as display tiles are 64
+                tile_y = (y+24) >> 6;
+
+                if (tile_x < 0) tile_x = 0;
+                if (tile_y < 0) tile_y = 0;
+
+                start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+                tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+                if (tile != 0)
+                {
+                    shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+                    start_row = ((y-24) & 0x003f)>>1;	//
+                    current_row = start_row;
+
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1 = 0x10000000;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                }
+
+                //find the tile which the top-left corner of the ship is in
+                tile_x = (x-24) >> 6;	//dividing by 64 here, as display tiles are 64
+                tile_y = (y-24) >> 6;
+
+                if (tile_x < 0) tile_x = 0;
+                if (tile_y < 0) tile_y = 0;
+
+                start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+                tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+                if (tile != 0)
+                {
+                    shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+                    start_row = ((y-24) & 0x003f)>>1;	//
+                    current_row = start_row;
+
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    //ship_word1 = 0x10000000;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                }
+            }
+
+#if 0
+
             //find the tile which the top-left corner of the ship is in
-            tile_x = (x) >> 6;	//dividing by 64 here, as display tiles are 64
-            tile_y = (y) >> 6;
+            tile_x = (x-24) >> 6;	//dividing by 64 here, as display tiles are 64
+            tile_y = (y-24) >> 6;
 
             if (tile_x < 0) tile_x = 0;
             if (tile_y < 0) tile_y = 0;
@@ -1028,7 +1309,7 @@ int find_wall(int i, int angle)
             shift1 = ((x-24) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
             start_row = ((y-24) & 0x003f)>>1;	//
             current_row = start_row;
-            rows = 32-start_row;		//rows until we get to the bottom of the tile
+            //rows = 32-start_row;		//rows until we get to the bottom of the tile
 
             if (tile != 0)	//if it's not an empty tile
             {
@@ -1038,19 +1319,103 @@ int find_wall(int i, int angle)
                     //map_word1 = map_col_mask[tile + current_row*words_per_row]; //here
                     map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
                     //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
-                    //ship_word1_shift = ship_word1 >> shift1;
+                    ship_word1 = 0x00ffff00;
+                    ship_word1_shift = ship_word1 >> shift1;
 
-                    if(/*ship_word1_shift & */map_word1)
+                    //if(ship_word1_shift & map_word1)
                     {
                         break;
                     }
-                    current_row++;
+                    //current_row++;
                 }
             }
+
+            tile_y = (y+24) >> 6;
+
+            start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+            tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+            tl_tile = tile;
+
+            shift1 = ((x) & 0x003f)>>1;	//bottom 6 bits, rs by 1 because col masks are half size
+            start_row = ((y+24) & 0x003f)>>1;	//
+            current_row = start_row;
+            //rows = 32-start_row;		//rows until we get to the bottom of the tile
+
+            if (tile != 0)	//if it's not an empty tile
+            {
+                //for (k=0 ; k<rows ; k++)
+                {
+                    //if (k==24) break;
+                    //map_word1 = map_col_mask[tile + current_row*words_per_row]; //here
+                    map_word1 = map_col_mask[(tile & 0x07) + (((tile&0xfff8)<<2)+current_row)*words_per_row]; //bottom 3 bits of 'tile' index across (8 tiles per row in tilemap)
+                    //ship_word1 = (ship_col_mask[12*NUM_ANGLES + angle]);                             //upper bits of 'tile' index down - R shift by 3, but then *32 => L shift by 2
+                    ship_word1 = 0x00ffff00;
+                    ship_word1_shift = ship_word1 >> shift1;
+
+                    //if(ship_word1_shift & map_word1)
+                    {
+                        break;
+                    }
+                    //current_row++;
+                }
+            }
+#endif
         }
+
     }
 
-    return j;
+    wall->angle = angle;
+
+    wall->distance = j-step;//-step;
+    wall->x = x-Ship[i].xpos;
+    wall->y = y-Ship[i].ypos;
+
+    return ;//j;
+}
+
+int IsClear(int x, int y)
+{
+        if (Map.type == 0 || Map.type == 2)
+        {
+
+            map_idx_x = (x + 64) >> 6;	//+64 because of 2 columns padding.
+                                        //>>5 to divide by 32, >>1 more because display map x2 collision map
+            map_idx_y = (y + 24) >> 1;	//+24 rows padding
+            map_idx =  map_idx_x + map_idx_y * words_per_row;	//This assumes that display map and collision map are the same size
+
+            shift1 =  ((x) >> 1) & 0x001F;
+            //shift2 = 31-shift1;
+
+            //DEBUG
+            //k=12;
+            ship_word1 = 0x80000000;
+            ship_word1_shift = ship_word1 >> shift1;
+            //shift2 = 30-shift1;	//seems better. don't know why!
+            //ship_word2 = (ship_col_mask[k*NUM_ANGLES + Ship[i].angle]);
+            //ship_word2_shift = ship_word2 << shift2;
+            //collision=0;
+            //END DEBUG
+
+            map_word1 = map_col_mask[map_idx];
+            if((ship_word1 >> shift1) & map_word1)
+                return 0;
+            else
+                return 1;
+        }
+        else
+        {
+            tile_x = (x) >> 6;	//dividing by 64 here, as display tiles are 64
+            tile_y = (y) >> 6;
+
+            start_tile_idx =  tile_x + tile_y * MAX_MAP_WIDTH;	//index into tile array for the tile top-left corner is in
+            tile = tile_map[start_tile_idx];	//value in tile array, gives index into tile atlas
+
+            if (tile != 0)
+                return 0;
+            else
+                return 1;
+        }
+
 }
 
 //we know we've collided; check if we're roughly vertical, and on a pad.

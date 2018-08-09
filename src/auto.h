@@ -17,5 +17,14 @@
 */
 
 void AutoShip(int i);
+void GotoReturn(int i);
+void GotoTakeoff(int i);
+void GotoCruise(int i);
+void GotoHunt(int i);
+
 void find_walls(int i);
-extern int walls[8];
+void find_walls40(int i);
+extern WallType walls[40];
+extern float sumx,sumy,ratio;
+extern int avoid_angle,target_angle;
+extern float targetx,targety,avoidx,avoidy;

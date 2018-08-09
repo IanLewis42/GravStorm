@@ -14,9 +14,9 @@ wrap 1
 
 blackhole 960 960 10
 
-;   type y    xmin xmax
-pad 0    228  180  300
-pad 1    1393 1547 1668
+;   type y    xmin xmax m j exitx/y   returnx/y
+pad 0    228  180  300  0 0 239  84   239  84
+pad 1    1393 1547 1668 0 0 1799 1339 1364 1334
 
 ;    xmin xmax ymin ymax g     drag
 area 180  300  50   230  0.05  2

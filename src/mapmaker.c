@@ -475,6 +475,8 @@ void map_draw(void) {
         for (i=0 ; i<Map.num_pads ; i++)
         {
             al_draw_filled_rectangle(Map.pad[i].min_x,Map.pad[i].y+5,Map.pad[i].max_x,Map.pad[i].y,al_map_rgba(128,0,0,128));
+            al_draw_filled_circle(Map.pad[i].exit_x,Map.pad[i].exit_y,10,al_map_rgb(0,255,0));
+            al_draw_filled_circle(Map.pad[i].return_x,Map.pad[i].return_y,10,al_map_rgb(255,255,0));
         }
         for (i=0 ; i<Map.num_special_areas ; i++)
         {
@@ -797,8 +799,8 @@ int init_map(char *map_file_name)
 		{
 			Map.pad[i].miners = 0;
 			Map.pad[i].jewels = 0;
-			sscanf(line+3," %x %d %d %d %d %d",&Map.pad[i].type,&Map.pad[i].y,&Map.pad[i].min_x,&Map.pad[i].max_x,&Map.pad[i].miners,&Map.pad[i].jewels);
-			al_fprintf(logfile,"Pad %d: type:%02x y:%d x:%d x:%d miners:%d jewels:%d\n",i,Map.pad[i].type,Map.pad[i].y,Map.pad[i].min_x,Map.pad[i].max_x,Map.pad[i].miners,Map.pad[i].jewels);
+			sscanf(line+3," %x %d %d %d %d %d %d %d %d %d",&Map.pad[i].type,&Map.pad[i].y,&Map.pad[i].min_x,&Map.pad[i].max_x,&Map.pad[i].miners,&Map.pad[i].jewels,&Map.pad[i].exit_x,&Map.pad[i].exit_y,&Map.pad[i].return_x,&Map.pad[i].return_y);
+			al_fprintf(logfile,"Pad %d: type:%02x y:%d x:%d x:%d miners:%d jewels:%d exit_x:%d exit_y:%d return_x:%d return_y:%d\n",i,Map.pad[i].type,Map.pad[i].y,Map.pad[i].min_x,Map.pad[i].max_x,Map.pad[i].miners,Map.pad[i].jewels,Map.pad[i].exit_x,Map.pad[i].exit_y,Map.pad[i].return_x,Map.pad[i].return_y);
 
 			//if ((Map.pad[i].type & 0x000f) < MAX_SHIPS)
 	        //    Ship[Map.pad[i].type & 0x000f].home_pad = i;    //bottom nibble of type gives ship which this is home pad for.
