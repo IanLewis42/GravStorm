@@ -22,9 +22,13 @@ void GotoTakeoff(int i);
 void GotoCruise(int i);
 void GotoHunt(int i);
 
+void find_obstructions(int i);
+void find_walls8(int i);
 void find_walls(int i);
-void find_walls40(int i);
+void find_ships(int i);
+
 extern WallType walls[40];
 extern float sumx,sumy,ratio;
 extern int avoid_angle,target_angle;
 extern float targetx,targety,avoidx,avoidy;
+extern int fire_state;

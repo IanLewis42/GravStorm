@@ -388,37 +388,30 @@ gone for algorithm 1 (vector sums) for type 0/2 maps (single bmp)
          algorithm 2 (closest vector) for type 1 (tiled).
 Seems to work well.... except for takeoff on sitimus.... maybe have per-map algorithm? 1 is better on ekolos, I think....
 
-limiting target vector (alg 1) may be cauing problems...
+limiting target vector (alg 1) may be causing problems...
 Landing broken?? Maybe need to recheck targets / thresholds.
 Prob need exit and return points for pads.
 
 vague thought: al2 is better at going through gaps (so takeoff/land on sitimus, likvidius?)
 but more prone to getting stuck, partly as it has no escape strategy. Also a bit crashier,
-though often when it's stuck. Could add similar '45 degree' option for escape?? Tried. crashes a lot. implemenattion, or just a bad idea??
+though often when it's stuck. Could add similar '45 degree' option for escape?? Tried. crashes a lot. implementation, or just a bad idea??
 when stuck flip algorithm? 
 
 3-stage return:
 - [set algo 1] go to 'close to' defined return point
 - [set algo 1] go to 'centre of pad, up 150?'
 - wait until above pad, up<200, xv < 0.5.
-
-algorithms
-1:
-  ekolos
-
-  
-2:
-  sitimus 
-  canyon
-  
+ 
 
 
 New to do:
-- landing
-- firing in hunt
-- FSM as below
+* landing
+* firing in hunt
+* FSM as below
 - menus
-- network.
+- network - No AI on network games??
+
+- weird crash on auto takeoff, likvidius pad 1
  
  
 

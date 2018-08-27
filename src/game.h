@@ -32,7 +32,7 @@
 #define MAX_SHIPS 4		//max number of players
 
 #define SCREENX 1024//1280//1920 //1024
-#define SCREENY 576//720//1080 //768
+#define SCREENY 630//576//720//1080 //768
 
 #define PANEL_WIDTH 565
 #define PANEL_HEIGHT 360

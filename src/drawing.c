@@ -318,7 +318,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                     if (glow)
                     {
                         al_draw_textf(small_glow_font, ItemCurrentGlow, col1,  y,  ALLEGRO_ALIGN_LEFT, "%s", (char*)&MapNames[i].Map[j]);
-                        al_draw_textf(small_font, ItemUnselected,  col3, y,  ALLEGRO_ALIGN_LEFT, "Max players: %d", Map.max_players);
+                        al_draw_textf(small_font, ItemUnselected,  col3, y,  ALLEGRO_ALIGN_LEFT, "Max players: %d", MapNames[i].Map[j].players);//Map.max_players);
                     }
                 }
             }
@@ -1450,7 +1450,10 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
             if (tracking && Ship[i].automode)
             {
                 al_draw_bitmap(marker_bmp,Ship[i].xpos-10,Ship[i].ypos-10,0);
-                find_walls40(i);
+
+                find_obstructions(i);
+
+                //red, walls
                 for (j=0 ; j<40 ; j++)
                 {
                     //al_draw_line(Ship[i].xpos,Ship[i].ypos,walls[j]*sinlut[j]*5,walls[j]*coslut[j]*5,al_map_rgba(128,0,0,128),3);
@@ -1461,12 +1464,16 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
                 }
                 //al_draw_tinted_bitmap(marker2_bmp,al_map_rgb(0,255,0),Ship[i].xpos-10+100*sinlut[target_angle],Ship[i].ypos-10-100*coslut[target_angle],0);
                 //al_draw_tinted_bitmap(marker2_bmp,al_map_rgb(0,0,255),Ship[i].xpos-10+100*sinlut[avoid_angle],Ship[i].ypos-10-100*coslut[avoid_angle],0);
+
+                //green, target vector (vector sum algorithm)
                 al_draw_tinted_bitmap(marker2_bmp,al_map_rgb(0,255,0),Ship[i].xpos-10+1*targetx,Ship[i].ypos-10-1*targety,0);
+                //blue, avoid vector (vector sum algorithm)
                 al_draw_tinted_bitmap(marker2_bmp,al_map_rgb(0,0,255),Ship[i].xpos-10+1*avoidx,Ship[i].ypos-10-1*avoidy,0);
 
+                //white, ship
                 al_draw_bitmap(marker2_bmp,Ship[i].xpos-10+1*sumx,Ship[i].ypos-10-1*sumy,0);
-
-                al_draw_tinted_bitmap(marker2_bmp,al_map_rgb(255,255,0),Ship[i].autotargetx,Ship[i].autotargety,0);
+                //yellow, autotarget
+                al_draw_tinted_bitmap(marker2_bmp,al_map_rgb(255,255,0),Ship[i].autotargetx-10,Ship[i].autotargety-10,0);
 
             }
 		}

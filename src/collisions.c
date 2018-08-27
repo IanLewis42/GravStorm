@@ -552,6 +552,12 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
                                     }
                                 }
 
+                                if (Ship[i].automode == CRUISE)
+                                {
+                                    if (Ship[i].difficulty >= 1)
+                                        GotoHunt(i);
+                                }
+
                                 if (Bullet[j].type == BLT_HEAVY)    //stop explosion on hitting ship
                                     Bullet[j].type = BLT_NORMAL;
 
