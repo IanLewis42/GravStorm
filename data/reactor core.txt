@@ -5,10 +5,9 @@ collision_map scifitiles32_col.png
 ascii_map     rcmap.txt
 description   rc_desc.txt
 
-;ship_first 1
-ship_first 0
+ship_first 1
 
-lives 1
+lives 6
 
 gravity 0.05
 

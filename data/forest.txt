@@ -9,8 +9,7 @@ mission	      0
 sentry_display   sentries.png		;need this even though the sentries are fixed / indestructible
 ;sentry_collision sentries_col.png	;
 
-;ship_first    1
-ship_first    0
+ship_first    1
 
 gravity 0.05
 drag 2
