@@ -250,7 +250,8 @@ typedef enum
     NETWORK = 0,
     INSTRUCTIONS,
     LEVEL,
-    PLAYERS
+    PLAYERS,
+    AI
 }MenuStateType;
 
 typedef enum
@@ -271,6 +272,8 @@ typedef struct
     int item;
     int define_keys;
     int ships;          //same as num_ships for local, 1 for network.
+    int ai_ships;
+    int difficulty;
 
 	int col;		//0,1,2
 	int group;		//0-n

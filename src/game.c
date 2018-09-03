@@ -490,6 +490,7 @@ int game(int argc, char **argv )
 
 		al_fprintf(logfile,"Init Ships\n");	//init ship structs
 		init_ships(MAX_SHIPS);				//read stuff from map struct.
+
 		al_fprintf(logfile,"Init Bullets\n");  //zeroing out the array
 		init_bullets();
 
@@ -607,6 +608,13 @@ int game(int argc, char **argv )
 			Ship[0].racing = true;
 		}
 		Map.timer = 0;  //timer for auto ships.
+
+        for (i=0 ; i<Menu.ai_ships ; i++)
+        {
+            GotoTakeoff(num_ships+i);
+        }
+        num_ships += Menu.ai_ships;
+
 
 #define DISPLAY 0
 #define KEYBOARD 1
@@ -739,6 +747,7 @@ int game(int argc, char **argv )
                     if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
                     {
                         Command.goback = true;
+                        Command.goforward = false;
                     }
 
                     else if  (event.keyboard.keycode == ALLEGRO_KEY_PRINTSCREEN ||
@@ -805,8 +814,9 @@ int game(int argc, char **argv )
             else if (Command.toggleradar)
             {
                 Command.toggleradar = false;
-
+#ifndef ANDROID
                 if (Net.client || Net.server || num_ships==1)
+#endif
                 {
                     Radar.on = !Radar.on;
                 }
@@ -861,7 +871,9 @@ int game(int argc, char **argv )
 				//it gets window/screen coords from this and figures out where to put the ship etc.
 				//Ship numbers passed in. This is used to centre the 'viewport' on the ship
 
-				//if (Net.net)
+#ifdef ANDROID
+                draw_split_screen(FULL,0);
+#else
                 if (Net.client || Net.server)
 				{
                     draw_split_screen(FULL,Net.id);
@@ -891,12 +903,17 @@ int game(int argc, char **argv )
                     }
                 }
 
+
                 //draw_status_bar(Menu.ships);	//also does dividers
                 draw_dividers();
-
+#endif
 				if (debug_on) draw_debug();
 
-				ScanInputs(Menu.ships);		//Convert keypresses/joystick input to ship controls (for n ships)
+				//ok unless we allow AI in net games.....
+				if (Menu.netmode == LOCAL)
+                    ScanInputs(Menu.ships+Menu.ai_ships);		//Convert keypresses/joystick input to ship controls (for n ships)
+                else
+                    ScanInputs(1);
 
 				if (Net.client)
                 {

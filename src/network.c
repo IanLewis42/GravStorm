@@ -128,14 +128,17 @@ void NetStopListen(void)
 
 void NetStopServer(void)
 {
-    enet_socket_shutdown(Net.ping, ENET_SOCKET_SHUTDOWN_READ_WRITE);
-    enet_socket_destroy(Net.ping);
+    if (Net.host)
+    {
+        enet_socket_shutdown(Net.ping, ENET_SOCKET_SHUTDOWN_READ_WRITE);
+        enet_socket_destroy(Net.ping);
 
-    enet_host_destroy(Net.host);
-    Net.host = NULL;
-    num_ships = 1;
-    al_set_window_title(display, NAME);
-    Net.server = false;
+        enet_host_destroy(Net.host);
+        Net.host = NULL;
+        num_ships = 1;
+        al_set_window_title(display, NAME);
+        Net.server = false;
+    }
 }
 
 void AddressToString(int address, char* string)
@@ -496,13 +499,15 @@ void NetSendGameOver(void)
 void NetSendAbort(void)
 {
     char temp_pkt[100];
+    if (Net.host)
+    {
+        temp_pkt[0] = HOST_ABORT;
 
-    temp_pkt[0] = HOST_ABORT;
-
-    ENetPacket * packet = enet_packet_create (&temp_pkt,1,ENET_PACKET_FLAG_RELIABLE);
-    enet_host_broadcast (Net.host, 0, packet);
-    al_fprintf(hostfile,"Sent ABORT (broadcast)\n");
-    NetStopListen();
+        ENetPacket * packet = enet_packet_create (&temp_pkt,1,ENET_PACKET_FLAG_RELIABLE);
+        enet_host_broadcast (Net.host, 0, packet);
+        al_fprintf(hostfile,"Sent ABORT (broadcast)\n");
+        NetStopListen();
+    }
 }
 
 NetMessageType ServiceNetwork(void)

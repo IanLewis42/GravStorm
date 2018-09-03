@@ -411,7 +411,7 @@ New to do:
 - menus
 - network - No AI on network games??
 
-- weird crash on auto takeoff, likvidius pad 1
+* weird crash on auto takeoff, likvidius pad 1
  
  
 
@@ -1107,7 +1107,12 @@ MAYBE LATER.....
   yeah - for disconnected ships, set r_t to non-zero, then won't get collision detected or drawn - passed over net, so clients won't draw.
   Use disconnected in update_ships, so r_t won't get decremented :-)
   on connect, make sure r_t = 0;
-
+- Simpler possible solution:
+  Ignore disconnects! 
+  i.e. don't decrement num_ships, so ship is still updated, but not controllable.
+  Ah, but need to monitor connects, I think.... 
+  so do first half of above, but on disconnect, just dec num_connected_ships, leave num_ships alone - use this for net code.
+  
 - 8 way level? team mode? (switch in txt file)
   - can't quite see how 'capture the flag' works, unless it's just land on 'their' base
   - Ooh, could do 'hit their FF switch'.....

@@ -554,7 +554,7 @@ void CheckBSCollisions(int num_ships)	//Bullet-to-ship collisions
 
                                 if (Ship[i].automode == CRUISE)
                                 {
-                                    if (Ship[i].difficulty >= 1)
+                                    if (Menu.difficulty >= 1)
                                         GotoHunt(i);
                                 }
 

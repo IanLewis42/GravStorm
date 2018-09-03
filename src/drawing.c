@@ -92,7 +92,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
     ALLEGRO_COLOR ItemCurrentGlow= al_map_rgba_f(0.2, 0.2, 0.04, 0.078);
     ALLEGRO_COLOR ItemSelected   = al_map_rgba_f(0.5, 0, 0, 1);
     ALLEGRO_COLOR ItemUnselected = al_map_rgba_f(1, 1, 0.8, 1);
-    ALLEGRO_COLOR ItemExcluded   = al_map_rgba_f(0.25, 0.25, 0.25, 1);
+    ALLEGRO_COLOR ItemExcluded   = al_map_rgba_f(0.5, 0.5, 0.5, 1);
 
 	w = al_get_display_width(display);
     h = al_get_display_height(display);
@@ -544,7 +544,69 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         }
 
     }
+    else if (Menu.state == AI)
+    {
+        float y2;
+#ifdef ANDROID
+        y = h/4 - 2*line_space;
+        y2 =  h/4 + 2*line_space;
 
+        al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "AI Ships:");
+        al_draw_textf(small_glow_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "AI Ships:");
+
+        al_draw_textf(small_font, GroupActive,col0, y2,  ALLEGRO_ALIGN_LEFT, "Difficulty:");
+        al_draw_textf(small_glow_font, GroupGlow,col0, y2,  ALLEGRO_ALIGN_LEFT, "Difficulty:");
+
+
+
+#else
+        y = line_space*2;
+        y2 = line_space*4;
+        if (Menu.col_pos == 0)
+        {
+            al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "AI Ships:");
+            al_draw_textf(small_glow_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "AI Ships:");
+            al_draw_textf(small_font, GroupInactive,col0, y2,  ALLEGRO_ALIGN_LEFT, "Difficulty:");
+        }
+        else
+        {
+            al_draw_textf(small_font, GroupInactive,col0, y,  ALLEGRO_ALIGN_LEFT, "AI Ships:");
+            al_draw_textf(small_font, GroupActive,col0, y2,  ALLEGRO_ALIGN_LEFT, "Difficulty:");
+            al_draw_textf(small_glow_font, GroupGlow,col0, y2,  ALLEGRO_ALIGN_LEFT, "Difficulty:");
+        }
+#endif
+
+        for (i=0 ; i<MAX_SHIPS ; i++)
+        {
+            if (i > Map.max_players-num_ships)
+                colour = ItemExcluded;
+            else if (i == Menu.ai_ships)
+            {
+                colour = ItemCurrent;
+                al_draw_textf(small_glow_font, ItemCurrentGlow,w/6+i*w/12, y,  ALLEGRO_ALIGN_LEFT, "%d",i);
+            }
+            else
+                colour = ItemUnselected;
+
+            al_draw_textf(small_font, colour,w/6+i*w/12, y,  ALLEGRO_ALIGN_LEFT, "%d",i);
+        }
+
+        for (i=0 ; i<4 ; i++)
+        {
+            if (i == Menu.difficulty)
+            {
+                colour = ItemCurrent;
+                al_draw_textf(small_glow_font, ItemCurrentGlow,w/6+i*w/12, y2,  ALLEGRO_ALIGN_LEFT, "%d",i);
+            }
+            else
+                colour = ItemUnselected;
+
+            al_draw_textf(small_font, colour,w/6+i*w/12, y2,  ALLEGRO_ALIGN_LEFT, "%d",i);
+        }
+
+
+
+    }
     //reset transform
     al_identity_transform(&transform);
     al_use_transform(&transform);

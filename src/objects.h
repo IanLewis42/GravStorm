@@ -141,7 +141,6 @@ typedef struct
 	float autovectintegrator;
 	float autovsqint;
 	float autoratio;
-	int difficulty;
 
 	int image;      //what does it look like?
 	int offset;     //for scrolling in menu
