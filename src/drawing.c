@@ -547,6 +547,8 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
     else if (Menu.state == AI)
     {
         float y2;
+        char Easy[] = "Easy", Medium[] = "Med.", Hard[]= "Hard", Insane[] = "Insane";
+        char *dif_str[] = {Easy, Medium, Hard, Insane};
 #ifdef ANDROID
         y = h/4 - 2*line_space;
         y2 =  h/4 + 2*line_space;
@@ -596,12 +598,12 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             if (i == Menu.difficulty)
             {
                 colour = ItemCurrent;
-                al_draw_textf(small_glow_font, ItemCurrentGlow,w/6+i*w/12, y2,  ALLEGRO_ALIGN_LEFT, "%d",i);
+                al_draw_textf(small_glow_font, ItemCurrentGlow,w/6+i*w/12, y2,  ALLEGRO_ALIGN_LEFT, "%s",dif_str[i]);
             }
             else
                 colour = ItemUnselected;
 
-            al_draw_textf(small_font, colour,w/6+i*w/12, y2,  ALLEGRO_ALIGN_LEFT, "%d",i);
+            al_draw_textf(small_font, colour,w/6+i*w/12, y2,  ALLEGRO_ALIGN_LEFT, "%s",dif_str[i]);
         }
 
 
