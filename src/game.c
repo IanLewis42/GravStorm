@@ -774,7 +774,7 @@ int game(int argc, char **argv )
                 }
                 else if (event.type == ALLEGRO_EVENT_KEY_CHAR)   //used for high score entry
                 {
-                    if (game_over==1)
+                    if (game_over==2)
                     {
                         keypress = true;
                         current_key = event.keyboard.unichar;

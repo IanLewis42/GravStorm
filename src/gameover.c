@@ -24,6 +24,9 @@
 
 int game_over = 0;
 void SaveScores(void);
+void DisplayScores(int position, int start);
+void DisplayTimes(int position, int ship);
+
 
 #define PPMINER  500    //points per miner rescued
 #define PPJEWEL  200
@@ -41,7 +44,7 @@ void SaveScores(void);
 int GameOver()
 {
 	int i,j,temp;
-	static int score = 0,time_left = 0, timer = 0,position,ship,show_times=false;
+	static int score = 0,time_left = 0,position,ship,show_times=false;
 	int line_space,y;
 	int col1,col2,col3,col4;
 	char display_name[50];
@@ -192,12 +195,12 @@ int GameOver()
         game_over--;    //next state...
     break;
 
-    case 3:
+    case 4:
         Command.goforward = false;
         game_over--;    //next state...
     break;
 
-    case 2: //game_over = 2 i.e. nearly finished. display score for mission levels
+    case 3: //game_over = 2 i.e. nearly finished. display score for mission levels
         if (Map.mission)
         {
             line_space = 50*font_scale;
@@ -297,7 +300,7 @@ int GameOver()
 #ifdef ANDROID
             //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "UiChangeListener", "()V");
             if (Map.mission && (position < MAX_SCORES))
-                _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "OpenKeyBoard", "()V");
+                _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(),"OpenKeyBoard", "()V");
             if (Map.race && (Ship[0].lap_table_pos < MAX_SCORES))
                 _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(),"OpenKeyBoard", "()V");
 #endif
@@ -314,25 +317,9 @@ int GameOver()
         }
         */
     break;
-    case 1: //game_over = 1, final state, hi score table for missions, times table for race, straight out otherwise.
+    case 2: //game_over = 1, final state, hi score table for missions, times table for race, straight out otherwise.
         if (Map.mission)
         {
-            line_space = 50*font_scale;
-
-            y = line_space;
-            col1 = 100*font_scale;
-            col2 = 300*font_scale;
-            col3 = 350*font_scale;
-
-
-            timer++;            //blinking cursor
-            if (timer & 0x10)
-                //cursor = ' ';
-                strcpy(cursor,blank);
-            else
-                //cursor = '_';
-                strcpy(cursor,underscore);
-
             if (keypress)
             {
                 if (current_key == 0x0D) //return
@@ -341,7 +328,6 @@ int GameOver()
                     game_over --;   //exit back to menu
 #ifdef ANDROID
                     _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "CloseKeyBoard", "()V");
-                    //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "onWindowFocusChanged", "()V");
 #endif
                 }
                 else if (current_key == 0x08)   //backspace
@@ -354,50 +340,24 @@ int GameOver()
 
                 keypress = false;
             }
-            if (position < MAX_SCORES) {
-                strncpy(display_name, Map.newscore[position].name, 49);
-                strcat(display_name, cursor);
-                }
-
-            al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "HIGH SCORES");
-            y+=line_space;
 
             temp=0;
 #ifdef ANDROID
             if (position < MAX_SCORES)
                 temp = position;
-            //if (temp < 0)
-            //    temp = 0;
 #endif
-            for (i=temp ; i<MAX_SCORES ; i++)
-            {
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "%d",i+1);
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Map.newscore[i].score);
+            DisplayScores(position, temp);
 
-                if (i==position)
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col3, y,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
-                else
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col3, y,  ALLEGRO_ALIGN_LEFT, "%s",Map.newscore[i].name);
-                y+=line_space;
-            }
             //if we are not in the high score table allow thrust to exit
             //don't otherwise, as thrust key might be a character that is typed in to high score table!
             if (position > MAX_SCORES)
             {
                 for(i=0 ; i<num_ships ; i++)	//enable check for each ships fire/thrust button to go back to start (menu)
                 {
-                    /*
-                    if(Ship[i].thrust_down)
-                    {
-                        Ship[i].thrust_down = false;
-                        game_over --;
-                        score = 0;
-                    }
-                    */
                     if (Command.goforward)      //thrust, or OK(?) button
                     {
                         Command.goforward = false;
-                        game_over--;
+                        game_over-=2;
                         score = 0;
                     }
                 }
@@ -405,13 +365,6 @@ int GameOver()
         }
         else if (Map.race && show_times)    //race, and someone completed a lap.
         {
-            line_space = 50*font_scale;
-
-            y = line_space;
-            col1 = 100*font_scale;
-            col2 = 200*font_scale;
-            col3 = 400*font_scale;
-            col4 = 500*font_scale;
 
             while (Ship[ship].lap_table_pos > MAX_SCORES)  //skip to next ship with a lap table entry
             {
@@ -419,14 +372,6 @@ int GameOver()
                     break;
                 ship++;
             }
-
-            timer++;            //blinking cursor
-            if (timer & 0x10)
-                //cursor = ' ';
-                strcpy(cursor,blank);
-            else
-                //cursor = '_';
-                strcpy(cursor,underscore);
 
             if (keypress)
             {
@@ -442,7 +387,6 @@ int GameOver()
                             game_over--;
 #ifdef ANDROID
                             _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "CloseKeyBoard", "()V");
-                            //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "onWindowFocusChanged", "()V");
 #endif
                             break;
                         }
@@ -459,12 +403,6 @@ int GameOver()
                 keypress = false;
             }
 
-            strncpy(display_name,Map.newtime[Ship[ship].lap_table_pos].name,49);
-            strcat(display_name,cursor);
-
-            al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "BEST TIMES");
-            y+=line_space;
-
             temp = 0;
 #ifdef ANDROID
             if (Ship[0].lap_table_pos < MAX_SCORES)
@@ -472,51 +410,132 @@ int GameOver()
             if (temp < 0)
                 temp = 0;
 #endif
-
-            for (i=temp ; i<MAX_SCORES ; i++)
-            {
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "%d",i+1);
-                al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%.3f",Map.newtime[i].time);
-                if (i==Ship[ship].lap_table_pos)
-                {
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_LEFT, "(P%d)",ship+1);
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col4,  y,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
-                }
-                else
-                    al_draw_textf(menu_font, al_map_rgb(0,0,0),col4,  y,  ALLEGRO_ALIGN_LEFT, "%s",Map.newtime[i].name);
-                y+=line_space;
-            }
+            DisplayTimes(temp, ship);
 
             //if we are not in the high score table allow thrust to exit
             if (ship >= num_ships)
             {
                 for(i=0 ; i<num_ships ; i++)	//and enable check for each ships fire/thrust button to go back to start (menu)
                 {
-                    /*
-                    if(Ship[i].thrust_down)
-                    {
-                        Ship[i].thrust_down = false;
-                        game_over --;
-                        score = 0;
-                    }
-                    */
                     if (Command.goforward)      //thrust, or OK(?) button
                     {
                         Command.goforward = false;
-                        game_over--;
+                        game_over-=2;
                         score = 0;
                     }
                 }
             }
         }
         else
+            game_over-=2;
+    break;
+    case 1:
+#ifdef ANDROID
+            if (Map.mission)
+                DisplayScores(11, 0);
+            else if (Map.race && show_times)    //race, and someone completed a lap.
+                DisplayTimes(0, MAX_SHIPS);
+
+            if (Command.goforward)      //thrust, or OK(?) button
+            {
+                Command.goforward = false;
+                game_over--;
+                score = 0;
+            }
+#else
             game_over--;
+#endif
     break;
     default:
         game_over--;					//decrement timer
     break;
     }
 	return game_over;	//return 0 when we want to restart the game
+}
+
+void DisplayScores(int position, int start)
+{
+    int line_space = 50*font_scale;
+    int i;
+    int y = line_space;
+    int col1 = 100*font_scale;
+    int col2 = 300*font_scale;
+    int col3 = 350*font_scale;
+
+    char cursor[2];
+    char blank[] = " ",underscore[] = "_";
+    char display_name[50];
+
+    static int timer = 0;
+
+    timer++;            //blinking cursor
+    if (timer & 0x10)
+        strcpy(cursor,blank);
+    else
+        strcpy(cursor,underscore);
+
+    if (position < MAX_SCORES) {
+        strncpy(display_name, Map.newscore[position].name, 49);
+        strcat(display_name, cursor);
+    }
+
+    al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "HIGH SCORES");
+    y+=line_space;
+
+    for (i=start ; i<MAX_SCORES ; i++)
+    {
+        al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "%d",i+1);
+        al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_RIGHT, "%d",Map.newscore[i].score);
+
+        if (i==position)
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col3, y,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
+        else
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col3, y,  ALLEGRO_ALIGN_LEFT, "%s",Map.newscore[i].name);
+        y+=line_space;
+    }
+}
+
+void DisplayTimes(int start, int ship)
+{
+    int line_space = 50*font_scale;
+    int i;
+    int y = line_space;
+    int col1 = 100*font_scale;
+    int col2 = 200*font_scale;
+    int col3 = 400*font_scale;
+    int col4 = 500*font_scale;
+
+    char cursor[2],blank[] = " ",underscore[] = "_";
+    char display_name[50];
+
+    static int timer = 0;
+
+    timer++;            //blinking cursor
+    if (timer & 0x10)
+        strcpy(cursor,blank);
+    else
+        strcpy(cursor,underscore);
+
+    strncpy(display_name,Map.newtime[Ship[ship].lap_table_pos].name,49);
+    strcat(display_name,cursor);
+
+    al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "BEST TIMES");
+    y+=line_space;
+
+    for (i=start ; i<MAX_SCORES ; i++)
+    {
+        al_draw_textf(menu_font, al_map_rgb(0,0,0),col1,  y,  ALLEGRO_ALIGN_LEFT, "%d",i+1);
+        al_draw_textf(menu_font, al_map_rgb(0,0,0),col2,  y,  ALLEGRO_ALIGN_LEFT, "%.3f",Map.newtime[i].time);
+        if (ship < MAX_SHIPS && i==Ship[ship].lap_table_pos)
+        {
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col3,  y,  ALLEGRO_ALIGN_LEFT, "(P%d)",ship+1);
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col4,  y,  ALLEGRO_ALIGN_LEFT, "%s",display_name);
+        }
+        else
+            al_draw_textf(menu_font, al_map_rgb(0,0,0),col4,  y,  ALLEGRO_ALIGN_LEFT, "%s",Map.newtime[i].name);
+        y+=line_space;
+    }
+
 }
 
 void SaveScores(void)   //scores/times.
