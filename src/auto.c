@@ -57,8 +57,9 @@ void Pilot0(int i);
 void Pilot1(int i);
 
 
-WallType walls[40];
-WallType ship_av[40];//[MAX_SHIPS];
+WallType walls[NUM_ANGLES];
+WallType ships_by_angle[NUM_ANGLES];
+WallType ships_by_num[MAX_SHIPS];
 
 float sumx,sumy,ratio;
 int avoid_angle,target_angle;
@@ -98,13 +99,12 @@ void GotoTakeoff(int i)
     Ship[i].automode = TAKEOFF;
     Ship[i].automodechangetime = Map.timer+10;
 
-    Ship[i].ammo1_type = rand()%3;
+    Ship[i].ammo1_type = rand()%4;
 
     do{
-        Ship[i].ammo2_type = BLT_HEAVY + rand()%3;
+        Ship[i].ammo2_type = BLT_HEAVY + rand()%4;
     }while (Ship[i].ammo2_type == BLT_MINE);
 
-    //Menu.difficulty = 1;
 }
 
 void GotoCruise(int i)
@@ -171,10 +171,7 @@ void Takeoff(int i)
 {
     if (Map.timer == Ship[i].automodechangetime)
     {
-        //if (i&1)
-            GotoCruise(i);
-        //else
-        //    GotoHunt(i);
+        GotoCruise(i);
     }
 
     Ship[i].fangle = 0.0f;                //fangle range is 0-360
@@ -183,25 +180,20 @@ void Takeoff(int i)
     Ship[i].thrust_held = (Ship[i].yv < 4);
 }
 
+//things affected by diffculty
+int HuntProb[]    = {  0, 30, 70, 100};
+int Fire1Prob[]   = {  0, 30, 70, 100};
+int Fire1ProbLD[] = {  0,  0,  0, 50};
+int Fire2Prob[]   = {  0,  1,  2, 3};
+int Fire2ProbLD[] = {  0,  0,  0, 1};
+
 void Cruise(int i)
 {
     if (Map.timer >= Ship[i].automodechangetime)
     {
-        //Ship[i].automodechangetime = Map.timer+MODE_DURATION;
-        switch(Menu.difficulty)
-        {
-            case 0:
-            break;
-            case 1:
-                if (rand()%10 > 7) GotoHunt(i);
-            break;
-            case 2:
-                if (rand()%10 > 3) GotoHunt(i);
-            break;
-            case 3:
-                GotoHunt(i);
-            break;
-        }
+        Ship[i].automodechangetime = Map.timer+MODE_DURATION;
+        if (rand()%100 < HuntProb[Menu.difficulty])
+            GotoHunt(i);
     }
 
     //if timer expires, or we get close to target, get a new one
@@ -248,21 +240,9 @@ void Hunt(int i)   //so we are ship[i]
 
     if (Map.timer >= Ship[i].automodechangetime)
     {
-        //Ship[i].automodechangetime = Map.timer+MODE_DURATION;//600;
-        switch(Menu.difficulty)
-        {
-            case 0:
-                GotoCruise(i);
-            break;
-            case 1:
-                if (rand()%10 > 3) GotoCruise(i);
-            break;
-            case 2:
-                if (rand()%10 > 7) GotoCruise(i);
-            break;
-            case 3:
-            break;
-        }
+        Ship[i].automodechangetime = Map.timer+MODE_DURATION;
+        if (rand()%100 < (100 - HuntProb[Menu.difficulty]))
+            GotoCruise(i);
     }
 
     find_ships(i);
@@ -272,7 +252,7 @@ void Hunt(int i)   //so we are ship[i]
     for (k=0 ; k<num_ships ; k++)
     {
         if (Ship[k].reincarnate_timer == 0)     //don't consider dead ships
-            if (ship_av[k].distance < ship_av[min].distance)
+            if (ships_by_num[k].distance < ships_by_num[min].distance)
                 min = k;
     }
 
@@ -284,12 +264,6 @@ void Hunt(int i)   //so we are ship[i]
     else
         Pilot0(i);
 
-    //if (Map.timer == Ship[i].autofire1toggletime)
-    //{
-    //    Ship[i].autofire1 = !Ship[i].autofire1;
-    //    Ship[i].autofire1toggletime = Map.timer+30;
-    //}
-
     Ship[i].fire1_held = false;
     Ship[i].fire2_down = false;
 
@@ -299,47 +273,35 @@ void Hunt(int i)   //so we are ship[i]
     {
         fire_state = 1;
 
-        /*if (ship_av[min].distance<100)
-        {
-            Ship[i].fangle = ship_av[min].angle * 9;
-            if (Ship[i].angle == ship_av[min].angle)
-            {
-                Ship[i].thrust_held = false;
-                Ship[i].fire1_held = true;
-                Ship[i].fire2_down = (rand()%100 < 10);
-            }
-        }
-
-
-        else */
-        if (ship_av[min].distance<200)              //if we're close enough to the nearest ship
+        if (ships_by_num[min].distance<200)              //if we're close enough to the nearest ship
         {
             fire_state = 2; //DEBUG
             Ship[i].autoalgorithm = 0;              //1 is too crashy....
 
-            if ((walls[ship_av[min].angle].distance * 2 + 10) >= (int)Ship[i].autotargetdistance)   //if the ship is closer than the wall (/2 because ship pos is inserted
+            if ((walls[ships_by_num[min].angle].distance) + 10>= (int)Ship[i].autotargetdistance)   //if the ship is closer than the wall (/2 because ship pos is inserted
             {                                                                               //into walls[] at half real distance to minimize ship-shup crashes
                 fire_state = 3; //DEBUG
-                if (abs(Ship[i].angle - ship_av[min].angle) < 2)                            //if we're pointing roughly the right way
+
+                if (!Ship[i].thrust_held) Ship[i].fangle = ships_by_num[min].angle *9;
+
+                if (abs(Ship[i].angle - ships_by_num[min].angle) < 2)                            //if we're pointing roughly the right way
                 {
                     fire_state = 4; //DEBUG
-                    Ship[i].fire1_held = true;                                              //FIRE 1
-                    Ship[i].fire2_down = (rand()%100 < 3);                                  //and maybe fire 2
+                    Ship[i].fire1_held = (rand()%100 < Fire1Prob[Menu.difficulty]);//true;                                              //FIRE 1
+                    Ship[i].fire2_down = (rand()%100 < Fire2Prob[Menu.difficulty]);//3);                                  //and maybe fire 2
                 }
             }
         }
-        else if (ship_av[min].distance<500)              //if we're close enough to the nearest ship
+        else if (ships_by_num[min].distance<500)              //if we're close enough to the nearest ship
         {
-            if ((walls[ship_av[min].angle].distance) == 200)
+            if ((walls[ships_by_num[min].angle].distance) == 195)
             {
-                if (abs(Ship[i].angle - ship_av[min].angle) < 2)                            //if we're pointing roughly the right way
+                if (abs(Ship[i].angle - ships_by_num[min].angle) < 2)                            //if we're pointing roughly the right way
                 {
-                    Ship[i].fire1_held = (rand()%100 < 50);                                              //FIRE 1
-                    Ship[i].fire2_down = (rand()%100 < 1);                                  //and maybe fire 2
+                    Ship[i].fire1_held = (rand()%100 < Fire1ProbLD[Menu.difficulty]);//50);                                              //FIRE 1
+                    Ship[i].fire2_down = (rand()%100 < Fire2ProbLD[Menu.difficulty]);//1);                                  //and maybe fire 2
                 }
             }
-
-
         }
     }
 
@@ -420,7 +382,10 @@ void Pilot1(int i)
 
     for (j=0 ; j<40 ; j++)
     {
-        metric = walls[j].distance-3*abs(j-target_angle);
+        if (walls[j].distance < ships_by_angle[j].distance)
+            metric = walls[j].distance-3*abs(j-target_angle);
+        else
+            metric = ships_by_angle[j].distance-3*abs(j-target_angle);
 
         if (metric >= max)
         {
@@ -485,10 +450,10 @@ void Pilot1(int i)
         Ship[i].thrust_held = false;                            //off if not.
 */
 
-    if (Ship[i].automode == HUNT && Ship[i].autotargetdistance < 200 && !Ship[i].thrust_held)
-        Ship[i].fangle = (180/PI)*atan2(x,-1*y);
+    //if (Ship[i].automode == HUNT && Ship[i].autotargetdistance < 200 && !Ship[i].thrust_held)
+    //    Ship[i].fangle = (180/PI)*atan2(x,-1*y);
 
-    if (Ship[i].fangle < 0) Ship[i].fangle +=360;   //wrap
+    //if (Ship[i].fangle < 0) Ship[i].fangle +=360;   //wrap
 
 }
 
@@ -521,17 +486,23 @@ void Pilot0(int i)
     {
         avoidx-=0.2*(limit-walls[j].distance) * sinlut[j];
         avoidy-=0.2*(limit-walls[j].distance) * coslut[j];
+
+        if (ships_by_angle[j].distance < limit)
+        {
+            avoidx-=0.6*(limit - (ships_by_angle[j].distance/2)) * sinlut[j];
+            avoidx-=0.6*(limit - (ships_by_angle[j].distance/2)) * sinlut[j];
+        }
     }
-    /*
+
     for (j=0 ; j<num_ships ; j++)
     {
-        if (ship_av[j].distance < limit)
+        /*if (ship_av[j].distance < limit)
         {
             avoidx-=0.6*(limit - (ship_av[j].distance/2) * sinlut[ship_av[j].angle];
             avoidx-=0.6*(limit - (ship_av[j].distance/2)) * sinlut[ship_av[j].angle];
-        }
+        }*/
     }
-*/
+
 
     //if (close_walls == 0)
     //    close_walls = 1;
@@ -602,7 +573,7 @@ void Pilot0(int i)
     targetx = Ship[i].autotargetdistance*sinlut[target_angle]; //get xy. possibly only used for drawing debug....
     targety = Ship[i].autotargetdistance*coslut[target_angle];
 
-    find_wall(i,target_angle,&target_wall);
+    //find_wall(i,target_angle,&target_wall);
 
     //if (target_wall.distance == limit)
     //    Ship[i].autoratio  = 0.8;
@@ -634,9 +605,9 @@ void Pilot0(int i)
     else
         Ship[i].thrust_held = false;                            //off if not.
 
-    if (Ship[i].automode == HUNT && Ship[i].autotargetdistance < 200 && !Ship[i].thrust_held)
-        Ship[i].fangle = (180/PI)*atan2(x,-1*y);
-    else
+    //if (Ship[i].automode == HUNT && Ship[i].autotargetdistance < 200 && !Ship[i].thrust_held)
+    //    Ship[i].fangle = (180/PI)*atan2(x,-1*y);
+    //else
         Ship[i].fangle = (180/PI)*atan2(sumx, sumy);                //fangle range is 0-360
 
     if (Ship[i].fangle < 0) Ship[i].fangle +=360;   //wrap
@@ -648,7 +619,7 @@ void find_obstructions(int i)
 
     find_walls(i);
     find_ships(i);
-
+/*
     for (j=0 ; j<num_ships ; j++)
     {
         if (ship_av[j].distance < walls[ship_av[j].angle].distance)
@@ -658,20 +629,25 @@ void find_obstructions(int i)
             walls[(ship_av[j].angle+1)%40].distance = ship_av[j].distance/2;
         }
     }
-
+*/
 }
 
 void find_ships(int i)
 {
-    int j;
+    int j,angle;
     float dx,dy;
+
+    for (j=0 ; j<NUM_ANGLES ; j++)
+    {
+        ships_by_angle[j].distance = 10000;
+    }
 
 	for (j=0 ; j<num_ships ; j++)
 	{
 		if (i==j)
 		{
-			ship_av[j].distance = 9999999;	//big, so we shouldn't choose it
-			ship_av[j].angle = 0;	//
+			ships_by_num[j].distance = 9999999;	//big, so we shouldn't choose it
+			ships_by_num[j].angle = 0;	//
 		}
 		else
 		{
@@ -692,9 +668,14 @@ void find_ships(int i)
 			tan(t) = o/a
 			t = arctan o/a
 	*/
-			ship_av[j].distance = sqrt((dx * dx) + (dy * dy));
-			ship_av[j].angle = (20/PI) * atan2(dx,dy);	//40 increments
-			if (ship_av[j].angle < 0) ship_av[j].angle += 40;
+			ships_by_num[j].distance = sqrt((dx * dx) + (dy * dy));
+			ships_by_num[j].angle = (20/PI) * atan2(dx,dy);	//40 increments
+			if (ships_by_num[j].angle < 0) ships_by_num[j].angle += 40;
+
+
+            //angle = (20/PI) * atan2(dx,dy);	//40 increments
+            if (angle < 0) angle += 40;
+            ships_by_angle[ships_by_num[j].angle].distance = sqrt((dx * dx) + (dy * dy));
         }
 	}
 }
