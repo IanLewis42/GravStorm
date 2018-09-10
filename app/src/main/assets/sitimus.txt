@@ -8,13 +8,15 @@ ship_first    0
 gravity 0.05
 drag 2
 
+lives 6
+
 ; pads
-;   type y    xmin xmax
-pad 0    1228 240  350  
-pad 1    400  1060 1170     
+;   type y    xmin xmax m j exitx/y returnx/y
+pad 0    1228 240  350  0 0 255 900 274 989 ;280 1100
+pad 1    400  1060 1170 0 0 924 249 1119 294
 ;pad 2    412  240  410  ;parking
-pad 2    400  260 370
-pad 3    1226 1110 1220 ;new, bottom right
+pad 2    400  260 370   0 0 534 344 534 344
+pad 3    1226 1110 1220 0 0 1214 925 899 1234 ;new, bottom right
 pad 24   412  670  815  ;ammo1
 pad 45   827  240  410  ;ammo2
 pad 16   827  670  815  ;fuel

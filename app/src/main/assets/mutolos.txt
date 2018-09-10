@@ -9,9 +9,9 @@ gravity 0.05
 
 drag    2
 
-;   type y    xmin xmax
-pad 0    593  190  300  
-pad 1    1505 1340  1490 
+;   type y    xmin xmax  m j exitx/y returnx/y
+pad 0    593  190  300   0 0 584 179 584 179 
+pad 1    1505 1340  1490 0 0 1400 1024 1259 1024 
 
 pad 2    1543 124  162
 pad 3    1101 522  563
