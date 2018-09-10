@@ -287,7 +287,7 @@ ShipType AnyShip;
 
 int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
-	int i;
+	int i,j;
 	int w,h;//,xoffset,yoffset;
 
 	ALLEGRO_SAMPLE_INSTANCE *loop_inst;
@@ -315,7 +315,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
         Ship[i].image = i;
         Ship[i].colour = ShipColour[i];
-        Ship[i].statuscolour = StatusColour[i];
+        //Ship[i].statuscolour = StatusColour[i];
     }
 
 	Menu.num_groups = read_maps();	//read 'maps.txt' and store strings
@@ -353,6 +353,18 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 	//if (DoOldMenu(queue, event, AnyShip)) return 1;
 	if (DoNewMenu(queue)) return 1;
+
+	for (i=num_ships ; i<num_ships+Menu.ai_ships ; i++)
+    {
+        for (j=0 ; j<num_ships ; j++)
+        {
+            if (Ship[j].image == i)
+            {
+                 Ship[i].image = j;
+                 Ship[i].colour = ShipColour[j];
+            }
+        }
+    }
 
 	//stop music
 	al_stop_sample_instance(loop_inst);
@@ -869,7 +881,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                         Ship[Menu.player].image--;
                         Ship[Menu.player].image&=0x07;
                         Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
-                        Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
+                        //Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
                         Ship[Menu.player].offset = -60;
                     }
 #ifndef ANDROID
@@ -904,7 +916,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                         Ship[Menu.player].image++;
                         Ship[Menu.player].image&=0x07;
                         Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
-                        Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
+                        //Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
                         Ship[Menu.player].offset = 60;
                     }
 #ifndef ANDROID
@@ -1145,5 +1157,7 @@ void GotoAI(void)
 {
     Menu.state = AI;
     Menu.col_pos = 0;
+    if (Menu.ai_ships > Map.max_players - num_ships)
+        Menu.ai_ships = Map.max_players - num_ships;
 }
 

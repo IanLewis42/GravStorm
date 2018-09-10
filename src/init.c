@@ -759,7 +759,7 @@ void init_controls(void)
     {
         Ship[i].image = i;
         Ship[i].colour = ShipColour[i];
-        Ship[i].statuscolour = StatusColour[i];
+        //Ship[i].statuscolour = StatusColour[i];
     }
 }
 

@@ -653,7 +653,7 @@ NetMessageType ServiceNetwork(void)
 
                                     Ship[j].image  = Net.event.packet->data[i++];
                                     Ship[j].colour = ShipColour[Ship[j].image];
-                                    Ship[j].statuscolour = StatusColour[Ship[j].image];
+                                    //Ship[j].statuscolour = StatusColour[Ship[j].image];
 
                                     Ship[j].reincarnate_timer  = Net.event.packet->data[i++];
                                     //Ship[j].shield = Net.event.packet->data[i++];
@@ -891,7 +891,7 @@ NetMessageType ServiceNetwork(void)
 
                             Ship[j].image  = Net.event.packet->data[i++];
                             Ship[j].colour = ShipColour[Ship[j].image];
-                            Ship[j].statuscolour = StatusColour[Ship[j].image];
+                            //Ship[j].statuscolour = StatusColour[Ship[j].image];
 
                             Ship[j].reincarnate_timer  = Net.event.packet->data[i++];
 
