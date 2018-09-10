@@ -455,6 +455,7 @@ int game(int argc, char **argv )
 	while(1)
 	{
 		//LoadFonts();
+		Command.goforward = false;
 
 		exit = DoMenu(queue, event);
 

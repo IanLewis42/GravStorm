@@ -550,8 +550,8 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         char Easy[] = "Easy", Medium[] = "Med.", Hard[]= "Hard", Insane[] = "Insane";
         char *dif_str[] = {Easy, Medium, Hard, Insane};
 #ifdef ANDROID
-        y = h/4 - 2*line_space;
-        y2 =  h/4 + 2*line_space;
+        y  = h/4 - 2*line_space;
+        y2 = h/4 + 1*line_space;
 
         al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "AI Ships:");
         al_draw_textf(small_glow_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "AI Ships:");

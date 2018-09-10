@@ -821,12 +821,11 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 if (Command.goforward)
                 {
                     Command.goforward = false;    //thrust to start game;
+                    init_map(Menu.group, Menu.map);
 
                     //if (Map.max_players == 1 || Menu.netmode != LOCAL)  //skip AI screen if 1 player map, or network game.
                     if (Map.max_players == num_ships || Menu.netmode != LOCAL)  //skip AI screen if all players human, or network game.
                     {
-                        init_map(Menu.group, Menu.map);
-
                         if (Menu.netmode == CLIENT)
                         {
                             if (Net.client_state == CONNECTED)
