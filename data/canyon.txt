@@ -6,8 +6,8 @@ ascii_map     canyon_map.txt
 description   canyon_desc.txt
 mission	      0
 
-;ship_first    1
-ship_first    0
+ship_first    1
+;ship_first    0
 
 gravity 0.05
 drag 2
