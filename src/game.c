@@ -1658,11 +1658,7 @@ extern float soverm;
 
 void draw_debug(void)
 {
-	int level,i;
-
-
-	//if (Map.mission) level = num_ships*180;
-	//else             level = num_ships*120;
+	int level;
 
     level = 100;
 
@@ -1875,8 +1871,8 @@ void draw_debug(void)
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "JDS:%d", joystick_down_state);
 }
 
-#if 0
-//#ifdef RPI
+//#if 0
+#ifdef RPI
 /* Function: al_vfprintf
  */
 int al_vfprintf(ALLEGRO_FILE *pfile, const char *format, va_list args)

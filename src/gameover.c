@@ -47,10 +47,6 @@ int GameOver()
 	static int score = 0,time_left = 0,position,ship,show_times=false;
 	int line_space,y;
 	int col1,col2,col3,col4;
-	char display_name[50];
-    char cursor[2];
-    char underscore[] = "_";
-    char blank[] =  " ";
 	int w,h;
 	static int num_ships_latched = 0;
 

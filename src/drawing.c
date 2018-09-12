@@ -1670,10 +1670,7 @@ void draw_status_bar(int ship, int x, int y)
 
 	//for (i=first_ship ; i<num_ships ; i++)
 	{
-		//al_draw_filled_rectangle(0,i*100,120,i*100+90,Ship[i].colour);	//120*90 - make a nice bitmap background.
-		//al_draw_filled_rectangle(0,yoffset+i*bs,135,yoffset+i*bs+(bs-10),Ship[i].statuscolour);
-		al_draw_filled_rounded_rectangle(x,y,x+102,y+bs,5,5,al_map_rgba(0, 0, 0, 128));//Ship[i].statuscolour);
-		//al_draw_bitmap(Ship[i].status_bg,0,i*100,0);
+		al_draw_filled_rounded_rectangle(x,y,x+102,y+bs,5,5,al_map_rgba(0, 0, 0, 128));
 
 		al_draw_bitmap_region(ui,100-Ship[i].shield,    0,  Ship[i].shield,       14, x+0, y+0, 0);
         al_draw_bitmap_region(ui,100-Ship[i].ammo1 ,    14, Ship[i].ammo1,        14, x+0, y+14, 0);
@@ -1681,28 +1678,6 @@ void draw_status_bar(int ship, int x, int y)
         al_draw_bitmap_region(ui,100-(Ship[i].fuel>>4), 42, (Ship[i].fuel>>4),    14, x+0, y+42, 0);
 
         al_draw_bitmap_region(ui,0, 56, Ship[i].lives*17, 14, x+0,y+56,0);
-
-		/*
-		al_draw_filled_rectangle(15,yoffset+i*bs+10,15+Ship[i].shield,yoffset+i*bs+20,al_map_rgb(0, 128, 0));
-		al_draw_filled_rectangle(15,yoffset+i*bs+12,15+Ship[i].shield-2,yoffset+i*bs+14,al_map_rgba(255, 255, 255, 64));
-
-		al_draw_filled_rectangle(15,yoffset+i*bs+30,15+Ship[i].ammo1,yoffset+i*bs+40,al_map_rgb(128, 0, 0));
-		al_draw_filled_rectangle(15,yoffset+i*bs+32,15+Ship[i].ammo1-2,yoffset+i*bs+34,al_map_rgba(255, 255, 255, 64));
-
-		for (j=0 ; j<Ship[i].ammo2 ; j++)
-		{
-			al_draw_filled_rectangle(15+j*12+1,yoffset+i*bs+50,15+j*12+11,yoffset+i*bs+60,al_map_rgb(0, 128, 128));
-			al_draw_filled_rectangle(15+j*12+1,yoffset+i*bs+52,15+j*12+11,yoffset+i*bs+54,al_map_rgba(255, 255, 255, 64));
-		}
-
-
-		al_draw_filled_rectangle(15,yoffset+i*bs+70,15+(Ship[i].fuel>>4),yoffset+i*bs+80,al_map_rgb(128, 128, 0));
-		al_draw_filled_rectangle(15,yoffset+i*bs+72,15+(Ship[i].fuel>>4)-2,yoffset+i*bs+74,al_map_rgba(255, 255, 255, 64));
-
-		for (j=0 ; j<Ship[i].lives ; j++)
-			//al_draw_filled_circle(110, i*100+j*12+10, 5, al_map_rgb(255, 255, 255));
-			al_draw_filled_triangle(15+106, yoffset+i*bs+j*12+15, 15+114, yoffset+i*bs+j*12+15,  15+110, yoffset+i*bs+j*12+5, al_map_rgb(255, 255, 255));
-        */
 
 		if (Map.mission)
 		{
@@ -1720,29 +1695,7 @@ void draw_status_bar(int ship, int x, int y)
 			al_draw_textf(race_font, al_map_rgb(255, 128,   0),50, y+bs-38, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].best_lap_time);
         }
 	}
-/*
-// draw android onscreen controls
-//#define ANDROID
 
-    //int w,h,ctrl_size;
-    //fudge - android screen size shouldn't change.....
-    int w=al_get_display_width(display);
-    int h=al_get_display_height(display);
-
-    //Ctrl.ctrl[DPAD].x = 0.98*w-Ctrl.ctrl[DPAD].w;
-	//Ctrl.ctrl[DPAD].y = 0.98*h-Ctrl.ctrl[DPAD].h;
-
-    //Ctrl.ctrl[BACK].y = bs+0.02*h;
-
-    for (i=0 ; i<NO_BUTTON ; i++)
-        if (Ctrl.ctrl[i].active)
-            al_draw_scaled_bitmap(Ctrl.controls, Ctrl.ctrl[i].idx*200, i*200, 200,200, Ctrl.ctrl[i].x, Ctrl.ctrl[i].y, Ctrl.ctrl[i].size, Ctrl.ctrl[i].size, 0);
-
-    //al_draw_bitmap_region(Ctrl.dpad,    Ctrl.ctrl[DPAD].idx*200,       0,     200,200, Ctrl.ctrl[DPAD].x,       Ctrl.ctrl[DPAD].y, 0);
-    //al_draw_scaled_bitmap(Ctrl.buttons, Ctrl.ctrl[JOY_BUTTON].idx*200, 2*200, 200,200, Ctrl.ctrl[JOY_BUTTON].x, Ctrl.ctrl[JOY_BUTTON].y,    Ctrl.ctrl[JOY_BUTTON].w, Ctrl.ctrl[JOY_BUTTON].h, 0);
-    //al_draw_scaled_bitmap(Ctrl.buttons, Ctrl.ctrl[BACK].idx*200,       3*200, 200,200, Ctrl.ctrl[BACK].x,       Ctrl.ctrl[BACK].y,    Ctrl.ctrl[BACK].w, Ctrl.ctrl[BACK].h, 0);
-
-*/
     al_identity_transform(&transform);
     al_use_transform(&transform);
 }

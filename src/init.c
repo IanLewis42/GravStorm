@@ -37,6 +37,7 @@
 #include "inputs.h"
 #include "drawing.h"
 #include "network.h"
+#include "auto.h"
 
 #if RPI
 #include <wiringPi.h>
@@ -759,7 +760,6 @@ void init_controls(void)
     {
         Ship[i].image = i;
         Ship[i].colour = ShipColour[i];
-        //Ship[i].statuscolour = StatusColour[i];
     }
 }
 
@@ -769,7 +769,6 @@ void init_ships(int num_ships)
 
 	for (i=0 ; i<MAX_SHIPS ; i++)   //init all, as we can have late joiner on network games.
 	{
-		//Ship[i].image      = i+4;
 		Ship[i].automode   = MANUAL;
 		Ship[i].lives      = Map.lives;
 		Ship[i].crashed    = 0;

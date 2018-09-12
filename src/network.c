@@ -388,31 +388,9 @@ void NetSendGameState()
         temp_pkt[i++] = (char)Ship[j].left_held;
         temp_pkt[i++] = (char)Ship[j].right_held;
         temp_pkt[i++] = (char)Ship[j].mass;
-
-
-        //temp_pkt[i++] = (char)Ship[j].landed;
-
         temp_pkt[i++] = (char)Ship[j].lives;
-        //temp_pkt[i++] = (char)Ship[j].shield;
-        //temp_pkt[i++] = (char)(Ship[j].fuel>>8);
-        //temp_pkt[i++] = (char)(Ship[j].fuel&0xff);
-        //temp_pkt[i++] = (char)Ship[j].ammo1;
-        //temp_pkt[i++] = (char)Ship[j].ammo2;
         temp_pkt[i++] = (char)Ship[j].image;
         temp_pkt[i++] = (char)Ship[j].reincarnate_timer;
-        //temp_pkt[i++] = (char)Ship[j].shield;
-        //temp_pkt[i++] = (char)Ship[j].landed;
-
-        //temp_pkt[i++] = (char)Ship[j].menu;
-        //if (Ship[j].menu)
-        {
-        //    temp_pkt[i++] = (char)Ship[j].menu_state;
-        //    temp_pkt[i++] = (char)Ship[j].ammo1_type;
-        //    temp_pkt[i++] = (char)Ship[j].ammo2_type;
-        //    temp_pkt[i++] = (char)Ship[j].user_ammo1;
-        //    temp_pkt[i++] = (char)Ship[j].user_ammo2;
-        //    temp_pkt[i++] = (char)Ship[j].user_fuel;
-        }
         temp_pkt[i++] = (char)Ship[j].bullet.damage;
         temp_pkt[i++] = (char)Ship[j].bullet.owner;
         temp_pkt[i++] = (char)Ship[j].bullet.type;
@@ -642,33 +620,12 @@ NetMessageType ServiceNetwork(void)
                                     Ship[j].right_held = Net.event.packet->data[i++];
                                     Ship[j].mass       = Net.event.packet->data[i++];
 
-                                    //Ship[j].landed = Net.event.packet->data[i++];
-
                                     Ship[j].lives  = Net.event.packet->data[i++];
-                                    //Ship[j].shield = Net.event.packet->data[i++];
-                                    //Ship[j].fuel   = Net.event.packet->data[i++] << 8;
-                                    //Ship[j].fuel  += Net.event.packet->data[i++];
-                                    //Ship[j].ammo1  = Net.event.packet->data[i++];
-                                    //Ship[j].ammo2  = Net.event.packet->data[i++];
-
                                     Ship[j].image  = Net.event.packet->data[i++];
                                     Ship[j].colour = ShipColour[Ship[j].image];
-                                    //Ship[j].statuscolour = StatusColour[Ship[j].image];
 
                                     Ship[j].reincarnate_timer  = Net.event.packet->data[i++];
-                                    //Ship[j].shield = Net.event.packet->data[i++];
-                                    //Ship[j].landed = Net.event.packet->data[i++];
 
-                                    //Ship[j].menu = Net.event.packet->data[i++];
-                                    //if (Ship[j].menu)
-                                    //{
-                                    //    Ship[j].menu_state = Net.event.packet->data[i++];
-                                    //    Ship[j].ammo1_type = Net.event.packet->data[i++];
-                                    //    Ship[j].ammo2_type = Net.event.packet->data[i++];
-                                    //    Ship[j].user_ammo1 = Net.event.packet->data[i++];
-                                    //    Ship[j].user_ammo2 = Net.event.packet->data[i++];
-                                    //    Ship[j].user_fuel  = Net.event.packet->data[i++];
-                                   // }
                                    i+=5; //skip bullet params
                                 }
                             }

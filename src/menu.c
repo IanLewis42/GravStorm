@@ -315,19 +315,15 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
         Ship[i].image = i;
         Ship[i].colour = ShipColour[i];
-        //Ship[i].statuscolour = StatusColour[i];
     }
 
 	Menu.num_groups = read_maps();	//read 'maps.txt' and store strings
-	//RETURN VALUE HERE
-	//MAYBE NEED CURRENT GROUP / CURRENT MAP in struct somewhere???
 
     w = al_get_display_width(display);
     h = al_get_display_height(display);
 
     al_set_clipping_rectangle(0, 0, w, h);
 
-	//Menu.map = 0;
 	Menu.col = 0;
 	Menu.offset = 0;
 
@@ -880,7 +876,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                         Ship[Menu.player].image--;
                         Ship[Menu.player].image&=0x07;
                         Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
-                        //Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
                         Ship[Menu.player].offset = -60;
                     }
 #ifndef ANDROID
@@ -915,7 +910,6 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                         Ship[Menu.player].image++;
                         Ship[Menu.player].image&=0x07;
                         Ship[Menu.player].colour = ShipColour[Ship[Menu.player].image];
-                        //Ship[Menu.player].statuscolour = StatusColour[Ship[Menu.player].image];
                         Ship[Menu.player].offset = 60;
                     }
 #ifndef ANDROID

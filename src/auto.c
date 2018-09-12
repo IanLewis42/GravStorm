@@ -234,9 +234,8 @@ void Cruise(int i)
 
 void Hunt(int i)   //so we are ship[i]
 {
-	int j,k,min;//,closest_wall,wall_threshold=200; //w_t from mapfile
-	float dx,dy,distance[MAX_SHIPS-1],angle[MAX_SHIPS-1];
-    //int deviation,temp_angle;
+	int k,min;
+
 
     if (Map.timer >= Ship[i].automodechangetime)
     {
@@ -460,10 +459,9 @@ void Pilot1(int i)
 //'vector sum' algorithm
 void Pilot0(int i)
 {
-    int j;//,close_walls = 0;
+    int j;
     float limit = 200,v_squared;
-    float x,y/*,target_distance*/,av_wall;
-    WallType target_wall;
+    float x,y,av_wall;
 
     find_obstructions(i);                          //find all wall distance/angles
 
@@ -471,8 +469,6 @@ void Pilot0(int i)
     for (j=0 ; j<40 ; j++)
     {
         av_wall += walls[j].distance;
-        //if (walls[j].distance != limit)
-        //    close_walls++;
     }
 
     av_wall /=40;
@@ -605,31 +601,16 @@ void Pilot0(int i)
     else
         Ship[i].thrust_held = false;                            //off if not.
 
-    //if (Ship[i].automode == HUNT && Ship[i].autotargetdistance < 200 && !Ship[i].thrust_held)
-    //    Ship[i].fangle = (180/PI)*atan2(x,-1*y);
-    //else
-        Ship[i].fangle = (180/PI)*atan2(sumx, sumy);                //fangle range is 0-360
+
+    Ship[i].fangle = (180/PI)*atan2(sumx, sumy);                //fangle range is 0-360
 
     if (Ship[i].fangle < 0) Ship[i].fangle +=360;   //wrap
 }
 
 void find_obstructions(int i)
 {
-    int j;
-
     find_walls(i);
     find_ships(i);
-/*
-    for (j=0 ; j<num_ships ; j++)
-    {
-        if (ship_av[j].distance < walls[ship_av[j].angle].distance)
-        {
-            walls[(ship_av[j].angle-1)%40].distance = ship_av[j].distance/2;
-            walls[ship_av[j].angle].distance = ship_av[j].distance/2;
-            walls[(ship_av[j].angle+1)%40].distance = ship_av[j].distance/2;
-        }
-    }
-*/
 }
 
 void find_ships(int i)

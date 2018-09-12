@@ -33,6 +33,7 @@
 #include "collisions.h"
 #include "objects.h"
 #include "network.h"
+#include "auto.h"
 
 ALLEGRO_BITMAP *ship_mask,*map_mask,*sentry_mask;
 extern ALLEGRO_SAMPLE *particle;
@@ -1004,7 +1005,6 @@ void CheckSWCollisions(int num_ships)
 void find_wall(int i, int angle, WallType* wall)
 {
     int j,k;
-    int distance = 0;
     int step = 5;
     int limit = 200;
     int x,y;
