@@ -280,7 +280,10 @@ int GameOver()
 
                 //draw ship and player number
                 al_draw_scaled_bitmap(ships,Ship[Map.score[i].player].angle*SHIP_SIZE_X,Ship[Map.score[i].player].image*SHIP_SIZE_Y*2,SHIP_SIZE_X,SHIP_SIZE_Y,col2, y+line_space*i,SHIP_SIZE_X*scale,SHIP_SIZE_Y*scale,0);
-                al_draw_textf(menu_font, colour, col2+SHIP_SIZE_X*scale,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "(P%d)",Map.score[i].player+1);
+                if (Ship[Map.score[i].player].automode == MANUAL)
+                    al_draw_textf(menu_font, colour, col2+SHIP_SIZE_X*scale,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "(P%d)",Map.score[i].player+1);
+                else
+                    al_draw_textf(menu_font, colour, col2+SHIP_SIZE_X*scale,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "(AI)");
 
                 //kills and lives
                 al_draw_textf(menu_font, colour, col3,   y+line_space*i,  ALLEGRO_ALIGN_LEFT, "%d",Map.score[i].kills);
@@ -293,6 +296,8 @@ int GameOver()
         {
             Command.goforward = false;
             game_over--;
+            for (i=0 ; i<num_ships ; i++)
+                Ship[i].automode = MANUAL;
 #ifdef ANDROID
             //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "UiChangeListener", "()V");
             if (Map.mission && (position < MAX_SCORES))
