@@ -967,7 +967,7 @@ int game(int argc, char **argv )
                         for (i=0 ; i<MAX_SHIPS ; i++)
                         {
                             al_stop_sample_instance(wind_inst[i]);
-                            Ship[i].automode = MANUAL;
+                            //Ship[i].automode = MANUAL;
                             Ship[i].fire1_held = false;
                             Ship[i].fire2_down = false;
                             Ship[i].thrust_held = false;
