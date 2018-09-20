@@ -6,12 +6,17 @@ If it's a mission level, rescue miners, and pick up bonus
 jewels by landing on the pads. Fly off away from the surface 
 to complete the level.
 
+Gravstorm can be played as:
+ Single player (Mission, race, practice)
+ 1 human player vs. 1-3 AI controlled ships
+ Network multiplayer (2-4 players)
+
 [ctrl]10
 [ctrl]11 
  
  
                        
-                          Use the direction pad to steer your ship...
+                            Use the direction pad to steer your ship...
  
  
  
@@ -62,7 +67,7 @@ along with miners rescued and jewels collected.
    Huge thanks to Heikki Kossola, the creator of TurboRaketti.
    Also thanks to the Allegro community.
  Graphics provided by:
-   Asbjorn Djupdal
+   Asbjørn Djupdal
    SpiralGraphics.biz
    pzUH / GameArt2D.com
    justinredfield.deviantart.com

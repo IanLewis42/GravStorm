@@ -6,6 +6,11 @@ If it's a mission level, rescue miners, and pick up bonus
 jewels by landing on the pads. Fly off away from the surface 
 to complete the level.
 
+Gravstorm can be played as:
+ Single player (Mission, race, practice)
+ Local multiplayer split screen (1-4 human players, 0-3 AI ships)
+ Network multiplayer (2-4 players)
+
 Default controls are:
  Player 1: Cursors and Right Ctrl
  Player 2: Q A R T and Left Alt
@@ -46,7 +51,7 @@ More info, including making your own maps, in readme.txt
    Huge thanks to Heikki Kossola, the creator of TurboRaketti.
    Also thanks to the Allegro community.
  Graphics provided by:
-   Asbjorn Djupdal
+   Asbjørn Djupdal
    SpiralGraphics.biz
    pzUH / GameArt2D.com
    justinredfield.deviantart.com
