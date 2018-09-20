@@ -179,6 +179,8 @@ typedef struct
 	//constants, but allow local variation
 	float drag;
 	float gravity;
+	float xg;
+	float yg;
 	float x_force;	//extra forces, added for bouncing forcefields.
 	float y_force;
 

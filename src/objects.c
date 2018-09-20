@@ -56,7 +56,7 @@ int last_bullet = END_OF_LIST;	//init this when you make a new bullet.
 int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   50,   5000, 150, 300,   256, 300,   300};   //Life (in frames)
 int reload[BULLET_TYPES] = {5,     5,     5,     15,    0,    0,    0,   0,     0,   0,     0};	    //frames in between shots (if fire held down) N/A for heavy weapons
 float Mass[BULLET_TYPES] = {0.04,  0.04,  0.04,  0.04,  0.1,  0.1,  0.1, 0.04,  0.1, 0.1,   0.04};	//Really bullet mass/ship mass; only used in collisions
-int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   30,  9,     10,  50,    4};     //points off shield when collision happens
+int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   30,  6,     10,  50,    4};     //points off shield when collision happens
 
 void UpdateLandedShip(int ship_num);	//int
 void NewShipBullet (int ship_num, int type, int flags); //int
@@ -106,7 +106,7 @@ int UpdateShips(int num_ships)
                         NetSendOutOfLives();
                         return 0;
                     }
-                    Ship[i].automode = MANUAL;
+                    //Ship[i].automode = MANUAL;
                     Ship[i].thrust_held = 0;
 					return(GO_TIMER);	//game over
 				}
@@ -228,6 +228,8 @@ int UpdateShips(int num_ships)
 					yg += G*Map.blackhole[j].g * y/(r*r_squared);     //..and scale along normalised (unit) vector
 					                                                //These accumulate up for all blackholes to get a final overall value
 				}
+				Ship[i].xg = xg;
+				Ship[i].yg = yg;
 				//velocity = velocity + (Thrust - Drag)/Mass
 				Ship[i].xv += (((Ship[i].thrust*sinlut[Ship[i].angle]) - Ship[i].xv*Ship[i].drag)/Ship[i].mass) - xg;
 				//Position = position + velocity
@@ -892,7 +894,7 @@ void FireSpecial(int ship_num)
 				{
 					NewBullet(Ship[ship_num].xpos + (SHIP_SIZE_X/2 * sinlut[Ship[ship_num].angle]), Ship[ship_num].ypos - (SHIP_SIZE_Y/2 * coslut[Ship[ship_num].angle]),
 					          Ship[ship_num].xv + (BULLET_SPEED * sinlut[Ship[ship_num].angle]), Ship[ship_num].yv + (BULLET_SPEED * coslut[Ship[ship_num].angle]),
-					          j*5, 0.02 * k * BULLET_SPEED, BLT_NORMAL, 0, ship_num);
+					          j*5, 0.02 * k * BULLET_SPEED, BLT_SPREADER, 0, ship_num);
 				}
 			}
 

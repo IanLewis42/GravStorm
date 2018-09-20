@@ -799,6 +799,9 @@ void init_ships(int num_ships)
 		Ship[i].sentries = 0;
 		Ship[i].home_pad = i;
 
+		Ship[i].xg = 0;
+		Ship[i].yg = 0;
+
 		reinit_ship(i);
 	}
 }

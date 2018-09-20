@@ -401,6 +401,9 @@ void Pilot1(int i)
 
     //sumx -= 35*Ship[i].;
     sumy -= 20*Ship[i].gravity;      //and gravity
+    sumy -= 1500*Ship[i].yg;
+    sumx += 1500*Ship[i].xg;
+
 
     //atan to get angle from vector.
     Ship[i].fangle = (180/PI)*atan2(sumx, sumy);          //fangle range is 0-360
@@ -588,6 +591,8 @@ void Pilot0(int i)
     sumy -= 4*Ship[i].yv;
 
     sumy -= 50*Ship[i].gravity;
+    sumy -= 1500*Ship[i].yg;
+    sumx += 1500*Ship[i].xg;
 
     float summag = sumx*sumx + sumy*sumy;       //get (squared) magnitude of resultant vector
 
