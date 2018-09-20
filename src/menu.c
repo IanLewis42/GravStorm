@@ -832,6 +832,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                         else
                             GotoLevel();     //set state for when we return to menu
 
+                        Menu.ai_ships = 0;
                         return 0;                       //return from function to start game
                     }
                     else
@@ -1138,9 +1139,16 @@ void GotoPlayers(void)
         Menu.item = 0;
 #else
         get_map_players( Menu.group, Menu.map);
-        if (Map.max_players == 1) num_ships = 1;    //default 2 players, unless max is 1
-        else num_ships = 2;
-        Menu.col_pos = 0;
+        if (Map.max_players == 1)
+        {
+            num_ships = 1;    //default 2 players, unless max is 1
+            Menu.col_pos = 1;
+        }
+        else
+        {
+            num_ships = 2;
+            Menu.col_pos = 0;
+        }
 #endif
         Menu.ships = num_ships; //for local
     }

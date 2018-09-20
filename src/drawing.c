@@ -351,20 +351,25 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         //y+= yoffset;
 
 #ifndef ANDROID
-        if (!Net.client)
+        if (!(Net.client || Net.host) && Map.max_players > 1)
         {
             if (Menu.col_pos == 0)
             {
-                al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Players:");
-                al_draw_textf(small_glow_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "Players:");
-                al_draw_textf(small_font, ItemCurrent    ,(int)(180*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
-                al_draw_textf(small_glow_font, ItemCurrentGlow,(int)(180*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Human Players:");
+                al_draw_textf(small_glow_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "Human Players:");
+                al_draw_textf(small_font, ItemCurrent    ,(int)(300*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                al_draw_textf(small_glow_font, ItemCurrentGlow,(int)(300*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
             }
             else
             {
-                al_draw_textf(small_font, ItemUnselected,col0, y,  ALLEGRO_ALIGN_LEFT, "Players:");
-                al_draw_textf(small_font, ItemUnselected,(int)(180*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
+                al_draw_textf(small_font, ItemUnselected,col0, y,  ALLEGRO_ALIGN_LEFT, "Human Players:");
+                al_draw_textf(small_font, ItemUnselected,(int)(300*font_scale), y,  ALLEGRO_ALIGN_LEFT, "%d",num_ships);
             }
+        }
+        else
+        {
+            al_draw_textf(small_glow_font, GroupGlow,col0, y,  ALLEGRO_ALIGN_LEFT, "Choose your ship");
+            al_draw_textf(small_font, GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Choose your ship");
         }
 
         y+=line_space*1.2;
@@ -392,7 +397,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                 al_draw_scaled_bitmap(ships,Ship[i].angle*SHIP_SIZE_X,2*j*SHIP_SIZE_Y, SHIP_SIZE_X, SHIP_SIZE_Y,step*j,y,SHIP_SIZE_X*scale,SHIP_SIZE_Y*scale, 0);
             }
 #else
-            if (!Net.client && !Net.server)
+            if (!Net.client && !Net.server && Map.max_players > 1)
             {
                 if (Menu.player == i && Menu.col_pos != 0)
                 {
@@ -1538,7 +1543,8 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
                 al_draw_bitmap(marker2_bmp,Ship[i].xpos-10+1*sumx,Ship[i].ypos-10-1*sumy,0);
                 //yellow, autotarget
                 al_draw_tinted_bitmap(marker2_bmp,al_map_rgb(255,255,0),Ship[i].autotargetx-10,Ship[i].autotargety-10,0);
-
+                //magenta, radial g vector
+                al_draw_tinted_bitmap(marker2_bmp,al_map_rgb(255,0,255),Ship[i].xpos-1000*Ship[i].xg,Ship[i].ypos-1000*Ship[i].yg,0);
             }
 		}
 
