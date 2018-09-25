@@ -117,7 +117,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
     wind_inst = al_create_sample_instance(wind);
     al_attach_sample_instance_to_mixer(wind_inst, mixer);
     al_set_sample_instance_playmode(wind_inst, ALLEGRO_PLAYMODE_LOOP);
-
+/*
 	for (i=0 ; i<1 ; )
 	{
 		al_wait_for_event(queue, &event);
@@ -153,7 +153,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
                 i++;
             }
 	}
-
+*/
     bgw = al_get_bitmap_width(menu_bg_bmp);
     bgh = al_get_bitmap_height(menu_bg_bmp);
 
@@ -174,31 +174,40 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
             w = al_get_display_width(display);
             h = al_get_display_height(display);
             LoadFonts(0);
-            //fade_in_y  = 0.75*h +30*font_scale;
-            //visible_y  = 0.75*h;
-            //fade_out_y = 0.75*h-30*font_scale;
         }
-
+        if (event.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING)   //we've been sidelined by the user/os
+        {
+            al_acknowledge_drawing_halt(display);   //acknowledge
+            halted = true;                          //flag to drawing routines to do nothing
+            al_stop_timer(timer);                   //no more timer events, so we should do nothing, saving battery
+            #ifdef ANDROID
+                al_set_default_voice(NULL);         //destroy voice, so no more sound events, ditto.
+            #endif // ANDROID
+        }
+        if (event.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) //we've been restored
+        {
+            al_acknowledge_drawing_resume(display); //ack
+            halted = false;                         //remove flag
+            al_start_timer(timer);                  //restart timer
+            voice = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);  //restart audio
+            al_attach_mixer_to_voice(mixer, voice);
+        }
 		if (event.type == ALLEGRO_EVENT_TIMER)
 		{
 			if (y < ht) y++;
 
 			al_set_sample_instance_gain(wind_inst,5*y/ht);
 			if (y == ht-sound_latency) {
-                //al_play_sample(clunk, 5, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
                 al_play_sample_instance(slam_inst);
-                //Vibrate(200);
             }
 
 			shadow_scale = (ht*a/y)/hc;	//sin theta. try arcsin???
 			text_scale = a/(y-(ht-hc)); //ditto
 
 			al_clear_to_color(al_map_rgb(0, 0, 0));
-			//al_draw_bitmap(menu_bg_bmp,0,0,0);
             al_identity_transform(&transform);			/* Initialize transformation. */
-            //al_scale_transform(&transform, shadow_scale, shadow_scale);	/* Rotate and scale around the center first. */
-            //al_translate_transform(&transform,w/2,h/2);
             al_use_transform(&transform);
+
             for(bgy=0 ; bgy<h ; bgy+=bgh)
             {
                 for(bgx=0 ; bgx<w ; bgx+=bgw)
@@ -206,8 +215,6 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
                     al_draw_bitmap(menu_bg_bmp,bgx,bgy,0);
                 }
             }
-
-			//al_draw_textf(font, al_map_rgb(255, 255, 0),200, 200,  ALLEGRO_ALIGN_LEFT, "Y:%0.1f",y);
 
 			al_identity_transform(&transform);			/* Initialize transformation. */
 			al_scale_transform(&transform, shadow_scale, shadow_scale);	/* Rotate and scale around the center first. */
@@ -224,15 +231,11 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
 				al_scale_transform(&transform, text_scale*font_scale, text_scale*font_scale);	/* Rotate and scale around the center first. */
 				al_translate_transform(&transform,(w/2)-(lw*text_scale*font_scale/2),(h/2)-(int)(26*font_scale));
 				al_use_transform(&transform);
-				//al_draw_textf(title_font, al_map_rgb(128, 128, 0),0, -1*al_get_font_ascent(title_font)/2,  ALLEGRO_ALIGN_CENTRE, "%s", NAME);
-				//al_draw_bitmap(logo,-w/(2*font_scale),0,0);
                 al_draw_bitmap(logo,0,0,0);
 			}
 
 			al_identity_transform(&transform);
     		al_use_transform(&transform);
-
-    		//line_space = 30*font_scale;
 
     		if (y==ht)	//start credits
     		{
@@ -242,18 +245,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
                 if (fade_count == 0)
 				{
 					break;
-                    //strcpy(fade_out,visible);
-					//strcpy(visible,fade_in);
-					////if (fgets(fade_in,200,credits) == NULL) break;
-                    //if (al_fgets(credits,fade_in,200) == NULL) break;
-					//fade_count = line_space;
 				}
-				//alpha = (1.0/line_space)*(line_space-fade_count);
-				//al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*(30-fade_count))*/,w/2, fade_in_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_in);
-				//al_draw_textf(small_font, al_map_rgba_f(0.35, 0, 0, 1),w/2, visible_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",visible);
-				//alpha = (1.0/line_space)*fade_count;
-				//al_draw_textf(small_font, al_map_rgba_f(0.35*alpha, 0, 0, alpha)/*8*fade_count)*/,w/2, fade_out_y+fade_count,  ALLEGRO_ALIGN_CENTRE, "%s",fade_out);
-
 				fade_count--;
 			}
 
@@ -267,7 +259,6 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
             while (Touch[i].id != NO_TOUCH) i++;    //need protection for running out of array.....
 
             Touch[i].id = event.touch.id;
-            //Touch[i].button = FindButton(event.touch.x, event.touch.y);   //no buttons displayed.....
 
             break;
         }
@@ -275,8 +266,6 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
 	al_fclose(credits);
 	al_stop_sample_instance(wind_inst);
 	al_destroy_sample_instance(wind_inst);
-	//al_destroy_mixer(mixer);
-	//al_destroy_voice(voice);
 
 	FreeMenuBitmaps();
 	al_fprintf(logfile,"Exit Title Screen\n");
@@ -632,6 +621,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                     {
                         Menu.group = 0;
                         Menu.map = 0;
+                        Net.id = 0;
                         GotoLevel();
                     }
                     else if (Menu.netmode == HOST)
@@ -1025,7 +1015,13 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                     if (Select.y < h/2)
                         Menu.ai_ships = 0.5 + (Select.x - w/3) / (w/6);
                     else
-                        Menu.difficulty = 0.5 + (Select.x - w/3) / (w/6);
+                        Menu.difficulty = 0.0 + (Select.x - w/3) / (w/6);
+
+                    if (Menu.ai_ships < 0) Menu.ai_ships = 0;
+                    if (Menu.ai_ships > 3) Menu.ai_ships = 3;
+
+                    if (Menu.difficulty < 0) Menu.difficulty = 0;
+                    if (Menu.difficulty > 3) Menu.difficulty = 3;
                 }
 #endif
 
