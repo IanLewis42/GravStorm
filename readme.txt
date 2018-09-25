@@ -11,17 +11,23 @@ If you've never played TurboRaketti, then it can be described as a 2 player vers
 
 If you're curious as to what it looks like, there should be some screenshots in the same directory as this file.
 
+Gravstorm can be played as:
+- Single player (Mission, race, practice).
+- Local multiplayer split screen (1-4 human players, 0-3 AI controlled ships) (Windows & Raspberry Pi).
+- 1 human player vs. 1-3 AI controlled ships. (Android) 
+- Network multiplayer (2-4 players) (Any platform, or combination of platforms).
+
 REQUIREMENTS
 ------------
 o Raspberry Pi
   I built/ran it under Raspbian. If you just want to run it, you'll need Raspbian too. There are two versions, which one you need depends on the version of your RPi hardware, and version of Raspbian. See Installation section for details. If you want to build it yourself, feel free to try under any OS you want ;-)
   ~30MB free disk/SD card space.
-  TV / Monitor plugged into the Pi. It only runs full-screen (not in a window) and VNC doesn't display anything. I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your display isn't big enough. Feedback welcome :-)
+  TV / Monitor plugged into the Pi. I've also only run it on a 16:9 TV at a resolution of 1280x720, over HDMI. I don't know what happens if your display isn't big enough. Feedback welcome :-)
   There don't seem to be any dependencies that aren't in the standard Raspbian Jessie image (as of 23/02/16).
     
 o Windows
-  Should run on any modern version of windows. I test on Windows7 32-bit ('cos that's what I have :-)
-  Reported running on Windows XP and Windows 10.
+  Should run on any modern version of windows. I test on Windows10 64-bit ('cos that's what I have :-)
+  Reported running on Windows XP and Windows 7.
   If you run it on any other version, please let me know how you get on.
   
 o Android  
@@ -151,9 +157,17 @@ o PLAYERS
   Use cursor 'up' and 'down' to select item.
   Use left and right cursor keys to select number of players, ship type, and controller type when highlighted.
     If you press 'right' when 'define keys->' is highlighted, the next five keypresses will be used as your controls.
-  Enter:  Start Game
+  Enter:  Start Game / AI menu
   Escape: Previous menu 
 
+o AI
+  This menu only appears if you have selected a local game, and fewer than the maximum number of players for the level.
+  Use this menu to set up the number of AI Ships (i.e. CPU controlled opponents) and the difficulty level (how hard they try to shoot you).
+  Use cursor 'up' and 'down' to select item.
+  Use left and right cursor keys to select number of ships or difficulty.   
+  Enter:  Start Game
+  Escape: Previous menu 
+  
 NOTE: Any set of player defined keys, or joystick can also be used to navigate the menu. 
 
 
@@ -177,7 +191,7 @@ If you complete a lap, the best times (and players who set them) will be display
 In network play only, F10 will toggle a 'radar' display at the top-right of the screen, showing the terrain, and all ships.
 
 o Single player 'Mission' levels
-  These are largely based on the 'Thrust' maps. Here, the objective is to rescue the miners who are stuck at the bottom of the cave system. Land on the 'blue' pads to rescue them. Land on the 'red' pads to collect jewels for bonus points. Beware that your ship will be heavier with extra passengers and cargo! Fly off away from the surface to complete the level.
+  These are loosely based on the 'Thrust' maps. Here, the objective is to rescue the miners who are stuck at the bottom of the cave system. Land on the 'blue' pads to rescue them. Land on the 'red' pads to collect jewels for bonus points. Beware that your ship will be heavier with extra passengers and cargo! Fly off away from the surface to complete the level.
   
 STATUS PANEL
 ------------
@@ -301,7 +315,7 @@ o gravity <value>
 o drag <value>
   Air resistance. Default = 2
 
-o pad <type> <y> <min x> <max x> <miners> <jewels>  REQUIRED (at least one)
+o pad <type> <y> <min x> <max x> <miners> <jewels> <exitx> <exity> <returnx> <returny> REQUIRED (at least one)
   This describes a landing pad. Note that this does NOT draw graphics for the pad. These must be part of the display_map file. Maximum 12 pads allowed.
   <type> is a 16-bit *hexadecimal* number.
     Lowest nibble (digit) is the ship that this pad is 'home' for (0-3). Each ship always appears on its home pad, and will get shield, fuel and both types of ammo recharged when on it. If this digit is >3 then this pad will be a general pad, not home for any ship.
@@ -311,9 +325,11 @@ o pad <type> <y> <min x> <max x> <miners> <jewels>  REQUIRED (at least one)
     AMMO2  0x0040
     SHIELD 0x0080
     e.g. if pad type is 10 then it is home for ship 0, and will recharge fuel for any ship that lands on it. If pad type is 9F then it's not home for any ship (F = 15, which is > 3) but will recharge fuel and shield for any ship (8+1 = 9)
-  <y> is the y-coordinate of the pad. 0 is the top of the map, and it becomes more positive as you go down. The easiest way to find the y-coordinate is to start the game with the debug switch -d, try to land on the pad, and note the y-cordinate displayed in the status bar when you crash on the pad.
+  <y> is the y-coordinate of the pad. 0 is the top of the map, and it becomes more positive as you go down. The easiest way to find the y-coordinate is to start the game with the debug switch -d, try to land on the pad, and note the y-cordinate displayed in the status bar when you crash on the pad. Or load the map in mapmaker, and press 'G' (see below).
   <min x> and <max x> are the x coordinates of the left and right hand edges of the pad. If this is the home pad for a ship, it will appear half way in between these.
   <miners> and <jewels> are the number of miners stranded on this pad for the ship to rescue / number of jewels to be collected (both only applicable on 'mission' levels)
+  <exitx/y> is the point an AI ship will try to fly to after takeoff.
+  <returnx/y> is the point it will go back to when attempting to refuel.
     
 o blackhole <x> <y> <g>
   This describes a gravity source somewhere on the map. Ships will be pulled towards it from any direction. The force is stronger the closer you get. Again, this does NOT draw anything. Maximum 4 blackholes allowed.
@@ -370,11 +386,11 @@ o race <min_x> <max_x> <min_y> <max_y> <reverse>
   
   <min_x> <max_x> <min_y> <max_y> define endpoints of line. Line must be either horizontal or vertical, i.e. EITHER min_x = max_x (vertical) OR min_y = max_y (horizontal).
   
-  'normal' horizontal lines are traversed right-left; 'normal' vertical lines are traversed top-bottom. If 'reverse' is set to 1, then this direction is reversed. The lines can be viewed in mapmaker; press G to turn grid on; racelines are shown as red/green lines - traversed red-green, and in the order they're declared in the map file. 
+  'normal' vertical lines are traversed right-left; 'normal' horizontal lines are traversed top-bottom. If 'reverse' is set to 1, then this direction is reversed. The lines can be viewed in mapmaker; press G to turn grid on; racelines are shown as red/green lines - traversed red-green, and in the order they're declared in the map file. 
 
 There is a separate map maker program. This is unimaginatively called 'mapmaker'. It reads the same .txt file, which should be passed on the command line, e.g. 
 
-mapmaker "mission 1.txt"
+./mapmaker "mission 1.txt"
   
 Quotes are required if there's a space in the filename. If you run it without a filename, it will immediately exit, so double clicking from Windows explorer won't work. In Windows, open a command window by clicking on the start button and typing cmd <return>, then navigate to the 'gravstorm' directory, and type the command line as above. 
 
@@ -391,7 +407,7 @@ Keyboard controls are:
 - G:                 toggle grid off/white/grey/black. 
 - Escape:            exit 
 
-N.B. Grid is only shown for tiled maps (i.e. type 1), However, for all map types, 'G' also turns on colouring for pads (red bar), black holes (cyan circle), racelines (red/green) and altered gravity/drag areas (yellow).
+N.B. Grid is only shown for tiled maps (i.e. type 1), However, for all map types, 'G' also turns on colouring for pads (red bar), black holes (cyan circle), racelines (red/green), altered gravity/drag areas (yellow) and AI exit/return points (green/yellow respectively).
 
 The mouse can be used to edit tiled maps as follows:
 - Left click and release to 'pick up' a tile (either from the map, or the preview area on the left)
