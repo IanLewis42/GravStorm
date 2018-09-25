@@ -155,35 +155,38 @@ int GameOver()
 
             for (j=0 ; j<num_ships ; j++)
             {
-                if (Ship[j].lap_complete) show_times = true;    //only show times if a lap was completed
-                //Ship[j].lap_table_pos = MAX_SCORES+1;           //init each ship's position to 'off the table'
+                if (Ship[j].automode == MANUAL)
+                {
+                    if (Ship[j].lap_complete) show_times = true;    //only show times if a lap was completed
+                    //Ship[j].lap_table_pos = MAX_SCORES+1;           //init each ship's position to 'off the table'
 
-                for (i=0 ; i<MAX_SCORES ; i++)                  //now work out each ship's correct position in table
-                {                                               //and copy into newtime, just like the scores
-                    if (Ship[j].best_lap_time < Map.oldtime[i].time)
-                    {
-                        Map.newtime[i].time = Ship[j].best_lap_time;
-                        strncpy(Map.newtime[i].name,"",50);
-                        Ship[j].lap_table_pos = i;
-                        break;
+                    for (i=0 ; i<MAX_SCORES ; i++)                  //now work out each ship's correct position in table
+                    {                                               //and copy into newtime, just like the scores
+                        if (Ship[j].best_lap_time < Map.oldtime[i].time)
+                        {
+                            Map.newtime[i].time = Ship[j].best_lap_time;
+                            strncpy(Map.newtime[i].name,"",50);
+                            Ship[j].lap_table_pos = i;
+                            break;
+                        }
+                        else
+                        {
+                            Map.newtime[i].time = Map.oldtime[i].time;
+                            strncpy(Map.newtime[i].name,Map.oldtime[i].name,50);
+                        }
                     }
-                    else
+                    i++;
+                    for ( ; i<MAX_SCORES ; i++)
                     {
-                        Map.newtime[i].time = Map.oldtime[i].time;
-                        strncpy(Map.newtime[i].name,Map.oldtime[i].name,50);
+                        Map.newtime[i].time = Map.oldtime[i-1].time;
+                        strncpy(Map.newtime[i].name,Map.oldtime[i-1].name,50);
                     }
-                }
-                i++;
-                for ( ; i<MAX_SCORES ; i++)
-                {
-                    Map.newtime[i].time = Map.oldtime[i-1].time;
-                    strncpy(Map.newtime[i].name,Map.oldtime[i-1].name,50);
-                }
-                //now copy new back to old for next ship.....
-                for (i=0 ; i<MAX_SCORES ; i++)
-                {
-                    Map.oldtime[i].time = Map.newtime[i].time;
-                    strncpy(Map.oldtime[i].name,Map.newtime[i].name,50);
+                    //now copy new back to old for next ship.....
+                    for (i=0 ; i<MAX_SCORES ; i++)
+                    {
+                        Map.oldtime[i].time = Map.newtime[i].time;
+                        strncpy(Map.oldtime[i].name,Map.newtime[i].name,50);
+                    }
                 }
             }
             Ship[j].lap_table_pos = MAX_SCORES+1;
