@@ -991,8 +991,8 @@ void make_instructions_bitmap(void)
 int component;
 void draw_split_screen(ViewportType viewport, int ship_num)
 {
-    ALLEGRO_TRANSFORM transform;
-    int i;
+    //ALLEGRO_TRANSFORM transform;
+    //int i;
     int x=0, y=0, sbx=0, sby=0;
     int w, h;
 	int scrollx, scrolly;	//These are the centre of the 'viewport' - normally the ship position, except when you get near an edge.
@@ -1126,6 +1126,18 @@ void draw_split_screen(ViewportType viewport, int ship_num)
 
 	draw_status_bar(ship_num,sbx,sby);
 
+
+
+	return;
+}
+
+void draw_radar(void)
+{
+    ALLEGRO_TRANSFORM transform;
+    int i;
+
+    int w = al_get_display_width(display);
+
 	if (Radar.on)
     {
         al_identity_transform(&transform);
@@ -1144,8 +1156,6 @@ void draw_split_screen(ViewportType viewport, int ship_num)
         al_identity_transform(&transform);
         al_use_transform(&transform);
     }
-
-	return;
 }
 
 float soverm;
@@ -1723,7 +1733,7 @@ void draw_controls(ALLEGRO_COLOR tint)
     return;
 }
 #endif // ANDROID
-void draw_dividers(void)
+void draw_dividers(int ships)
 {
     int w,h;
 
@@ -1736,13 +1746,13 @@ void draw_dividers(void)
 
 	//dividers
 	//if (!Net.net)
-	if (!Net.client && !Net.server)
+	//if (!Net.client && !Net.server)
     {
-        if (num_ships > 1)
+        if (ships > 1)
             //al_draw_filled_rectangle(STATUS_BAR_WIDTH,SCREENY/2-5,SCREENX,SCREENY/2+5,al_map_rgb(128, 128, 128));
             //al_draw_filled_rectangle(STATUS_BAR_WIDTH,h/2-2,w,h/2+2,al_map_rgb(128, 128, 128));
             al_draw_filled_rectangle(0,(h/2)-2,w,(h/2)+2,al_map_rgb(128, 128, 128));
-        if (num_ships > 2)
+        if (ships > 2)
             //al_draw_filled_rectangle(((w-STATUS_BAR_WIDTH)/2)+STATUS_BAR_WIDTH-2,0,(w-STATUS_BAR_WIDTH)/2+STATUS_BAR_WIDTH+2,h,al_map_rgb(128, 128, 128));
             al_draw_filled_rectangle((w/2)-2,0,(w/2)+2,h,al_map_rgb(128, 128, 128));
     }

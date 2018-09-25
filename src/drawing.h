@@ -19,7 +19,7 @@
 void LoadMap(void);
 void FreeMap(void);
 void draw_status_bar(int ship, int x, int y);
-void draw_dividers(void);
+void draw_dividers(int ships);
 void display_menu(void);
 void display_new_menu(void);
 void make_map_text_bitmap(void);
@@ -29,6 +29,7 @@ void make_bullet_bitmap(void);
 void make_instructions_bitmap(void);
 void draw_split_screen(ViewportType viewport, int ship_num);
 void draw_controls(ALLEGRO_COLOR tint);
+void draw_radar(void);
 
 extern ALLEGRO_BITMAP *tiles;
 extern ALLEGRO_BITMAP *bullets_bmp;

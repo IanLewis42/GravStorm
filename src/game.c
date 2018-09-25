@@ -472,8 +472,8 @@ int game(int argc, char **argv )
 		make_map_col_mask();
 
 		make_radar_bitmap();
-		if (num_ships > 1)
-            Radar.on = false;
+		//if (num_ships > 1)
+        Radar.on = true;
 
         al_fprintf(logfile,"Loading game bitmaps\n");
 		al_fflush(logfile);
@@ -761,7 +761,6 @@ int game(int argc, char **argv )
                     {
                         Command.toggleradar = true;
                     }
-
                     else
                     {
                         pressed_keys[event.keyboard.keycode]=true;
@@ -816,7 +815,7 @@ int game(int argc, char **argv )
             {
                 Command.toggleradar = false;
 #ifndef ANDROID
-                if (Net.client || Net.server || num_ships==1)
+                //if (Net.client || Net.server || num_ships==1)
 #endif
                 {
                     Radar.on = !Radar.on;
@@ -872,19 +871,20 @@ int game(int argc, char **argv )
 				//it gets window/screen coords from this and figures out where to put the ship etc.
 				//Ship numbers passed in. This is used to centre the 'viewport' on the ship
 
-#ifdef ANDROID
-                draw_split_screen(FULL,0);
-#else
-                if (Net.client || Net.server)
+//#ifdef ANDROID
+//                draw_split_screen(FULL,0);
+//#else
+                /*if (Net.client || Net.server)
 				{
                     draw_split_screen(FULL,Net.id);
                 }
-				else
+				else*/
                 {
-                    switch(num_ships)
+                    //switch(num_ships)
+                    switch(Menu.ships)
                     {
                     case 1:
-                            draw_split_screen(FULL,0);
+                            draw_split_screen(FULL,Net.id);
                             break;
                     case 2:
                             draw_split_screen(TOP,1);
@@ -892,10 +892,6 @@ int game(int argc, char **argv )
                             break;
                     case 3:
                     case 4:
-                            //draw_split_screen(TOPLEFT,0);
-                            //draw_split_screen(TOPRIGHT,1);
-                            //draw_split_screen(BOTTOMLEFT,2);
-                            //draw_split_screen(BOTTOMRIGHT,3);
                             draw_split_screen(TOPLEFT,2);		//better for sitimus....
                             draw_split_screen(TOPRIGHT,1);
                             draw_split_screen(BOTTOMLEFT,0);
@@ -904,10 +900,10 @@ int game(int argc, char **argv )
                     }
                 }
 
+                draw_dividers(Menu.ships);
+//#endif
+				draw_radar();
 
-                //draw_status_bar(Menu.ships);	//also does dividers
-                draw_dividers();
-#endif
 				if (debug_on) draw_debug();
 
 				//ok unless we allow AI in net games.....
@@ -954,16 +950,10 @@ int game(int argc, char **argv )
 
 				if (game_over)
 				{
-					//al_stop_samples();	//stop the audio
-
-					//for (i=0 ; i<num_ships ; i++)
-                    //    Ship[i].automode = MANUAL;
-
 					if (game_over == GO_TIMER-1)    //wait 1 tick to calculate / sort scores.
                     {
                         if (Net.server) NetSendGameOver();
 
-                        //for (i=0 ; i<num_ships ; i++)
                         for (i=0 ; i<MAX_SHIPS ; i++)
                         {
                             al_stop_sample_instance(wind_inst[i]);
@@ -1010,21 +1000,16 @@ int game(int argc, char **argv )
 
                         if (!Net.updated)                   //if we didn't get a game state packet
                         {
-                            UpdateBullets();
-                            UpdateRemoteShips();
+                            UpdateBullets();                //do a local best-guees update.
+                            UpdateRemoteShips();            //next recieved packet will correct any inaccuracies.
                             missed_packets++;
                         }
-
                     }
 
-                    //for (i=0 ; i<num_ships ; i++)
-                    //for (i=0 ; i<Menu.ships ; i++)
                     for (i=0 ; i<MAX_SHIPS ; i++)
                     {
                         if (Ship[i].thrust)
                         {
-                            //al_set_sample_instance_gain (wind_inst[i],2.0);
-                            //al_set_sample_instance_speed(wind_inst[i],2.0);
                             volume = 2.0;
                         }
                         else
@@ -1056,11 +1041,8 @@ int game(int argc, char **argv )
 
         MenuControls();
 
-        //for (i=0 ; i<num_ships ; i++)
-        //for (i=0 ; i<Menu.ships ; i++)
         for (i=0 ; i<MAX_SHIPS ; i++)
         {
-            //al_stop_sample_instance(wind_inst[i]);
             al_destroy_sample_instance(wind_inst[i]);
             al_destroy_sample_instance(shoota_inst[i]);
             al_destroy_sample_instance(shootb_inst[i]);
@@ -1071,9 +1053,6 @@ int game(int argc, char **argv )
         }
         al_destroy_sample_instance(yippee_inst);
         al_destroy_sample_instance(sentry_particle_inst);
-
-        //al_destroy_mixer(mixer);
-        //al_destroy_voice(voice);
 
         al_fflush(logfile);
         if (exit) break;
@@ -1089,7 +1068,6 @@ void MenuControls(void)
     Ctrl.ctrl[FIRE1].active = FALSE;
     Ctrl.ctrl[FIRE2].active = FALSE;
     Ctrl.ctrl[THRUST_BUTTON].active = FALSE;
-    //Ctrl.ctrl[DPAD].active = TRUE;
     Ctrl.ctrl[SELECT].active = TRUE;
     Ctrl.ctrl[REVERSE].active = FALSE;
 }
@@ -1102,7 +1080,6 @@ void GameControls(void)
     Ctrl.ctrl[FIRE1].active = TRUE;
     Ctrl.ctrl[FIRE2].active = TRUE;
     Ctrl.ctrl[THRUST_BUTTON].active = TRUE;
-    //Ctrl.ctrl[DPAD].active = FALSE;
     Ctrl.ctrl[SELECT].active = FALSE;
     Ctrl.ctrl[REVERSE].active = TRUE;
 }
@@ -1112,7 +1089,6 @@ void SystemBackPressed(void)
     Command.goback = true;
 }
 
-//int FireOrEscape(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 {
     int i;//,redraw=TRUE;
@@ -1158,14 +1134,6 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
         al_attach_mixer_to_voice(mixer, voice);
         //break;
     }
-    //else if (al_is_touch_input_installed())
-    //{
-    //    if (event.any.source == al_get_touch_input_event_source())
-    //    {
-    //        CheckTouchControls(event);  //will set command.goforward etc.
-    //    }
-    //}
-
     else if (event.type == ALLEGRO_EVENT_KEY_DOWN)
     {
         if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
@@ -1197,23 +1165,6 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
     }
 
     return;
-
-    //skip this, just leave command.x set and return - check in calling fn.
-    /*
-    if (Command.goforward)
-    {
-        Command.goforward = false;
-        return FIRE;
-    }
-
-    if (Command.goback)
-    {
-        Command.goback = false;
-        return ESCAPE;
-    }
-
-    return 0;
-    */
 }
 
 void CalcScales(void)
@@ -1663,6 +1614,10 @@ void draw_debug(void)
     level = 100;
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Menu.ships: %d", Menu.ships);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Menu.ai_ships: %d", Menu.ai_ships);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "num_ships: %d", num_ships);
+
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Ship: %d", d);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Algorithm: %i", Ship[d].autoalgorithm);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Automode: %i", Ship[d].automode);
