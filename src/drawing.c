@@ -1593,15 +1593,8 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
     al_use_transform(&transform);
 
 #else
-    if (num_ships == 1)
-		{
-			//x+=w/4; //w-(w/2)/2
-			x+=(w-bmw)/2;
-			//y+=h/4;
-			y+=(h-bmh)/2;
-		}
-		if (num_ships == 2)
-			x+=w/4;
+        x+=(w-bmw)/2;
+        y+=(h-bmh)/2;
 #endif
 		al_draw_bitmap(panel_bmp,x, y,0);
 #ifndef ANDROID
