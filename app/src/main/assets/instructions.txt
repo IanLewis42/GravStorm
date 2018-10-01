@@ -7,9 +7,9 @@ jewels by landing on the pads. Fly off away from the surface
 to complete the level.
 
 Gravstorm can be played as:
- Single player (Mission, race, practice)
- 1 human player vs. 1-3 AI controlled ships
- Network multiplayer (2-4 players)
+  Single player (Mission, race, practice)
+  1 human player vs. 1-3 AI controlled ships
+  Network multiplayer (2-4 players)
 
 [ctrl]10
 [ctrl]11 
@@ -33,7 +33,7 @@ Gravstorm can be played as:
 [ctrl]7
 
              ...and this fires your special weapon.
-             Press while on your home pad to adjust your fuel and ammo.
+             Press while on your home pad to adjust your weapons, fuel and ammo.
 [ctrl]8
              
              This one toggles your radar
