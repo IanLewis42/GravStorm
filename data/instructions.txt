@@ -7,9 +7,9 @@ jewels by landing on the pads. Fly off away from the surface
 to complete the level.
 
 Gravstorm can be played as:
- Single player (Mission, race, practice)
- Local multiplayer split screen (1-4 human players, 0-3 AI ships)
- Network multiplayer (2-4 players)
+  Single player (Mission, race, practice)
+  Local multiplayer split screen (1-4 human players, 0-3 AI ships)
+  Network multiplayer (2-4 players)
 
 Default controls are:
  Player 1: Cursors and Right Ctrl
