@@ -278,6 +278,7 @@ int game(int argc, char **argv )
 
     al_fprintf(logfile,"log open\n");
     al_fflush(logfile);
+    al_fprintf(logfile,"%s %s\n",NAME,VERSION);
 
     //init other bits of allegro
     al_init_image_addon();
