@@ -13,8 +13,8 @@ If you're curious as to what it looks like, there should be some screenshots in 
 
 Gravstorm can be played as:
 - Single player (Mission, race, practice).
-- Local multiplayer split screen (1-4 human players, 0-3 AI controlled ships) (Windows & Raspberry Pi).
-- 1 human player vs. 1-3 AI controlled ships. (Android) 
+- 1 human player vs. 1-3 AI controlled ships. 
+- Local multiplayer split screen (2-4 players) (Windows & Raspberry Pi).
 - Network multiplayer (2-4 players) (Any platform, or combination of platforms).
 
 REQUIREMENTS
@@ -36,8 +36,8 @@ o Android
 o iOS
   No chance. Unless you want to do it :-)
 
-INSTALLATION
-------------
+INSTALLATION (RPi / Windows)
+----------------------------
 Go to https://github.com/IanLewis42/GravStorm 
 Click the button labelled 'Clone or Download' and then 'Download Zip'.
 
@@ -68,10 +68,10 @@ o Raspbian on Raspberry Pi
 
         You need the executable 'gravstorm-stretch'.
         rename it to just 'gravstorm'
-        mv gravstorm-stretch gravstorm        
+        > mv gravstorm-stretch gravstorm        
       
       - Raspberry Pi 1 (original) (and probably zero, but I don't have one to test)
-        The new openGL driver doesn't run on this hardware, so you need to use the old driver. enable this as follows:
+        The new openGL driver doesn't run on this hardware, so you need to use the old driver. Enable this as follows:
         > cd /opt/vc/lib
         > sudo ln -s libbrcmEGL.so libEGL.so
         > sudo ln -s libbrcmGLESv2.so libGLESv2.so
@@ -84,7 +84,7 @@ o Raspbian on Raspberry Pi
 
         I'm told that a better way to do the last step is via a .conf file in etc/ld.so.conf.d but that doesn't seem to work for me :-(        
       
-      - These enable the old version of the OpenGL driver, so you need the executable 'gravstorm-jessie'.
+        These enable the old version of the OpenGL driver, so you need the executable 'gravstorm-jessie'.
         rename it to just 'gravstorm'
         > mv gravstorm-jessie gravstorm
   
@@ -95,6 +95,12 @@ o Raspbian on Raspberry Pi
       > cd gravstorm
       set file permissions:
       > chmod +x gravstorm
+      
+    - if you get an error like this: 
+      ./gravstorm: error while loading shared libraries: libenet.so.7: cannot open shared object file: No such file or directory
+      you need to install the networking library:
+      sudo apt-get install libenet7
+      There may also be a similar step required for other shared libraries, e.g. libdumb1
 
   Gravstorm requires the Raspberry Pi to be configured with at least 128MB of Graphics RAM. This can be changed by running the config utiliy. In LXterminal type:
     sudo raspi-config
@@ -169,7 +175,6 @@ o AI
   Escape: Previous menu 
   
 NOTE: Any set of player defined keys, or joystick can also be used to navigate the menu. 
-
 
 PLAYING
 -------
@@ -327,6 +332,7 @@ o pad <type> <y> <min x> <max x> <miners> <jewels> <exitx> <exity> <returnx> <re
     e.g. if pad type is 10 then it is home for ship 0, and will recharge fuel for any ship that lands on it. If pad type is 9F then it's not home for any ship (F = 15, which is > 3) but will recharge fuel and shield for any ship (8+1 = 9)
   <y> is the y-coordinate of the pad. 0 is the top of the map, and it becomes more positive as you go down. The easiest way to find the y-coordinate is to start the game with the debug switch -d, try to land on the pad, and note the y-cordinate displayed in the status bar when you crash on the pad. Or load the map in mapmaker, and press 'G' (see below).
   <min x> and <max x> are the x coordinates of the left and right hand edges of the pad. If this is the home pad for a ship, it will appear half way in between these.
+  [The following parameters may be left blank if not required]
   <miners> and <jewels> are the number of miners stranded on this pad for the ship to rescue / number of jewels to be collected (both only applicable on 'mission' levels)
   <exitx/y> is the point an AI ship will try to fly to after takeoff.
   <returnx/y> is the point it will go back to when attempting to refuel.
@@ -429,5 +435,5 @@ under certain conditions. See gpl.txt for details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-IPL 19/06/18
+IPL 03/10/18
 gravstorm9@gmail.com
