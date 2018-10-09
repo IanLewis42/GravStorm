@@ -194,8 +194,8 @@
  // *screenshots: *mission 5 (FF), *canyon (start?), *neutron star (star, plus bullets), sitimus (battle) - no gravity!
  // *RELEASE 1.0.0.0
  // contact:
- // *gurkoz, *mp, *tb, *Asbjorn, *Alex, *canyon, *KIIRA, 
- // finnish thread, mc?, Zimeon,  RPi guy (malman), 
+   xgurkoz, mp, tb, Asbjorn, Alex, xcanyon, KIIRA, 
+   finnish thread, mc, Zimeon,  RPi guy (malman), Allegro 
  
  // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
  // networking - enet...
@@ -441,79 +441,24 @@ LAND
   
   
   
-  
- 
-
-      
-  
-void AutoShip(int i)
-{
-	int j,k;
-	float dx,dy,distance[MAX_SHIPS-1],direction[MAX_SHIPS-1];
-	
-	for (j=0 ; j<num_ships ; j++)
-	{
-		if (i=j)
-		{
-			distance[j] = 9999999;	//big, so we shouldn't choose it
-			direction[j] = 120;	//degrees
-		}
-		else
-		{
-			dx = -1*(Ship[i].x - Ship[j].x);
-			dy =     Ship[i].y - Ship[j].y;
-		
-			//for each ship, work out distance, work out direction
-
-	/*		___o___Opponent(Ship[j])
-			|     /
-			|    /
-		       a|   /
-			|  /
-			|t/
-			|/
-			Us(Ship[i])
-
-			tan(t) = o/a
-			t = arctan o/a
-	*/
-			distance[j] = sqrt((dx * dx) + (dy * dy)); 
-			direction[j] = (180/PI) * atan2(dx,dx);	//degrees
-			if (direction[j] < 0) direction[j] += 360;
-	}
-	
-	min = 0;
-	for (j=0 ; j<num_ships ; j++)
-	{		
-		for (k=0 ; k<num_ships ; k++)
-		{	
-			if (distance[k] < distance[min])
-			min = k;
-		}
-		
-		
-		if (find_obstruction(k)) > distance[k];
-		break;	
-	}
-
-	if (j == num_ships) //no break, so no clear line of sight
-	{
-	
-	}
-
-
-	Ship[i].fangle = direction[k];
-	Ship[i].thrust_held = v_squared < 10; //Map.auto_v
-	Ship[i].fire1_held = distance[k] < 400;
-	Ship[i].fire2_down = distance[k] < 200;
-}
-  
-
-
   - Win/RPI
     Local game ->  Multiplayer -> LEVEL -> Player 1 - Human/CPU etc....
   - Android
     Local Game ->  Multiplayer -> LEVEL -> Choose ship, Num CPU ships (same screen)
+    
+New menu:
+--------
+
+How do you want to play today?
+- Play solo mission
+- Play against the AI
+- Play with friends
+- Instructions
+
+solo -> levels (1P) just 1P??? ->...
+AI -> levels (Multiplay) (Just multi?) ->...
+Friends -> network / local (tweaked, and diff for Android....) -> levels (multi)
+
 
 net startup:
 HOST:   Select 'host game'

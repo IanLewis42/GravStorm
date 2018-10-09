@@ -41,6 +41,7 @@
 //int DoOldMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event, ShipType AnyShip);
 int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue);
 
+void GotoGametype(void);
 void GotoNetwork(void);
 void GotoLevel(void);
 void GotoPlayers(void);
@@ -374,7 +375,7 @@ int DoMenu(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
 ALLEGRO_FILE *hostfile,*clientfile;
 
-int total_lines;
+int solo_lines,multi_lines;
 float line_space;
 
 int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
@@ -392,12 +393,13 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
     event.keyboard.keycode = 0;
     Net.pingtimer = 0;
     Menu.expand = 0;
-
-    int total_maps = 0;
-    for (i=0 ; i< Menu.num_groups ; i++)
-        total_maps += MapNames[i].Count;
-    total_lines = total_maps + Menu.num_groups;
-
+/*
+    int multi_maps = 0;
+    for (i=1 ; i< Menu.num_groups ; i++)
+        multi_maps += MapNames[i].Count;
+    multi_lines = multi_maps + Menu.num_groups-1;
+    solo_lines = MapNames[i].Count +1;
+*/
     for (i=0 ; i<Menu.num_groups ; i++ )
     {
         for(j=0 ; j<MapNames[i].Count ; j++)
@@ -405,6 +407,9 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
             MapNames[i].Map[j].players = get_map_players(i,j);
         }
     }
+
+    if (Menu.gametype == SOLO)
+        Menu.display_groups = 1;
 
     line_space = 35*font_scale;
 
@@ -446,16 +451,16 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
             //break;
         }
 
-		else if (event.type == ALLEGRO_EVENT_TIMER && al_is_event_queue_empty(queue))
+		else if (event.type == ALLEGRO_EVENT_TIMER)
 		{
-			display_new_menu();
+			if (al_is_event_queue_empty(queue))
+                display_new_menu();
 
             UpdateTouches();
 
 #ifdef ANDROID
             Menu.expand = 35*font_scale;
 #else
-
 			//expanding maps
 			if (Menu.expand < 35*font_scale)
 				Menu.expand += 5*font_scale;
@@ -607,7 +612,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
 
         switch (Menu.state)
         {
-            case NETWORK:
+            case GAMETYPE:
                 if (Command.goback)
                 {
                     Command.goback = false;
@@ -617,10 +622,69 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 if (Command.goforward)
                 {
                     Command.goforward = false;
+                    switch (Menu.gametype)
+                    {
+                        case SOLO:
+                            Menu.netmode = LOCAL;
+                            Menu.group = 0;
+                            GotoLevel();
+                        break;
+                        case COMPUTER:
+                            Menu.netmode = LOCAL;
+                            Menu.group = 1;
+                            GotoLevel();
+                        break;
+                        case FRIENDS:
+                            Menu.group = 1;
+                            GotoNetwork();
+                        break;
+                        case INST:
+                            Menu.state = INSTRUCTIONS;               //go to next menu
+                            if ((ui = al_load_bitmap("ui.png")) == NULL)  al_fprintf(logfile,"ui.png load fail");
+                            make_instructions_bitmap();
+                            Ctrl.ctrl[SELECT].active=FALSE;
+                            Select.sumdymin = Menu.max_scroll;//-1*total_lines*line_space;
+                            Select.sumdy = Select.sumdymax;
+                        break;
+                    }
+                    Menu.map = 0;
+                }
+                else if (AnyShip.fire2_down)    //down
+                {
+                    AnyShip.fire2_down = false;
+                    if (Menu.gametype < INST)
+                    {
+                        Menu.gametype++;
+                    }
+                }
+                else if(AnyShip.fire1_down) //up!
+                {
+                    AnyShip.fire1_down = false;
+                    if (Menu.gametype > SOLO)
+                    {
+                        Menu.gametype--;
+                    }
+                }
+                else if (Select.action == RELEASE)
+                {
+                    Select.action = NO_ACTION;
+                        Menu.gametype = Select.line-1;
+                    if (Menu.gametype == INST)
+                        Command.goforward = TRUE;
+                }
+            break;
+            case NETWORK:
+                if (Command.goback)
+                {
+                    GotoGametype();
+                }
+                if (Command.goforward)
+                {
+                    Command.goforward = false;
                     if (Menu.netmode == LOCAL)
                     {
-                        Menu.group = 0;
-                        Menu.map = 0;
+                        //Menu.group = 0;
+                        //Menu.map = 0;
                         Net.id = 0;
                         GotoLevel();
                     }
@@ -634,22 +698,13 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                     {
                         GotoPlayers();
                     }
-                    else if (Menu.netmode == INST)
-                    {
-                        Menu.state = INSTRUCTIONS;               //go to next menu
-                        if ((ui = al_load_bitmap("ui.png")) == NULL)  al_fprintf(logfile,"ui.png load fail");
-                        make_instructions_bitmap();
-                        Ctrl.ctrl[SELECT].active=FALSE;
-                        Select.sumdymin = Menu.max_scroll;//-1*total_lines*line_space;
-                        Select.sumdy = Select.sumdymax;
-                    }
                 }
 
                 else if (AnyShip.fire2_down)    //down
                 {
                     AnyShip.fire2_down = false;
                     //if (Menu.col_pos < 2/*Menu.max_col_pos*/)
-                    if (Menu.netmode < INST)
+                    if (Menu.netmode < CLIENT)
                     {
                         //Menu.col_pos++;
                         Menu.netmode++;
@@ -670,14 +725,14 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 {
                     Select.action = NO_ACTION;
                     //if (Select.x < 0.75*w)
-                        Menu.netmode = Select.line-1;
+                        Menu.netmode = Select.line;
                     if (Menu.netmode == INST)
                         Command.goforward = TRUE;
                 }
             break;
             case INSTRUCTIONS:
                 if (Command.goback || Command.goforward)
-                    GotoNetwork();
+                    GotoGametype();
                 if (AnyShip.fire2_held)    //down
                 {
                     Menu.scroll = -10*font_scale;
@@ -694,7 +749,10 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
             case LEVEL: //map selection
                 if (Command.goback)
                 {
-                    GotoNetwork();
+                    if (Menu.gametype == FRIENDS)
+                        GotoNetwork();
+                    else
+                        GotoGametype();
                 }
                 if (Command.goforward)
                 {
@@ -707,7 +765,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
 
                     if (Menu.map < MapNames[Menu.group].Count-1)	//more maps in group, so inc map count
                         Menu.map++;
-                    else if(Menu.group < Menu.num_groups-1)		//no more maps, but another group so inc group
+                    else if(Menu.group < Menu.display_groups-1)		//no more maps, but another group so inc group
                     {
                         Menu.group++;
                         Menu.map = 0;
@@ -722,10 +780,15 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 else if(AnyShip.fire1_down) //up!
                 {
                     AnyShip.fire1_down = false;
+                    int first;
+                    if (Menu.gametype == SOLO)
+                        first = 0;
+                    else
+                        first = 1;
 
                     if (Menu.map > 0)	//more maps in group, so dec map count
                         Menu.map--;
-                    else if(Menu.group > 0)		//no more maps, but another group so dec group
+                    else if(Menu.group > first)		//no more maps, but another group so dec group
                     {
                         Menu.group--;
                         Menu.map = MapNames[Menu.group].Count-1;
@@ -741,7 +804,9 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 {
                     Select.action = NO_ACTION;
                     if (Select.x < 0.75*w) {
-                        for (i = 0; i < Menu.num_groups; i++) {
+                        if (Menu.gametype == SOLO) i=0;
+                        else i=1;
+                        for (  ; i < Menu.display_groups; i++) {
                             if (Select.line == 0) break;
                             Select.line--;                          //group name
 
@@ -1035,6 +1100,18 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
 	}
 }
 
+void GotoGametype(void)
+{
+	Command.goback = false;
+	Command.goforward = false;
+
+	Menu.state = GAMETYPE;            //back to previous menu
+	Select.sumdymin = 0;//-4*line_space;
+	//Select.sumdy = Select.sumdymax;
+	Ctrl.ctrl[SELECT].active=TRUE;
+	AnyShip.fire1_down = false;     //stop scroll up on exit
+}
+
 void GotoNetwork(void)
 {
 	Command.goback = false;
@@ -1042,7 +1119,7 @@ void GotoNetwork(void)
 
 	Menu.state = NETWORK;            //back to previous menu
 	Select.sumdymin = 0;//-4*line_space;
-	Select.sumdy = Select.sumdymax;
+	//Select.sumdy = Select.sumdymax;
 	Ctrl.ctrl[SELECT].active=TRUE;
 	AnyShip.fire1_down = false;     //stop scroll up on exit
 }
@@ -1072,8 +1149,26 @@ void GotoLevel(void)
 	Command.goforward = false;
 
 	Menu.state = LEVEL;               		//go to next menu
-	Select.sumdymin = -1*total_lines*line_space;    //set max scroll
+
+	if (Menu.gametype == SOLO)
+    {
+        Menu.display_groups = 1;	//read 'maps.txt' and store strings
+        solo_lines = MapNames[0].Count -1;
+        Select.sumdymin = -1*solo_lines*line_space;    //set max scroll
+    }
+    else
+    {
+        //Menu.num_groups = read_maps();	//read 'maps.txt' and store strings
+        Menu.display_groups = Menu.num_groups;
+        int multi_maps = 0;
+        for (i=1 ; i< Menu.num_groups ; i++)
+            multi_maps += MapNames[i].Count;
+        multi_lines = multi_maps + Menu.num_groups-3;
+        Select.sumdymin = -1*multi_lines*line_space;    //set max scroll
+    }
+/*
 	Select.sumdy = Select.sumdymax;                 //reset current scroll
+
 
 	for (i=0 ; i<Menu.group ; i++)
     {
@@ -1081,8 +1176,8 @@ void GotoLevel(void)
         y++;                    //one more for group name
     }
 	Select.sumdy -= (y+Menu.map) * line_space;//add in current map within group and bump scroll to correct place
-	Menu.col_pos = 0;
-
+	//Menu.col_pos = 0;
+*/
     init_map(Menu.group, Menu.map);
 }
 
@@ -1094,7 +1189,7 @@ void GotoPlayers(void)
 	Menu.state = PLAYERS;
 
 	Select.sumdymin = Select.sumdymax;
-	Select.sumdy = Select.sumdymax;
+	//Select.sumdy = Select.sumdymax;
 	Select.sumdxmin = -1000;
 	Select.sumdxmax = 1000;
 	Select.sumdx = 0;
@@ -1142,8 +1237,16 @@ void GotoPlayers(void)
         }
         else
         {
-            num_ships = 2;
-            Menu.col_pos = 0;
+            if (Menu.gametype == FRIENDS)
+            {
+                num_ships = 2;
+                Menu.col_pos = 0;
+            }
+            else
+            {
+                num_ships = 1;
+                Menu.col_pos = 1;
+            }
         }
 #endif
         Menu.ships = num_ships; //for local
@@ -1154,7 +1257,14 @@ void GotoAI(void)
 {
     Menu.state = AI;
     Menu.col_pos = 0;
-    if (Menu.ai_ships > Map.max_players - num_ships)
-        Menu.ai_ships = Map.max_players - num_ships;
+    if (Menu.gametype == FRIENDS)
+        Menu.ai_ships = 0;
+    else if (Menu.gametype == COMPUTER) {
+        if (Menu.ai_ships == 0)
+            Menu.ai_ships = 1;
+        if (Menu.ai_ships > Map.max_players - num_ships)
+            Menu.ai_ships = Map.max_players - num_ships;
+    }
+
 }
 

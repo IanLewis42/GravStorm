@@ -149,7 +149,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	al_use_transform(&transform);
 
 #ifdef ANDROID
-    y = Select.sumdy;
+    y = Select.sumdymax;
 
     al_set_clipping_rectangle(0, Ctrl.ctrl[BACK].y + Ctrl.ctrl[BACK].size, w, h);
 
@@ -159,65 +159,94 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
     y=line_space;
 #endif
 
+    if (Menu.state == GAMETYPE)
+    {
+        al_draw_textf(small_font,      GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "How do you want to play today?");
+        al_draw_textf(small_glow_font, GroupGlow,  col0, y,  ALLEGRO_ALIGN_LEFT, "How do you want to play today?");
 
-    //timer++;            //blinking cursor
-    //if (timer & 0x10)
-    //    cursor = ' ';
-    //else
-    //    cursor = '_';
+        y+=line_space;
+        if (Menu.gametype == SOLO)
+        {
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "Play a solo mission");
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "Play a solo mission");
+        }
+        else
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Play a solo mission");
+
+        y+=line_space;
+        if (Menu.gametype == COMPUTER)
+        {
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "Play against the AI");
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "Play against the AI");
+        }
+        else
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Play against the AI");
+
+        y+=line_space;
+        if (Menu.gametype == FRIENDS)
+        {
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "Play with friends");
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "Play with friends");
+        }
+        else
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Play with friends");
+
+        y+=line_space;
+        if (Menu.gametype == INST)
+        {
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "Instructions");
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "Instructions");
+        }
+        else
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Instructions");
+    }
 
     if (Menu.state == NETWORK)
     {
-        al_draw_textf(small_font,      GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Mode");
-        al_draw_textf(small_glow_font, GroupGlow,  col0, y,  ALLEGRO_ALIGN_LEFT, "Mode");
-        /*
-             if (Menu.netmode == LOCAL)  netmodestr = local;
-        else if (Menu.netmode == HOST)   netmodestr = host;
-        else                             netmodestr = client;
-        */
+        al_draw_textf(small_font,      GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "Do you want to:");
+        al_draw_textf(small_glow_font, GroupGlow,  col0, y,  ALLEGRO_ALIGN_LEFT, "Do you want to:");
         y+=line_space;
 
+#ifndef ANDROID
         if (Menu.netmode == LOCAL)
         {
-           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
-           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
-#ifdef ANDROID
-            //al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Single player.");
-#else
-            al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Single player, or all players on one device.");
-#endif
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "Play on this computer");
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "Play on this computer");
+
+           //al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Single player, or all players on one device.");
+
         }
         else
-            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",local);
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Play on this computer");
 
         y+=line_space;
-
+#endif
         if (Menu.netmode == HOST)
         {
-           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
-           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "Start a local network game");
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "Start a local network game");
 #ifndef ANDROID
-           al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Host chooses level to play on.");
+           //l_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Host chooses level to play on.");
 #endif
         }
         else
-            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",host);
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Start a local network game");
 
         y+=line_space;
 
         if (Menu.netmode == CLIENT)
         {
-           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
-           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
+           al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "Join a local network game");
+           al_draw_textf(small_glow_font, ItemCurrentGlow,col1, y,  ALLEGRO_ALIGN_LEFT, "Join a local network game");
 #ifndef ANDROID
-            al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Join a game someone else is hosting.");
+            //al_draw_textf(small_font, ItemUnselected,col2, y,  ALLEGRO_ALIGN_LEFT, "Join a local network game");
 #endif
         }
         else
-            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",client);
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Join a local network game",client);
 
         y+=line_space;
-
+/*
         if (Menu.netmode == INST)
         {
             al_draw_textf(small_font, ItemCurrent    ,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",inst);
@@ -226,7 +255,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
         }
         else
             al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "%s",inst);
-
+*/
         y+=line_space*3;
 
         if (Net.client_state == ABORTED)
@@ -274,11 +303,19 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	else if (Menu.state == LEVEL)
     {
 	//Display maps; display all group names, and maps in current group
+#ifdef ANDROID
+        y = Select.sumdy;
+#endif
         al_draw_textf(small_font, GroupActive, col0, y,  ALLEGRO_ALIGN_LEFT, "Level");
         al_draw_textf(small_glow_font, GroupGlow,   col0, y,  ALLEGRO_ALIGN_LEFT, "Level");
+
+        if (Menu.gametype == SOLO)
+            i = 0;
+        else
+            i = 1;
 #ifdef ANDROID
         char temp[50];
-        for (i=0 ; i<Menu.num_groups ; i++) {
+        for ( ; i<Menu.display_groups ; i++) {
             al_draw_textf(small_font, GroupActive, col0, y += line_space, ALLEGRO_ALIGN_LEFT, "%s", (char *) &MapNames[i].Group);
             al_draw_textf(small_glow_font, GroupGlow, col0, y/*+=LINE_SPACE*/, ALLEGRO_ALIGN_LEFT, "%s", (char *) &MapNames[i].Group);
 
@@ -296,7 +333,8 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             }
         }
 #else
-        for (i=0 ; i<Menu.num_groups ; i++)
+
+        for ( ; i<Menu.display_groups ; i++)
         {
             if (i == Menu.group)
             {
@@ -941,6 +979,8 @@ void make_instructions_bitmap(void)
     ALLEGRO_FILE * inst;
     int i=0, line_space, idx;
     char line[200];
+
+    if (inst_bmp != NULL) return;
 
     line_space = 30*font_scale;
 

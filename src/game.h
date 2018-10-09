@@ -247,7 +247,8 @@ typedef struct
 
 typedef enum
 {
-    NETWORK = 0,
+    GAMETYPE = 0,
+    NETWORK,
     INSTRUCTIONS,
     LEVEL,
     PLAYERS,
@@ -259,13 +260,21 @@ typedef enum
     LOCAL = 0,
     HOST,
     CLIENT,
-    INST
 }NetModeType;
+
+typedef enum
+{
+    SOLO = 0,
+    COMPUTER,
+    FRIENDS,
+    INST
+}GameType;
 
 typedef struct
 {
 	MenuStateType state;
     NetModeType netmode;
+    GameType gametype;
 	int col_pos;
 	int max_col_pos;
     int player;
@@ -279,6 +288,7 @@ typedef struct
 	int group;		//0-n
 	int map;		//0-n
 	int num_groups;	//
+	int display_groups;
 	int controls;	//0,1 keys, 2 GPIO joystick? 3 onwards USB joysticks.
 	char current_key;
 	int offset;		//to make columns slide
