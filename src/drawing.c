@@ -243,7 +243,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 #endif
         }
         else
-            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Join a local network game",client);
+            al_draw_textf(small_font, ItemUnselected,col1, y,  ALLEGRO_ALIGN_LEFT, "Join a local network game");
 
         y+=line_space;
 /*
