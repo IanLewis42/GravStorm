@@ -669,8 +669,10 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 {
                     Select.action = NO_ACTION;
                         Menu.gametype = Select.line-1;
-                    if (Menu.gametype == INST)
+                    if (Menu.gametype == INST) {
                         Command.goforward = TRUE;
+                        display_new_menu();             //force a redraw
+                    }
                 }
             break;
             case NETWORK:
