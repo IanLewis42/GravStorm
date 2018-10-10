@@ -143,17 +143,23 @@ In general, use up and down cursor keys to navigate the menu, left and right to 
 
 Menus on Android are touchy/scrolly as you'd (hopefully) expect.
 
-o MODE
-  Use cursor 'up' and 'down' to select game mode.
-    Local Game        - Select this for single player, or for up to 4 players in split-screen mode on the same device.
-    Host Network Game - Select this to allow other players to join 'your' game. As the host, you get to select the level.
-    Join Network Game - Select this to join a game hosted by another player.
-    Instructions      - Select this to show instructions(!)
-    
-    NOTE: Network support is ONLY for a local network, not over the internet.
+o Game Type
+  Play a solo mission : These are the 'Thrust'-like levels; fly down the cave system, rescue the miners, get out again.
+  Play against the AI : Free-for-all dogfight where you are pitted against 1-3 AI controlled ships. 
+  Play with friends   : As above but with any combination of human and AI ships. 
+  Instructions        : Select this to show instructions(!)
+  
+o Local / Network
+  If you chose 'Play with Friends' you get a second menu
+  Play on this computer      : This will start a split-screen game on a single computer (Only on Raspberry Pi and Windows) 
+  Start a local network game : This will start a network server, and allow you to choose the level used for the game
+  Join a local network game  : This will allow you to join a game started by someone else.
+  
+  NOTE: Network support is ONLY for a local network, not over the internet.
+
   Enter:  Next menu
   Escape: Exit 
-
+     
 o LEVEL
   Use cursor 'up' and 'down' to select level.
   Enter:  Next menu
@@ -167,7 +173,7 @@ o PLAYERS
   Escape: Previous menu 
 
 o AI
-  This menu only appears if you have selected a local game, and fewer than the maximum number of players for the level.
+  This menu only appears if you not playing a network game, and have fewer human playesr than the maximum number of players for the level.
   Use this menu to set up the number of AI Ships (i.e. CPU controlled opponents) and the difficulty level (how hard they try to shoot you).
   Use cursor 'up' and 'down' to select item.
   Use left and right cursor keys to select number of ships or difficulty.   
@@ -252,7 +258,7 @@ The game has been designed to make creating your own levels as easy as possible.
 
 I tend to use the terms 'level' and 'map' interchangably. Sorry for any confusion this causes :-)
 
-- The file 'data/maps.txt' lists all the maps(/levels) that can be played. A colon ':' at the start of an entry indicates a group. Each entry in maps.txt (apart from the groups) must have a corresponding .txt file in the /data directory. So if the entry in maps.txt is my_level, you must have a file called data/my_level.txt. (This applies to Raspberry Pi & Windows versions. Android packs everything into an .apk file, so you need to download the source from Github, add your data files to \app\src\main\assets and then build the app.)
+- The file 'data/maps.txt' lists all the maps(/levels) that can be played. A colon ':' at the start of an entry indicates a group. There's a (slightly ugly) assumption that all the 'solo mission' levels are in teh first group, and all the mulitplayer levels are in subsequent groups. Each entry in maps.txt (apart from the groups) must have a corresponding .txt file in the /data directory. So if the entry in maps.txt is my_level, you must have a file called data/my_level.txt. (This applies to Raspberry Pi & Windows versions. Android packs everything into an .apk file, so you need to download the source from Github, add your data files to \app\src\main\assets and then build the app.)
   
 - This .txt file contains all the information about the level. Each parameter should be typed on its own line. 
   Pretty much anything (other than whitespace) can be used as a single-line comment, but I tend to use a semicolon ;

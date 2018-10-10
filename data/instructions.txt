@@ -22,8 +22,8 @@ Down/Back fires your 'special' weapon (limited ammo, more damage,
 various types)
 Thrust/Joystick Button fires your engine.
 
-In network play only, F10 will toggle a 'radar' display at the 
-top-right of the screen, showing the terrain, and all ships.
+F10 will toggle a 'radar' display at the top-right of the screen, 
+showing the terrain, and all ships.
 
 At the top-left of each player's window there is a status panel 
 for their ship. 
