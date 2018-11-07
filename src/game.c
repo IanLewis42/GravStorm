@@ -1484,13 +1484,16 @@ void FreeGameBitmaps(void)
 
     if (Radar.mask)
     {
-        if (Radar.display == Radar.mask)
+        if (Radar.temp == Radar.mask)
         {
             al_destroy_bitmap(Radar.mask);
             Radar.mask = NULL;
+            Radar.temp = NULL;
+            al_destroy_bitmap(Radar.display);
             Radar.display = NULL;
-            i++;
-            j++;
+
+            i+=2;
+            j+=2;
         }
         else
         {
@@ -1498,8 +1501,11 @@ void FreeGameBitmaps(void)
             Radar.mask = NULL;
             al_destroy_bitmap(Radar.display);
             Radar.display = NULL;
-            i+=2;
-            j+=2;
+            al_destroy_bitmap(Radar.temp);
+            Radar.temp = NULL;
+
+            i+=3;
+            j+=3;
         }
     }
 

@@ -306,7 +306,7 @@ void make_radar_bitmap(void)
     Radar.width  = (mask_width)/8;
     al_fprintf(logfile,"Radar Mask Height = %d, Width = %d\n",Radar.height, Radar.width);
 
-    //al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
+    al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP); 
     Radar.mask = al_create_bitmap(Radar.width, Radar.height);	//create a bitmap - 400
     al_set_target_bitmap(Radar.mask);				//set it as the default target for all al_draw_ operations
 
@@ -362,15 +362,15 @@ void make_radar_bitmap(void)
     }
 
     if (Map.type == 0 || Map.type == 2)
-        Radar.display = Radar.mask;
+        Radar.temp = Radar.mask;
     else    //tiled
     {
         Radar.height = map_height*4;
         Radar.width  = map_width*4;
-        Radar.display = al_create_bitmap(Radar.width, Radar.height);	//create a bitmap -
+        Radar.temp = al_create_bitmap(Radar.width, Radar.height);	//create a bitmap -
         al_fprintf(logfile,"Radar Display Height = %d, Width = %d\n",Radar.height, Radar.width);
 
-        al_set_target_bitmap(Radar.display);				//set it as the default target for all al_draw_ operations
+        al_set_target_bitmap(Radar.temp);				//set it as the default target for all al_draw_ operations
         al_clear_to_color(al_map_rgba(0, 0, 0, 0));
 
         //use al_draw_bitmap_region to copy 4x4 chunks from .mask to .display
@@ -390,6 +390,10 @@ void make_radar_bitmap(void)
 
     al_set_target_backbuffer(display);			//Put default target back
     al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);
+
+    Radar.display = al_clone_bitmap(Radar.temp);    //make a clone in video memory to speed up drawing.
+
+
 }
 
 //int y_overlap,y_offset,i_row,j_row,shift,shipi_word,shipj_word; //global for debug

@@ -22,7 +22,7 @@
 //#define  WINDOWS 1
 
 #define NAME "GravStorm"
-#define VERSION "V1.05"
+#define VERSION "V1.06"
 
 #define TRUE 1
 #define FALSE 0
@@ -304,6 +304,7 @@ typedef struct
 {
    ALLEGRO_BITMAP *mask;
    ALLEGRO_BITMAP *display;
+	ALLEGRO_BITMAP *temp;
    int on;
    int width;
    int height;
