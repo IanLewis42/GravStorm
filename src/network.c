@@ -69,6 +69,11 @@ void NetStopNetwork(void)
 
 int NetStartHost(int players)
 {
+#ifdef ANDROID
+    //get wifi lock. This seems to be needed (sometimes!) for Android to receive broadcast packets.
+    _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "GetWifiLock", "()V");
+#endif
+
     //set up ping port for client and server to find each other
     Net.ping = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
     // Allow the port to be reused by other applications - this means we can run several servers at once
@@ -138,6 +143,10 @@ void NetStopServer(void)
         num_ships = 1;
         al_set_window_title(display, NAME);
         Net.server = false;
+
+#ifdef ANDROID
+        _jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "ReleaseWifiLock", "()V");
+#endif
     }
 }
 
