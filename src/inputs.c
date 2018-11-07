@@ -649,9 +649,9 @@ void DoAStick(float x, float y)
 
     Ship[Net.id].fangle = atan2(relx,-1*rely);                            //find angle
 
-    Ctrl.ctrl[ASTICK2].x = centre_x + 0.4*Ctrl.ctrl[ASTICK].size*sin(Ship[0].fangle);//event.touch.x;  //plot
+    Ctrl.ctrl[ASTICK2].x = centre_x + 0.4*Ctrl.ctrl[ASTICK].size*sin(Ship[Net.id].fangle);//event.touch.x;  //plot
     Ctrl.ctrl[ASTICK2].x -= Ctrl.ctrl[ASTICK2].size/2;
-    Ctrl.ctrl[ASTICK2].y = centre_y - 0.4*Ctrl.ctrl[ASTICK].size*cos(Ship[0].fangle);//event.touch.y;
+    Ctrl.ctrl[ASTICK2].y = centre_y - 0.4*Ctrl.ctrl[ASTICK].size*cos(Ship[Net.id].fangle);//event.touch.y;
     Ctrl.ctrl[ASTICK2].y -= Ctrl.ctrl[ASTICK2].size/2;
 
     Ship[Net.id].fangle = Ship[Net.id].fangle*180/PI;                                 //to degrees
