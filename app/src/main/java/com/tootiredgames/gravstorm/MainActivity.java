@@ -18,6 +18,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Vibrator;
 
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.MulticastLock;
+
 public class MainActivity extends AllegroActivity {
 
     static {
@@ -66,7 +69,26 @@ public class MainActivity extends AllegroActivity {
             }}, 100);
     }
 
+    // create a class member variable.
+    WifiManager.MulticastLock mWifiLock = null;
 
+    public void GetWifiLock() {
+        Context mContext = getApplicationContext();
+        WifiManager wifi = (WifiManager)mContext.getSystemService( Context.WIFI_SERVICE );
+        if(wifi != null){
+             mWifiLock = wifi.createMulticastLock("Log_Tag");
+            mWifiLock.acquire();
+        }
+    }
+
+    public void ReleaseWifiLock() {
+
+        if( mWifiLock != null && mWifiLock.isHeld() ){
+            mWifiLock.release();
+            mWifiLock = null;
+        }
+
+    }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
