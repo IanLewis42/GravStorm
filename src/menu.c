@@ -726,8 +726,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 else if (Select.action == RELEASE)
                 {
                     Select.action = NO_ACTION;
-                    //if (Select.x < 0.75*w)
-                        Menu.netmode = Select.line;
+                    Menu.netmode = Select.line;
                     if (Menu.netmode == INST)
                         Command.goforward = TRUE;
                 }
@@ -1112,6 +1111,7 @@ void GotoGametype(void)
 	//Select.sumdy = Select.sumdymax;
 	Ctrl.ctrl[SELECT].active=TRUE;
 	AnyShip.fire1_down = false;     //stop scroll up on exit
+    //Select.line = 1;
 }
 
 void GotoNetwork(void)
@@ -1121,9 +1121,13 @@ void GotoNetwork(void)
 
 	Menu.state = NETWORK;            //back to previous menu
 	Select.sumdymin = 0;//-4*line_space;
-	//Select.sumdy = Select.sumdymax;
 	Ctrl.ctrl[SELECT].active=TRUE;
 	AnyShip.fire1_down = false;     //stop scroll up on exit
+
+#ifdef ANDROID
+    if (Menu.netmode == LOCAL)
+        Menu.netmode = HOST;
+#endif
 }
 
 void GotoLevel(void)
@@ -1168,18 +1172,7 @@ void GotoLevel(void)
         multi_lines = multi_maps + Menu.num_groups-3;
         Select.sumdymin = -1*multi_lines*line_space;    //set max scroll
     }
-/*
-	Select.sumdy = Select.sumdymax;                 //reset current scroll
 
-
-	for (i=0 ; i<Menu.group ; i++)
-    {
-        y+= MapNames[i].Count;  //levels in each group
-        y++;                    //one more for group name
-    }
-	Select.sumdy -= (y+Menu.map) * line_space;//add in current map within group and bump scroll to correct place
-	//Menu.col_pos = 0;
-*/
     init_map(Menu.group, Menu.map);
 }
 
