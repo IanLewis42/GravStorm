@@ -7,8 +7,8 @@ android {
         applicationId "com.tootiredgames.gravstorm"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 6
-        versionName "1.05"
+        versionCode 7
+        versionName "1.06"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
