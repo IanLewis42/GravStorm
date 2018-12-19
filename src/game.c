@@ -1011,7 +1011,8 @@ int game(int argc, char **argv )
                     {
                         if (Ship[i].thrust)
                         {
-                            volume = 2.0;
+                            if (Ship[i].automode == MANUAL)
+                                volume = 2.0;
                         }
                         else
                         {
