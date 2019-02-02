@@ -308,6 +308,7 @@ int game(int argc, char **argv )
 
     //al_fprintf(logfile,"Creating display\n");
     display = al_create_display(SCREENX, SCREENY);
+    al_set_window_position(display, 100, 100);
     //display = al_create_display(960, 540);  //Moto E resolution
     //display = al_create_display(800, 480);  //Cheap android phone resolution
 
