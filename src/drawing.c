@@ -977,46 +977,40 @@ void make_map_text_bitmap(void)
 void make_instructions_bitmap(void)
 {
     ALLEGRO_FILE * inst;
-    int i=0, line_space, idx;
+    int i=0, j, line_space, idx, len;
     char line[200];
 
     if (inst_bmp != NULL) return;
 
     line_space = 30*font_scale;
 
-    inst_bmp = al_create_bitmap(al_get_display_width(display), al_get_display_height(display)*3);			//create a bitmap
+    inst_bmp = al_create_bitmap(al_get_display_width(display), al_get_display_height(display)*4);			//create a bitmap
     al_set_target_bitmap(inst_bmp);					//set it as the default target for all al_draw_ operations
 
     if ((inst = al_fopen("instructions.txt", "r"))) {
         while (al_fgets(inst, line, 200) != NULL) {
             //ustr = al_ustr_new(line);
             //al_draw_ustr(small_font, al_map_rgb(240, 240, 240),(int)(20*font_scale), i,  ALLEGRO_ALIGN_LEFT, ustr);
-            if (strncmp(line, "[ctrl]", 6) == 0) {
+            int drawn = false;
+            len = strlen(line)-6;
+            for(j=0 ; j<len ; j++)
+            {
+                if (strncmp(&line[j], "[ctrl]", 6) == 0) {
+                    drawn = true;
+                    //i += line_space / 2;
+                    idx = strtol(&line[j] + 6, NULL, 10);
+                    al_draw_tinted_scaled_bitmap(Ctrl.controls, al_map_rgba_f(0.5, 0.5, 0.5, 0.5),
+                                                 0, idx * 200, 200, 200, 50*font_scale*j/6, i, Ctrl.ctrl[idx].size, Ctrl.ctrl[idx].size, 0);
+                    //i += Ctrl.ctrl[idx].size;
 
-                i += line_space / 2;
-                idx = strtol(line + 6, NULL, 10);
-                al_draw_tinted_scaled_bitmap(Ctrl.controls, al_map_rgba_f(0.5, 0.5, 0.5, 0.5),
-                                             0, idx * 200, 200, 200, 50*font_scale, i, Ctrl.ctrl[idx].size, Ctrl.ctrl[idx].size, 0);
-                //i += Ctrl.ctrl[idx].size;
-
-            } else if (strncmp(line, "[status]", 8) == 0) {
-                i += line_space;
-                al_draw_scaled_bitmap(ui, 0, 0, 120, 80, 50*font_scale, i, 120*font_scale*2.0, 80*font_scale*2.0, 0);
-                i -= line_space*0.2;
-
+                } else if (strncmp(&line[j], "[status]", 8) == 0) {
+                    drawn = true;
+                    i += line_space;
+                    al_draw_scaled_bitmap(ui, 0, 0, 120, 80, 50*font_scale, i, 120*font_scale*2.0, 80*font_scale*2.0, 0);
+                    i -= line_space*0.2;
+                }
             }
-            /*else if (strncmp(line, "[miner]", 7) == 0) {
-                //idx = strtol(line+8,NULL,10);
-                i += line_space / 2;
-                al_draw_scaled_bitmap(miner, 24, 0, 24, 24, 200, i, 48, 48, 0);
-                i += 48;
-            } else if (strncmp(line, "[jewel]", 7) == 0) {
-                //idx = strtol(line+8,NULL,10);
-                i += line_space / 2;
-                al_draw_scaled_bitmap(jewel, 0, 0, 24, 24, 200, i, 48, 48, 0);
-                i += 48;
-            } */
-            else {
+            if (!drawn) {
                 al_draw_text(small_font, al_map_rgb(240, 240, 240), (int) (50 * font_scale), i,
                              ALLEGRO_ALIGN_LEFT, line);
                 i += line_space;

@@ -618,18 +618,19 @@ void init_controls(void)
 	dw = al_get_display_width(display);
 	dh = al_get_display_height(display);
 
-	Ctrl.reversed = false;
+	//Ctrl.reversed = false;
+	Ctrl.mode = 0;
     Ctrl.ButtonSize = 100*scale;  //tweak for scaling????
 
 	//init size/position of buttons
 	//could read/store this in file, but I guess still need this for defaults....
-	Ctrl.ctrl[DPAD].active = FALSE;
+/*	Ctrl.ctrl[DPAD].active = FALSE;
 	Ctrl.ctrl[DPAD].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
 	Ctrl.ctrl[DPAD].x = 0.98*dw-Ctrl.ctrl[DPAD].size;
 	Ctrl.ctrl[DPAD].y = 0.98*dh-Ctrl.ctrl[DPAD].size;
 	Ctrl.ctrl[DPAD].movex = 10;
 	Ctrl.ctrl[DPAD].movey = 10;
-
+*/
     Ctrl.ctrl[ASTICK].active = FALSE;
     Ctrl.ctrl[ASTICK].size = 2*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
     Ctrl.ctrl[ASTICK].border = Ctrl.ctrl[ASTICK].size*0.5;
@@ -645,6 +646,22 @@ void init_controls(void)
     Ctrl.ctrl[ASTICK2].y = 0.98*dh-Ctrl.ctrl[ASTICK2].size;
 	Ctrl.ctrl[ASTICK2].movex = 10;
 	Ctrl.ctrl[ASTICK2].movey = 10;
+
+    Ctrl.ctrl[CW].active = FALSE;
+    Ctrl.ctrl[CW].size = 1.5*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
+    Ctrl.ctrl[CW].border = 0;//Ctrl.ctrl[CW].size*0.5;
+    Ctrl.ctrl[CW].x = 0.98*dw-Ctrl.ctrl[CW].size;
+    Ctrl.ctrl[CW].y = 0.98*dh-Ctrl.ctrl[CW].size;
+	Ctrl.ctrl[CW].movex = 10;
+	Ctrl.ctrl[CW].movey = 10;
+
+    Ctrl.ctrl[ACW].active = FALSE;
+    Ctrl.ctrl[ACW].size = 1.5*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.direction.bmp);
+    Ctrl.ctrl[ACW].border = 0;//Ctrl.ctrl[ACW].size*0.5;
+    Ctrl.ctrl[ACW].x = 0.98*dw-2*Ctrl.ctrl[ACW].size;
+    Ctrl.ctrl[ACW].y = 0.98*dh-Ctrl.ctrl[ACW].size;
+	Ctrl.ctrl[ACW].movex = 10;
+	Ctrl.ctrl[ACW].movey = 10;
 
 	Ctrl.ctrl[THRUST_BUTTON].active = FALSE;
 	Ctrl.ctrl[THRUST_BUTTON].size = 1.5*Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.thrust.bmp);

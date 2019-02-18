@@ -376,8 +376,8 @@ extern MenuType Menu;
 //order of these MUST match order in bmp.
 typedef enum
 {
-	DPAD = 0,
-	SELECT,
+	//DPAD = 0,
+	SELECT = 0,
 	THRUST_BUTTON,
 	BACK,
 	BIGGER,
@@ -386,6 +386,8 @@ typedef enum
     FIRE2,
     RADAR,
     REVERSE,
+    CW,
+    ACW,
 	ASTICK,
     ASTICK2,
 	NO_BUTTON,
@@ -423,9 +425,10 @@ typedef struct
 {
     //ALLEGRO_BITMAP *dpad;
     ALLEGRO_BITMAP *controls;
-    int reversed;       //left handed   - redundant, if dragging?
+    //int reversed;       //left handed   - redundant, if dragging?
+    int mode;
 
-    CtrlType ctrl[NO_BUTTON];
+    CtrlType ctrl[NO_BUTTON];   //ARRAY! of ctrltype
 
     int ButtonSize;
 

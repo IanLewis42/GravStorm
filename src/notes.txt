@@ -194,8 +194,9 @@
  // *screenshots: *mission 5 (FF), *canyon (start?), *neutron star (star, plus bullets), sitimus (battle) - no gravity!
  // *RELEASE 1.0.0.0
  // contact:
-   xgurkoz, mp, tb, Asbjorn, Alex, xcanyon, KIIRA, 
-   finnish thread, mc, Zimeon,  RPi guy (malman), Allegro 
+   xgurkoz, xmp, , xcanyon
+    *Allegro, tb, *Asbjorn, Alex, KIIRA, mc, *Zimeon
+   (RPi)finnish thread,  RPi guy (malman), 
  
  // Underwater level? (single image, A? Or pov rocks - or whole thing in pov? blobs, or mesh, modeller?)
  // networking - enet...

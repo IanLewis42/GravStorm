@@ -59,6 +59,8 @@ void NewTouch(float x, float y, int i);
 void DoDPAD(float x, float y);
 void DoAStick(float x, float y);
 ButtonType FindButton(float x, float y);
+void swapx(ButtonType i, ButtonType j);
+
 
 
 /****************************************************
@@ -309,13 +311,13 @@ void CheckTouchControls(ALLEGRO_EVENT event)
         Touch[i].valid = 0;
 
 		switch (Touch[i].button) {
-			case DPAD:        //release joystick
+/*			case DPAD:        //release joystick
 				TouchJoystick.right_up = true;
 				TouchJoystick.left_up = true;
 				TouchJoystick.down_up = true;
 				TouchJoystick.up_up = true;
 				TouchJoystick.spin = 0;
-				break;
+				break;*/
 			case THRUST_BUTTON:
             case SELECT:
 				TouchJoystick.button_up = true;
@@ -330,6 +332,16 @@ void CheckTouchControls(ALLEGRO_EVENT event)
 				TouchJoystick.down_up = TRUE;
 				Ctrl.ctrl[FIRE2].idx = 0;
 				break;
+
+            case CW:
+                TouchJoystick.right_up = true;
+                Ctrl.ctrl[CW].idx = 0;
+                break;
+            case ACW:
+                TouchJoystick.left_up = true;
+                Ctrl.ctrl[ACW].idx = 0;
+                break;
+
 			case BACK:
 				Ctrl.ctrl[BACK].idx = 0;
 				break;
@@ -372,7 +384,7 @@ void CheckTouchControls(ALLEGRO_EVENT event)
 		Touch[i].button = FindButton(event.touch.x, event.touch.y);
 
         switch (oldbutton) {
-            case DPAD: {
+/*            case DPAD: {
                 if (Touch[i].button == DPAD)             //touch STILL on DPAD
                 {
                     DoDPAD(Touch[i].x, Touch[i].y);  //map touch event x/y to TouchJoystick struct.
@@ -395,7 +407,7 @@ void CheckTouchControls(ALLEGRO_EVENT event)
                     Touch[i].button = DPAD;
                 }
             }
-            break;
+            break;*/
             case ASTICK: {
                 //don't drag - but keep updating.
                 Touch[i].button = ASTICK;
@@ -412,6 +424,22 @@ void CheckTouchControls(ALLEGRO_EVENT event)
                     Ctrl.ctrl[THRUST_BUTTON].idx = 0;
                 }
             }
+            break;
+            case CW:
+                if (Touch[i].button != CW)  //touch moved off button
+                {
+                    Touch[i].button = NO_BUTTON;
+                    TouchJoystick.right_up = true;  //so cancel
+                    Ctrl.ctrl[CW].idx = 0;
+                }
+            break;
+            case ACW:
+                if (Touch[i].button != ACW)  //touch moved off button
+                {
+                    Touch[i].button = NO_BUTTON;
+                    TouchJoystick.left_up = true; //so cancel
+                    Ctrl.ctrl[ACW].idx = 0;
+                }
             break;
             case FIRE1:
                 if (Touch[i].button != FIRE1) {
@@ -487,11 +515,11 @@ void NewTouch(float x, float y, int i)
     int j;//,w,h;
 
     switch (Touch[i].button) {
-		case DPAD:
+/*		case DPAD:
 			DoDPAD(x, y);  //map touch event x/y to TouchJoystick struct.
 			Touch[i].valid = 0;
 			Touch[i].count = 0;
-			break;
+			break;*/
 		case ASTICK:
 			DoAStick(x, y);
 			break;
@@ -501,6 +529,20 @@ void NewTouch(float x, float y, int i)
             Touch[i].valid = 0;
             Touch[i].count = 0;
             break;
+
+        case CW:
+            TouchJoystick.right_down = true;
+            Ctrl.ctrl[CW].idx = 1;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
+            break;
+        case ACW:
+            TouchJoystick.left_down = true;
+            Ctrl.ctrl[ACW].idx = 1;
+            Touch[i].valid = 0;
+            Touch[i].count = 0;
+            break;
+
         case SELECT:
             Command.goforward = true;
 			Ctrl.ctrl[SELECT].idx = 1;
@@ -557,11 +599,17 @@ void NewTouch(float x, float y, int i)
         case REVERSE:
             //flip(DPAD);
             //flip(SELECT);
+            Ctrl.mode++;
+            Ctrl.mode &= 0x0003;
+            GameControls();
             flip(ASTICK);
             flip(ASTICK2);
             flip(THRUST_BUTTON);
             flip(FIRE1);
             flip(FIRE2);
+            flip(CW);
+            flip(ACW);
+            swapx(CW,ACW);
         break;
         case NO_BUTTON:
             //w = al_get_display_width(display);
@@ -590,6 +638,14 @@ void flip(ButtonType i )
     return;
 }
 
+void swapx(ButtonType i, ButtonType j)
+{
+    int temp;
+    temp = Ctrl.ctrl[i].x;
+    Ctrl.ctrl[i].x = Ctrl.ctrl[j].x;
+    Ctrl.ctrl[j].x = temp;
+}
+/*
 void DoDPAD(float x, float y)
 {
     relx = x - Ctrl.ctrl[DPAD].x;    //relative x               //relative to top-left corner
@@ -638,7 +694,7 @@ void DoDPAD(float x, float y)
     }
     return;
 }
-
+*/
 void DoAStick(float x, float y)
 {
     int centre_x = (Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size/2);

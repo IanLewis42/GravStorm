@@ -1068,6 +1068,8 @@ void MenuControls(void)
     Ctrl.ctrl[RADAR].active = FALSE;
     Ctrl.ctrl[ASTICK].active = FALSE;
     Ctrl.ctrl[ASTICK2].active = FALSE;
+    Ctrl.ctrl[CW].active = FALSE;
+    Ctrl.ctrl[ACW].active = FALSE;
     Ctrl.ctrl[FIRE1].active = FALSE;
     Ctrl.ctrl[FIRE2].active = FALSE;
     Ctrl.ctrl[THRUST_BUTTON].active = FALSE;
@@ -1078,13 +1080,26 @@ void MenuControls(void)
 void GameControls(void)
 {
     Ctrl.ctrl[RADAR].active = TRUE;
-    Ctrl.ctrl[ASTICK].active = TRUE;
-    Ctrl.ctrl[ASTICK2].active = TRUE;
     Ctrl.ctrl[FIRE1].active = TRUE;
     Ctrl.ctrl[FIRE2].active = TRUE;
     Ctrl.ctrl[THRUST_BUTTON].active = TRUE;
     Ctrl.ctrl[SELECT].active = FALSE;
     Ctrl.ctrl[REVERSE].active = TRUE;
+
+    if(Ctrl.mode & 0x0002)
+    {
+        Ctrl.ctrl[CW].active = TRUE;
+        Ctrl.ctrl[ACW].active = TRUE;
+        Ctrl.ctrl[ASTICK].active = FALSE;
+        Ctrl.ctrl[ASTICK2].active = FALSE;
+    }
+    else
+    {
+        Ctrl.ctrl[CW].active = FALSE;
+        Ctrl.ctrl[ACW].active = FALSE;
+        Ctrl.ctrl[ASTICK].active = TRUE;
+        Ctrl.ctrl[ASTICK2].active = TRUE;
+    }
 }
 
 void SystemBackPressed(void)

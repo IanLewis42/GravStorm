@@ -11,44 +11,54 @@ Gravstorm can be played as:
   1 human player vs. 1-3 AI controlled ships
   Network multiplayer (2-4 players)
 
-[ctrl]10
-[ctrl]11 
+[ctrl]11
+[ctrl]12 
  
  
                        
                             Use the direction pad to steer your ship...
  
  
+
  
-[ctrl]2
+[ctrl]9            [ctrl]10
+
+                               ...or these to rotate clockwise / anticlockwise.
+
+
+
+                   
+ [ctrl]8
+
+              Use this to select between control types, or swap sides.
+
+
+[ctrl]1
 
                
-                    ...and the thrust button to fire your engine.
+                  Use the thrust button to fire your engine.
 
 
-[ctrl]6
+
+ [ctrl]5
              
              This fires your normal weapon...      
-                  
-[ctrl]7
+   
+   
+ [ctrl]6
 
              ...and this fires your special weapon.
              Press while on your home pad to adjust your weapons, fuel and ammo.
-[ctrl]8
+
+ [ctrl]7
              
              This one toggles your radar
 
-[ctrl]4
 
-             This makes the controls larger...
+ [ctrl]3      [ctrl]4
 
-[ctrl]5
+                    These make the controls larger or smaller
 
-             this makes them smaller
-
-[ctrl]9
-
-             And this swaps the controls left/right
 
 
 The status panel is in the top left corner

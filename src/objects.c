@@ -140,30 +140,46 @@ int UpdateShips(int num_ships)
 		{
 			UpdateLandedShip(i);		//separate functiom, as it was getting unweildy
 		}
-		else
-		{
+		else {
 			//if (Ship[i].right) //increment angle. wrap if necessary.
 #define ASTICK_SPEED 0.5
 #ifdef ANDROID
 			//Ship[i].fangle += TouchJoystick.spin;
 			//if (Ship[i].fangle > NUM_ANGLES) Ship[i].fangle -= NUM_ANGLES;
-            //if (Ship[i].fangle < 0) Ship[i].fangle += NUM_ANGLES;
-            //Ship[i].angle = (int)Ship[i].fangle;
+			//if (Ship[i].fangle < 0) Ship[i].fangle += NUM_ANGLES;
+			//Ship[i].angle = (int)Ship[i].fangle;
 
-            //int temp = Ship[i].angle*9;
-            //if (temp > 19) temp -= NUM_ANGLES;  //delta >180.......?? 0-360. if (difference < 180) sum -= 180; //??
+			//int temp = Ship[i].angle*9;
+			//if (temp > 19) temp -= NUM_ANGLES;  //delta >180.......?? 0-360. if (difference < 180) sum -= 180; //??
 
+			if (Ctrl.ctrl[ASTICK].active ||  (Ship[i].automode != MANUAL)) {
+				float temp = ASTICK_SPEED * (float) Ship[i].angle * 9 + (1 - ASTICK_SPEED) *
+																		(Ship[i].fangle); //convert 'angle' index to degrees, and go part way to control angle
 
-            float temp = ASTICK_SPEED*(float)Ship[i].angle*9 + (1-ASTICK_SPEED)*(Ship[i].fangle); //convert 'angle' index to degrees, and go part way to control angle
+				if (fabsf(((float) Ship[i].angle * 9 - Ship[i].fangle)) > 180)
+					temp += 180;
+				if (temp > 360)
+					temp -= 360;
 
-            if (fabsf(((float)Ship[i].angle*9 - Ship[i].fangle)) > 180)
-                temp +=180;
-            if (temp > 360)
-                temp -=360;
-
-            Ship[i].angle = (int)(temp/9);
-
-
+				Ship[i].angle = (int) (temp / 9);
+			} else
+			{
+				if (Ship[i].right_held)
+				{
+					//Ship[i].xpos++;	//DEBUG
+					Ship[i].angle++;
+					if (Ship[i].angle == NUM_ANGLES)
+						Ship[i].angle = 0;
+				}
+				//if (Ship[i].left)
+				if (Ship[i].left_held)
+				{
+					//Ship[i].xpos--;	//DEBUG
+					Ship[i].angle--;
+					if (Ship[i].angle == -1)
+						Ship[i].angle = NUM_ANGLES-1;
+				}
+			}
 
 
             //if (Ship[i].angle < 0) Ship[i].angle += NUM_ANGLES;
