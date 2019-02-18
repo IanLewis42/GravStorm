@@ -1108,7 +1108,7 @@ void GotoGametype(void)
 
 	Menu.state = GAMETYPE;            //back to previous menu
 	Select.sumdymin = 0;//-4*line_space;
-	//Select.sumdy = Select.sumdymax;
+	Select.sumdy = Select.sumdymax;
 	Ctrl.ctrl[SELECT].active=TRUE;
 	AnyShip.fire1_down = false;     //stop scroll up on exit
     //Select.line = 1;
