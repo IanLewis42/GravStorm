@@ -569,6 +569,7 @@ void UpdateLandedShip(int i)
 	if (Ship[i].thrust_held)
 	{
 		Ship[i].landed = FALSE;
+		//Ship[i].menu = FALSE;
 		Ship[i].thrust = THRUST;
         Ship[i].fangle = 0;
         Ship[i].angle = 0;
@@ -576,7 +577,7 @@ void UpdateLandedShip(int i)
         Ctrl.ctrl[ASTICK2].y = Ctrl.ctrl[ASTICK].y + Ctrl.ctrl[ASTICK].size/10 - Ctrl.ctrl[ASTICK2].size/2;
 	}
 
-	else if (Ship[i].menu)
+	/*else*/ if (Ship[i].menu)
 	{
 #ifdef ANDROID
 		if (Select.action == TOUCH || Select.action == MOVE)
