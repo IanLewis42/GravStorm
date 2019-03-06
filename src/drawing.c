@@ -39,7 +39,7 @@ int tile_map[MAX_MAP_WIDTH * MAX_MAP_HEIGHT];
 
 int map_height=0, map_width=0;
 
-ALLEGRO_BITMAP *inst_bmp;
+ALLEGRO_BITMAP *inst_bmp = NULL;
 ALLEGRO_BITMAP *map_text_bmp;
 ALLEGRO_BITMAP *marker_bmp;
 ALLEGRO_BITMAP *marker2_bmp;
@@ -854,7 +854,10 @@ void display_instructions(void)
     Menu.y_origin = Select.sumdy;
 #endif
 
-    al_draw_bitmap(inst_bmp,0,Menu.y_origin + 2*line_space,0);
+    if (inst_bmp == NULL)
+    	al_fprintf(logfile,"inst_bmp == NULL\n");
+    else
+    	al_draw_bitmap(inst_bmp,0,Menu.y_origin + 2*line_space,0);
 
     al_set_clipping_rectangle(0,0,w,h);
     draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
@@ -982,9 +985,18 @@ void make_instructions_bitmap(void)
 
     if (inst_bmp != NULL) return;
 
+    al_fprintf(logfile,"Making inst_bmp\n");
+
     line_space = 30*font_scale;
 
-    inst_bmp = al_create_bitmap(al_get_display_width(display), al_get_display_height(display)*4);			//create a bitmap
+	int max_bmp = al_get_display_option(display, ALLEGRO_MAX_BITMAP_SIZE);
+
+	al_fprintf(logfile,"Max bmp = %d\n",max_bmp);
+
+	if (al_get_display_height(display)*4 < max_bmp)
+		max_bmp = al_get_display_height(display)*4;
+
+    inst_bmp = al_create_bitmap(al_get_display_width(display), max_bmp);			//create a bitmap
     al_set_target_bitmap(inst_bmp);					//set it as the default target for all al_draw_ operations
 
     if ((inst = al_fopen("instructions.txt", "r"))) {
@@ -1020,6 +1032,8 @@ void make_instructions_bitmap(void)
         al_fclose(inst); //close file
     }
     al_set_target_backbuffer(display);			//Put default target back
+    al_fprintf(logfile,"Done(%d).\n",i);
+    al_fflush(logfile);
 }
 
 int component;
