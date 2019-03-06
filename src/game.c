@@ -74,7 +74,7 @@ int missed_packets = 0;
 ALLEGRO_BITMAP *logo;
 ALLEGRO_BITMAP *ships;
 ALLEGRO_BITMAP *grey_ships;
-ALLEGRO_BITMAP *status_bg;
+//ALLEGRO_BITMAP *status_bg;
 ALLEGRO_BITMAP *panel_bmp;
 ALLEGRO_BITMAP *panel_pressed_bmp;
 ALLEGRO_BITMAP *bullets_bmp;
@@ -296,10 +296,10 @@ int game(int argc, char **argv )
 
     /* Create our window. */
     #if RPI
-    al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);//ALLEGRO_WINDOWED);// | ALLEGRO_RESIZABLE);
+    al_set_new_display_flags(ALLEGRO_RESIZABLE | ALLEGRO_WINDOWED);//ALLEGRO_FULLSCREEN_WINDOW);//ALLEGRO_WINDOWED);// | ALLEGRO_RESIZABLE);
     #else
     #ifdef _WIN32
-    al_set_new_display_flags(ALLEGRO_RESIZABLE);//ALLEGRO_WINDOWED);// | ALLEGRO_RESIZABLE);
+    al_set_new_display_flags(ALLEGRO_RESIZABLE | ALLEGRO_WINDOWED);//ALLEGRO_WINDOWED);// | ALLEGRO_RESIZABLE);
     #endif
     #endif // _WIN32
 #ifdef ANDROID
@@ -346,7 +346,7 @@ int game(int argc, char **argv )
     invscale = 1/scale;
     CalcScales();
 
-    al_fprintf(logfile,"Display Created. Scale = %f, i/scale = %f\n",scale,invscale);
+    al_fprintf(logfile,"Display Created. Scale = %f, invscale = %f\n",scale,invscale);
     al_fflush(logfile);
 #ifdef ANDROID
     al_android_set_apk_file_interface();
@@ -483,7 +483,7 @@ int game(int argc, char **argv )
         if ((pickups = al_load_bitmap("pickups.png")) == NULL)  al_fprintf(logfile,"pickups.png load fail");
         if ((miner = al_load_bitmap("astronaut.png")) == NULL)  al_fprintf(logfile,"astronaut.png load fail");
         if ((jewel = al_load_bitmap("jewels.png")) == NULL)  al_fprintf(logfile,"jewels.png load fail");
-        if ((status_bg = al_load_bitmap("status_bg.png")) == NULL)  al_fprintf(logfile,"status_bg.png load fail");
+        //if ((status_bg = al_load_bitmap("status_bg.png")) == NULL)  al_fprintf(logfile,"status_bg.png load fail");
 		if ((panel_bmp = al_load_bitmap("panel.png")) == NULL)  al_fprintf(logfile,"panel.png load fail");
 		if ((panel_pressed_bmp = al_load_bitmap("panel_pressed.png")) == NULL)  al_fprintf(logfile,"panel_pressed.png load fail");
         if ((ui = al_load_bitmap("ui.png")) == NULL)  al_fprintf(logfile,"ui.png load fail");
@@ -1403,13 +1403,13 @@ void FreeGameBitmaps(void)
     }
     j++;
 
-    if (status_bg)
+/*    if (status_bg)
     {
         al_destroy_bitmap(status_bg);
         status_bg = NULL;
         i++;
     }
-    j++;
+    j++;*/
 
     if (panel_bmp)
     {
