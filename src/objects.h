@@ -252,7 +252,7 @@ typedef struct
 	BulletType bullet;       //used in network - server works out damage, sends to client. client manages shield.
 
 	ALLEGRO_COLOR colour;
-	ALLEGRO_BITMAP* status_bg;
+	//ALLEGRO_BITMAP* status_bg;
 
 } ShipType;
 

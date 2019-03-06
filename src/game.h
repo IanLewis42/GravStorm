@@ -22,7 +22,7 @@
 //#define  WINDOWS 1
 
 #define NAME "GravStorm"
-#define VERSION "V1.06"
+#define VERSION "V1.07"
 
 #define TRUE 1
 #define FALSE 0
@@ -335,7 +335,7 @@ extern ALLEGRO_BITMAP *ui;
 extern ALLEGRO_BITMAP *pickups;
 extern ALLEGRO_BITMAP *miner;
 extern ALLEGRO_BITMAP *jewel;
-extern ALLEGRO_BITMAP *status_bg;
+//extern ALLEGRO_BITMAP *status_bg;
 extern ALLEGRO_BITMAP *panel_bmp;
 extern ALLEGRO_BITMAP *panel_pressed_bmp;
 extern ALLEGRO_BITMAP *menu_bg_bmp;
