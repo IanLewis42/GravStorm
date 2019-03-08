@@ -64,7 +64,7 @@ o Raspbian on Raspberry Pi
       - Raspberry Pi 2/3
         Enable the New OpenGl driver:
         > sudo raspi-config
-        select 'Advanced Options', then 'GL Drivers' and 'GL (Full KMS)'. 
+        select 'Advanced Options', then 'GL Drivers' and 'GL (Fake KMS)'. ('Full KMS' should work too)
 
         You need the executable 'gravstorm-stretch'.
         rename it to just 'gravstorm'
