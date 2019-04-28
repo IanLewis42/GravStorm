@@ -19,7 +19,7 @@
 #include <ctype.h>
 //#include <conio.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
