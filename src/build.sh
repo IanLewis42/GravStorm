@@ -6,7 +6,8 @@
 #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/vc/lib/
 export LDFLAGS="-rpath /opt/vc/lib/ "$LDFLAGS
 #gcc -O2 -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../game ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c ./gameover.c -pthread -lrt -lm -lwiringPi `pkg-config --libs --static allegro-static-5 allegro_image-static-5 allegro_primitives-static-5 allegro_font-static-5 allegro_ttf-static-5 allegro_audio-static-5 allegro_acodec-static-5`
-gcc -DRPI -O2 -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../gravstorm ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c ./gameover.c ./network.c ./auto.c -pthread -lrt -lm -lwiringPi -lenet `pkg-config --libs --static allegro-static-5 allegro_image-static-5 allegro_primitives-static-5 allegro_font-static-5 allegro_ttf-static-5 allegro_audio-static-5 allegro_acodec-static-5`
+#gcc -DRPI -O2 -march=armv6j -mfpu=vfp -mfloat-abi=hard -o ../gravstorm ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c ./gameover.c ./network.c ./auto.c -pthread -lrt -lm -lwiringPi -lenet `pkg-config --libs --static allegro-static-5 allegro_image-static-5 allegro_primitives-static-5 allegro_font-static-5 allegro_ttf-static-5 allegro_audio-static-5 allegro_acodec-static-5`
+gcc -DRPI -O2 -I/home/pi/gravstorm/src -march=armv8-a -mfpu=vfp -mfloat-abi=hard -o ../gravstorm ./game.c ./drawing.c ./init.c ./collisions.c ./objects.c ./inputs.c ./menu.c ./gameover.c ./network.c ./auto.c -pthread -lrt -lm -lwiringPi -lenet `pkg-config --libs --static allegro-static-5 allegro_image-static-5 allegro_primitives-static-5 allegro_font-static-5 allegro_ttf-static-5 allegro_audio-static-5 allegro_acodec-static-5`
 
 #helpful error messages from attemting static build.....
 #/usr/bin/ld: cannot find -lGLESv2
