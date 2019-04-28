@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -40,7 +40,7 @@
 float sinlut[NUM_ANGLES];
 float coslut[NUM_ANGLES];
 
-float FrameTime = 0.03333333333333;	//used in race timing
+float FrameTime;// = 1.0/35;//0.03333333333333;	//used in race timing
 
 //Structs for objects
 ShipType Ship[MAX_SHIPS];
@@ -54,13 +54,13 @@ int last_bullet = END_OF_LIST;	//init this when you make a new bullet.
 //Parameters for bullets
 //                          normal random double triple heavy mine  heat spread lava sentry shrapnel
 int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   50,   5000, 150, 300,   256, 300,   300};   //Life (in frames)
-int reload[BULLET_TYPES] = {5,     5,     5,     15,    0,    0,    0,   0,     0,   0,     0};	    //frames in between shots (if fire held down) N/A for heavy weapons
+int reload[BULLET_TYPES] = {3,     3,     3,     9,     0,    0,    0,   0,     0,   0,     0};	    //frames in between shots (if fire held down) N/A for heavy weapons
 float Mass[BULLET_TYPES] = {0.04,  0.04,  0.04,  0.04,  0.1,  0.1,  0.1, 0.04,  0.1, 0.1,   0.04};	//Really bullet mass/ship mass; only used in collisions
-int Damage[BULLET_TYPES] = {9,     9,     9,     9,     80,   50,   30,  6,     10,  50,    4};     //points off shield when collision happens
+int Damage[BULLET_TYPES] = {5,     5,     5,     5,     80,   50,   30,  6,     10,  50,    4};     //points off shield when collision happens
 
 void UpdateLandedShip(int ship_num);	//int
 void NewShipBullet (int ship_num, int type, int flags); //int
-void NewBullet (int x,int y,int xv,int yv,int angle,float speed, int type,int random,int owner);
+void NewBullet (float x,float y,float xv,float yv,int angle,float speed, int type,int random,int owner);
 
 
 
@@ -202,17 +202,28 @@ int UpdateShips(int num_ships)
 			if (Ship[i].right_held)
 			{
 				//Ship[i].xpos++;	//DEBUG
-				Ship[i].angle++;
-				if (Ship[i].angle == NUM_ANGLES)
-				  Ship[i].angle = 0;
+				//Ship[i].angle++=
+				//if (Ship[i].angle >= NUM_ANGLES)
+				//  Ship[i].angle = 0;
+
+				Ship[i].fangle+=rate_of_turn;
+				if (Ship[i].fangle >= NUM_ANGLES)
+                    Ship[i].fangle -= NUM_ANGLES;
+				Ship[i].angle = (int)(Ship[i].fangle);
 			}
 			//if (Ship[i].left)
 			if (Ship[i].left_held)
 			{
 				//Ship[i].xpos--;	//DEBUG
-				Ship[i].angle--;
-				if (Ship[i].angle == -1)
-				  Ship[i].angle = NUM_ANGLES-1;
+				//Ship[i].angle--;
+				//if (Ship[i].angle == -1)
+				//  Ship[i].angle = NUM_ANGLES-1;
+
+				Ship[i].fangle-=rate_of_turn;
+				if (Ship[i].fangle < 0)
+                    Ship[i].fangle += NUM_ANGLES;
+
+				Ship[i].angle = (int)(Ship[i].fangle);
 			}
 #endif
 			//if (Ship[i].thrust)
@@ -222,7 +233,7 @@ int UpdateShips(int num_ships)
                 //if (Ship[i].angle == NUM_ANGLES)
                 //	Ship[i].angle = 0;
 
-                Ship[i].thrust = THRUST;
+                Ship[i].thrust = thrust;
                 Ship[i].fuel--;
             }
 			else
@@ -477,9 +488,11 @@ int UpdateShips(int num_ships)
 }
 
 //EMPTY_SHIP_MASS = 50, fully loaded ship should be ~200, so ~50 each from fuel, ammo1, ammo2
+//try 75, 25 each
 int  ShipMass(int ship_num)
 {
-	return EMPTY_SHIP_MASS + (Ship[ship_num].fuel>>5) + (Ship[ship_num].ammo1>>1) + (6 * Ship[ship_num].ammo2) + (MINER_MASS * Ship[ship_num].miners) + (JEWEL_MASS * Ship[ship_num].jewels);
+	//return EMPTY_SHIP_MASS + (Ship[ship_num].fuel>>5) + (Ship[ship_num].ammo1>>1) + (6 * Ship[ship_num].ammo2) + (MINER_MASS * Ship[ship_num].miners) + (JEWEL_MASS * Ship[ship_num].jewels);
+	return 75 + (Ship[ship_num].fuel>>6) + (Ship[ship_num].ammo1>>2) + (3 * Ship[ship_num].ammo2) + (MINER_MASS * Ship[ship_num].miners) + (JEWEL_MASS * Ship[ship_num].jewels);
 }
 
 //Called by client if no packet rx'd from server
@@ -570,7 +583,7 @@ void UpdateLandedShip(int i)
 	{
 		Ship[i].landed = FALSE;
 		//Ship[i].menu = FALSE;
-		Ship[i].thrust = THRUST;
+		Ship[i].thrust = thrust;
         Ship[i].fangle = 0;
         Ship[i].angle = 0;
         Ctrl.ctrl[ASTICK2].x = Ctrl.ctrl[ASTICK].x + Ctrl.ctrl[ASTICK].size/2  - Ctrl.ctrl[ASTICK2].size/2;
@@ -650,7 +663,7 @@ void UpdateLandedShip(int i)
 		{
 			case MENU_AMMO1_LEVEL:
 				if (Ship[i].right_held)
-					if (Ship[i].user_ammo1 < 100)
+					if (Ship[i].user_ammo1 < 200)
 						Ship[i].user_ammo1++;
 
 				if (Ship[i].left_held)
@@ -769,7 +782,7 @@ void UpdateLandedShip(int i)
 
         if(Ship[i].pad == Ship[i].home_pad || (Map.pad[Ship[i].pad].type & PAD_AMMO1) )//same for ammo 1
 			if (Ship[i].ammo1 < Ship[i].user_ammo1)
-				Ship[i].ammo1++;
+				Ship[i].ammo1+=2;
 
         if(Ship[i].pad == Ship[i].home_pad || (Map.pad[Ship[i].pad].type & PAD_SHIELD) )//same for shield
 			if (Ship[i].shield < 100)
@@ -782,6 +795,16 @@ void UpdateLandedShip(int i)
 			if (Ship[i].ammo2 < Ship[i].user_ammo2)
 				Ship[i].ammo2++;
 	}
+
+    //in case we're hit, and moved....
+    if (fabsf(Ship[i].xv) > 0.1)
+    {
+        //velocity = velocity + (Thrust - Drag)/Mass
+        Ship[i].xv -= Ship[i].xv*PAD_DRAG/Ship[i].mass;
+        //Position = position + velocity
+        Ship[i].xpos += Ship[i].xv;
+        CheckForLanding(i);
+    }
 
 	return;
 }
@@ -1105,7 +1128,7 @@ void NewShipBullet (int ship_num, int type, int flags)// signed int position, in
 //when you make next bullet, copy next bullets index into first ones' n_b field, and END_OF_LIST into that one.
 //when you destroy (ttl decremented to zero) copy next bullet index up the chain.
 //if you destroy first one, copy it's n_b into first_bullet.
-void NewBullet (int x,int y,int xv,int yv,int angle,float speed,int type,int random,int owner)//(int ship_num, int type, int flags)// signed int position, int random)
+void NewBullet (float x,float y,float xv,float yv,int angle,float speed,int type,int random,int owner)//(int ship_num, int type, int flags)// signed int position, int random)
 {
 	int i;
 
@@ -1210,18 +1233,20 @@ void UpdateBullets(void)
 				{
 					for(i=0 ; i<num_ships ; i++)
 					{
-						x = Ship[i].xpos - Bullet[current_bullet].xpos; //x-y vector from current bullet to Ship[i]
-						y = Ship[i].ypos - Bullet[current_bullet].ypos;
+						if (Ship[i].reincarnate_timer == 0)
+                        {
+                            x = Ship[i].xpos - Bullet[current_bullet].xpos; //x-y vector from current bullet to Ship[i]
+                            y = Ship[i].ypos - Bullet[current_bullet].ypos;
 
-						r_squared = x*x + y*y;
-                        r = sqrt(r_squared);                            //distance between bullet and ship
+                            r_squared = x*x + y*y;
+                            r = sqrt(r_squared);                            //distance between bullet and ship
 
-						if (r_squared < MIN_R_SQUARED)	//if the bullet is closer than 200, thrust is capped.
-							r_squared = MIN_R_SQUARED;
+                            if (r_squared < MIN_R_SQUARED)	//if the bullet is closer than 200, thrust is capped.
+                                r_squared = MIN_R_SQUARED;
 
-						hsax += HS_ACCN * x/(r*r_squared);              //acceleration proportional to 1/r^2...
-                        hsay += HS_ACCN * y/(r*r_squared);              //..and scale along normalised (unit) vector
-					                                                    //These accumulate up for all ships to get a final overall value.
+                            hsax += HS_ACCN * x/(r*r_squared);              //acceleration proportional to 1/r^2...
+                            hsay += HS_ACCN * y/(r*r_squared);              //..and scale along normalised (unit) vector
+                        }                                                    //These accumulate up for all ships to get a final overall value.
                     }
 
                     hsax -= Bullet[current_bullet].xv*Map.drag;         //apply drag to limit max speed

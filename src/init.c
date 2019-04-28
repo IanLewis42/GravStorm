@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -572,9 +572,26 @@ void load_map_file(void)
 void init_controls(void)
 {
 	int i;
+
+	controllers[KEYS] = true;   //always....
+	if (gpio_active)
+        controllers[GPIO_JOYSTICK] = true;
+    else
+        controllers[GPIO_JOYSTICK] = false;
+    for (i=0 ; i<4 ; i++)
+    {
+        if (i<al_get_num_joysticks())
+            controllers[USB_JOYSTICK0+i] = true;
+        else
+            controllers[USB_JOYSTICK0+i] = false;
+    }
+
 	//key mapping
-	Ship[0].controller = KEYS;	//keys or joystick
-	Ship[0].selected_controller = KEYS;	//keys or joystick
+	if (controllers[USB_JOYSTICK0])
+        Ship[0].controller = USB_JOYSTICK0;
+    else
+        Ship[0].controller = KEYS;	//keys or joystick
+	//Ship[0].selected_controller = KEYS;	//keys or joystick
 	Ship[0].up_key     = ALLEGRO_KEY_UP;
 	Ship[0].down_key   = ALLEGRO_KEY_DOWN;
 	Ship[0].left_key   = ALLEGRO_KEY_LEFT;
@@ -582,29 +599,120 @@ void init_controls(void)
 	Ship[0].thrust_key = ALLEGRO_KEY_RCTRL;
 
 	//key mapping
-	Ship[1].controller = KEYS;//USB_JOYSTICK0;	//keys or joystick
-	Ship[1].selected_controller = KEYS;
+	if (controllers[USB_JOYSTICK1])
+        Ship[1].controller = USB_JOYSTICK1;
+    else
+        Ship[1].controller = KEYS;	//keys or joystick
+	//Ship[1].selected_controller = KEYS;
 	Ship[1].up_key     = ALLEGRO_KEY_Q;
 	Ship[1].down_key   = ALLEGRO_KEY_A;
 	Ship[1].left_key   = ALLEGRO_KEY_R;
 	Ship[1].right_key  = ALLEGRO_KEY_T;
 	Ship[1].thrust_key = ALLEGRO_KEY_ALT;
 
-	Ship[2].controller = USB_JOYSTICK0;	//keys or joystick
-	Ship[2].selected_controller = USB_JOYSTICK0;
+	if (controllers[USB_JOYSTICK2])
+        Ship[2].controller = USB_JOYSTICK2;
+    else
+        Ship[2].controller = KEYS;	//keys or joystick
+	//Ship[2].selected_controller = USB_JOYSTICK0;
     Ship[2].up_key     = ALLEGRO_KEY_Q;
     Ship[2].down_key   = ALLEGRO_KEY_A;
     Ship[2].left_key   = ALLEGRO_KEY_R;
     Ship[2].right_key  = ALLEGRO_KEY_T;
     Ship[2].thrust_key = ALLEGRO_KEY_ALT;
 
-	Ship[3].controller = USB_JOYSTICK1;	//keys or joystick
-	Ship[3].selected_controller = USB_JOYSTICK1;
+	if (controllers[USB_JOYSTICK3])
+        Ship[3].controller = USB_JOYSTICK3;
+    else
+        Ship[3].controller = KEYS;	//keys or joystick
+	//Ship[3].selected_controller = USB_JOYSTICK1;
 	Ship[3].up_key     = ALLEGRO_KEY_UP;
 	Ship[3].down_key   = ALLEGRO_KEY_DOWN;
 	Ship[3].left_key   = ALLEGRO_KEY_LEFT;
 	Ship[3].right_key  = ALLEGRO_KEY_RIGHT;
 	Ship[3].thrust_key = ALLEGRO_KEY_RCTRL;
+
+	//init usb / bluetooth controller mapping
+	for (i=0 ; i<3 ; i++)
+    {
+        USBJoystick[i].Map[0].Type      = STICK;
+        USBJoystick[i].Map[0].StickIdx  = 0;
+        USBJoystick[i].Map[0].AxisIdx   = 0;
+        USBJoystick[i].Map[0].Threshold = -0.5;
+        USBJoystick[i].Map[0].OnPtr     = &USBJoystick[i].left_down;
+        USBJoystick[i].Map[0].OffPtr    = &USBJoystick[i].left_up;
+        USBJoystick[i].Map[0].Held      = false;
+
+        USBJoystick[i].Map[1].Type      = STICK;
+        USBJoystick[i].Map[1].StickIdx  = 0;
+        USBJoystick[i].Map[1].AxisIdx   = 0;
+        USBJoystick[i].Map[1].Threshold = 0.5;
+        USBJoystick[i].Map[1].OnPtr     = &USBJoystick[i].right_down;
+        USBJoystick[i].Map[1].OffPtr    = &USBJoystick[i].right_up;
+        USBJoystick[i].Map[1].Held      = false;
+
+        USBJoystick[i].Map[2].Type      = STICK;
+        USBJoystick[i].Map[2].StickIdx  = 0;
+        USBJoystick[i].Map[2].AxisIdx   = 1;
+        USBJoystick[i].Map[2].Threshold = -0.5;
+        USBJoystick[i].Map[2].OnPtr     = &USBJoystick[i].up_down;
+        USBJoystick[i].Map[2].OffPtr    = &USBJoystick[i].up_up;
+        USBJoystick[i].Map[2].Held      = false;
+
+        USBJoystick[i].Map[3].Type      = STICK;
+        USBJoystick[i].Map[3].StickIdx  = 0;
+        USBJoystick[i].Map[3].AxisIdx   = 1;
+        USBJoystick[i].Map[3].Threshold = 0.5;
+        USBJoystick[i].Map[3].OnPtr     = &USBJoystick[i].down_down;
+        USBJoystick[i].Map[3].OffPtr    = &USBJoystick[i].down_up;
+        USBJoystick[i].Map[3].Held      = false;
+
+        USBJoystick[i].Map[4].Type      = BUTTON;
+        USBJoystick[i].Map[4].ButIdx    = 0;
+        USBJoystick[i].Map[4].OnPtr     = &USBJoystick[i].button_down;
+        USBJoystick[i].Map[4].OffPtr    = &USBJoystick[i].button_up;
+        USBJoystick[i].Map[4].Held      = false;
+
+        USBJoystick[i].Map[5].Type      = STICK;
+        USBJoystick[i].Map[5].StickIdx  = 0;
+        USBJoystick[i].Map[5].AxisIdx   = 0;
+        USBJoystick[i].Map[5].Threshold = -0.5;
+        USBJoystick[i].Map[5].OnPtr     = &USBJoystick[i].left_down;
+        USBJoystick[i].Map[5].OffPtr    = &USBJoystick[i].left_up;
+        USBJoystick[i].Map[5].Held      = false;
+
+        USBJoystick[i].Map[6].Type      = STICK;
+        USBJoystick[i].Map[6].StickIdx  = 0;
+        USBJoystick[i].Map[6].AxisIdx   = 0;
+        USBJoystick[i].Map[6].Threshold = 0.5;
+        USBJoystick[i].Map[6].OnPtr     = &USBJoystick[i].right_down;
+        USBJoystick[i].Map[6].OffPtr    = &USBJoystick[i].right_up;
+        USBJoystick[i].Map[6].Held      = false;
+
+        USBJoystick[i].Map[7].Type      = STICK;
+        USBJoystick[i].Map[7].StickIdx  = 0;
+        USBJoystick[i].Map[7].AxisIdx   = 1;
+        USBJoystick[i].Map[7].Threshold = -0.5;
+        USBJoystick[i].Map[7].OnPtr     = &USBJoystick[i].up_down;
+        USBJoystick[i].Map[7].OffPtr    = &USBJoystick[i].up_up;
+        USBJoystick[i].Map[7].Held      = false;
+
+        USBJoystick[i].Map[8].Type      = STICK;
+        USBJoystick[i].Map[8].StickIdx  = 0;
+        USBJoystick[i].Map[8].AxisIdx   = 1;
+        USBJoystick[i].Map[8].Threshold = 0.5;
+        USBJoystick[i].Map[8].OnPtr     = &USBJoystick[i].down_down;
+        USBJoystick[i].Map[8].OffPtr    = &USBJoystick[i].down_up;
+        USBJoystick[i].Map[8].Held      = false;
+
+        USBJoystick[i].Map[9].Type      = BUTTON;
+        USBJoystick[i].Map[9].ButIdx    = 0;
+        USBJoystick[i].Map[9].OnPtr     = &USBJoystick[i].button_down;
+        USBJoystick[i].Map[9].OffPtr    = &USBJoystick[i].button_up;
+        USBJoystick[i].Map[9].Held      = false;
+
+
+    }
 
   #ifdef ANDROID
 

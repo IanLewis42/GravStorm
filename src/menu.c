@@ -20,7 +20,7 @@
 #include <stdlib.h>
 //#include <math.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -104,7 +104,7 @@ int DoTitle(ALLEGRO_EVENT_QUEUE *queue)
 	//visible[0] = 0;
 	//fade_out[0] = 0;
 
-#if RPI
+#if 0//RPI
     sound_latency = 15;
 #else
     sound_latency = 1;
@@ -537,7 +537,88 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
 		//See if it's a USB joystick or touch event. If it is, log it.
  		else
         {
-            CheckUSBJoyStick(event);
+            if (event.type == ALLEGRO_EVENT_JOYSTICK_AXIS ||
+                event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN ||
+                event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_UP)
+            {
+                //CheckUSBJoyStick(event);
+                if(Menu.define_keys)
+                {
+                    int joy = Ship[Menu.player].controller-USB_JOYSTICK0;
+
+                    switch (Menu.current_key)
+                    {
+                    case -1:
+                        if (event.type == ALLEGRO_EVENT_JOYSTICK_AXIS)
+						{
+						    //if (!USBJoystick[joy].Map[Menu.current_key].Held)
+                            if (event.joystick.stick == USBJoystick[joy].Map[1].StickIdx &&
+                                event.joystick.axis  == USBJoystick[joy].Map[1].AxisIdx  &&
+                                fabsf(event.joystick.pos) < 0.3)
+                            {
+                                Menu.current_key = 0;//Menu.last_key+1;
+                                //*USBJoystick[joy].Map[Menu.current_key].OffPtr = false;
+                            }
+						}
+					case 0: //left
+					case 1: //right
+					case 2: //up
+					case 3: //down
+                    case 4: //fire
+					    if (event.type == ALLEGRO_EVENT_JOYSTICK_AXIS)
+						{
+						    //alternative? Get info for here from event, else CheckUSBJoyStick???
+						    //if (USBJoystick[joy].Map[Menu.current_key].Held)    //ah, no, anything held??
+						    if (fabsf(event.joystick.pos) > 0.7)
+						    {
+						        USBJoystick[joy].Map[Menu.current_key].Type = STICK;
+                                USBJoystick[joy].Map[Menu.current_key].StickIdx = event.joystick.stick;
+                                USBJoystick[joy].Map[Menu.current_key].AxisIdx = event.joystick.axis;
+                                USBJoystick[joy].Map[Menu.current_key].Threshold = (event.joystick.pos>0)?0.5:-0.5;
+                                //*USBJoystick[joy].Map[Menu.current_key].OnPtr = false;
+                                Menu.last_key = Menu.current_key;
+                                Menu.current_key = 6;
+						    }
+
+						}
+						else if (event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN)
+                        {
+                            USBJoystick[joy].Map[Menu.current_key].Type = BUTTON;
+                            USBJoystick[joy].Map[Menu.current_key].ButIdx = event.joystick.button;
+                            //*USBJoystick[joy].Map[Menu.current_key].OnPtr = false;
+                            Menu.last_key = Menu.current_key;
+                            Menu.current_key = 6;
+                        }
+                        break;
+                    case 6: //wait for release
+                        if (event.type == ALLEGRO_EVENT_JOYSTICK_AXIS)
+						{
+						    //if (!USBJoystick[joy].Map[Menu.current_key].Held)
+                            if (event.joystick.stick == USBJoystick[joy].Map[Menu.last_key].StickIdx &&
+                                event.joystick.axis  == USBJoystick[joy].Map[Menu.last_key].AxisIdx  &&
+                                fabsf(event.joystick.pos) < 0.3)
+                            {
+                                Menu.current_key = Menu.last_key+1;
+                                //*USBJoystick[joy].Map[Menu.current_key].OffPtr = false;
+                            }
+						}
+						else if (event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_UP)
+                        {
+                            Menu.current_key = Menu.last_key+1;
+                            //*USBJoystick[joy].Map[Menu.current_key].OffPtr = false;
+                        }
+
+						if (Menu.current_key == 5)
+                            Menu.define_keys = false;
+						break;
+                    }
+                }
+                else CheckUSBJoyStick(event,true);
+            }
+            else  if (event.type == ALLEGRO_EVENT_JOYSTICK_CONFIGURATION)
+            {
+                al_reconfigure_joysticks();
+            }
             if (al_is_touch_input_installed())
             {
                 if (event.any.source == al_get_touch_input_event_source())
@@ -555,24 +636,27 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
 		//Take any ship control to control menu. Also, cursor keys / return always work.
         AnyShip.fire1_held = false;
         AnyShip.fire2_held = false;
-        for (i=0 ; i<num_ships ; i++)
+        for (i=0 ; i<MAX_SHIPS ; i++)
         {
-			if (Ship[i].left_down || key_down_log[ALLEGRO_KEY_LEFT])
+			if (Ship[i].left_down || USBJoystick[i].left_down || key_down_log[ALLEGRO_KEY_LEFT])
 			{
 				AnyShip.left_down = true;
 				Ship[i].left_down = false;
+				USBJoystick[i].left_down = false;
 	 			key_down_log[ALLEGRO_KEY_LEFT] = false;
 			}
-			if (Ship[i].right_down || key_down_log[ALLEGRO_KEY_RIGHT])
+			if (Ship[i].right_down || USBJoystick[i].right_down || key_down_log[ALLEGRO_KEY_RIGHT])
 			{
 				AnyShip.right_down = true;
 				Ship[i].right_down = false;
+				USBJoystick[i].right_down = false;
 				key_down_log[ALLEGRO_KEY_RIGHT] = false;
 			}
-			if (Ship[i].fire1_down || key_down_log[ALLEGRO_KEY_UP])
+			if (Ship[i].fire1_down || USBJoystick[i].up_down || key_down_log[ALLEGRO_KEY_UP])
 			{
 				AnyShip.fire1_down = true;
 				Ship[i].fire1_down = false;
+				USBJoystick[i].up_down = false;
 				key_down_log[ALLEGRO_KEY_UP] = false;
 			}
             if (Ship[i].fire1_held)
@@ -580,10 +664,11 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 AnyShip.fire1_held = true;
             }
 
-            if (Ship[i].fire2_down || key_down_log[ALLEGRO_KEY_DOWN])
+            if (Ship[i].fire2_down || USBJoystick[i].down_down || key_down_log[ALLEGRO_KEY_DOWN])
 			{
 				AnyShip.fire2_down = true;
 				Ship[i].fire2_down = false;
+				USBJoystick[i].down_down = false;
 				key_down_log[ALLEGRO_KEY_DOWN] = false;
 			}
             if (Ship[i].fire2_held)
@@ -591,11 +676,12 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                 AnyShip.fire2_held = true;
             }
 
-			if (Ship[i].thrust_down || key_down_log[ALLEGRO_KEY_ENTER])
+			if (Ship[i].thrust_down || USBJoystick[i].button_down || key_down_log[ALLEGRO_KEY_ENTER])
 			{
 				//AnyShip.thrust_down = true;
 				Command.goforward = true;
 				Ship[i].thrust_down = false;
+				USBJoystick[i].button_down = false;
 				key_down_log[ALLEGRO_KEY_ENTER] = false;
 			}
 		}
@@ -903,7 +989,7 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                     if (Menu.col_pos < Menu.ships*3) Menu.col_pos++;             //move down, unless we're at the end -
                     Menu.player = (Menu.col_pos-1) / 3;                         //work out player
                     Menu.item   = (Menu.col_pos-1) % 3;                         //..and item (ship, controller, define keys)
-                    if (Menu.item == 2 && Ship[Menu.player].controller != KEYS) //skip 'define keys' if we haven't selected keys
+                    if (Menu.item == 2 && Ship[Menu.player].controller == GPIO_JOYSTICK) //skip 'define keys' if we haven't selected keys
                     {
                         if (Menu.col_pos < Menu.ships*3)
                             Menu.col_pos++;
@@ -916,12 +1002,12 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                     if (Menu.col_pos > 0)
                     {
                         Menu.col_pos--;
-                        if (Menu.col_pos == 0 && (Net.client || Net.server))            //can't change this if networked.
+                        if (Menu.col_pos == 0 && (Net.client || Net.server || Map.mission))            //can't change this if networked.
                             Menu.col_pos++;
                     }
                     Menu.player = (Menu.col_pos-1) / 3;
                     Menu.item   = (Menu.col_pos-1) % 3;
-                    if (Menu.item == 2 && Ship[Menu.player].controller != KEYS)
+                    if (Menu.item == 2 && Ship[Menu.player].controller == GPIO_JOYSTICK)
                         Menu.col_pos--;
                 }
 #endif
@@ -948,14 +1034,26 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                     else if (Menu.item == 1)        //controls
                     {
                         if (Ship[Menu.player].controller > 0)
-                        Ship[Menu.player].controller--;
-                        if (Ship[Menu.player].controller == GPIO_JOYSTICK)
+                            Ship[Menu.player].controller--;
+
+                        while (!controllers[Ship[Menu.player].controller])
+                        {
+                            if (Ship[Menu.player].controller > 0)
+                                Ship[Menu.player].controller--;
+                        }
+
+                        //if (Ship[Menu.player].controller == GPIO_JOYSTICK)
+                        //    strncpy(define)
+                        //else if (Ship[Menu.player].controller == KEYS)
+
+
+                        /*if (Ship[Menu.player].controller == GPIO_JOYSTICK)
                         {
                             if (!gpio_active)
                             {
                                 Ship[Menu.player].controller--;
                             }
-                        }
+                        }*/
                     }
 #endif
                 }
@@ -983,7 +1081,19 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                     }
                     if (Menu.item == 1)    //controls
                     {
-                        if (Ship[Menu.player].controller < 3)
+                        if (Ship[Menu.player].controller < NUM_CONTROLLERS)
+                            Ship[Menu.player].controller++;
+
+                        while (!controllers[Ship[Menu.player].controller])
+                        {
+                            Ship[Menu.player].controller++;
+                            if (Ship[Menu.player].controller >= NUM_CONTROLLERS)
+                                Ship[Menu.player].controller=0;
+                        }
+
+
+                        /*
+                        if (Ship[Menu.player].controller < USB_JOYSTICK0 + al_get_num_joysticks()-1)
                             Ship[Menu.player].controller++;
                         if (Ship[Menu.player].controller == GPIO_JOYSTICK)
                         {
@@ -992,10 +1102,13 @@ int DoNewMenu(ALLEGRO_EVENT_QUEUE *queue)
                                 Ship[Menu.player].controller++;
                             }
                         }
+                        */
                     }
                     else if (Menu.item == 2)    //define keys
                     {
                         Menu.define_keys = true;    //done above
+                        Menu.current_key = -1;
+                        //Menu.last_key = 1;
                     }
 #endif
                 }

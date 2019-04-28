@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -38,12 +38,13 @@
 #include <wiringPi.h>
 #endif
 
-ALLEGRO_JOYSTICK *USBJOY[2];
+//ALLEGRO_JOYSTICK *USBJOY[4];
 
 JoystickType GPIOJoystick;
-JoystickType USBJoystick[2];
-
+JoystickType USBJoystick[4];
 JoystickType TouchJoystick; //for android
+
+int controllers [NUM_CONTROLLERS];
 
 TouchType Touch[NUM_TOUCHES];
 
@@ -54,7 +55,6 @@ bool key_up_log[ALLEGRO_KEY_MAX];
 
 void ScanInputs(int num_ships);
 void ReadGPIOJoystick();
-void CheckUSBJoyStick(ALLEGRO_EVENT event);
 void NewTouch(float x, float y, int i);
 void DoDPAD(float x, float y);
 void DoAStick(float x, float y);
@@ -172,17 +172,119 @@ void ReadGPIOJoystick()
 #endif
 }
 
-//maps allegro events into JoystickType struct.
-void CheckUSBJoyStick(ALLEGRO_EVENT event)
-{
-	int JoyIdx = 0;
 
+
+//maps allegro events into JoystickType struct.
+void CheckUSBJoyStick(ALLEGRO_EVENT event, bool menu)
+{
+	int i,start,JoyIdx = 0;
+	float hysteresis = 0.2;
+#if 1
+
+    if (menu)
+        start = 5;
+    else
+        start = 0;
+
+    while(event.joystick.id != USBJoystick[JoyIdx].al_joy) JoyIdx++;    //find the right controller
+
+    for (i=start ; i<start+5 ; i++)   //spin through mapping
+    {
+        if (event.type == ALLEGRO_EVENT_JOYSTICK_AXIS && USBJoystick[JoyIdx].Map[i].Type == STICK)  //stick, not button
+        {
+            if (event.joystick.stick == USBJoystick[JoyIdx].Map[i].StickIdx)            //does the stick in the event match the control map we're looking at?
+            {
+                if (event.joystick.axis == USBJoystick[JoyIdx].Map[i].AxisIdx)          //and the axis
+                {
+ /*
+ if (pos*threshold>0)	//i.e. both +ve or both -ve
+   if (_held)
+     if (abs(pos)> abs(threshold + hysteresis)) //abs??
+       _down = true
+     else if (pos<threshold - hysteresis)
+       _up = true
+ */
+                    //if((event.joystick.pos * USBJoystick[JoyIdx].Map[i].Threshold) > 0) //i.e. +ve value & +ve threshold or -ve value & -ve threshold
+                    {
+                        if (USBJoystick[JoyIdx].Map[i].Held)    //if the control is held, only check for release
+                        {
+                            if (fabsf(event.joystick.pos) < (fabsf(USBJoystick[JoyIdx].Map[i].Threshold) - hysteresis))
+                            {
+                                *USBJoystick[JoyIdx].Map[i].OffPtr = true;
+                                USBJoystick[JoyIdx].Map[i].Held = false;
+                            }
+                        }
+                        else
+                        {
+                            if((event.joystick.pos * USBJoystick[JoyIdx].Map[i].Threshold) > 0) //i.e. +ve value & +ve threshold or -ve value & -ve threshold
+                            {
+                                if (fabsf(event.joystick.pos) > (fabsf(USBJoystick[JoyIdx].Map[i].Threshold) + hysteresis))
+                                {
+                                    *USBJoystick[JoyIdx].Map[i].OnPtr = true;
+                                    USBJoystick[JoyIdx].Map[i].Held = true;
+                                }
+                            }
+                        }
+                    }
+
+
+                    /*
+                    if (USBJoystick[JoyIdx].Map[i].Threshold < 0)                       //is the threshold negative?
+                    {
+                        if (event.joystick.pos < USBJoystick[JoyIdx].Map[i].Threshold-hysteresis)  //yes, so check for < threshold
+                        {
+                            *USBJoystick[JoyIdx].Map[i].OnPtr  = true;                    //assert
+                            //*USBJoystick[JoyIdx].Map[i].OffPtr = false;
+                        }
+                        else if (event.joystick.pos > USBJoystick[JoyIdx].Map[i].Threshold+hysteresis)
+                        {
+                            //*USBJoystick[JoyIdx].Map[i].OnPtr  = false;                   //deassert
+                            *USBJoystick[JoyIdx].Map[i].OffPtr = true;
+                        }
+                    }
+                    else
+                    {
+                        if (event.joystick.pos > USBJoystick[JoyIdx].Map[i].Threshold+hysteresis)  //no, so check for > threshold
+                        {
+                            *USBJoystick[JoyIdx].Map[i].OnPtr  = true;                    //assert
+                            //*USBJoystick[JoyIdx].Map[i].OffPtr = false;
+                        }
+                        else if (event.joystick.pos < USBJoystick[JoyIdx].Map[i].Threshold-hysteresis)
+                        {
+                            //*USBJoystick[JoyIdx].Map[i].OnPtr  = false;                   //deassert
+                            *USBJoystick[JoyIdx].Map[i].OffPtr = true;
+                        }
+                    }
+                    */
+                }
+            }
+        }
+        else if (event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN && USBJoystick[JoyIdx].Map[i].Type == BUTTON)  //stick, not button
+        {
+            if (event.joystick.button == USBJoystick[JoyIdx].Map[i].ButIdx)  //does the button match
+                *USBJoystick[JoyIdx].Map[i].OnPtr  = true;                    //assert
+        }
+        else if (event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_UP && USBJoystick[JoyIdx].Map[i].Type == BUTTON)  //stick, not button
+        {
+            if (event.joystick.button == USBJoystick[JoyIdx].Map[i].ButIdx)  //does the button match
+                *USBJoystick[JoyIdx].Map[i].OffPtr  = true;                    //assert
+        }
+    }
+
+
+        //event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN ||
+        //event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN
+
+
+#else
 	if (event.type == ALLEGRO_EVENT_JOYSTICK_AXIS)
 	{
+
 		if (event.joystick.id == USBJOY[0])
 			JoyIdx = 0;
 		else if (event.joystick.id == USBJOY[1])
 			JoyIdx = 1;
+
 
 		{
 			if (event.joystick.axis == 0)
@@ -270,7 +372,7 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event)
 			USBJoystick[JoyIdx].button_up = true;
 		}
 	}
-
+#endif
 }
 
 //Android controls
@@ -898,10 +1000,12 @@ void ScanInputs(int num_ships)
                 //Ship[i].thrust_held = GPIOJoystick.button;
             }
 
-            else if (Ship[j].controller == USB_JOYSTICK0 || Ship[j].controller == USB_JOYSTICK1 )
+            else if (Ship[j].controller >= USB_JOYSTICK0 && Ship[j].controller <= USB_JOYSTICK3)
             {
-                if (Ship[j].controller == USB_JOYSTICK0) joy_idx = 0;
-                if (Ship[j].controller == USB_JOYSTICK1) joy_idx = 1;
+                //if (Ship[j].controller == USB_JOYSTICK0) joy_idx = 0;
+                //if (Ship[j].controller == USB_JOYSTICK1) joy_idx = 1;
+
+                joy_idx = Ship[j].controller - USB_JOYSTICK0;
 
                 if (USBJoystick[joy_idx].left_down)
                 {

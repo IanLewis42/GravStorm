@@ -30,6 +30,7 @@
 
 #define THRUST 50
 #define G 1000
+#define PAD_DRAG 20
 
 #define BLT_NORMAL		0
 #define BLT_RANDOM		1
@@ -49,7 +50,7 @@
 #define EXPLODE         4
 
 #define DEFAULT_FUEL		75
-#define DEFAULT_AMMO1		50
+#define DEFAULT_AMMO1		100
 #define DEFAULT_AMMO1_TYPE	BLT_NORMAL
 #define DEFAULT_AMMO2		4
 #define DEFAULT_AMMO2_TYPE	BLT_HEAVY
@@ -266,6 +267,7 @@ extern float Mass[BULLET_TYPES];
 //Trig LUTs
 extern float sinlut[NUM_ANGLES];
 extern float coslut[NUM_ANGLES];
+extern float FrameTime;
 
 extern ALLEGRO_SAMPLE *shoota;
 extern ALLEGRO_SAMPLE *shootb;

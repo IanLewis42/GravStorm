@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -49,8 +49,8 @@
 
 
 ALLEGRO_DISPLAY *display;
-ALLEGRO_HAPTIC *hap;
-ALLEGRO_HAPTIC_EFFECT_ID *hapID;
+//ALLEGRO_HAPTIC *hap;
+//ALLEGRO_HAPTIC_EFFECT_ID *hapID;
 
 ALLEGRO_TIMER *timer;
 
@@ -65,10 +65,14 @@ ALLEGRO_FONT *title_font;
 float font_scale;
 //float font_scale_y;
 
-int fps, fps_accum;
+int fps=35, fps_accum;
 double fps_time;
 int fpsnet, fpsnet_acc;
 int missed_packets = 0;
+
+float rate_of_turn = 1.0;
+int thrust = THRUST;
+
 
 //Bitmaps
 ALLEGRO_BITMAP *logo;
@@ -256,6 +260,9 @@ int game(int argc, char **argv )
 	{
 		if (strncmp(argv[i],"-g",2) == 0) gpio_active = true;	//Enable GPIO joystick with -g switch
 		if (strncmp(argv[i],"-d",2) == 0) debug_on = true;		//Enable debug output
+		if (strncmp(argv[i],"-f",2) == 0) fps = strtol(argv[i]+2,NULL,10); 		//Set FPS
+		if (strncmp(argv[i],"-r",2) == 0) rate_of_turn = strtof(argv[i]+2,NULL); 		//Set rate of turn
+		if (strncmp(argv[i],"-t",2) == 0) thrust = strtol(argv[i]+2,NULL,10); 		//Set FPS
 	}
 
     //debug_on = true;		//Enable debug output
@@ -372,8 +379,10 @@ int game(int argc, char **argv )
 	al_fflush(logfile);
 
 	al_fprintf(logfile,"Creating Events\n");
-	timer = al_create_timer(1.0 / 30);
+	timer = al_create_timer(1.0 / fps);
+	FrameTime = 1.0/fps;
 	queue = al_create_event_queue();
+	al_fprintf(logfile,"Timer created. %d FPS.\n",fps);
 	al_fflush(logfile);
 
 	//Allegro Joystick routines
@@ -406,11 +415,35 @@ int game(int argc, char **argv )
 
 	for (i=0 ; i<al_get_num_joysticks() ; i++)
 	{
-		USBJOY[i] = al_get_joystick(i);
-		if (al_get_joystick_active(USBJOY[i]))
+		ALLEGRO_JOYSTICK_STATE state;
+		int j,k;
+		int sticks,axes,buttons;
+
+		USBJoystick[i].al_joy = al_get_joystick(i);
+
+		sticks = al_get_joystick_num_sticks(USBJoystick[i].al_joy);
+
+		al_get_joystick_state(USBJoystick[i].al_joy, &state);
+
+		if (al_get_joystick_active(USBJoystick[i].al_joy))
 			al_fprintf(logfile,"Joystick %d active\n",i);
 		else
 			al_fprintf(logfile,"Joystick %d NOT active\n",i);
+
+        al_fprintf(logfile,"Joystick %d has %d sticks\n",i,sticks);
+        for (j=0 ; j<sticks ; j++)
+        {
+            axes = al_get_joystick_num_axes(USBJoystick[i].al_joy,j);
+            al_fprintf(logfile," Stick %d has %d axes\n",j,axes);
+            for (k=0 ; k<axes ; k++)
+            {
+                al_fprintf(logfile,"  Axis %d = %f\n",k,state.stick[j].axis[k]);
+            }
+        }
+
+        buttons = al_get_joystick_num_buttons(USBJoystick[i].al_joy);
+        for (j=0 ; j<buttons ; j++)
+            al_fprintf(logfile," Button %d = %d\n",j,state.button[j]);
 	}
 
 	al_start_timer(timer);
@@ -784,7 +817,7 @@ int game(int argc, char **argv )
                 }
             break;
             case JOYSTICK:
-                CheckUSBJoyStick(event);
+                CheckUSBJoyStick(event, false);
             break;
             case TOUCH:
                 CheckTouchControls(event);
@@ -1165,7 +1198,7 @@ void ForwardOrBack(ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_EVENT event)
 
     else
     {
-        CheckUSBJoyStick(event);
+        CheckUSBJoyStick(event,false);
         CheckTouchControls(event);  //will set command.goforward etc.
     }
 
@@ -1635,9 +1668,15 @@ void draw_debug(void)
 {
 	int level;
 
-    level = 100;
+    level = 150;
 
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level,  ALLEGRO_ALIGN_LEFT, "FPS: %d", fps);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "ROT: %0.1f", rate_of_turn);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Thrust: %d", thrust);
+    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Map g: %0.2f", Map.gravity);
+	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Map drag: %0.1f", Map.drag);
+	/*
+
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Menu.ships: %d", Menu.ships);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Menu.ai_ships: %d", Menu.ai_ships);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "num_ships: %d", num_ships);
@@ -1663,7 +1702,7 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "AVI: %0.2f", Ship[d].autovectintegrator);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "VSquint: %0.2f", Ship[d].autovsqint);
 
-
+*/
 
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Scale:%0.3f",scale);
 	//for (i=0 ; Touch[i].id != NO_TOUCH ; i++)
@@ -1691,19 +1730,19 @@ void draw_debug(void)
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "X: %.0f", Ship[d].xpos);
 	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Y: %.0f", Ship[d].ypos);
     */
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Xv: %.2f", Ship[d].xv);
+    //(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Xv: %.2f", Ship[d].xv);
     /*
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Yv: %.0f", Ship[d].yv);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Relx: %d", relx);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Rely: %d", rely);
     */
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "FAngle: %0.2f", Ship[d].fangle);
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[d].angle);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "FAngle: %0.2f", Ship[d].fangle);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Angle: %d", Ship[d].angle);
     /*
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Shield: %d", Ship[d].shield);
     //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "G: %.2f", Ship[d].gravity);
 */
-    al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Kills:%d",Ship[d].kills);
+    //al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Kills:%d",Ship[d].kills);
     /*al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Killed:%d",Ship[d].killed);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Crashes:%d",Ship[d].crashed);
     al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30,  ALLEGRO_ALIGN_LEFT, "Ammo2:%d",(Ship[d].ammo2*25)/2);
@@ -1769,8 +1808,22 @@ void draw_debug(void)
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "R: %.1f", r);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "xg: %.1f", xg);
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "yg: %.1f",yg);
+/*
+	int i;
+	for (i=0 ; i<5 ; i++)
+	{
+        al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy0Map%d On%d",i,*USBJoystick[0].Map[i].OnPtr);
+		al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy0Map%d Off%d",i,*USBJoystick[0].Map[i].OffPtr);
+        al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy0Map%d Held%d",i,USBJoystick[0].Map[i].Held);
 
-	//int i;
+
+	//	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy%d R %d",i,USBJoystick[i].right_down);
+	//	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy%d U %d",i,USBJoystick[i].up_down);
+	//	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy%d D %d",i,USBJoystick[i].down_down);
+	//	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy%d B %d",i,USBJoystick[i].button_down);
+	}
+*/
+
 	//for (i=0 ; i<al_get_num_joysticks() ; i++)
 	//{
 	//	al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "Joy%d L %d",i,USBJoystick[i].left_down);
@@ -1850,8 +1903,8 @@ void draw_debug(void)
 	//al_draw_textf(font, al_map_rgb(255, 255, 255),0, level+=30, ALLEGRO_ALIGN_LEFT, "JDS:%d", joystick_down_state);
 }
 
-//#if 0
-#ifdef RPI
+#if 0
+//#ifdef RPI
 /* Function: al_vfprintf
  */
 int al_vfprintf(ALLEGRO_FILE *pfile, const char *format, va_list args)

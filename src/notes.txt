@@ -998,6 +998,28 @@ X fade on android instructions.
 * videos
 - promote
 - code clean up (dead code (careful.....), scale factors)
+- AI Ships
+//////////////Play store 1.05
+- More friendly menus 
+- More reliable network discovery 
+- Adaptive icons for Android 8 
+- Assorted minor bug fixes
+//////////////Play store 1.06
+* Mute AI engine sounds
+* Better USB / bluetooth controller support
+* Controller config
+* Fix bug with shot 'wobble'
+* Allow movement on pad
+* fps switch
+- Hotplug joysticks
+- wireless keyboard issue??
+
+- set include path to /src ??
+-     -march=armv8-a 
+  OR  -mcpu=cortex-a53
+  AND -mfpu=neon-vfpv4
+  OR  -mfpu=auto
+  Keep -mfloat-abi=hard
 
 Added instructions
 Added support for Android Immersive Mode
@@ -1030,6 +1052,97 @@ need to fix:
 0.77
 y 704
 
+if (thrust 
+
+Controllers
+-------------
+XBOX One S
+Bluetooth
+4 sticks:
+Stick0 left analogue 
+ 2 axes
+ A0 -1 = left, +1 = right
+ A1 -1 = forward, +1 = back
+Stick1 right analogue 
+ 2 axes
+ A0 -1 = left, +1 = right
+ A1 -1 = forward, +1 = back 
+Stick2 left trigger 
+ 1 axis
+ 0 unpressed, 1 fully pressed
+Stick3 right trigger 
+ 1 axis
+ 0 unpressed, 1 fully pressed
+14 Buttons
+ 0  A
+ 1  B
+ 2  X
+ 3  Y
+ 4  R Shoulder
+ 5  L Shoulder
+ 6  R AStick press
+ 7  L AStick press
+ 8  squares
+ 9  lines
+ 10 dpad right 
+ 11 dpad left 
+ 12 dpad down 
+ 13 dpad up
+ 
+ above is true for un-taped controller, (and for taped w/xinput, it turns out, see below....)
+ 
+ If no allegro cfg, (taped controller only!!) comes up as 2 joysticks! with allegro cfg and EITHER XINPUT or DIRECTINPUT specified, comes up as single joystick
+ different configuration depending on driver selected (above is for XINPUT, DIRECTINPUT below)
+ 
+ 3 sticks:
+ Stick0 left analogue / triggers
+  3 axes
+  A0 -1 = left, +1 = right
+  A1 -1 = forward, +1 = back
+  A2 -1 = RT +1 = LT
+ Stick1 right analogue 
+  2 axes
+  A0 -1 = left, +1 = right
+  A1 -1 = forward, +1 = back 
+ Stick2 dpad
+  2 axes
+  A0 -1 = left, +1 = right
+  A1 -1 = forward, +1 = back  (forward doesn't work??)
+ 10 Buttons
+  0  A
+  1  B
+  2  X
+  3  Y
+  4  L Shoulder
+  5  R Shoulder
+  6  squares
+  7  lines
+  8  R AStick press
+  9  L AStick press
+
+ 
+ *in GS, allow use of any *connected* controller in menus at all times.
+ *hysteresis in menu? (i.e. <0.2, >0.8 or something.....) not just in menu??
+ *also, remove 'dead' top setting on solo player menu. 
+ auto assignment
+ hot plugging
+ config
+ 
+ default mapping.... escape button?? 
+ 
+
+ Hysteresis
+ 
+   if (_held)
+     if (abs(pos)> abs(threshold + hysteresis)) //abs??
+       _down = true
+     
+   else if (pos*threshold>0)	//i.e. both +ve or both -ve  
+     if (pos<threshold - hysteresis)
+       _up = true
+ 
+ 
+ 
 MAYBE LATER.....
 ----------------
 - Network issue

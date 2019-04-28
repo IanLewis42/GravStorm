@@ -20,8 +20,10 @@
 #define GPIO_JOYSTICK 1
 #define USB_JOYSTICK0 2
 #define USB_JOYSTICK1 3
-#define NA 4
-#define TOUCH_JOYSTICK 5
+#define USB_JOYSTICK2 4
+#define USB_JOYSTICK3 5
+#define TOUCH_JOYSTICK 6
+#define NUM_CONTROLLERS 7
 
 //GPIO Pins for joystick
 #define GPIO_LEFT  22/*18*/
@@ -33,13 +35,36 @@
 #define RELEASED 0
 #define HELD 1
 
+typedef enum
+{
+    BUTTON = 0,
+    STICK,
+}ControlType;
+
 typedef struct
 {
-	int left;
-	int right;
-	int up;
-	int down;
-	int button;
+    ControlType Type;
+    int ButIdx;
+    int StickIdx;
+    int AxisIdx;
+    float Threshold;
+    int* OnPtr;
+    int* OffPtr;
+    int Held;
+
+}ControlMapType;
+
+typedef struct
+{
+	//int left;
+	//int right;
+	//int up;
+	//int down;
+	//int button;
+
+	ALLEGRO_JOYSTICK *al_joy;
+
+	ControlMapType Map[5*2];    //5 each for menu & game
 
 	int left_down;	//down events
 	int right_down;
@@ -82,17 +107,18 @@ typedef struct
     SelectActionType action;
 }SelectType;
 
-extern ALLEGRO_JOYSTICK *USBJOY[2];
+//extern ALLEGRO_JOYSTICK *USBJOY[4];
 extern bool key_down_log[ALLEGRO_KEY_MAX];
 extern bool key_up_log[ALLEGRO_KEY_MAX];
-extern JoystickType USBJoystick[2];
+extern JoystickType USBJoystick[4];
 extern JoystickType TouchJoystick;
 extern SelectType Select;  //for touch menu control. Couldn't think of a better name.....
 extern int relx,rely;
+extern int controllers [NUM_CONTROLLERS];
 
 void ScanInputs(int num_ships);
 void ReadGPIOJoystick();
-void CheckUSBJoyStick(ALLEGRO_EVENT event);
+void CheckUSBJoyStick(ALLEGRO_EVENT event, bool menu);
 void CheckTouchControls(ALLEGRO_EVENT event);
 void UpdateTouches(void);
 void ValidateTouch(int i);

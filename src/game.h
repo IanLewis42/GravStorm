@@ -162,7 +162,6 @@ typedef struct
     int player;     //used in ranking table for multiplayer games
     int kills;
     int lives;
-
     int score;      //used in hi score table for mission levels
     char name[50];
 }ScoreType;
@@ -290,7 +289,8 @@ typedef struct
 	int num_groups;	//
 	int display_groups;
 	int controls;	//0,1 keys, 2 GPIO joystick? 3 onwards USB joysticks.
-	char current_key;
+	signed char current_key;
+	signed char last_key;
 	int offset;		//to make columns slide
 	int ship_offset;//to make ships slide
 	int x_origin;
@@ -497,8 +497,8 @@ extern ALLEGRO_SAMPLE_INSTANCE *particle_inst[MAX_SHIPS];
 extern ALLEGRO_SAMPLE_INSTANCE *sentry_particle_inst;
 extern ALLEGRO_SAMPLE_INSTANCE *yippee_inst;
 
-extern ALLEGRO_HAPTIC *hap;
-extern ALLEGRO_HAPTIC_EFFECT_ID *hapID;
+//extern ALLEGRO_HAPTIC *hap;
+//extern ALLEGRO_HAPTIC_EFFECT_ID *hapID;
 
 extern bool pressed_keys[ALLEGRO_KEY_MAX];
 extern int gpio_active;
@@ -512,6 +512,8 @@ extern int halted;
 extern int vibrate_time;
 extern int vibrate_timer;
 extern int tracking;
+extern float rate_of_turn;
+extern int thrust;
 
 int  ShipMass(int ship_num);
 void FreeMenuBitmaps(void);

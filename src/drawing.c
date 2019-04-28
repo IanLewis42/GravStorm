@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -68,8 +68,9 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 	float local_scale;
 	char keys[]  = "Keys";
 	char gpio[]  = "GPIO Joy";
-	char usb0[]  = "USB Joy 1";
-	char usb1[]  = "USB Joy 2";
+	//char usb0[]  = "USB Joy 1";
+	//char usb1[]  = "USB Joy 2";
+	char joy[10];
 	char* control_string;
 #ifdef ANDROID
     char local[]  = "Local Game (no network)";
@@ -483,12 +484,18 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
                 control_string = keys;
             else if (Ship[i].controller == GPIO_JOYSTICK)
                 control_string = gpio;
-            else if (Ship[i].controller == USB_JOYSTICK0)
+            /*else if (Ship[i].controller == USB_JOYSTICK0)
                 control_string = usb0;
-            else /*if (Ship[i].controller == USB_JOYSTICK1)*/
+            else //if (Ship[i].controller == USB_JOYSTICK1)
                 control_string = usb1;
             //else if (Ship[i].controller == NA)
             //    control_string = na;
+            */
+            else
+            {
+                sprintf(joy,"JOY %d",Ship[i].controller - USB_JOYSTICK0);
+                control_string = joy;
+            }
 
             if (Menu.item == 1 && Menu.player == i)
             {
@@ -500,50 +507,100 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
             y+=line_space;
 
+            char define_str[25];
+
+            if (Ship[i].controller == GPIO_JOYSTICK)
+                strncpy(define_str," ",25);
+            else if (Ship[i].controller == KEYS)
+                strncpy(define_str,"define keys ->",25);
+            else//if (Ship[Menu.player].controller == GPIO_JOYSTICK)
+                strncpy(define_str,"config ->",25);
+
            if (Menu.item == 2 && Menu.player == i)
             {
-                al_draw_textf(small_glow_font, ItemCurrentGlow,col1in, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
-                al_draw_textf(small_font, ItemCurrent,col1in, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
+                al_draw_textf(small_glow_font, ItemCurrentGlow,col1in, y,  ALLEGRO_ALIGN_LEFT, define_str);		//Control method for selected player
+                al_draw_textf(small_font, ItemCurrent,col1in, y,  ALLEGRO_ALIGN_LEFT, define_str);		//Control method for selected player
             }
             else
             {
-                if (Ship[i].controller != KEYS) colour = ItemExcluded;
-                al_draw_textf(small_font, colour,col1in, y,  ALLEGRO_ALIGN_LEFT, "define keys ->");		//Control method for selected player
+                if (Ship[i].controller == GPIO_JOYSTICK) colour = ItemExcluded;
+                al_draw_textf(small_font, colour,col1in, y,  ALLEGRO_ALIGN_LEFT, define_str);		//Control method for selected player
             }
 
             int key_start = 80*font_scale;
 
-            if (Menu.item == 2 && Menu.player == i && Ship[i].controller == KEYS)
+            if (Menu.item == 2 && Menu.player == i)// && Ship[i].controller == KEYS)
             {
+                char left[30],right[30],up[30],down[30],thrust[30];
+
+                if (Ship[i].controller == KEYS)
+                {
+                    strncpy(left,al_keycode_to_name(Ship[Menu.player].left_key),10);
+                    strncpy(right,al_keycode_to_name(Ship[Menu.player].right_key),10);
+                    strncpy(up,al_keycode_to_name(Ship[Menu.player].up_key),10);
+                    strncpy(down,al_keycode_to_name(Ship[Menu.player].down_key),10);
+                    strncpy(thrust,al_keycode_to_name(Ship[Menu.player].thrust_key),10);
+                }
+                else if (Ship[i].controller >= USB_JOYSTICK0 && Ship[i].controller <= USB_JOYSTICK3)
+                {
+                    int joy = Ship[Menu.player].controller-USB_JOYSTICK0;
+                    char neg[4]="-ve",pos[4]="+ve";
+
+                    if(USBJoystick[joy].Map[0].Type == STICK)
+                        sprintf(left,"Stick %d | Axis %d | %s",USBJoystick[joy].Map[0].StickIdx,USBJoystick[joy].Map[0].AxisIdx, USBJoystick[joy].Map[0].Threshold>0?pos:neg);
+                    else
+                        sprintf(left,"Button %d",USBJoystick[joy].Map[0].ButIdx);
+
+                    if(USBJoystick[joy].Map[1].Type == STICK)
+                        sprintf(right,"Stick %d | Axis %d | %s",USBJoystick[joy].Map[1].StickIdx,USBJoystick[joy].Map[1].AxisIdx, USBJoystick[joy].Map[1].Threshold>0?pos:neg);
+                    else
+                        sprintf(right,"Button %d",USBJoystick[joy].Map[1].ButIdx);
+
+                    if(USBJoystick[joy].Map[2].Type == STICK)
+                        sprintf(up,"Stick %d | Axis %d | %s",USBJoystick[joy].Map[2].StickIdx,USBJoystick[joy].Map[2].AxisIdx, USBJoystick[joy].Map[2].Threshold>0?pos:neg);
+                    else
+                        sprintf(up,"Button %d",USBJoystick[joy].Map[2].ButIdx);
+
+                    if(USBJoystick[joy].Map[3].Type == STICK)
+                        sprintf(down,"Stick %d | Axis %d | %s",USBJoystick[joy].Map[3].StickIdx,USBJoystick[joy].Map[3].AxisIdx, USBJoystick[joy].Map[3].Threshold>0?pos:neg);
+                    else
+                        sprintf(down,"Button %d",USBJoystick[joy].Map[3].ButIdx);
+
+                    if(USBJoystick[joy].Map[4].Type == STICK)
+                        sprintf(thrust,"Stick %d | Axis %d | %s",USBJoystick[joy].Map[4].StickIdx,USBJoystick[joy].Map[4].AxisIdx, USBJoystick[joy].Map[4].Threshold>0?pos:neg);
+                    else
+                        sprintf(thrust,"Button %d",USBJoystick[joy].Map[4].ButIdx);
+                }
+
                 al_draw_textf(small_font, ItemUnselected ,col3, key_start+line_space*0,  ALLEGRO_ALIGN_LEFT, "Rotate Left :");
                 if (Menu.define_keys && Menu.current_key == 0){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,col3, key_start+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
-                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].left_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",left);
+                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*1,  ALLEGRO_ALIGN_LEFT, " %s",left);
 
                 al_draw_textf(small_font, ItemUnselected, col3, key_start+line_space*2,  ALLEGRO_ALIGN_LEFT, "Rotate Right :");
                 if (Menu.define_keys && Menu.current_key == 1){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,col3, key_start+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
-                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].right_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",right);
+                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*3,  ALLEGRO_ALIGN_LEFT, " %s",right);
 
                 al_draw_textf(small_font, ItemUnselected,col3, key_start+line_space*4,  ALLEGRO_ALIGN_LEFT, "Fire1 :");
                 if (Menu.define_keys && Menu.current_key == 2){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,col3, key_start+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
-                if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,col3, key_start+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].up_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",up);
+                if (glow)al_draw_textf(small_glow_font, ItemCurrentGlow ,col3, key_start+line_space*5,  ALLEGRO_ALIGN_LEFT, " %s",up);
 
                 al_draw_textf(small_font, ItemUnselected,col3, key_start+line_space*6,  ALLEGRO_ALIGN_LEFT, "Fire2 :");
                 if (Menu.define_keys && Menu.current_key == 3){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,col3, key_start+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
-                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].down_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",down);
+                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*7,  ALLEGRO_ALIGN_LEFT, " %s",down);
 
                 al_draw_textf(small_font, ItemUnselected,col3, key_start+line_space*8,  ALLEGRO_ALIGN_LEFT, "Thrust :");
                 if (Menu.define_keys && Menu.current_key == 4){colour = ItemCurrent; glow = true;}
                 else {colour = ItemSelected; glow = false;}
-                al_draw_textf(small_font, colour,col3, key_start+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
-                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",al_keycode_to_name(Ship[Menu.player].thrust_key));
+                al_draw_textf(small_font, colour,col3, key_start+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",thrust);
+                if (glow) al_draw_textf(small_glow_font, ItemCurrentGlow,col3, key_start+line_space*9,  ALLEGRO_ALIGN_LEFT, " %s",thrust);
             }
 
             y+=line_space;
@@ -1654,8 +1711,8 @@ void draw_menu(int ship_num, int x, int y, int w, int h)
 		al_draw_bitmap_region(panel_pressed_bmp,20+(Ship[ship_num].ammo2_type-4)*110,200,80,80,x+20+(Ship[ship_num].ammo2_type-4)*110,y+200,0); //src x,y,w,h dst x,y,flags
 
 		//ammo1 bar
-		al_draw_filled_rectangle(x+35,y+55,x+35+Ship[ship_num].user_ammo1*3.8,y+65,al_map_rgb(128, 0, 0));				//ammo1
-		al_draw_filled_rectangle(x+35,y+57,x+35+Ship[ship_num].user_ammo1*3.8,y+59,al_map_rgba(255, 255, 255, 20));
+		al_draw_filled_rectangle(x+35,y+55,x+35+Ship[ship_num].user_ammo1*3.8/2,y+65,al_map_rgb(128, 0, 0));				//ammo1
+		al_draw_filled_rectangle(x+35,y+57,x+35+Ship[ship_num].user_ammo1*3.8/2,y+59,al_map_rgba(255, 255, 255, 20));
 
 		//ammo2 blobs
 		for (j=0 ; j<Ship[ship_num].user_ammo2 ; j++)
@@ -1730,7 +1787,7 @@ void draw_status_bar(int ship, int x, int y)
 		al_draw_filled_rounded_rectangle(x,y,x+102,y+bs,5,5,al_map_rgba(0, 0, 0, 128));
 
 		al_draw_bitmap_region(ui,100-Ship[i].shield,    0,  Ship[i].shield,       14, x+0, y+0, 0);
-        al_draw_bitmap_region(ui,100-Ship[i].ammo1 ,    14, Ship[i].ammo1,        14, x+0, y+14, 0);
+        al_draw_bitmap_region(ui,100-Ship[i].ammo1/2,   14, Ship[i].ammo1,        14, x+0, y+14, 0);
         al_draw_bitmap_region(ui,0                 ,    28, (Ship[i].ammo2*25)/2, 14, x+0, y+28, 0);
         al_draw_bitmap_region(ui,100-(Ship[i].fuel>>4), 42, (Ship[i].fuel>>4),    14, x+0, y+42, 0);
 

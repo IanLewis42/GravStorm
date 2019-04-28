@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -306,7 +306,7 @@ void make_radar_bitmap(void)
     Radar.width  = (mask_width)/8;
     al_fprintf(logfile,"Radar Mask Height = %d, Width = %d\n",Radar.height, Radar.width);
 
-    al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP); 
+    al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
     Radar.mask = al_create_bitmap(Radar.width, Radar.height);	//create a bitmap - 400
     al_set_target_bitmap(Radar.mask);				//set it as the default target for all al_draw_ operations
 
@@ -1433,6 +1433,8 @@ void CheckForLanding(int i)
 {
 	int k;
 
+	Ship[i].landed = 0;
+
 	if ((Ship[i].angle) < 5 || (Ship[i].angle) > NUM_ANGLES-5)
 	{
 		for(k=0 ; k<Map.num_pads ; k++)
@@ -1448,7 +1450,7 @@ void CheckForLanding(int i)
 						Ship[i].fangle = 0;
 						Ship[i].angle = 0;			//position correctly
 						Ship[i].ypos = Map.pad[k].y-2;
-						Ship[i].xv = 0;
+						//Ship[i].xv = 0;
 						Ship[i].yv = 0;
 
 						if (Map.mission)			//restart on last pad.
