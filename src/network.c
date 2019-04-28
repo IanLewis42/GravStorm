@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ALLEGRO_UNSTABLE 1  //needed for haptics.
+//#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 
 #include "allegro5/allegro.h"
 #include "allegro5/allegro_image.h"
@@ -37,7 +37,8 @@ int NetStartNetwork(void)
     {
         //fgets(line,6,portfile);
         al_fgets(portfile,line,6);
-        Net.ping_port = atoi(line);
+        //Net.ping_port = atoi(line);
+        Net.ping_port = strtol(line,NULL,10);
     }
     al_fprintf(logfile,"Broadcast port:%d\n",Net.ping_port);
     al_fclose (portfile);
