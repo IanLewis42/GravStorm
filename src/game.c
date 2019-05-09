@@ -327,19 +327,6 @@ int game(int argc, char **argv )
 
     //_jni_callVoidMethodV(_al_android_get_jnienv(), _al_android_activity_object(), "HideNavBar", "()V");
 
-#ifdef ANDROID
-    ALLEGRO_TOUCH_INPUT *touch;
-    int temp = al_install_haptic();
-    if (al_is_haptic_installed())
-    {
-        if (al_is_display_haptic(display))
-            hap = al_get_haptic_from_display(display);
-
-        else if (al_is_touch_input_haptic(touch))
-            al_get_haptic_from_touch_input(touch);
-    }
-#endif
-
     al_set_window_title(display, NAME);
 
     al_set_new_bitmap_flags(ALLEGRO_VIDEO_BITMAP);// | ALLEGRO_MAG_LINEAR | ALLEGRO_MIN_LINEAR);
