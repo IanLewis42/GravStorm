@@ -186,6 +186,11 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event, bool menu)
     else
         start = 0;
 
+    if (!(event.type == ALLEGRO_EVENT_JOYSTICK_AXIS ||
+          event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN ||
+          event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_UP))
+        return;
+
     while(event.joystick.id != USBJoystick[JoyIdx].al_joy) JoyIdx++;    //find the right controller
 
     for (i=start ; i<start+5 ; i++)   //spin through mapping
