@@ -52,11 +52,11 @@ int first_bullet = END_OF_LIST;	//index to first bullet in list END_OF_LIST => '
 int last_bullet = END_OF_LIST;	//init this when you make a new bullet.
 
 //Parameters for bullets
-//                          normal random double triple heavy mine  heat spread lava sentry shrapnel
-int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   50,   5000, 150, 300,   256, 300,   300};   //Life (in frames)
-int reload[BULLET_TYPES] = {3,     3,     3,     9,     0,    0,    0,   0,     0,   0,     0};	    //frames in between shots (if fire held down) N/A for heavy weapons
-float Mass[BULLET_TYPES] = {0.04,  0.04,  0.04,  0.04,  0.1,  0.1,  0.1, 0.04,  0.1, 0.1,   0.04};	//Really bullet mass/ship mass; only used in collisions
-int Damage[BULLET_TYPES] = {5,     5,     5,     5,     80,   50,   30,  6,     10,  50,    4};     //points off shield when collision happens
+//                          normal random double triple heavy mine  heat  spread lava sentry shrapnel
+int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   50,   5000, 150,  300,   256, 300,   300};   //Life (in frames)
+int reload[BULLET_TYPES] = {3,     3,     3,     9,     0,    0,    0,    0,     0,   0,     0};	    //frames in between shots (if fire held down) N/A for heavy weapons
+float Mass[BULLET_TYPES] = {0.1,   0.1,   0.1,   0.1,   0.2,  0.2,  0.15, 0.04,  0.2, 0.1,   0.04};	//Really bullet mass/ship mass; only used in collisions
+int Damage[BULLET_TYPES] = {5,     5,     5,     5,     80,   50,   30,   6,     10,  50,    4};     //points off shield when collision happens
 
 void UpdateLandedShip(int ship_num);	//int
 void NewShipBullet (int ship_num, int type, int flags); //int
