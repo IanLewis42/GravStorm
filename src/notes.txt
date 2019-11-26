@@ -446,6 +446,26 @@ LAND
     Local game ->  Multiplayer -> LEVEL -> Player 1 - Human/CPU etc....
   - Android
     Local Game ->  Multiplayer -> LEVEL -> Choose ship, Num CPU ships (same screen)
+
+Tweaking bullet momentum
+--------------------------
+- when bullet hits ship, Ship.[x/y]v += Bullet.mass * Bullet.[x/y]v
+- Bullet *speed* = 10
+- Bullet rate = 3
+- mass = 0.04 (normal bullet)
+- so delta-mv = 0.04*10/3 = 0.1333
+
+- when thrusting, Ship.[x/y]v += Ship.thrust (+drag, etc) / Ship.mass
+- thrust = 50 (default)
+- mass = 100 (nominal)
+- so delta-mv = 50/100 = 0.5
+
+to match, bullet mass = 0.5*3/10 = 0.15
+
+if ship mass is > 100, then thrust will be smaller, so bullets will over power. if ship mass <100, vice versa.
+
+
+
     
 New menu:
 --------
