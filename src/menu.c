@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include <math.h>
+#include <math.h>
 
 //#define ALLEGRO_UNSTABLE 1  //needed for haptics.
 

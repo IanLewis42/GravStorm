@@ -76,7 +76,7 @@ void make_ship_col_mask()
 			{
 				if(!EquivalentColour(al_get_pixel(ship_mask,(j*24)+k,i), al_map_rgb(255,0,255))) //SHIP_SIZE/2
 				{
-					ship_col_mask[i*40+j] |= (0x80000000 >> k);
+					ship_col_mask[i*NUM_ANGLES+j] |= (0x80000000 >> k);
 					//al_fprintf(logfile,"1,");
 				}
 				//else al_fprintf(logfile,"0,");
@@ -446,11 +446,11 @@ void CheckSSCollisions(int num_ships)	//Ship-to-ship collisions
 							{
 								for (k=0 ; k<y_overlap ; k++)	//not 24 - just the overlap.
 								{
-									shipi_word = (ship_col_mask[(i_row+k)*40 + Ship[i].angle]);
+									shipi_word = (ship_col_mask[(i_row+k)*NUM_ANGLES + Ship[i].angle]);
 									if (shift > 0)
-										shipj_word = (int)(ship_col_mask[(j_row+k)*40 + Ship[j].angle])<<shift;
+										shipj_word = (int)(ship_col_mask[(j_row+k)*NUM_ANGLES + Ship[j].angle])<<shift;
 									else
-										shipj_word = (int)(ship_col_mask[(j_row+k)*40 + Ship[j].angle])>>(-1*shift);
+										shipj_word = (int)(ship_col_mask[(j_row+k)*NUM_ANGLES + Ship[j].angle])>>(-1*shift);
 
 									if (shipi_word & shipj_word)
 									{
