@@ -16,17 +16,17 @@ sentry_collision sentries_col.png
 ship_first    1
 
 gravity 0.05
-drag 2
+drag 	3
 
 wrap 0
 lives 1
 
 ; pads
 ;   type y    xmin xmax miners jewels
-pad 0    570  148  296       
-pad 1    2297 661  811    0     5
-pad F2	 2553 2580 2731
-pad 3    3771 2835 2988    5     0 
+pad 0    572  148  296       
+pad 1    2299 661  811    0     5
+pad F2	 2555 2580 2731
+pad 3    3773 2835 2988    5     0 
 
 
 ;      x    y    D  type frames prob% random range image image

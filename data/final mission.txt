@@ -15,16 +15,16 @@ bg_fade	      256
 ship_first    1
 
 gravity 0.05
-drag 2
+drag	3
 
 wrap 0
 
 ; pads
 ;   type y    xmin xmax miners jewels
-pad 0   442  979  1131        
+pad 0   443  979  1131        
 pad 1    2363 1236 1387  5      
-pad 2    1274 1107 1260  0     5
-pad 3    1467 2260 2413  5
+pad 2    1275 1107 1260  0     5
+pad 3    1468 2260 2413  5
 ;pad 4   441  1619 1771
 
 ;       x    y    D  type frames prob% random range image image

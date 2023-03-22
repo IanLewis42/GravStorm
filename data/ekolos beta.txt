@@ -6,11 +6,11 @@ description   ekolos_desc.txt
 ship_first    1
 
 gravity 0.05
-drag    2
+drag    3
 
 ;   type y    xmin xmax m j exitx/y returnx/y
-pad 0    417  486  586   0 0 569 374 724 364 
-pad 1    887  600  700   0 0 674 844 554 834
+pad 0    419  486  586   0 0 569 374 724 364 
+pad 1    889  600  700   0 0 674 844 554 834
 
 ;    xmin xmax ymin ymax g    drag
 area 0    150  270  650 -0.05 2

@@ -6,10 +6,10 @@ description   sinneau_desc.txt
 ship_first    0
 
 gravity 0.05
-drag    2
+drag    3
 
 ;   type y    xmin xmax  m j exitx/y returnx/y
-pad 0    1022  140  210  0 0 259 679 259 679
+pad 0    1023  140  210  0 0 259 679 259 679
 pad 1    1031  970  1040 0 0 919 874 919 874
 
 max_players 2

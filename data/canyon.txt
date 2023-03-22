@@ -10,21 +10,22 @@ ship_first    1
 ;ship_first    0
 
 gravity 0.05
-drag 2
+;gravity 0
+drag 3
 
 wrap 1
 
 ; pads
 ;   type y    xmin xmax miners jewels	 exitx/y   returnx/y
-pad 0    2171  550  660   0      0       606  1809 606  2009
-pad 1    250   2120 2285  0      0       2400 420  2464 237
-pad 2    315   285  415   0      0       596  153  127  198	
-pad 3    1786  2125 2292  0      0       2206 1581 2211 1620
+pad 0    2173  550  660   0      0       606  1809 606  2009
+pad 1    252   2120 2285  0      0       2400 420  2464 237
+pad 2    317   285  415   0      0       596  153  127  198	
+pad 3    1788  2125 2292  0      0       2206 1581 2211 1620
  
-pad 34    1210 779  924  0     0	;centre left, fuel, ammo1
-pad 35    1210 1508 1650 0     0	;centre right, fuel, ammo1
-pad F6    1019 2217 2327 0     0	;rhs, everything
-pad F7    2106 1181 1311 0     0	;bottom, everything
+pad 34    1212 779  924  0     0	;centre left, fuel, ammo1
+pad 35    1212 1508 1650 0     0	;centre right, fuel, ammo1
+pad F6    1021 2217 2327 0     0	;rhs, everything
+pad F7    2108 1181 1311 0     0	;bottom, everything
 
 max_players 4
 
