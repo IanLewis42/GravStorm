@@ -27,7 +27,7 @@ void find_walls8(int i);
 void find_walls(int i);
 void find_ships(int i);
 
-extern WallType walls[40];
+extern WallType walls[NUM_ANGLES];
 extern float sumx,sumy,ratio;
 extern int avoid_angle,target_angle;
 extern float targetx,targety,avoidx,avoidy;

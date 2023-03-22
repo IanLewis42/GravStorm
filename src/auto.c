@@ -281,7 +281,7 @@ void Hunt(int i)   //so we are ship[i]
             {                                                                               //into walls[] at half real distance to minimize ship-shup crashes
                 fire_state = 3; //DEBUG
 
-                if (!Ship[i].thrust_held) Ship[i].fangle = ships_by_num[min].angle *9;
+                if (!Ship[i].thrust_held) Ship[i].fangle = ships_by_num[min].angle * ANGLE_INC;
 
                 if (abs(Ship[i].angle - ships_by_num[min].angle) < 2)                            //if we're pointing roughly the right way
                 {
@@ -365,8 +365,8 @@ void Pilot1(int i)
 
     Ship[i].autotargetdistance = sqrt((x*x) + (y*y));   //and distance
 
-    target_angle = (int)((20/PI)* atan2(x, -1*y)); //angle to head for target position
-    if (target_angle < 0) target_angle += 40;
+    target_angle = (int)((NUM_ANGLES/(2*PI))* atan2(x, -1*y)); //angle to head for target position
+    if (target_angle < 0) target_angle += NUM_ANGLES;
 
     find_obstructions(i);                         //find all wall distance/angles
 
@@ -377,9 +377,9 @@ void Pilot1(int i)
             walls[ship_av[j].angle].distance = ship_av[j].distance;
     }
 */
-    int metric = 0,max=-1000,best_angle;    //decide which of 40 directions is best compromise of 'where we want to go' and 'won't hit a wall'
+    int metric = 0,max=-1000,best_angle;    //decide which of NUM_ANGLES directions is best compromise of 'where we want to go' and 'won't hit a wall'
 
-    for (j=0 ; j<40 ; j++)
+    for (j=0 ; j<NUM_ANGLES ; j++)
     {
         if (walls[j].distance < ships_by_angle[j].distance)
             metric = walls[j].distance-3*abs(j-target_angle);
@@ -469,19 +469,19 @@ void Pilot0(int i)
     find_obstructions(i);                          //find all wall distance/angles
 
     av_wall = 0;                            //average them, to get a feel for how tight space is.
-    for (j=0 ; j<40 ; j++)
+    for (j=0 ; j<NUM_ANGLES ; j++)
     {
         av_wall += walls[j].distance;
     }
 
-    av_wall /=40;
+    av_wall /=NUM_ANGLES;
 
     //float limit45 = limit * OOR2;
 
     avoidx=0;
     avoidy=0;
 
-    for (j=0 ; j<40 ; j++)
+    for (j=0 ; j<NUM_ANGLES ; j++)
     {
         avoidx-=0.2*(limit-walls[j].distance) * sinlut[j];
         avoidy-=0.2*(limit-walls[j].distance) * coslut[j];
@@ -518,8 +518,8 @@ void Pilot0(int i)
     switch (Ship[i].autostate)
     {
         case NORMAL:
-            target_angle = (int)((20/PI)* atan2(x, -1*y)); //angle to head for target position
-            if (target_angle < 0) target_angle += 40;
+            target_angle = (int)((NUM_ANGLES/(2*PI))* atan2(x, -1*y)); //angle to head for target position
+            if (target_angle < 0) target_angle += NUM_ANGLES;
 
             if (Ship[i].autovectintegrator < 1900)
             {
@@ -541,9 +541,9 @@ void Pilot0(int i)
             }
         break;
         case ESCAPE_PLUS:
-            target_angle = (int)((20/PI)* atan2(x, -1*y))+5; //angle to head for target position
-            if (target_angle < 0)  target_angle += 40;
-            if (target_angle > 40) target_angle -= 40;
+            target_angle = (int)((NUM_ANGLES/(2*PI))* atan2(x, -1*y))+5; //angle to head for target position
+            if (target_angle < 0)  target_angle += NUM_ANGLES;
+            if (target_angle > NUM_ANGLES) target_angle -= NUM_ANGLES;
 
             if (Map.timer >= Ship[i].autostatechangetime)
             {
@@ -552,9 +552,9 @@ void Pilot0(int i)
             }
         break;
         case ESCAPE_MINUS:
-            target_angle = (int)((20/PI)* atan2(x, -1*y))-5; //angle to head for target position
-            if (target_angle < 0)  target_angle += 40;
-            if (target_angle > 40) target_angle -= 40;
+            target_angle = (int)((NUM_ANGLES/(2*PI))* atan2(x, -1*y))-5; //angle to head for target position
+            if (target_angle < 0)  target_angle += NUM_ANGLES;
+            if (target_angle > NUM_ANGLES) target_angle -= NUM_ANGLES;
 
             if (Map.timer >= Ship[i].autostatechangetime)
             {
@@ -645,7 +645,7 @@ void find_ships(int i)
 	/*		___o___Opponent(Ship[j])
 			|     /
 			|    /
-		       a|   /
+           a|   /
 			|  /
 			|t/
 			|/
@@ -655,12 +655,12 @@ void find_ships(int i)
 			t = arctan o/a
 	*/
 			ships_by_num[j].distance = sqrt((dx * dx) + (dy * dy));
-			ships_by_num[j].angle = (20/PI) * atan2(dx,dy);	//40 increments
-			if (ships_by_num[j].angle < 0) ships_by_num[j].angle += 40;
+			ships_by_num[j].angle = (NUM_ANGLES/(2*PI)) * atan2(dx,dy);	//NUM_ANGLES increments
+			if (ships_by_num[j].angle < 0) ships_by_num[j].angle += NUM_ANGLES;
 
 
             //angle = (20/PI) * atan2(dx,dy);	//40 increments
-            if (angle < 0) angle += 40;
+            if (angle < 0) angle += NUM_ANGLES;
             ships_by_angle[ships_by_num[j].angle].distance = sqrt((dx * dx) + (dy * dy));
         }
 	}
@@ -678,7 +678,7 @@ void find_walls8(int i)
 void find_walls(int i)
 {
     int j;
-    for (j=0 ; j<40 ; j++)
+    for (j=0 ; j<NUM_ANGLES ; j++)
     {
         find_wall(i,j,&walls[j]);
     }

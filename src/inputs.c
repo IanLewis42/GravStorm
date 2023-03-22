@@ -239,11 +239,11 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event, bool menu)
                         if (event.joystick.pos < USBJoystick[JoyIdx].Map[i].Threshold-hysteresis)  //yes, so check for < threshold
                         {
                             *USBJoystick[JoyIdx].Map[i].OnPtr  = true;                    //assert
-                            //*USBJoystick[JoyIdx].Map[i].OffPtr = false;
+                            // *USBJoystick[JoyIdx].Map[i].OffPtr = false;
                         }
                         else if (event.joystick.pos > USBJoystick[JoyIdx].Map[i].Threshold+hysteresis)
                         {
-                            //*USBJoystick[JoyIdx].Map[i].OnPtr  = false;                   //deassert
+                            // *USBJoystick[JoyIdx].Map[i].OnPtr  = false;                   //deassert
                             *USBJoystick[JoyIdx].Map[i].OffPtr = true;
                         }
                     }
@@ -252,11 +252,11 @@ void CheckUSBJoyStick(ALLEGRO_EVENT event, bool menu)
                         if (event.joystick.pos > USBJoystick[JoyIdx].Map[i].Threshold+hysteresis)  //no, so check for > threshold
                         {
                             *USBJoystick[JoyIdx].Map[i].OnPtr  = true;                    //assert
-                            //*USBJoystick[JoyIdx].Map[i].OffPtr = false;
+                            // *USBJoystick[JoyIdx].Map[i].OffPtr = false;
                         }
                         else if (event.joystick.pos < USBJoystick[JoyIdx].Map[i].Threshold-hysteresis)
                         {
-                            //*USBJoystick[JoyIdx].Map[i].OnPtr  = false;                   //deassert
+                            // *USBJoystick[JoyIdx].Map[i].OnPtr  = false;                   //deassert
                             *USBJoystick[JoyIdx].Map[i].OffPtr = true;
                         }
                     }

@@ -875,7 +875,7 @@ NetMessageType ServiceNetwork(void)
                             if (Net.event.packet->data[i]   & FIRE_NORMAL)  FireNormal(j);
                             if (Net.event.packet->data[i]   & FIRE_SPECIAL) FireSpecial(j);
                             if (Net.event.packet->data[i++] & EXPLODE)
-                                CreateExplosion(Ship[j].xpos, Ship[j].ypos, 2, 8, Ship[j].xv, Ship[j].yv);//float outward_v);
+                                CreateExplosion(Ship[j].xpos, Ship[j].ypos, 2, 10, Ship[j].xv, Ship[j].yv);//float outward_v);
                             Net.sounds |= Net.event.packet->data[i++];    //take sounds from client
                         break;
                         case CLIENT_KILLED:

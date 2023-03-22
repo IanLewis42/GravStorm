@@ -476,7 +476,7 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
             if (Ship[i].offset < 0) Ship[i].offset+=6;
 #endif
             Ship[i].angle++;
-            if (Ship[i].angle == 40) Ship[i].angle = 0;
+            if (Ship[i].angle == NUM_ANGLES) Ship[i].angle = 0;
             y+=45;
 #ifndef ANDROID
             //controls - if keys, show keys
@@ -1638,7 +1638,7 @@ void draw_ships(int scrollx, int scrolly, int x, int y, int w, int h)
                 find_obstructions(i);
 
                 //red, walls
-                for (j=0 ; j<40 ; j++)
+                for (j=0 ; j<NUM_ANGLES ; j++)
                 {
                     //al_draw_line(Ship[i].xpos,Ship[i].ypos,walls[j]*sinlut[j]*5,walls[j]*coslut[j]*5,al_map_rgba(128,0,0,128),3);
                     int x = Ship[i].xpos-10+walls[j].distance*sinlut[j];

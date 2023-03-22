@@ -27,6 +27,7 @@ void CheckSWCollisions(int num_ships);
 void CheckBWCollisions(void);
 void CheckBSentryCollisions(void);
 void CheckBSwitchCollisions(void);
+void CheckForLanding(int i);
 void find_wall(int i, int angle, WallType* wall);
 int IsClear(int x, int y);
 

@@ -35,6 +35,7 @@
 #include "gameover.h"
 #include "network.h"
 #include "inputs.h"
+#include "collisions.h"
 
 //Trig LUTs
 float sinlut[NUM_ANGLES];
@@ -56,7 +57,7 @@ int last_bullet = END_OF_LIST;	//init this when you make a new bullet.
 int TTL[BULLET_TYPES]    = {300,   300,   300,   300,   50,   5000, 150,  300,   256, 300,   300};   //Life (in frames)
 int reload[BULLET_TYPES] = {3,     3,     3,     9,     0,    0,    0,    0,     0,   0,     0};	    //frames in between shots (if fire held down) N/A for heavy weapons
 float Mass[BULLET_TYPES] = {0.1,   0.1,   0.1,   0.1,   0.2,  0.2,  0.15, 0.04,  0.2, 0.1,   0.04};	//Really bullet mass/ship mass; only used in collisions
-int Damage[BULLET_TYPES] = {5,     5,     5,     5,     80,   50,   30,   6,     10,  50,    4};     //points off shield when collision happens
+int Damage[BULLET_TYPES] = {5,     5,     5,     5,     80,   50,   30,   5,     10,  50,    4};     //points off shield when collision happens
 
 void UpdateLandedShip(int ship_num);	//int
 void NewShipBullet (int ship_num, int type, int flags); //int
@@ -123,7 +124,7 @@ int UpdateShips(int num_ships)
             }
             else
             {
-                CreateExplosion(Ship[i].xpos, Ship[i].ypos, 2, 8, Ship[i].xv, Ship[i].yv);//float outward_v);
+                CreateExplosion(Ship[i].xpos, Ship[i].ypos, 2, 10, Ship[i].xv, Ship[i].yv);//float outward_v);
             }
 			//al_play_sample(dead, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 			al_play_sample_instance(dead_inst[i]);
@@ -149,19 +150,19 @@ int UpdateShips(int num_ships)
 			//if (Ship[i].fangle < 0) Ship[i].fangle += NUM_ANGLES;
 			//Ship[i].angle = (int)Ship[i].fangle;
 
-			//int temp = Ship[i].angle*9;
+			//int temp = Ship[i].angle*ANGLE_INC;
 			//if (temp > 19) temp -= NUM_ANGLES;  //delta >180.......?? 0-360. if (difference < 180) sum -= 180; //??
 
 			if (Ctrl.ctrl[ASTICK].active ||  (Ship[i].automode != MANUAL)) {
-				float temp = ASTICK_SPEED * (float) Ship[i].angle * 9 + (1 - ASTICK_SPEED) *
+				float temp = ASTICK_SPEED * (float) Ship[i].angle * ANGLE_INC + (1 - ASTICK_SPEED) *
 																		(Ship[i].fangle); //convert 'angle' index to degrees, and go part way to control angle
 
-				if (fabsf(((float) Ship[i].angle * 9 - Ship[i].fangle)) > 180)
+				if (fabsf(((float) Ship[i].angle * ANGLE_INC - Ship[i].fangle)) > 180)
 					temp += 180;
 				if (temp > 360)
 					temp -= 360;
 
-				Ship[i].angle = (int) (temp / 9);
+				Ship[i].angle = (int) (temp / ANGLE_INC);
 			} else
 			{
 				if (Ship[i].right_held)
@@ -195,8 +196,8 @@ int UpdateShips(int num_ships)
                     temp -=360;
 
                 Ship[i].saved_angle = temp;
-                Ship[i].angle = (int)((temp/9)+0.5);
-                if (Ship[i].angle == 40)
+                Ship[i].angle = (int)((temp/ANGLE_INC)+0.5);
+                if (Ship[i].angle == NUM_ANGLES)
                     Ship[i].angle = 0;
             }
 			if (Ship[i].right_held)
@@ -821,7 +822,7 @@ void CreateExplosion(float xpos, float ypos, int num_rings, int num_particles, f
 
 	//al_fprintf(logfile,"Explosion.\n");
 
-	angle_inc = 40/num_particles;
+	angle_inc = NUM_ANGLES/num_particles;
 
 	for (k=1 ; k<num_rings+1 ; k++)	//1-2 for 2 rings of particles; fast and slow
 	{
@@ -930,11 +931,11 @@ void FireSpecial(int ship_num)
 		case BLT_SPREADER: //spreader
 			for (k=1 ; k<3 ; k++)	//1-2 for 2 rings of particles; fast and slow
 			{
-				for (j=0 ; j<8 ; j++)
+				for (j=0 ; j<10 ; j++)
 				{
 					NewBullet(Ship[ship_num].xpos + (SHIP_SIZE_X/2 * sinlut[Ship[ship_num].angle]), Ship[ship_num].ypos - (SHIP_SIZE_Y/2 * coslut[Ship[ship_num].angle]),
-					          Ship[ship_num].xv + (BULLET_SPEED * sinlut[Ship[ship_num].angle]), Ship[ship_num].yv + (BULLET_SPEED * coslut[Ship[ship_num].angle]),
-					          j*5, 0.02 * k * BULLET_SPEED, BLT_SPREADER, 0, ship_num);
+					          Ship[ship_num].xv + ((BULLET_SPEED * 0.75) * sinlut[Ship[ship_num].angle]), Ship[ship_num].yv + ((BULLET_SPEED * 0.75) * coslut[Ship[ship_num].angle]),
+					          j*6, 0.02 * k * BULLET_SPEED, BLT_SPREADER, 0, ship_num);
 				}
 			}
 
@@ -1019,7 +1020,7 @@ void UpdateSentries(void)
 			if (Map.sentry[i].shield < 0)
 			{
 				Map.sentry[i].alive = 0;
-				CreateExplosion(Map.sentry[i].x, Map.sentry[i].y, 2, 8, 0, 0);//explode
+				CreateExplosion(Map.sentry[i].x, Map.sentry[i].y, 2, 10, 0, 0);//explode
 				Ship[0].sentries++;
 			}
 
@@ -1065,8 +1066,8 @@ void UpdateSentries(void)
 
 							if (distance < Map.sentry[i].range)	//squared value from file.
 							{
-								direction = (40/(2*3.14)) * atan2(x_dis,y_dis);	//scaled to 40 = 2*PI
-								if (direction < 0) direction += 40;
+								direction = (NUM_ANGLES/(2*PI)) * atan2(x_dis,y_dis);	//scaled to NUM_ANGLES = 2*PI
+								if (direction < 0) direction += NUM_ANGLES;
 
 								NewBullet(Map.sentry[i].x, Map.sentry[i].y, 0, 0, direction, BULLET_SPEED, BLT_SENTRY, Map.sentry[i].random, NO_OWNER);
 							}
@@ -1096,7 +1097,7 @@ void NewShipBullet (int ship_num, int type, int flags)// signed int position, in
 
 	if (type == BLT_MINE)	//mines go backwards
 	{
-		angle = (angle + 20);		//angle goes 0 to 40 for full rotation, so +20 is 180 degrees - just used to calculate start position
+		angle = (angle + NUM_ANGLES/2);		//angle goes 0 to NUM_ANGLES for full rotation, so +NUM_ANGLES/2 is 180 degrees - just used to calculate start position
 		speed = BULLET_SPEED * -0.2;//slow and backwards
 	}
 	else
@@ -1218,7 +1219,7 @@ void UpdateBullets(void)
 				last_bullet = previous_bullet;						// now one up the list.
 
 			if (Bullet[current_bullet].type == BLT_HEAVY)
-                CreateExplosion(Bullet[current_bullet].xpos, Bullet[current_bullet].ypos, 1, 8, 0, 0);
+                CreateExplosion(Bullet[current_bullet].xpos, Bullet[current_bullet].ypos, 1, 10, 0, 0);
 
 		}
 

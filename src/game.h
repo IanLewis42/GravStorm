@@ -22,7 +22,7 @@
 //#define  WINDOWS 1
 
 #define NAME "GravStorm"
-#define VERSION "V1.07"
+#define VERSION "V1.08"
 
 #define TRUE 1
 #define FALSE 0

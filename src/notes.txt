@@ -1026,11 +1026,38 @@ X fade on android instructions.
 - Assorted minor bug fixes
 //////////////Play store 1.06
 * Mute AI engine sounds
+* Alt control method (Android CW/ACW buttons)
+//////////////Play store 1.07
 * Better USB / bluetooth controller support
 * Controller config
 * Fix bug with shot 'wobble'
 * Allow movement on pad
 * fps switch
+* Retro style red and green ships
+* Modified ship handling to be closer to original
+- Changed ships.png to add retro TR ships
+- consequently changed ship masks??? (slightly smaller) - Not convinced this is needed.....
+- And also all pad y co-ordinates.
+- FPS 30->35, so quicker rotation (and everything else!)
+- Faster firing, bullet tweaks.
+- Other remake is super-smooth. Maybe running at 50fps? 
+  I could up frame rate easily, but then need more frames of ship / collision mask.
+  NUM_ANGLES define? Yeah, in objects.h. Can't immediately see problem with increasing it (other than more mips required, esp in autopilot)
+  s'pose it might screw up autopilot. It was always a bit twitchy.....
+  (Tried this, collisions and autopilot a bit broken. Discovered many instances of me using 40 instead of NUM_ANGLES. bugger.)
+  So probably order is:
+    XTweak povray to do just ships, plus just flames
+    XTweak code to display this (ship + flame)
+    *(Tweak povray to do retro pixellated ships)
+    *Up FPS to 50 (use rate_of_turn and THRUST to retain handling, adjust fire rates)
+    *Tweak povray to do more frames, change NUM_ANGLES 
+      (currently 35fps, 40 frames, so rotation is 40/35 = 1.14s, so need 50*1.14 = 57 frames??? 60 would be nicer in many ways. 60/50 = 1.2s)
+      *So maybe NUM_ANGLES = frames = 60)
+      *DON'T FORGET TO DO MASKS TOO!
+    Fix places where I hardcoded 40 instead of NUM_ANGLKES....
+    re-adjust rate_of_turn (back to 1.0), THRUST for handling.
+    
+
 - Hotplug joysticks
 - wireless keyboard issue??
 
@@ -1200,7 +1227,7 @@ MAYBE LATER.....
   - if (team) -> only 2 ship choices, random allocation? or alternate? allow changing?
   - count kills/lives at end, add up those for same team.....
 - wall collision vibrate proportional to speed??
-- android crash on pause - OK with nav buttons - only crashes with f/p sensor.... Check events??
+- android crash on pause - OK with nav buttons - only crashes with fingerprint sensor.... Check events??
   no events -> ignore for now.....
   .....Hmmmm.. seems Ok now (29/3/18, just released 1.04) - checked with 'reactor core' and sitimus. And menu.
 - back/exit on system back button? 

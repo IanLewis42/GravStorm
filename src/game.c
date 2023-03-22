@@ -65,7 +65,7 @@ ALLEGRO_FONT *title_font;
 float font_scale;
 //float font_scale_y;
 
-int fps=35, fps_accum;
+int fps=40, fps_accum;
 double fps_time;
 int fpsnet, fpsnet_acc;
 int missed_packets = 0;
