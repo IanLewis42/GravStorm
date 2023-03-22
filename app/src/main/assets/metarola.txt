@@ -6,13 +6,14 @@ description   metarola_desc.txt
 ship_first    1
 
 gravity 0.05
-drag    2
+;gravity 0
+drag    3
 
 ;   type y    xmin xmax m j exitx/y returnx/y
-pad 0    864  265  370  0 0 314 764 424 839
-pad 1    336  335  440  0 0 389 264 389 264
-pad F2   368  870  1040 0 0 839 114 944 194 
-pad F3   1010 870  1040 0 0 934 744 944 849
+pad 0    338  335  440  0 0 389 264 389 264
+pad 1    866  265  370  0 0 314 764 424 839
+pad F2   370  870  1040 0 0 839 114 944 194 
+pad F3   1012 870  1040 0 0 934 744 944 849
 
 max_players 4
 

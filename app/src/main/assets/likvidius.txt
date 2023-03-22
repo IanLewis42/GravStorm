@@ -6,12 +6,12 @@ description   likvidius_desc.txt
 ship_first    1
 
 gravity 0.05
-drag    2
+drag    3
 
 ;   type y    xmin xmax m j exitx/y  return x/y
-pad 0    410  295  400  0 0 300  100 299 149 ;320  200
-pad 1    398  1150 1270 0 0 1224 100 1439 423 ;1229 149 ;1235 200
-pad 12   962  350  415  
+pad 0    412  295  400  0 0 300  100 299 149 ;320  200
+pad 1    400  1170 1270 0 0 1230 100 1439 423 ;1229 149 ;1235 200
+pad 12   964  350  415  
 
 ;    xmin xmax ymin ymax g     drag
 area 800  1190 835  1024 -0.05 10
