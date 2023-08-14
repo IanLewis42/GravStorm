@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 33
     buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "com.tootiredgames.gravstorm"
         minSdkVersion 19
-        targetSdkVersion 26
-        versionCode 8
-        versionName "1.07"
+        targetSdkVersion 33
+        versionCode 9
+        versionName "1.08"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
