@@ -162,8 +162,8 @@ void display_new_menu(void)//int num_maps, int selected)	//show list of maps
 
     if (Menu.state == GAMETYPE)
     {
-        al_draw_textf(small_font,      GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "How do you want to play today?");
-        al_draw_textf(small_glow_font, GroupGlow,  col0, y,  ALLEGRO_ALIGN_LEFT, "How do you want to play today?");
+        al_draw_textf(small_font,      GroupActive,col0, y,  ALLEGRO_ALIGN_LEFT, "How do you want to play?");
+        al_draw_textf(small_glow_font, GroupGlow,  col0, y,  ALLEGRO_ALIGN_LEFT, "How do you want to play?");
 
         y+=line_space;
         if (Menu.gametype == SOLO)
@@ -908,13 +908,13 @@ void display_instructions(void)
 
 #ifdef ANDROID
     al_set_clipping_rectangle(0, Ctrl.ctrl[BACK].y + Ctrl.ctrl[BACK].size, w, (h - 3 * line_space));
-    Menu.y_origin = Select.sumdy;
+    Menu.y_origin = Select.sumdy + Ctrl.ctrl[BACK].y + Ctrl.ctrl[BACK].size - 4.5*line_space;
 #endif
 
     if (inst_bmp == NULL)
     	al_fprintf(logfile,"inst_bmp == NULL\n");
     else
-    	al_draw_bitmap(inst_bmp,0,Menu.y_origin + 2*line_space,0);
+    	al_draw_bitmap(inst_bmp,0,Menu.y_origin + 2.5*line_space,0);
 
     al_set_clipping_rectangle(0,0,w,h);
     draw_controls(al_map_rgba_f(0.5,0.5,0.5,0.5));
@@ -1784,6 +1784,40 @@ void draw_status_bar(int ship, int x, int y)
 
 	//for (i=first_ship ; i<num_ships ; i++)
 	{
+		#ifdef ANDROID   //ANDROID - 2 rows, 5 bars on each row:
+                        //          shield ; ammo     ; smmo     ; fuel   ; lives
+                        //          time   ; last lap ; best lap ; miners ; jewels
+		int c = invscale *(al_get_display_width(display)/2);    //centre
+		int bw = 102;                               //bar width
+
+		x = c - 2.5*bw;
+
+		al_draw_filled_rounded_rectangle(x,y,x+5*bw,y+28,5,5,al_map_rgba(0, 0, 0, 192));
+
+		al_draw_bitmap_region(ui,100-Ship[i].shield,    0,  Ship[i].shield,       14, x+0*bw, y, 0);
+        al_draw_bitmap_region(ui,100-Ship[i].ammo1/2,   14, Ship[i].ammo1,        14, x+1*bw, y, 0);
+        al_draw_bitmap_region(ui,0                 ,    28, (Ship[i].ammo2*25)/2, 14, x+2*bw, y, 0);
+        al_draw_bitmap_region(ui,100-(Ship[i].fuel>>4), 42, (Ship[i].fuel>>4),    14, x+3*bw, y, 0);
+
+        al_draw_bitmap_region(ui,0, 56, Ship[i].lives*17, 14, x+4*bw,y,0);
+
+		if (Map.mission)
+		{
+			for (j=0 ; j<Ship[i].miners ; j++)
+				al_draw_bitmap_region(pickups,16,0,16,16,x+3*bw+j*12+1,y+14,0);
+			for (j=0 ; j<Ship[i].jewels ; j++)
+				al_draw_bitmap_region(pickups,0,0,16,16,x+4*bw+j*12+1,y+14,0);
+		}
+
+		if (Ship[i].racing)
+			al_draw_textf(race_font, al_map_rgb(255, 255, 255),x+0*bw, y+14, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].current_lap_time);
+		if (Ship[i].lap_complete)
+        {
+			al_draw_textf(race_font, al_map_rgb(255, 255,   0),x+1*bw,  y+14, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].last_lap_time);
+			al_draw_textf(race_font, al_map_rgb(255, 128,   0),x+2*bw, y+14, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].best_lap_time);
+        }
+
+		#else
 		al_draw_filled_rounded_rectangle(x,y,x+102,y+bs,5,5,al_map_rgba(0, 0, 0, 128));
 
 		al_draw_bitmap_region(ui,100-Ship[i].shield,    0,  Ship[i].shield,       14, x+0, y+0, 0);
@@ -1808,6 +1842,7 @@ void draw_status_bar(int ship, int x, int y)
 			al_draw_textf(race_font, al_map_rgb(255, 255,   0),5,  y+bs-38, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].last_lap_time);
 			al_draw_textf(race_font, al_map_rgb(255, 128,   0),50, y+bs-38, ALLEGRO_ALIGN_LEFT, "%0.3f", Ship[i].best_lap_time);
         }
+        #endif // 1
 	}
 
     al_identity_transform(&transform);

@@ -807,7 +807,7 @@ void init_controls(void)
 	Ctrl.ctrl[BACK].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
     Ctrl.ctrl[BACK].border = 0;
 	Ctrl.ctrl[BACK].x = 0.5*dw - (Ctrl.ctrl[BACK].size * 2.60);
-	Ctrl.ctrl[BACK].y = 0.02*dh;
+	Ctrl.ctrl[BACK].y = 0.02*dh + 28;
 	Ctrl.ctrl[BACK].movex = 20;
 	Ctrl.ctrl[BACK].movey = 0;
 
@@ -815,7 +815,7 @@ void init_controls(void)
     Ctrl.ctrl[SMALLER].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
     Ctrl.ctrl[SMALLER].border = 0;
     Ctrl.ctrl[SMALLER].x = 0.5*dw - (Ctrl.ctrl[SMALLER].size * 1.55);
-    Ctrl.ctrl[SMALLER].y = 0.02*dh;
+    Ctrl.ctrl[SMALLER].y = 0.02*dh + 28;
 	Ctrl.ctrl[SMALLER].movex = 10;
 	Ctrl.ctrl[SMALLER].movey = 0;
 
@@ -823,7 +823,7 @@ void init_controls(void)
     Ctrl.ctrl[BIGGER].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
     Ctrl.ctrl[BIGGER].border = 0;
     Ctrl.ctrl[BIGGER].x = 0.5*dw - (Ctrl.ctrl[BIGGER].size * 0.5);
-    Ctrl.ctrl[BIGGER].y = 0.02*dh;
+    Ctrl.ctrl[BIGGER].y = 0.02*dh + 28;
 	Ctrl.ctrl[BIGGER].movex = 0;
 	Ctrl.ctrl[BIGGER].movey = 0;
 
@@ -831,7 +831,7 @@ void init_controls(void)
     Ctrl.ctrl[REVERSE].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
     Ctrl.ctrl[REVERSE].border = 0;
     Ctrl.ctrl[REVERSE].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 0.55);
-    Ctrl.ctrl[REVERSE].y = 0.02*dh;
+    Ctrl.ctrl[REVERSE].y = 0.02*dh + 28;
     Ctrl.ctrl[REVERSE].movex = -10;
     Ctrl.ctrl[REVERSE].movey = 0;
 
@@ -839,7 +839,7 @@ void init_controls(void)
     Ctrl.ctrl[RADAR].size = Ctrl.ButtonSize;//al_get_bitmap_width(Ctrl.escape.bmp);
     Ctrl.ctrl[RADAR].border = 0;
     Ctrl.ctrl[RADAR].x = 0.5*dw + (Ctrl.ctrl[RADAR].size * 1.60);
-    Ctrl.ctrl[RADAR].y = 0.02*dh;
+    Ctrl.ctrl[RADAR].y = 0.02*dh + 28;
 	Ctrl.ctrl[RADAR].movex = -20;
 	Ctrl.ctrl[RADAR].movey = 0;
 
@@ -858,7 +858,8 @@ void init_controls(void)
 #endif // ANDROID
     float line_space = 35*font_scale;
 
-    Select.sumdymax =  2*line_space;       //start offset 2 lines from top.
+    //Select.sumdymax =  2.5*line_space;       //start offset 2 lines from top.
+    Select.sumdymax =  Ctrl.ctrl[BACK].y + Ctrl.ctrl[BACK].size - 2*line_space;
     Select.sumdymin = Select.sumdymax;//-4*line_space;  //4 lines on first screen
     Select.sumdy =  Select.sumdymax;       //don't go below that.
 
