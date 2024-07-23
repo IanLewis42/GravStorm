@@ -334,8 +334,12 @@ int game(int argc, char **argv )
     scalex = (float)al_get_display_width(display)/SCREENX;
     scaley = (float)al_get_display_height(display)/SCREENY;
 
-    if (scalex < scaley) scale = scalex;
+    if (scalex > scaley) scale = scalex;
     else scale = scaley;
+
+#ifdef ANDROID
+    scale *= ANDROID_SCALE;
+#endif
 
     invscale = 1/scale;
     CalcScales();
@@ -1253,10 +1257,17 @@ void CalcScales(void)
 
 void LoadFonts(float scale)
 {
+    float sf;
+#ifdef ANDROID
+    sf = ANDROID_INVSCALE * 0.65;
+#else
+    sf = 0.8;
+#endif
+
     FreeFonts();
 
     //font_scale = (float)al_get_display_width(display)/(SCREENX);    //font sizes chosen to suit SCREENX, so scale according to what we actually have!
-    if (scale) font_scale = scale*0.8;
+    if (scale) font_scale = scale*sf;
 
     if ((font       = al_load_font("miriam.ttf", 20*font_scale, 0))          == NULL)  al_fprintf(logfile,"miriam.ttf load fail\n"); //debug font
 

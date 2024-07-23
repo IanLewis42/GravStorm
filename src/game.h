@@ -22,7 +22,7 @@
 //#define  WINDOWS 1
 
 #define NAME "GravStorm"
-#define VERSION "V1.08"
+#define VERSION "V1.09"
 
 #define TRUE 1
 #define FALSE 0
@@ -33,6 +33,8 @@
 
 #define SCREENX 1024//1280//1920 //1024
 #define SCREENY 630//576//720//1080 //768
+#define ANDROID_SCALE   1.15
+#define ANDROID_INVSCALE (1/ANDROID_SCALE)
 
 #define PANEL_WIDTH 565
 #define PANEL_HEIGHT 360

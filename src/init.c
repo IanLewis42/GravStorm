@@ -728,7 +728,7 @@ void init_controls(void)
 
 	//Ctrl.reversed = false;
 	Ctrl.mode = 0;
-    Ctrl.ButtonSize = 100*scale;  //tweak for scaling????
+    Ctrl.ButtonSize = 100*ANDROID_INVSCALE*scale;  //tweak for scaling????
 
 	//init size/position of buttons
 	//could read/store this in file, but I guess still need this for defaults....
@@ -859,7 +859,7 @@ void init_controls(void)
     float line_space = 35*font_scale;
 
     //Select.sumdymax =  2.5*line_space;       //start offset 2 lines from top.
-    Select.sumdymax =  Ctrl.ctrl[BACK].y + Ctrl.ctrl[BACK].size - 2*line_space;
+    Select.sumdymax =  Ctrl.ctrl[BACK].y + Ctrl.ctrl[BACK].size - 3*line_space;
     Select.sumdymin = Select.sumdymax;//-4*line_space;  //4 lines on first screen
     Select.sumdy =  Select.sumdymax;       //don't go below that.
 

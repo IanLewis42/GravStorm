@@ -1069,7 +1069,7 @@ void make_instructions_bitmap(void)
                     //i += line_space / 2;
                     idx = strtol(&line[j] + 6, NULL, 10);
                     al_draw_tinted_scaled_bitmap(Ctrl.controls, al_map_rgba_f(0.5, 0.5, 0.5, 0.5),
-                                                 0, idx * 200, 200, 200, 50*font_scale*j/6, i, Ctrl.ctrl[idx].size, Ctrl.ctrl[idx].size, 0);
+                                                 0, idx * 200, 200, 200, 50*font_scale*j/6, i, Ctrl.ctrl[idx].size*0.8, Ctrl.ctrl[idx].size*0.8, 0);
                     //i += Ctrl.ctrl[idx].size;
 
                 } else if (strncmp(&line[j], "[status]", 8) == 0) {
