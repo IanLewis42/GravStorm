@@ -61,7 +61,7 @@ Gravstorm can be played as:
 
 
 
-The status panel is in the top left corner
+The status panel is at the top
 [status]        
                        Shield
                        Normal Ammo
