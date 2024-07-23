@@ -602,7 +602,7 @@ void UpdateLandedShip(int i)
                 if (Select.y > Scale.ammo1level)                             //below top of ammolevel...
                 {
                     if (Select.y < Scale.ammo1type) {                       //above ammo1 type, so adjust ammo1 level
-                        Ship[i].user_ammo1 = ((Select.x - Scale.xmin) * 100) / Scale.xdiff;
+                        Ship[i].user_ammo1 = ((Select.x - Scale.xmin) * 200) / Scale.xdiff;
                         ScheduleVibrate(30);
                         if (Ship[i].user_ammo1 < Ship[i].ammo1)
                             Ship[i].ammo1 = Ship[i].user_ammo1;
